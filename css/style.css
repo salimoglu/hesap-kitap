@@ -23,7 +23,7 @@
 html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: var(--text-primary); font-family: var(--font-body); font-size: 15px; line-height: 1.5; }
 .hidden { display: none !important; }
 
-/* LOCK */
+/* ── LOCK ── */
 .lock-screen { position: fixed; inset: 0; background: var(--bg-base); display: flex; align-items: center; justify-content: center; z-index: 1000; }
 .lock-inner { display: flex; flex-direction: column; align-items: center; gap: 28px; padding: 32px 24px; width: 100%; max-width: 360px; }
 .lock-logo { text-align: center; }
@@ -41,7 +41,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .num-del { color: var(--text-secondary); font-size: 20px; }
 .lock-hint { font-size: 12px; color: var(--text-muted); text-align: center; }
 
-/* APP */
+/* ── APP SHELL ── */
 .app { display: flex; flex-direction: column; height: 100dvh; overflow: hidden; }
 .topbar { display: flex; align-items: center; justify-content: space-between; height: var(--topbar-h); background: var(--bg-card); border-bottom: 1px solid var(--border); padding: 0 16px; flex-shrink: 0; z-index: 10; }
 .topbar-left { display: flex; align-items: center; gap: 10px; }
@@ -50,85 +50,216 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .icon-btn { background: transparent; border: none; font-size: 20px; cursor: pointer; padding: 6px; border-radius: var(--radius-sm); transition: background 0.15s; }
 .icon-btn:active { background: var(--bg-elevated); }
 
-/* TAB NAV */
+/* ── TAB NAV ── */
 .tab-nav { display: flex; overflow-x: auto; background: var(--bg-card); border-bottom: 1px solid var(--border); flex-shrink: 0; scrollbar-width: none; }
 .tab-nav::-webkit-scrollbar { display: none; }
 .tab-btn { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 14px; background: transparent; border: none; border-bottom: 3px solid transparent; color: var(--text-muted); font-family: var(--font-body); font-size: 11px; font-weight: 600; cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: all 0.15s ease; }
 .tab-btn .tab-icon { font-size: 18px; }
 .tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
 
-/* CONTENT */
+/* ── CONTENT ── */
 .content { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
 .tab-panel { display: none; flex: 1; flex-direction: column; overflow: hidden; }
 .tab-panel.active { display: flex; }
 
-/* ===================== ISLEMLER MODULU ===================== */
+/* ══════════════════════════════════════════
+   İŞLEMLER MODÜLÜ
+══════════════════════════════════════════ */
 .islemler-wrap { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
 
-/* UST OZET BAR */
-.ozet-bar { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; background: var(--bg-card); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+/* Üst özet bar — kompakt, tek satır */
+.ozet-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 16px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
 .ozet-item { display: flex; flex-direction: column; align-items: center; gap: 1px; }
-.ozet-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-muted); }
-.ozet-val { font-family: var(--font-brand); font-size: 16px; letter-spacing: 0.5px; }
+.ozet-label { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-muted); }
+.ozet-val { font-family: var(--font-brand); font-size: 15px; letter-spacing: 0.3px; }
 .ozet-val.gelir { color: var(--green); }
 .ozet-val.gider { color: var(--red); }
-.ozet-val.net { color: var(--gold); font-size: 18px; }
-.ozet-sep { width: 1px; height: 32px; background: var(--border); }
+.ozet-val.net { color: var(--gold); font-size: 17px; }
+.ozet-sep { width: 1px; height: 28px; background: var(--border); }
 
-/* FILTRE BAR */
-.filtre-bar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--bg-base); border-bottom: 1px solid var(--border); flex-shrink: 0; }
-.filtre-bar .filter-select { flex: 1; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-primary); font-family: var(--font-body); font-size: 12px; padding: 6px 8px; outline: none; }
-.btn-yeni-kat-bar { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--gold); font-family: var(--font-body); font-size: 12px; font-weight: 700; padding: 6px 10px; cursor: pointer; white-space: nowrap; }
+/* Filtre bar */
+.filtre-bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 12px;
+  background: var(--bg-base);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.filter-select {
+  flex: 1; background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); color: var(--text-primary);
+  font-family: var(--font-body); font-size: 12px; padding: 5px 8px; outline: none;
+}
+.btn-yeni-kat-bar {
+  background: var(--bg-elevated); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); color: var(--gold);
+  font-family: var(--font-body); font-size: 12px; font-weight: 700;
+  padding: 5px 10px; cursor: pointer; white-space: nowrap;
+}
 
-/* ISLEM LISTESI */
-.islem-scroll { flex: 1; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
-.islem-grup-baslik { font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); padding: 10px 14px 4px; background: var(--bg-base); position: sticky; top: 0; z-index: 1; border-bottom: 1px solid var(--border); }
-.islem-row { display: flex; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--border); gap: 10px; cursor: pointer; transition: background 0.1s; position: relative; }
+/* ── İŞLEM LİSTESİ SCROLL ── */
+.islem-scroll {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Ay grup başlığı */
+.islem-grup-baslik {
+  font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 8px 12px 4px;
+  background: var(--bg-base);
+  position: sticky; top: 0; z-index: 2;
+  border-bottom: 1px solid var(--border);
+}
+
+/* ── İŞLEM SATIRI — referans görsele uygun ── */
+.islem-row {
+  display: flex; align-items: center;
+  padding: 0 12px;
+  min-height: 38px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.1s;
+  position: relative;
+  gap: 0;
+}
 .islem-row:active { background: var(--bg-elevated); }
-.islem-row .sol-bar { position: absolute; left: 0; top: 0; bottom: 0; width: 3px; }
+
+/* Sol renkli şerit */
+.sol-bar { position: absolute; left: 0; top: 0; bottom: 0; width: 3px; }
 .islem-row.gelir .sol-bar { background: var(--green); }
 .islem-row.gider .sol-bar { background: var(--red); }
-.islem-row-left { flex: 1; min-width: 0; padding-left: 6px; }
-.islem-kat-adi { font-size: 13px; font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.islem-aciklama-kisa { font-size: 11px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.islem-tarih-kisa { font-size: 10px; color: var(--text-muted); }
-.islem-row-right { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; flex-shrink: 0; }
-.islem-tutar-val { font-family: var(--font-brand); font-size: 16px; letter-spacing: 0.3px; }
-.islem-row.gelir .islem-tutar-val { color: var(--green); }
-.islem-row.gider .islem-tutar-val { color: var(--red); }
-.islem-bakiye-val { font-size: 11px; color: var(--text-secondary); }
-.islem-row-actions { display: flex; gap: 2px; opacity: 0; transition: opacity 0.15s; }
+
+/* Kategori + açıklama — sol, esnek genişlik */
+.islem-row-left {
+  flex: 1; min-width: 0;
+  padding-left: 8px;
+  display: flex; align-items: center; gap: 6px;
+}
+.islem-kat-adi {
+  font-size: 13px; font-weight: 700; color: var(--text-primary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  text-transform: uppercase; letter-spacing: 0.3px;
+}
+.islem-kat-adi .islem-aciklama-inline {
+  font-weight: 400; color: var(--text-secondary);
+  font-size: 12px; text-transform: none; letter-spacing: 0;
+}
+
+/* Sağ grup: tarih | tutar | bakiye — yan yana */
+.islem-row-right {
+  display: flex; align-items: center; gap: 0;
+  flex-shrink: 0;
+}
+.islem-tarih-col {
+  font-size: 11px; color: var(--text-muted);
+  padding: 0 10px;
+  white-space: nowrap;
+}
+.islem-tutar-col {
+  font-family: var(--font-brand); font-size: 15px; letter-spacing: 0.3px;
+  text-align: right; min-width: 80px; padding: 0 10px;
+  white-space: nowrap;
+}
+.islem-row.gelir .islem-tutar-col { color: var(--green); }
+.islem-row.gider .islem-tutar-col { color: var(--red); }
+.islem-bakiye-col {
+  font-family: var(--font-brand); font-size: 13px; color: var(--text-secondary);
+  text-align: right; min-width: 80px; padding: 0 8px 0 4px;
+  white-space: nowrap;
+}
+.islem-row-actions {
+  display: flex; gap: 2px;
+  opacity: 0; transition: opacity 0.15s;
+  padding-right: 2px;
+}
 .islem-row:hover .islem-row-actions { opacity: 1; }
-.row-action-btn { background: transparent; border: none; font-size: 14px; cursor: pointer; padding: 3px 5px; border-radius: 4px; color: var(--text-muted); }
+.row-action-btn {
+  background: transparent; border: none; font-size: 13px; cursor: pointer;
+  padding: 3px 4px; border-radius: 4px; color: var(--text-muted);
+}
 .row-action-btn:hover { background: var(--bg-elevated); color: var(--text-primary); }
 .row-action-btn.sil:hover { color: var(--red); }
 
-/* BOŞ DURUM */
+/* Ay özet satırı */
+.islem-ay-ozet {
+  display: flex; justify-content: flex-end; align-items: center;
+  gap: 6px; padding: 5px 12px;
+  background: var(--bg-elevated);
+  border-bottom: 2px solid var(--border);
+  font-size: 11px; color: var(--text-secondary);
+}
+.islem-ay-ozet .ao-gelir { color: var(--green); font-family: var(--font-brand); font-size: 13px; }
+.islem-ay-ozet .ao-gider { color: var(--red); font-family: var(--font-brand); font-size: 13px; }
+.islem-ay-ozet .ao-net { color: var(--gold); font-family: var(--font-brand); font-size: 14px; font-weight: 700; }
+.islem-ay-ozet .ao-sep { color: var(--text-muted); }
+
+/* Genel toplam satırı */
+.islem-genel-toplam {
+  display: flex; justify-content: flex-end; align-items: center;
+  gap: 8px; padding: 6px 12px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  font-size: 11px; color: var(--text-secondary); font-weight: 700;
+}
+.islem-genel-toplam .gt-val { font-family: var(--font-brand); font-size: 15px; color: var(--gold); }
+
+/* Boş durum */
 .empty-state { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 60px 20px; color: var(--text-muted); text-align: center; }
 .empty-icon { font-size: 48px; }
 .empty-state p { font-size: 16px; font-weight: 700; color: var(--text-secondary); }
 
-/* ALT HIZLI GİRİŞ BARI */
-.hizli-giris { display: flex; align-items: center; gap: 6px; padding: 8px 10px; background: var(--bg-card); border-top: 1px solid var(--border); flex-shrink: 0; }
-.hizli-giris .hg-aciklama { flex: 2; background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-primary); font-family: var(--font-body); font-size: 13px; padding: 9px 10px; outline: none; min-width: 0; }
-.hizli-giris .hg-aciklama::placeholder { color: var(--text-muted); }
-.hizli-giris .hg-tutar { width: 90px; flex-shrink: 0; background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-primary); font-family: var(--font-brand); font-size: 16px; padding: 9px 8px; outline: none; text-align: right; }
-.hizli-giris .hg-kat { flex: 1.5; background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-primary); font-family: var(--font-body); font-size: 12px; padding: 9px 6px; outline: none; min-width: 0; }
-.hg-btn-group { display: flex; gap: 4px; flex-shrink: 0; }
-.hg-btn { border: none; border-radius: var(--radius-sm); font-family: var(--font-body); font-size: 12px; font-weight: 800; padding: 9px 12px; cursor: pointer; transition: all 0.12s; white-space: nowrap; }
-.hg-btn.gelir { background: var(--green); color: #0f1923; }
-.hg-btn.gider { background: var(--red); color: #fff; }
-.hg-btn:active { transform: scale(0.95); }
+/* ── HIZLI GİRİŞ BAR — referansa uygun ── */
+.hizli-giris {
+  display: flex; align-items: stretch;
+  background: var(--bg-card);
+  border-top: 2px solid var(--border);
+  flex-shrink: 0;
+  min-height: 44px;
+}
+.hg-aciklama {
+  flex: 2; background: transparent; border: none; border-right: 1px solid var(--border);
+  color: var(--text-primary); font-family: var(--font-body); font-size: 13px;
+  padding: 0 12px; outline: none; min-width: 0;
+}
+.hg-aciklama::placeholder { color: var(--text-muted); }
+.hg-tutar {
+  width: 100px; flex-shrink: 0; background: transparent;
+  border: none; border-right: 1px solid var(--border);
+  color: var(--text-primary); font-family: var(--font-brand); font-size: 16px;
+  padding: 0 10px; outline: none; text-align: right;
+}
+.hg-kat {
+  flex: 1.2; background: transparent; border: none; border-right: 1px solid var(--border);
+  color: var(--text-primary); font-family: var(--font-body); font-size: 12px;
+  padding: 0 8px; outline: none; min-width: 0; cursor: pointer;
+}
+.hg-btn-group { display: flex; flex-shrink: 0; }
+.hg-btn {
+  border: none; font-family: var(--font-body); font-size: 13px; font-weight: 800;
+  padding: 0 16px; cursor: pointer; transition: all 0.12s;
+  display: flex; align-items: center; gap: 4px; white-space: nowrap;
+}
+.hg-btn.gelir { background: var(--green); color: #0a1a12; border-left: 1px solid rgba(0,0,0,0.2); }
+.hg-btn.gider { background: var(--red); color: #fff; border-left: 1px solid rgba(0,0,0,0.2); }
+.hg-btn:active { opacity: 0.85; transform: scale(0.97); }
 
-/* COMING SOON */
+/* ── COMING SOON ── */
 .coming-soon { display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 80px 20px; color: var(--text-muted); text-align: center; width: 100%; }
 .coming-soon span { font-size: 52px; opacity: 0.5; }
 .coming-soon p { font-size: 15px; font-weight: 700; color: var(--text-secondary); }
 
-/* MODAL */
+/* ── MODAL ── */
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(4px); display: flex; align-items: flex-end; justify-content: center; z-index: 500; }
 .modal-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg) var(--radius-lg) 0 0; width: 100%; max-width: 560px; max-height: 92dvh; display: flex; flex-direction: column; overflow: hidden; animation: slide-up 0.25s ease; }
-.modal-sm { max-height: 55dvh; }
+.modal-sm { max-height: 60dvh; }
 @keyframes slide-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
 .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
 .modal-title { font-family: var(--font-brand); font-size: 22px; letter-spacing: 1px; color: var(--gold); }
@@ -150,10 +281,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .tip-btn[data-tip="gider"].active { border-color: var(--red); color: var(--red); background: rgba(240,84,84,0.1); }
 .tip-btn[data-tip="gelir"].active { border-color: var(--green); color: var(--green); background: rgba(52,201,122,0.1); }
 .confirm-text { color: var(--text-secondary); font-size: 14px; line-height: 1.6; text-align: center; padding: 8px 0; }
-
-/* BUTTONS */
-.btn-primary { background: var(--gold); color: #0f1923; border: none; border-radius: var(--radius-sm); font-family: var(--font-body); font-size: 14px; font-weight: 800; padding: 10px 18px; cursor: pointer; transition: all 0.15s; }
-.btn-primary:active { transform: scale(0.96); }
+.btn-primary { background: var(--gold); color: #0f1923; border: none; border-radius: var(--radius-sm); font-family: var(--font-body); font-size: 14px; font-weight: 800; padding: 10px 18px; cursor: pointer; }
 .btn-secondary { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: var(--font-body); font-size: 14px; font-weight: 700; padding: 10px 18px; cursor: pointer; }
 .btn-danger { background: var(--red); color: #fff; border: none; border-radius: var(--radius-sm); font-family: var(--font-body); font-size: 14px; font-weight: 800; padding: 10px 18px; cursor: pointer; }
 .link-btn { background: transparent; border: none; color: var(--gold); font-family: var(--font-body); font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: underline; }
