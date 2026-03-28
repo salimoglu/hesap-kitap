@@ -83,7 +83,7 @@
               <option value="gider">Gider</option>
             </select>
             <select id="filter-ay" class="filter-select"><option value="hepsi">T&#252;m Aylar</option></select>
-            <button class="btn-yeni-kat-bar" id="btn-yeni-kat-bar">+ Kategori</button>
+            <button class="btn-yeni-kat-bar" id="btn-yeni-kat-bar">&#9776; Kategoriler</button>
           </div>
           <div class="islem-scroll" id="islem-list">
             <div class="empty-state" id="empty-state">
@@ -92,44 +92,27 @@
               <span>A&#351;a&#287;&#305;dan h&#305;zl&#305; giri&#351; yap&#305;n</span>
             </div>
           </div>
-
-          <!-- HIZLI GİRİŞ -->
           <div class="hizli-giris">
             <input type="text" class="hg-aciklama" id="hg-aciklama" placeholder="A&#231;&#305;klama..." maxlength="100" />
             <input type="number" class="hg-tutar" id="hg-tutar" placeholder="0,00" min="0" step="0.01" inputmode="decimal" />
-
-            <!-- KATEGORİ DROPDOWN — ARAMA KUTULU -->
             <div class="hg-kat-wrap" id="hg-kat-wrap">
               <button class="hg-kat-trigger" id="hg-kat-trigger" type="button">Kategori...</button>
               <div class="hg-kat-dropdown" id="hg-kat-dropdown">
-                <!-- Arama kutusu -->
                 <div class="hg-kat-search">
                   <span class="hg-kat-search-icon">&#128269;</span>
-                  <input
-                    type="text"
-                    class="hg-kat-search-inp"
-                    id="hg-kat-search-inp"
-                    placeholder="Ara..."
-                    autocomplete="off"
-                    autocorrect="off"
-                    spellcheck="false"
-                  />
+                  <input type="text" class="hg-kat-search-inp" id="hg-kat-search-inp" placeholder="Ara..." autocomplete="off" spellcheck="false" />
                   <button class="hg-kat-search-clear" id="hg-kat-search-clear" type="button">&#10005;</button>
                 </div>
-                <!-- Sonuç listesi -->
                 <div class="hg-kat-list" id="hg-kat-list"></div>
               </div>
             </div>
-
             <div class="hg-btn-group">
               <button class="hg-btn gelir" id="hg-btn-gelir">+ Gelir</button>
               <button class="hg-btn gider" id="hg-btn-gider">&#8722; Gider</button>
             </div>
           </div>
-
         </div>
       </section>
-
       <section id="tab-butce" class="tab-panel"><div class="coming-soon"><span>&#128202;</span><p>B&#252;t&#231;e mod&#252;l&#252; yak&#305;nda</p></div></section>
       <section id="tab-birikim" class="tab-panel"><div class="coming-soon"><span>&#127974;</span><p>Birikim mod&#252;l&#252; yak&#305;nda</p></div></section>
       <section id="tab-kredi" class="tab-panel"><div class="coming-soon"><span>&#128179;</span><p>Kredi Kart&#305; mod&#252;l&#252; yak&#305;nda</p></div></section>
@@ -141,7 +124,7 @@
     </main>
   </div>
 
-  <!-- MODAL: DUZENLE -->
+  <!-- MODAL: İŞLEM DÜZENLE -->
   <div id="modal-islem" class="modal-overlay hidden">
     <div class="modal-box">
       <div class="modal-header">
@@ -159,7 +142,6 @@
         <div class="field-group">
           <div class="label-row">
             <label class="field-label" for="sel-kategori">Kategori</label>
-            <button class="link-btn" id="btn-yeni-kat">+ Yeni Kategori</button>
           </div>
           <select id="sel-kategori" class="field-select"></select>
         </div>
@@ -183,24 +165,31 @@
     </div>
   </div>
 
-  <!-- MODAL: YENİ KATEGORİ -->
+  <!-- MODAL: KATEGORİ YÖNETİMİ (Liste + Ekle) -->
   <div id="modal-kategori" class="modal-overlay hidden">
-    <div class="modal-box modal-sm">
+    <div class="modal-box modal-kat-box">
       <div class="modal-header">
-        <h2 class="modal-title">Yeni Kategori</h2>
+        <h2 class="modal-title">Kategoriler</h2>
         <button class="modal-close" id="kat-close">&#10005;</button>
       </div>
-      <div class="modal-body">
-        <div class="field-group">
-          <label class="field-label">Tip</label>
-          <div class="tip-toggle">
-            <button class="tip-btn active" data-tip="gider" id="kat-btn-gider">Gider</button>
-            <button class="tip-btn" data-tip="gelir" id="kat-btn-gelir">Gelir</button>
+
+      <!-- Tip seçici -->
+      <div class="kat-tip-bar">
+        <button class="kat-tip-tab active" id="kat-tab-gider" data-tip="gider">Gider</button>
+        <button class="kat-tip-tab" id="kat-tab-gelir" data-tip="gelir">Gelir</button>
+      </div>
+
+      <!-- Mevcut kategoriler listesi -->
+      <div class="kat-liste-wrap" id="kat-liste-wrap"></div>
+
+      <!-- Yeni kategori ekle -->
+      <div class="kat-ekle-form">
+        <div class="kat-ekle-baslik">+ Yeni Kategori Ekle</div>
+        <div class="kat-ekle-row">
+          <div class="field-group" style="flex:1">
+            <label class="field-label" for="sel-kat-grup">Grup</label>
+            <select id="sel-kat-grup" class="field-select"></select>
           </div>
-        </div>
-        <div class="field-group">
-          <label class="field-label" for="sel-kat-grup">Grup</label>
-          <select id="sel-kat-grup" class="field-select"></select>
         </div>
         <div class="field-group" id="yeni-grup-wrap" style="display:none">
           <label class="field-label" for="inp-kat-grup-yeni">Yeni Grup Ad&#305;</label>
@@ -210,15 +199,53 @@
           <label class="field-label" for="inp-kat-ad">Kategori Ad&#305;</label>
           <input type="text" id="inp-kat-ad" class="field-input" placeholder="orn: Dis Tedavisi" maxlength="50" />
         </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-secondary" id="kat-iptal">&#304;ptal</button>
-        <button class="btn-primary" id="kat-kaydet">Ekle</button>
+        <button class="btn-primary" id="kat-kaydet" style="width:100%;margin-top:4px">Ekle</button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL: SİL -->
+  <!-- MODAL: KATEGORİ DÜZENLE -->
+  <div id="modal-kat-duzenle" class="modal-overlay hidden">
+    <div class="modal-box modal-sm">
+      <div class="modal-header">
+        <h2 class="modal-title">Kategoriyi D&#252;zenle</h2>
+        <button class="modal-close" id="kat-duz-close">&#10005;</button>
+      </div>
+      <div class="modal-body">
+        <div class="field-group">
+          <label class="field-label" for="inp-duz-grup">Grup Ad&#305;</label>
+          <input type="text" id="inp-duz-grup" class="field-input" maxlength="50" />
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="inp-duz-ad">Kategori Ad&#305;</label>
+          <input type="text" id="inp-duz-ad" class="field-input" maxlength="50" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="kat-duz-iptal">&#304;ptal</button>
+        <button class="btn-primary" id="kat-duz-kaydet">Kaydet</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: KATEGORİ SİL ONAYI -->
+  <div id="modal-kat-sil" class="modal-overlay hidden">
+    <div class="modal-box modal-sm">
+      <div class="modal-header">
+        <h2 class="modal-title">Kategoriyi Sil</h2>
+        <button class="modal-close" id="kat-sil-close">&#10005;</button>
+      </div>
+      <div class="modal-body">
+        <p class="confirm-text" id="kat-sil-text">Bu kategoriyi silmek istedi&#287;inizden emin misiniz?</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="kat-sil-iptal">&#304;ptal</button>
+        <button class="btn-danger" id="kat-sil-onayla">Sil</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: İŞLEM SİL -->
   <div id="modal-sil" class="modal-overlay hidden">
     <div class="modal-box modal-sm">
       <div class="modal-header">
