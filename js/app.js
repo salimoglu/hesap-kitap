@@ -1,44 +1,59 @@
 (async () => {
 
+  // Firebase baslat
+  fbInit();
+
+  // IndexedDB baslat
   await initApp();
 
+  // Firebase dan verileri cek (ilk acilis veya baska cihaz)
+  const syncDurum = document.getElementById("sync-durum");
+  if (syncDurum) syncDurum.textContent = "☁ Sync...";
+  try {
+    const yuklendi = await fbVerileriYukle();
+    if (syncDurum) syncDurum.textContent = yuklendi ? "✓" : "✓";
+  } catch(e) {
+    if (syncDurum) syncDurum.textContent = "✗";
+    console.warn("Firebase sync basarisiz, cevrimdisi mod:", e.message);
+  }
+
   // SIFRE KILIDI
-  const lockScreen = document.getElementById('lock-screen');
-  const appEl = document.getElementById('app');
-  let pinGiris = '';
+  const lockScreen = document.getElementById("lock-screen");
+  const appEl = document.getElementById("app");
+  let pinGiris = "";
   const MAX_PIN = 4;
 
   function pinGoster() {
     for (let i = 1; i <= MAX_PIN; i++) {
-      const dot = document.getElementById('d' + i);
-      if (dot) dot.classList.toggle('filled', i <= pinGiris.length);
+      const dot = document.getElementById("d" + i);
+      if (dot) dot.classList.toggle("filled", i <= pinGiris.length);
     }
   }
 
   function pinTemizle() {
-    pinGiris = '';
+    pinGiris = "";
     pinGoster();
-    document.getElementById('pin-error').textContent = '';
+    document.getElementById("pin-error").textContent = "";
   }
 
   async function pinKontrol() {
-    const kayitliSifre = await AyarlarDB.get('sifre');
+    const kayitliSifre = await AyarlarDB.get("sifre");
     if (pinGiris === kayitliSifre) {
-      lockScreen.style.animation = 'fade-out 0.3s ease forwards';
+      lockScreen.style.animation = "fade-out 0.3s ease forwards";
       setTimeout(() => {
-        lockScreen.classList.add('hidden');
-        appEl.classList.remove('hidden');
+        lockScreen.classList.add("hidden");
+        appEl.classList.remove("hidden");
       }, 280);
     } else {
-      document.getElementById('pin-error').textContent = 'Hatali sifre!';
-      const pinDisp = document.querySelector('.pin-display');
-      pinDisp.style.animation = 'shake 0.4s ease';
-      setTimeout(() => { pinDisp.style.animation = ''; pinTemizle(); }, 400);
+      document.getElementById("pin-error").textContent = "Hatali sifre!";
+      const pinDisp = document.querySelector(".pin-display");
+      pinDisp.style.animation = "shake 0.4s ease";
+      setTimeout(() => { pinDisp.style.animation = ""; pinTemizle(); }, 400);
     }
   }
 
-  document.querySelectorAll('.num-btn[data-n]').forEach(btn => {
-    btn.addEventListener('click', async () => {
+  document.querySelectorAll(".num-btn[data-n]").forEach(btn => {
+    btn.addEventListener("click", async () => {
       if (pinGiris.length >= MAX_PIN) return;
       pinGiris += btn.dataset.n;
       pinGoster();
@@ -46,51 +61,47 @@
     });
   });
 
-  document.getElementById('pin-del').addEventListener('click', () => {
+  document.getElementById("pin-del").addEventListener("click", () => {
     if (pinGiris.length > 0) {
       pinGiris = pinGiris.slice(0, -1);
       pinGoster();
-      document.getElementById('pin-error').textContent = '';
+      document.getElementById("pin-error").textContent = "";
     }
   });
 
-  document.addEventListener('keydown', async (e) => {
-    if (!lockScreen.classList.contains('hidden')) {
-      if (e.key >= '0' && e.key <= '9' && pinGiris.length < MAX_PIN) {
-        pinGiris += e.key;
-        pinGoster();
+  document.addEventListener("keydown", async (e) => {
+    if (!lockScreen.classList.contains("hidden")) {
+      if (e.key >= "0" && e.key <= "9" && pinGiris.length < MAX_PIN) {
+        pinGiris += e.key; pinGoster();
         if (pinGiris.length === MAX_PIN) setTimeout(pinKontrol, 100);
-      } else if (e.key === 'Backspace') {
-        pinGiris = pinGiris.slice(0, -1);
-        pinGoster();
-        document.getElementById('pin-error').textContent = '';
+      } else if (e.key === "Backspace") {
+        pinGiris = pinGiris.slice(0, -1); pinGoster();
+        document.getElementById("pin-error").textContent = "";
       }
     }
   });
 
-  document.getElementById('lock-btn').addEventListener('click', () => {
-    appEl.classList.add('hidden');
-    lockScreen.classList.remove('hidden');
-    lockScreen.style.animation = '';
+  document.getElementById("lock-btn").addEventListener("click", () => {
+    appEl.classList.add("hidden");
+    lockScreen.classList.remove("hidden");
+    lockScreen.style.animation = "";
     pinTemizle();
   });
 
   // SEKME YONETIMI
-  const tabBtnler = document.querySelectorAll('.tab-btn');
-  const tabPaneller = document.querySelectorAll('.tab-panel');
-
+  const tabBtnler = document.querySelectorAll(".tab-btn");
+  const tabPaneller = document.querySelectorAll(".tab-panel");
   function tabSec(tabId) {
-    tabBtnler.forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tabId));
-    tabPaneller.forEach(panel => panel.classList.toggle('active', panel.id === 'tab-' + tabId));
+    tabBtnler.forEach(btn => btn.classList.toggle("active", btn.dataset.tab === tabId));
+    tabPaneller.forEach(panel => panel.classList.toggle("active", panel.id === "tab-" + tabId));
   }
-
-  tabBtnler.forEach(btn => btn.addEventListener('click', () => tabSec(btn.dataset.tab)));
+  tabBtnler.forEach(btn => btn.addEventListener("click", () => tabSec(btn.dataset.tab)));
 
   // MODULLERI BASLAT
   await IslemlerModule.init();
 
   // ANIMASYONLAR
-  const style = document.createElement('style');
+  const style = document.createElement("style");
   style.textContent = `
     @keyframes shake {
       0%,100%{ transform: translateX(0); }
@@ -99,19 +110,16 @@
       60%{ transform: translateX(-6px); }
       80%{ transform: translateX(6px); }
     }
-    @keyframes fade-out {
-      to { opacity: 0; transform: scale(0.97); }
-    }
+    @keyframes fade-out { to { opacity: 0; transform: scale(0.97); } }
+    .sync-durum { font-size: 12px; color: var(--text-muted); padding: 0 4px; transition: color 0.3s; }
+    .sync-durum.ok { color: var(--green); }
   `;
   document.head.appendChild(style);
 
   // SERVICE WORKER
-  if ('serviceWorker' in navigator) {
-    try {
-      await navigator.serviceWorker.register('/hesap-kitap/sw.js');
-    } catch (err) {
-      console.warn('SW kaydi basarisiz:', err);
-    }
+  if ("serviceWorker" in navigator) {
+    try { await navigator.serviceWorker.register("/hesap-kitap/sw.js"); }
+    catch (err) { console.warn("SW kaydi basarisiz:", err); }
   }
 
 })();
