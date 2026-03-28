@@ -379,3 +379,138 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 }
 .kat-ekle-row { display: flex; gap: 8px; }
 
+
+
+/* ══════════════════════════════════════
+   BÜTÇE MODÜLÜ
+══════════════════════════════════════ */
+
+.butce-wrap {
+  display: flex; flex-direction: column;
+  height: 100%; overflow: hidden;
+  background: var(--bg-base);
+}
+
+/* Ay seçici bar */
+.butce-ay-bar {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 14px; flex-shrink: 0;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+}
+.butce-ay-btn {
+  background: var(--bg-elevated); border: 1px solid var(--border);
+  color: var(--text-primary); font-size: 20px; font-weight: 700;
+  width: 32px; height: 32px; border-radius: var(--radius-sm);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all 0.12s;
+}
+.butce-ay-btn:hover { border-color: var(--gold); color: var(--gold); }
+.butce-ay-label {
+  flex: 1; font-family: var(--font-brand); font-size: 18px;
+  letter-spacing: 2px; color: var(--gold); text-align: center;
+}
+.butce-rapor-btn {
+  background: var(--bg-elevated); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); color: var(--green);
+  font-family: var(--font-body); font-size: 12px; font-weight: 700;
+  padding: 6px 12px; cursor: pointer; white-space: nowrap;
+  transition: all 0.12s;
+}
+.butce-rapor-btn:hover { border-color: var(--green); background: rgba(52,201,122,0.08); }
+
+/* Tablo sarıcı */
+.butce-tablo-wrap {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+}
+
+/* Ana tablo */
+.butce-tablo {
+  width: 100%; border-collapse: collapse;
+  font-family: var(--font-body);
+}
+
+/* Sütun genişlikleri */
+.bt-col-label { width: 65%; padding: 7px 14px; text-align: left; }
+.bt-col-tutar { width: 22%; padding: 7px 10px; text-align: right; white-space: nowrap; }
+.bt-col-pct   { width: 13%; padding: 7px 10px; text-align: right; white-space: nowrap; }
+
+/* Header */
+.butce-tablo thead tr {
+  background: var(--bg-elevated);
+  border-bottom: 2px solid var(--border);
+}
+.butce-tablo thead th {
+  font-size: 10px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 0.8px; color: var(--text-muted);
+  padding: 8px 10px; text-align: right;
+}
+.butce-tablo thead th:first-child { text-align: left; padding-left: 14px; }
+
+/* Bölüm başlığı */
+.bt-bolum-baslik td {
+  font-family: var(--font-brand); font-size: 13px; letter-spacing: 2px;
+  color: var(--gold); background: var(--bg-card);
+  border-top: 2px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 7px 14px !important;
+}
+
+/* Normal satır */
+.bt-satir { border-bottom: 1px solid var(--border); transition: background 0.08s; }
+.bt-satir:hover { background: var(--bg-elevated); }
+.bt-satir .bt-col-label {
+  font-size: 12px; color: var(--text-secondary); font-weight: 600;
+}
+
+/* Hesaplanan / Toplam satır */
+.bt-hesap-row, .bt-toplam-row {
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-elevated);
+}
+.bt-toplam-row .bt-col-label {
+  font-family: var(--font-brand); letter-spacing: 1px;
+  font-size: 13px; color: var(--text-primary);
+}
+.bt-toplam-row .bt-col-tutar {
+  font-family: var(--font-brand); font-size: 15px; color: var(--gold);
+}
+.bt-hesap-row .bt-col-tutar {
+  font-weight: 700; color: var(--text-primary);
+}
+.bt-col-pct {
+  font-size: 12px; color: var(--text-muted); font-weight: 600;
+}
+
+/* Sonuç satırları */
+.bt-sonuc-row { border-bottom: 1px solid var(--border); }
+.bt-sonuc-row .bt-col-label {
+  font-family: var(--font-brand); letter-spacing: 1.5px;
+  font-size: 14px;
+}
+.bt-harcanan { background: rgba(240,84,84,0.06); }
+.bt-harcanan .bt-col-label { color: var(--red); }
+.bt-harcanan .bt-col-tutar { font-family: var(--font-brand); font-size: 16px; color: var(--red); }
+.bt-kalan { background: rgba(52,201,122,0.06); }
+.bt-kalan .bt-col-label { color: var(--green); }
+.bt-kalan .bt-col-tutar { font-family: var(--font-brand); font-size: 17px; color: var(--green); }
+.bt-kalan-negatif { background: rgba(240,84,84,0.1); }
+.bt-kalan-negatif .bt-col-label { color: var(--red); }
+.bt-kalan-negatif .bt-col-tutar { font-family: var(--font-brand); font-size: 17px; color: var(--red); }
+
+/* Input alanı */
+.bt-input {
+  width: 100%; background: transparent; border: none;
+  color: var(--text-primary); font-family: var(--font-body);
+  font-size: 13px; font-weight: 700; text-align: right;
+  padding: 2px 0; outline: none;
+}
+.bt-input:focus {
+  background: rgba(240,184,64,0.07);
+  border-radius: 4px;
+  color: var(--gold);
+}
+.bt-input::placeholder { color: var(--text-muted); font-weight: 400; }
+.bt-input::-webkit-inner-spin-button,
+.bt-input::-webkit-outer-spin-button { -webkit-appearance: none; }
