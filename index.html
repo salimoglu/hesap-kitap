@@ -69,7 +69,6 @@
     <main class="content">
       <section id="tab-islemler" class="tab-panel active">
         <div class="islemler-wrap">
-
           <div class="ozet-bar">
             <div class="ozet-item"><span class="ozet-label">Gelir</span><span class="ozet-val gelir" id="total-gelir">0,00</span></div>
             <div class="ozet-sep"></div>
@@ -77,7 +76,6 @@
             <div class="ozet-sep"></div>
             <div class="ozet-item"><span class="ozet-label">Net Bakiye</span><span class="ozet-val net" id="total-net">0,00</span></div>
           </div>
-
           <div class="filtre-bar">
             <select id="filter-type" class="filter-select">
               <option value="hepsi">T&#252;m&#252;</option>
@@ -87,7 +85,6 @@
             <select id="filter-ay" class="filter-select"><option value="hepsi">T&#252;m Aylar</option></select>
             <button class="btn-yeni-kat-bar" id="btn-yeni-kat-bar">+ Kategori</button>
           </div>
-
           <div class="islem-scroll" id="islem-list">
             <div class="empty-state" id="empty-state">
               <span class="empty-icon">&#128221;</span>
@@ -96,15 +93,32 @@
             </div>
           </div>
 
-          <!-- HIZLI GİRİŞ — özel dropdown -->
+          <!-- HIZLI GİRİŞ -->
           <div class="hizli-giris">
             <input type="text" class="hg-aciklama" id="hg-aciklama" placeholder="A&#231;&#305;klama..." maxlength="100" />
             <input type="number" class="hg-tutar" id="hg-tutar" placeholder="0,00" min="0" step="0.01" inputmode="decimal" />
 
-            <!-- Özel kategori dropdown -->
+            <!-- KATEGORİ DROPDOWN — ARAMA KUTULU -->
             <div class="hg-kat-wrap" id="hg-kat-wrap">
               <button class="hg-kat-trigger" id="hg-kat-trigger" type="button">Kategori...</button>
-              <div class="hg-kat-dropdown" id="hg-kat-dropdown"></div>
+              <div class="hg-kat-dropdown" id="hg-kat-dropdown">
+                <!-- Arama kutusu -->
+                <div class="hg-kat-search">
+                  <span class="hg-kat-search-icon">&#128269;</span>
+                  <input
+                    type="text"
+                    class="hg-kat-search-inp"
+                    id="hg-kat-search-inp"
+                    placeholder="Ara..."
+                    autocomplete="off"
+                    autocorrect="off"
+                    spellcheck="false"
+                  />
+                  <button class="hg-kat-search-clear" id="hg-kat-search-clear" type="button">&#10005;</button>
+                </div>
+                <!-- Sonuç listesi -->
+                <div class="hg-kat-list" id="hg-kat-list"></div>
+              </div>
             </div>
 
             <div class="hg-btn-group">
