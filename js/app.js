@@ -88,10 +88,6 @@
 
   // MODULLERI BASLAT
   await IslemlerModule.init();
-  if (typeof YukleModule !== "undefined") YukleModule.init();
-
-  // yukle.js den erisim icin IslemlerModule.yukle disariya ac
-  window._islemlerYukle = async () => { await IslemlerModule.init(); };
 
   // ANIMASYONLAR
   const style = document.createElement('style');
