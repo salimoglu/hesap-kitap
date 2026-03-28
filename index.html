@@ -13,7 +13,6 @@
 </head>
 <body>
 
-  <!-- SIFRE EKRANI -->
   <div id="lock-screen" class="lock-screen">
     <div class="lock-inner">
       <div class="lock-logo">
@@ -46,7 +45,6 @@
     </div>
   </div>
 
-  <!-- ANA UYGULAMA -->
   <div id="app" class="app hidden">
     <header class="topbar">
       <div class="topbar-left">
@@ -71,10 +69,8 @@
     </nav>
 
     <main class="content">
-      <!-- ISLEMLER -->
       <section id="tab-islemler" class="tab-panel active">
         <div class="islemler-wrap">
-          <!-- OZET BAR -->
           <div class="ozet-bar">
             <div class="ozet-item">
               <span class="ozet-label">Gelir</span>
@@ -91,8 +87,6 @@
               <span class="ozet-val net" id="total-net">0,00</span>
             </div>
           </div>
-
-          <!-- FILTRE BAR -->
           <div class="filtre-bar">
             <select id="filter-type" class="filter-select">
               <option value="hepsi">T&#252;m&#252;</option>
@@ -104,17 +98,13 @@
             </select>
             <button class="btn-yeni-kat-bar" id="btn-yeni-kat-bar">+ Kategori</button>
           </div>
-
-          <!-- ISLEM LISTESI -->
           <div class="islem-scroll" id="islem-list">
             <div class="empty-state" id="empty-state">
               <span class="empty-icon">&#128221;</span>
               <p>Hen&#252;z i&#351;lem yok</p>
-              <span>A&#351;a&#287;&#305;dan hızlı giri&#351; yapın</span>
+              <span>A&#351;a&#287;&#305;dan h&#305;zl&#305; giri&#351; yap&#305;n</span>
             </div>
           </div>
-
-          <!-- HIZLI GIRIS BAR -->
           <div class="hizli-giris">
             <input type="text" class="hg-aciklama" id="hg-aciklama" placeholder="A&#231;&#305;klama..." maxlength="100" />
             <input type="number" class="hg-tutar" id="hg-tutar" placeholder="0,00" min="0" step="0.01" inputmode="decimal" />
@@ -196,8 +186,12 @@
           </div>
         </div>
         <div class="field-group">
-          <label class="field-label" for="inp-kat-grup">Grup Ad&#305;</label>
-          <input type="text" id="inp-kat-grup" class="field-input" placeholder="orn: SAGLIK" maxlength="50" />
+          <label class="field-label" for="sel-kat-grup">Grup</label>
+          <select id="sel-kat-grup" class="field-select"></select>
+        </div>
+        <div class="field-group" id="yeni-grup-wrap" style="display:none">
+          <label class="field-label" for="inp-kat-grup-yeni">Yeni Grup Ad&#305;</label>
+          <input type="text" id="inp-kat-grup-yeni" class="field-input" placeholder="orn: SAGLIK" maxlength="50" />
         </div>
         <div class="field-group">
           <label class="field-label" for="inp-kat-ad">Kategori Ad&#305;</label>
