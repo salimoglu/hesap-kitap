@@ -1,21 +1,10 @@
 (async () => {
 
-  // Firebase baslat
-  fbInit();
+  // 1. Firebase baslat (hata olsa bile devam et)
+  try { if (typeof fbInit !== "undefined") fbInit(); } catch(e) {}
 
-  // IndexedDB baslat
+  // 2. IndexedDB baslat
   await initApp();
-
-  // Firebase dan verileri cek (ilk acilis veya baska cihaz)
-  const syncDurum = document.getElementById("sync-durum");
-  if (syncDurum) syncDurum.textContent = "☁ Sync...";
-  try {
-    const yuklendi = await fbVerileriYukle();
-    if (syncDurum) syncDurum.textContent = yuklendi ? "✓" : "✓";
-  } catch(e) {
-    if (syncDurum) syncDurum.textContent = "✗";
-    console.warn("Firebase sync basarisiz, cevrimdisi mod:", e.message);
-  }
 
   // SIFRE KILIDI
   const lockScreen = document.getElementById("lock-screen");
@@ -29,7 +18,6 @@
       if (dot) dot.classList.toggle("filled", i <= pinGiris.length);
     }
   }
-
   function pinTemizle() {
     pinGiris = "";
     pinGoster();
@@ -40,9 +28,24 @@
     const kayitliSifre = await AyarlarDB.get("sifre");
     if (pinGiris === kayitliSifre) {
       lockScreen.style.animation = "fade-out 0.3s ease forwards";
-      setTimeout(() => {
+      setTimeout(async () => {
         lockScreen.classList.add("hidden");
         appEl.classList.remove("hidden");
+        // 3. Firebase sync — uygulama actiktan sonra arka planda
+        const syncEl = document.getElementById("sync-durum");
+        if (syncEl) syncEl.textContent = "☁";
+        try {
+          if (typeof fbVerileriYukle !== "undefined") {
+            const yuklendi = await fbVerileriYukle();
+            if (yuklendi) {
+              await IslemlerModule.init();
+            }
+          }
+          if (syncEl) syncEl.textContent = "✓";
+        } catch(e) {
+          if (syncEl) syncEl.textContent = "";
+          console.warn("Firebase sync:", e.message);
+        }
       }, 280);
     } else {
       document.getElementById("pin-error").textContent = "Hatali sifre!";
@@ -111,7 +114,7 @@
       80%{ transform: translateX(6px); }
     }
     @keyframes fade-out { to { opacity: 0; transform: scale(0.97); } }
-    .sync-durum { font-size: 12px; color: var(--text-muted); padding: 0 4px; transition: color 0.3s; }
+    .sync-durum { font-size: 13px; color: var(--text-muted); padding: 0 6px; transition: color 0.3s; }
     .sync-durum.ok { color: var(--green); }
   `;
   document.head.appendChild(style);
@@ -119,7 +122,7 @@
   // SERVICE WORKER
   if ("serviceWorker" in navigator) {
     try { await navigator.serviceWorker.register("/hesap-kitap/sw.js"); }
-    catch (err) { console.warn("SW kaydi basarisiz:", err); }
+    catch (err) { console.warn("SW hatasi:", err); }
   }
 
 })();
