@@ -1,39 +1,48 @@
-const CACHE_NAME = 'hesap-kitap-v1';
+/* sw.js v3 — cache guncellendi */
+const CACHE_NAME = "hesap-kitap-v3";
 const CACHE_URLS = [
-  '/hesap-kitap/',
-  '/hesap-kitap/index.html',
-  '/hesap-kitap/css/style.css',
-  '/hesap-kitap/js/db.js',
-  '/hesap-kitap/js/app.js',
-  '/hesap-kitap/js/modules/islemler.js',
-  '/hesap-kitap/manifest.json',
+  "/hesap-kitap/",
+  "/hesap-kitap/index.html",
+  "/hesap-kitap/css/style.css",
+  "/hesap-kitap/js/firebase.js",
+  "/hesap-kitap/js/db.js",
+  "/hesap-kitap/js/app.js",
+  "/hesap-kitap/js/modules/islemler.js",
+  "/hesap-kitap/manifest.json",
 ];
 
-self.addEventListener('install', (e) => {
+self.addEventListener("install", function(e) {
   e.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(CACHE_URLS))
+    caches.open(CACHE_NAME).then(function(cache) { return cache.addAll(CACHE_URLS); })
   );
   self.skipWaiting();
 });
 
-self.addEventListener('activate', (e) => {
+self.addEventListener("activate", function(e) {
   e.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
-    )
+    caches.keys().then(function(keys) {
+      return Promise.all(
+        keys.filter(function(k) { return k !== CACHE_NAME; }).map(function(k) { return caches.delete(k); })
+      );
+    })
   );
   self.clients.claim();
 });
 
-self.addEventListener('fetch', (e) => {
-  if (e.request.method !== 'GET') return;
+self.addEventListener("fetch", function(e) {
+  if (e.request.method !== "GET") return;
+  // Firebase ve CDN isteklerini cache leme — network first
+  var url = e.request.url;
+  if (url.includes("firebase") || url.includes("googleapis") || url.includes("gstatic")) {
+    return;
+  }
   e.respondWith(
-    caches.match(e.request).then((cached) => {
+    caches.match(e.request).then(function(cached) {
       if (cached) return cached;
-      return fetch(e.request).then((response) => {
-        if (response && response.status === 200 && response.type === 'basic') {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(e.request, clone));
+      return fetch(e.request).then(function(response) {
+        if (response && response.status === 200 && response.type === "basic") {
+          var clone = response.clone();
+          caches.open(CACHE_NAME).then(function(cache) { cache.put(e.request, clone); });
         }
         return response;
       });
