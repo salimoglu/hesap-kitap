@@ -526,3 +526,42 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .bt-input::placeholder { color: var(--text-muted); font-weight: 400; }
 .bt-input::-webkit-inner-spin-button,
 .bt-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+/* Butce — dinamik satirlar + drag drop */
+.bt-col-sira { width: 28px; padding: 4px 4px; text-align: center; }
+.bt-col-aksiyon { width: 52px; padding: 2px 4px; text-align: right; white-space: nowrap; }
+
+.bt-drag-handle {
+  cursor: grab; color: var(--text-muted); font-size: 14px;
+  display: inline-block; user-select: none; padding: 0 4px;
+}
+.bt-drag-handle:active { cursor: grabbing; }
+
+.bt-satir-ozel { transition: background 0.1s; }
+.bt-satir-ozel:hover { background: var(--bg-elevated); }
+.bt-drag-active { opacity: 0.4; }
+.bt-drag-over { border-top: 2px solid var(--gold) !important; background: rgba(240,184,64,0.07) !important; }
+
+.bt-satir-btn {
+  background: transparent; border: none;
+  color: var(--text-muted); font-size: 12px; cursor: pointer;
+  padding: 2px 4px; border-radius: 3px; opacity: 0;
+  transition: opacity 0.15s, color 0.1s;
+}
+.bt-satir-ozel:hover .bt-satir-btn { opacity: 1; }
+.bt-rename-btn:hover { color: var(--gold); }
+.bt-sil-btn:hover { color: var(--red); }
+
+.bt-ekle-row { border-bottom: 1px solid var(--border); }
+.bt-ekle-row td { padding: 4px 10px; }
+.bt-ekle-btn {
+  background: transparent; border: 1px dashed var(--border);
+  border-radius: var(--radius-sm); color: var(--text-muted);
+  font-size: 11px; font-weight: 700; cursor: pointer;
+  padding: 4px 12px; width: 100%; text-align: left;
+  transition: all 0.15s;
+}
+.bt-ekle-btn:hover {
+  border-color: var(--gold); color: var(--gold);
+  background: rgba(240,184,64,0.05);
+}
