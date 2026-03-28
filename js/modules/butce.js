@@ -12,8 +12,8 @@ var ButceModule = (function() {
       {id:"bugra_maas",   label:"BUĞRA MAAŞ / TAHMİNİ"},
       {id:"toplam_maas",  label:"TOPLAM MAAŞ / TAHMİNİ", hesaplanan:true, hesapla:function(d){return (d.salim_maas||0)+(d.bugra_maas||0);}},
       {id:"gelecek_borc", label:"GELECEK OLAN BORÇLAR"},
-      {id:"hedef_birikim",label:"HEDEF BİRİKİM MİKTARI"},
-      {id:"zekat_tahmini",label:"ZEKAT TAHMİNİ"},
+      {id:"hedef_birikim",label:"HEDEF BİRİKİM MİKTARI (%40)", hesaplanan:true, hesapla:function(d){return Math.round(((d.salim_maas||0)+(d.bugra_maas||0)+(d.gelecek_borc||0))*0.40);}},
+      {id:"zekat_tahmini",label:"ZEKAT TAHMİNİ (%2,5)", hesaplanan:true, hesapla:function(d){return Math.round(((d.salim_maas||0)+(d.bugra_maas||0)+(d.gelecek_borc||0))*0.025);}},
     ]},
     {bolum:"zorunlu",baslik:"ZORUNLU GİDERLER",satirlar:[
       {id:"mutfak",       label:"MUTFAK"},
