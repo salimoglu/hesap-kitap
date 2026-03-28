@@ -62,19 +62,10 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .tab-panel { display: none; flex: 1; flex-direction: column; overflow: hidden; }
 .tab-panel.active { display: flex; }
 
-/* ══════════════════════════════════════════
-   İŞLEMLER MODÜLÜ
-══════════════════════════════════════════ */
+/* ══ İŞLEMLER MODÜLÜ ══ */
 .islemler-wrap { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
 
-/* Üst özet bar — kompakt, tek satır */
-.ozet-bar {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 6px 16px;
-  background: var(--bg-card);
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-}
+.ozet-bar { display: flex; align-items: center; justify-content: space-between; padding: 6px 16px; background: var(--bg-card); border-bottom: 1px solid var(--border); flex-shrink: 0; }
 .ozet-item { display: flex; flex-direction: column; align-items: center; gap: 1px; }
 .ozet-label { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-muted); }
 .ozet-val { font-family: var(--font-brand); font-size: 15px; letter-spacing: 0.3px; }
@@ -83,170 +74,63 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .ozet-val.net { color: var(--gold); font-size: 17px; }
 .ozet-sep { width: 1px; height: 28px; background: var(--border); }
 
-/* Filtre bar */
-.filtre-bar {
-  display: flex; align-items: center; gap: 8px;
-  padding: 6px 12px;
-  background: var(--bg-base);
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-}
-.filter-select {
-  flex: 1; background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: var(--radius-sm); color: var(--text-primary);
-  font-family: var(--font-body); font-size: 12px; padding: 5px 8px; outline: none;
-}
-.btn-yeni-kat-bar {
-  background: var(--bg-elevated); border: 1px solid var(--border);
-  border-radius: var(--radius-sm); color: var(--gold);
-  font-family: var(--font-body); font-size: 12px; font-weight: 700;
-  padding: 5px 10px; cursor: pointer; white-space: nowrap;
-}
+.filtre-bar { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: var(--bg-base); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.filter-select { flex: 1; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-primary); font-family: var(--font-body); font-size: 12px; padding: 5px 8px; outline: none; }
+.btn-yeni-kat-bar { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--gold); font-family: var(--font-body); font-size: 12px; font-weight: 700; padding: 5px 10px; cursor: pointer; white-space: nowrap; }
 
-/* ── İŞLEM LİSTESİ SCROLL ── */
-.islem-scroll {
-  flex: 1; overflow-y: auto; overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-}
-
-/* Ay grup başlığı */
-.islem-grup-baslik {
-  font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
-  color: var(--text-muted);
-  padding: 8px 12px 4px;
-  background: var(--bg-base);
-  position: sticky; top: 0; z-index: 2;
-  border-bottom: 1px solid var(--border);
-}
-
-/* ── İŞLEM SATIRI — referans görsele uygun ── */
-.islem-row {
-  display: flex; align-items: center;
-  padding: 0 12px;
-  min-height: 38px;
-  border-bottom: 1px solid var(--border);
-  cursor: pointer;
-  transition: background 0.1s;
-  position: relative;
-  gap: 0;
-}
+/* ── İŞLEM LİSTESİ ── */
+.islem-scroll { flex: 1; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
+.islem-grup-baslik { font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); padding: 8px 12px 4px; background: var(--bg-base); position: sticky; top: 0; z-index: 2; border-bottom: 1px solid var(--border); }
+.islem-row { display: flex; align-items: center; padding: 0 12px; min-height: 38px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.1s; position: relative; }
 .islem-row:active { background: var(--bg-elevated); }
-
-/* Sol renkli şerit */
 .sol-bar { position: absolute; left: 0; top: 0; bottom: 0; width: 3px; }
 .islem-row.gelir .sol-bar { background: var(--green); }
 .islem-row.gider .sol-bar { background: var(--red); }
-
-/* Kategori + açıklama — sol, esnek genişlik */
-.islem-row-left {
-  flex: 1; min-width: 0;
-  padding-left: 8px;
-  display: flex; align-items: center; gap: 6px;
-}
-.islem-kat-adi {
-  font-size: 13px; font-weight: 700; color: var(--text-primary);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  text-transform: uppercase; letter-spacing: 0.3px;
-}
-.islem-kat-adi .islem-aciklama-inline {
-  font-weight: 400; color: var(--text-secondary);
-  font-size: 12px; text-transform: none; letter-spacing: 0;
-}
-
-/* Sağ grup: tarih | tutar | bakiye — yan yana */
-.islem-row-right {
-  display: flex; align-items: center; gap: 0;
-  flex-shrink: 0;
-}
-.islem-tarih-col {
-  font-size: 11px; color: var(--text-muted);
-  padding: 0 10px;
-  white-space: nowrap;
-}
-.islem-tutar-col {
-  font-family: var(--font-brand); font-size: 15px; letter-spacing: 0.3px;
-  text-align: right; min-width: 80px; padding: 0 10px;
-  white-space: nowrap;
-}
+.islem-row-left { flex: 1; min-width: 0; padding-left: 8px; display: flex; align-items: center; }
+.islem-kat-adi { font-size: 13px; font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; letter-spacing: 0.3px; }
+.islem-kat-adi .islem-aciklama-inline { font-weight: 400; color: var(--text-secondary); font-size: 12px; text-transform: none; letter-spacing: 0; }
+.islem-row-right { display: flex; align-items: center; flex-shrink: 0; }
+.islem-tarih-col { font-size: 11px; color: var(--text-muted); padding: 0 10px; white-space: nowrap; }
+.islem-tutar-col { font-family: var(--font-brand); font-size: 15px; text-align: right; min-width: 80px; padding: 0 10px; white-space: nowrap; }
 .islem-row.gelir .islem-tutar-col { color: var(--green); }
 .islem-row.gider .islem-tutar-col { color: var(--red); }
-.islem-bakiye-col {
-  font-family: var(--font-brand); font-size: 13px; color: var(--text-secondary);
-  text-align: right; min-width: 80px; padding: 0 8px 0 4px;
-  white-space: nowrap;
-}
-.islem-row-actions {
-  display: flex; gap: 2px;
-  opacity: 0; transition: opacity 0.15s;
-  padding-right: 2px;
-}
+.islem-bakiye-col { font-family: var(--font-brand); font-size: 13px; color: var(--text-secondary); text-align: right; min-width: 80px; padding: 0 8px 0 4px; white-space: nowrap; }
+.islem-row-actions { display: flex; gap: 2px; opacity: 0; transition: opacity 0.15s; }
 .islem-row:hover .islem-row-actions { opacity: 1; }
-.row-action-btn {
-  background: transparent; border: none; font-size: 13px; cursor: pointer;
-  padding: 3px 4px; border-radius: 4px; color: var(--text-muted);
-}
+.row-action-btn { background: transparent; border: none; font-size: 13px; cursor: pointer; padding: 3px 4px; border-radius: 4px; color: var(--text-muted); }
 .row-action-btn:hover { background: var(--bg-elevated); color: var(--text-primary); }
 .row-action-btn.sil:hover { color: var(--red); }
-
-/* Ay özet satırı */
-.islem-ay-ozet {
-  display: flex; justify-content: flex-end; align-items: center;
-  gap: 6px; padding: 5px 12px;
-  background: var(--bg-elevated);
-  border-bottom: 2px solid var(--border);
-  font-size: 11px; color: var(--text-secondary);
-}
+.islem-ay-ozet { display: flex; justify-content: flex-end; align-items: center; gap: 6px; padding: 5px 12px; background: var(--bg-elevated); border-bottom: 2px solid var(--border); font-size: 11px; color: var(--text-secondary); }
 .islem-ay-ozet .ao-gelir { color: var(--green); font-family: var(--font-brand); font-size: 13px; }
 .islem-ay-ozet .ao-gider { color: var(--red); font-family: var(--font-brand); font-size: 13px; }
 .islem-ay-ozet .ao-net { color: var(--gold); font-family: var(--font-brand); font-size: 14px; font-weight: 700; }
 .islem-ay-ozet .ao-sep { color: var(--text-muted); }
-
-/* Genel toplam satırı */
-.islem-genel-toplam {
-  display: flex; justify-content: flex-end; align-items: center;
-  gap: 8px; padding: 6px 12px;
-  background: var(--bg-card);
-  border-bottom: 1px solid var(--border);
-  font-size: 11px; color: var(--text-secondary); font-weight: 700;
-}
+.islem-genel-toplam { display: flex; justify-content: flex-end; align-items: center; gap: 8px; padding: 6px 12px; background: var(--bg-card); border-bottom: 1px solid var(--border); font-size: 11px; color: var(--text-secondary); font-weight: 700; }
 .islem-genel-toplam .gt-val { font-family: var(--font-brand); font-size: 15px; color: var(--gold); }
-
-/* Boş durum */
 .empty-state { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 60px 20px; color: var(--text-muted); text-align: center; }
 .empty-icon { font-size: 48px; }
 .empty-state p { font-size: 16px; font-weight: 700; color: var(--text-secondary); }
 
-/* ── HIZLI GİRİŞ BAR — referansa uygun ── */
-.hizli-giris {
-  display: flex; align-items: stretch;
-  background: var(--bg-card);
-  border-top: 2px solid var(--border);
-  flex-shrink: 0;
-  min-height: 44px;
-}
-.hg-aciklama {
-  flex: 2; background: transparent; border: none; border-right: 1px solid var(--border);
-  color: var(--text-primary); font-family: var(--font-body); font-size: 13px;
-  padding: 0 12px; outline: none; min-width: 0;
-}
+/* ── HIZLI GİRİŞ ── */
+.hizli-giris { display: flex; align-items: stretch; background: var(--bg-card); border-top: 2px solid var(--border); flex-shrink: 0; min-height: 44px; position: relative; }
+.hg-aciklama { flex: 2; background: transparent; border: none; border-right: 1px solid var(--border); color: var(--text-primary); font-family: var(--font-body); font-size: 13px; padding: 0 12px; outline: none; min-width: 0; }
 .hg-aciklama::placeholder { color: var(--text-muted); }
-.hg-tutar {
-  width: 100px; flex-shrink: 0; background: transparent;
-  border: none; border-right: 1px solid var(--border);
-  color: var(--text-primary); font-family: var(--font-brand); font-size: 16px;
-  padding: 0 10px; outline: none; text-align: right;
-}
-.hg-kat {
-  flex: 1.2; background: transparent; border: none; border-right: 1px solid var(--border);
-  color: var(--text-primary); font-family: var(--font-body); font-size: 12px;
-  padding: 0 8px; outline: none; min-width: 0; cursor: pointer;
-}
+.hg-tutar { width: 100px; flex-shrink: 0; background: transparent; border: none; border-right: 1px solid var(--border); color: var(--text-primary); font-family: var(--font-brand); font-size: 16px; padding: 0 10px; outline: none; text-align: right; }
+
+/* ── ÖZEL KATEGORİ DROPDOWN (hizli giris) ── */
+.hg-kat-wrap { flex: 1.2; position: relative; min-width: 0; border-right: 1px solid var(--border); display: flex; align-items: stretch; }
+.hg-kat-trigger { width: 100%; background: transparent; border: none; color: var(--text-primary); font-family: var(--font-body); font-size: 12px; padding: 0 24px 0 8px; outline: none; cursor: pointer; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; }
+.hg-kat-trigger::after { content: '▾'; position: absolute; right: 6px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 10px; pointer-events: none; }
+.hg-kat-dropdown { position: absolute; bottom: calc(100% + 2px); left: 0; min-width: 220px; max-height: 320px; overflow-y: auto; background: var(--bg-elevated); border: 1px solid var(--border-light); border-radius: var(--radius-md); z-index: 200; box-shadow: 0 -8px 32px rgba(0,0,0,0.5); display: none; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+.hg-kat-dropdown.open { display: block; }
+.hg-kat-group-label { font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--gold); padding: 8px 12px 4px; background: var(--bg-card); position: sticky; top: 0; border-bottom: 1px solid var(--border); }
+.hg-kat-option { padding: 9px 14px; font-size: 13px; font-weight: 600; color: var(--text-primary); cursor: pointer; transition: background 0.1s; border-bottom: 1px solid var(--border); }
+.hg-kat-option:last-child { border-bottom: none; }
+.hg-kat-option:hover { background: var(--bg-input); color: var(--gold); }
+.hg-kat-option.selected { background: var(--bg-input); color: var(--gold); }
+
 .hg-btn-group { display: flex; flex-shrink: 0; }
-.hg-btn {
-  border: none; font-family: var(--font-body); font-size: 13px; font-weight: 800;
-  padding: 0 16px; cursor: pointer; transition: all 0.12s;
-  display: flex; align-items: center; gap: 4px; white-space: nowrap;
-}
+.hg-btn { border: none; font-family: var(--font-body); font-size: 13px; font-weight: 800; padding: 0 16px; cursor: pointer; transition: all 0.12s; display: flex; align-items: center; gap: 4px; white-space: nowrap; }
 .hg-btn.gelir { background: var(--green); color: #0a1a12; border-left: 1px solid rgba(0,0,0,0.2); }
 .hg-btn.gider { background: var(--red); color: #fff; border-left: 1px solid rgba(0,0,0,0.2); }
 .hg-btn:active { opacity: 0.85; transform: scale(0.97); }
@@ -273,9 +157,41 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .field-group { display: flex; flex-direction: column; gap: 6px; }
 .label-row { display: flex; align-items: center; justify-content: space-between; }
 .field-label { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-secondary); }
-.field-input, .field-select { background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-primary); font-family: var(--font-body); font-size: 15px; padding: 11px 13px; outline: none; transition: border-color 0.15s; width: 100%; }
+
+/* Modal içi select — tema renkli */
+.field-input,
+.field-select {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 15px;
+  padding: 11px 13px;
+  outline: none;
+  transition: border-color 0.15s;
+  width: 100%;
+  /* Sistem dropdown rengini zorla */
+  color-scheme: dark;
+}
 .field-input:focus, .field-select:focus { border-color: var(--gold); }
 .field-input::placeholder { color: var(--text-muted); }
+
+/* optgroup ve option renkleri */
+.field-select option {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 14px;
+  padding: 6px;
+}
+.field-select optgroup {
+  background: var(--bg-card);
+  color: var(--gold);
+  font-weight: 800;
+  font-style: normal;
+}
+
 .tip-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .tip-btn { background: var(--bg-input); border: 2px solid var(--border); border-radius: var(--radius-sm); color: var(--text-secondary); font-family: var(--font-body); font-size: 14px; font-weight: 700; padding: 11px; cursor: pointer; transition: all 0.15s; }
 .tip-btn[data-tip="gider"].active { border-color: var(--red); color: var(--red); background: rgba(240,84,84,0.1); }
