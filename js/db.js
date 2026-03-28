@@ -1,100 +1,96 @@
-const DB_NAME = "hesap-kitap-db";
-const DB_VERSION = 1;
-const STORES = { ISLEMLER: "islemler", KATEGORILER: "kategoriler", AYARLAR: "ayarlar" };
-let _db = null;
+/* db.js — IndexedDB + Firebase sync */
+if (typeof window._dbLoaded === "undefined") {
+window._dbLoaded = true;
+
+var DB_NAME = "hesap-kitap-db";
+var DB_VERSION = 1;
+var STORES = { ISLEMLER: "islemler", KATEGORILER: "kategoriler", AYARLAR: "ayarlar" };
+var _db = null;
 
 function openDB() {
   if (_db) return Promise.resolve(_db);
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, DB_VERSION);
-    req.onupgradeneeded = (e) => {
-      const db = e.target.result;
+  return new Promise(function(resolve, reject) {
+    var req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = function(e) {
+      var db = e.target.result;
       if (!db.objectStoreNames.contains(STORES.ISLEMLER)) {
-        const s = db.createObjectStore(STORES.ISLEMLER, { keyPath: "id", autoIncrement: true });
+        var s = db.createObjectStore(STORES.ISLEMLER, { keyPath: "id", autoIncrement: true });
         s.createIndex("tarih", "tarih", { unique: false });
         s.createIndex("tip", "tip", { unique: false });
       }
       if (!db.objectStoreNames.contains(STORES.KATEGORILER)) {
-        const s = db.createObjectStore(STORES.KATEGORILER, { keyPath: "id", autoIncrement: true });
-        s.createIndex("tip", "tip", { unique: false });
+        var s2 = db.createObjectStore(STORES.KATEGORILER, { keyPath: "id", autoIncrement: true });
+        s2.createIndex("tip", "tip", { unique: false });
       }
       if (!db.objectStoreNames.contains(STORES.AYARLAR)) {
         db.createObjectStore(STORES.AYARLAR, { keyPath: "key" });
       }
     };
-    req.onsuccess = (e) => {
+    req.onsuccess = function(e) {
       _db = e.target.result;
-      _db.onversionchange = () => { _db.close(); _db = null; };
+      _db.onversionchange = function() { _db.close(); _db = null; };
       resolve(_db);
     };
-    req.onerror = () => reject(req.error);
+    req.onerror = function() { reject(req.error); };
   });
 }
 
 function tx(storeName, mode) { return _db.transaction([storeName], mode).objectStore(storeName); }
-function promisify(req) { return new Promise((res, rej) => { req.onsuccess = () => res(req.result); req.onerror = () => rej(req.error); }); }
-function getAll(store) { return new Promise((res, rej) => { const req = store.getAll(); req.onsuccess = () => res(req.result); req.onerror = () => rej(req.error); }); }
+function promisify(req) {
+  return new Promise(function(res, rej) { req.onsuccess = function() { res(req.result); }; req.onerror = function() { rej(req.error); }; });
+}
+function getAll(store) {
+  return new Promise(function(res, rej) { var req = store.getAll(); req.onsuccess = function() { res(req.result); }; req.onerror = function() { rej(req.error); }; });
+}
 
-const IslemlerDB = {
-  async getAll() { await openDB(); return getAll(tx(STORES.ISLEMLER, "readonly")); },
-
-  async add(islem) {
+var IslemlerDB = {
+  getAll: async function() { await openDB(); return getAll(tx(STORES.ISLEMLER, "readonly")); },
+  add: async function(islem) {
     await openDB();
-    const id = await promisify(tx(STORES.ISLEMLER, "readwrite").add({ ...islem, olusturma: Date.now() }));
-    // Firebase sync
-    const eklenen = await promisify(tx(STORES.ISLEMLER, "readonly").get(id));
-    if (typeof fbIslemEkle !== "undefined") fbIslemEkle({ ...eklenen, id }).catch(()=>{});
+    var id = await promisify(tx(STORES.ISLEMLER, "readwrite").add(Object.assign({}, islem, { olusturma: Date.now() })));
+    var eklenen = await promisify(tx(STORES.ISLEMLER, "readonly").get(id));
+    if (typeof fbIslemEkle !== "undefined") fbIslemEkle(Object.assign({}, eklenen, { id: id }));
     return id;
   },
-
-  async update(islem) {
+  update: async function(islem) {
     await openDB();
-    const result = await promisify(tx(STORES.ISLEMLER, "readwrite").put(islem));
-    // Firebase sync
-    if (typeof fbIslemGuncelle !== "undefined") fbIslemGuncelle(islem).catch(()=>{});
+    var result = await promisify(tx(STORES.ISLEMLER, "readwrite").put(islem));
+    if (typeof fbIslemGuncelle !== "undefined") fbIslemGuncelle(islem);
     return result;
   },
-
-  async delete(id) {
+  delete: async function(id) {
     await openDB();
-    const result = await promisify(tx(STORES.ISLEMLER, "readwrite").delete(id));
-    // Firebase sync
-    if (typeof fbIslemSil !== "undefined") fbIslemSil(id).catch(()=>{});
+    var result = await promisify(tx(STORES.ISLEMLER, "readwrite").delete(id));
+    if (typeof fbIslemSil !== "undefined") fbIslemSil(id);
     return result;
   },
-
-  async getById(id) { await openDB(); return promisify(tx(STORES.ISLEMLER, "readonly").get(id)); },
+  getById: async function(id) { await openDB(); return promisify(tx(STORES.ISLEMLER, "readonly").get(id)); },
 };
 
-const KategorilerDB = {
-  async getAll() { await openDB(); return getAll(tx(STORES.KATEGORILER, "readonly")); },
-
-  async add(kat) {
+var KategorilerDB = {
+  getAll: async function() { await openDB(); return getAll(tx(STORES.KATEGORILER, "readonly")); },
+  add: async function(kat) {
     await openDB();
-    const id = await promisify(tx(STORES.KATEGORILER, "readwrite").add(kat));
-    // Kullanici kategorisiyse Firebase e sync et
+    var id = await promisify(tx(STORES.KATEGORILER, "readwrite").add(kat));
     if (!kat.varsayilan && typeof fbSyncKategoriler !== "undefined") {
-      KategorilerDB.getAll().then(kats => fbSyncKategoriler(kats.filter(k=>!k.varsayilan))).catch(()=>{});
+      KategorilerDB.getAll().then(function(kats) { fbSyncKategoriler(kats.filter(function(k){ return !k.varsayilan; })); });
     }
     return id;
   },
-
-  async update(kat) {
+  update: async function(kat) {
     await openDB();
-    const result = await promisify(tx(STORES.KATEGORILER, "readwrite").put(kat));
+    var result = await promisify(tx(STORES.KATEGORILER, "readwrite").put(kat));
     if (typeof fbSyncKategoriler !== "undefined") {
-      KategorilerDB.getAll().then(kats => fbSyncKategoriler(kats.filter(k=>!k.varsayilan))).catch(()=>{});
+      KategorilerDB.getAll().then(function(kats) { fbSyncKategoriler(kats.filter(function(k){ return !k.varsayilan; })); });
     }
     return result;
   },
-
-  async delete(id) { await openDB(); return promisify(tx(STORES.KATEGORILER, "readwrite").delete(id)); },
-
-  async seedDefaults() {
+  delete: async function(id) { await openDB(); return promisify(tx(STORES.KATEGORILER, "readwrite").delete(id)); },
+  seedDefaults: async function() {
     await openDB();
-    const mevcut = await getAll(tx(STORES.KATEGORILER, "readonly"));
+    var mevcut = await getAll(tx(STORES.KATEGORILER, "readonly"));
     if (mevcut.length > 0) return;
-    const giderler = [
+    var giderler = [
       { grup: "AILE", ad: "Annem" }, { grup: "AILE", ad: "Babam" }, { grup: "AILE", ad: "Talha" },
       { grup: "ARAC", ad: "Bakim-Muayene" }, { grup: "ARAC", ad: "Ceza" }, { grup: "ARAC", ad: "Sigorta" }, { grup: "ARAC", ad: "Vergi" }, { grup: "ARAC", ad: "Yakut" },
       { grup: "BIRIKIM", ad: "Altin" }, { grup: "BIRIKIM", ad: "Bes" }, { grup: "BIRIKIM", ad: "Fon" }, { grup: "BIRIKIM", ad: "Kardes Birikim" }, { grup: "BIRIKIM", ad: "Vefa Dernek" },
@@ -110,23 +106,26 @@ const KategorilerDB = {
       { grup: "KREDI KARTI", ad: "Kredi Karti" },
       { grup: "MUTFAK", ad: "Aburcubur" }, { grup: "MUTFAK", ad: "Kasap" }, { grup: "MUTFAK", ad: "Manav" }, { grup: "MUTFAK", ad: "Market" }, { grup: "MUTFAK", ad: "Mutfak Malzemesi" }, { grup: "MUTFAK", ad: "Tatli-Kuruyemis" },
       { grup: "PLAN DISI", ad: "Plan Disi" },
-    ].map(k => ({ ...k, tip: "gider", varsayilan: true }));
-    const gelirler = [
+    ].map(function(k) { return Object.assign({}, k, { tip: "gider", varsayilan: true }); });
+    var gelirler = [
       { grup: "GELIRLER", ad: "Bugra Maas" }, { grup: "GELIRLER", ad: "Bugra Ek Ders" }, { grup: "GELIRLER", ad: "Cekilen Kredi" }, { grup: "GELIRLER", ad: "Salim Maas" },
-    ].map(k => ({ ...k, tip: "gelir", varsayilan: true }));
-    const s = tx(STORES.KATEGORILER, "readwrite");
-    for (const k of [...giderler, ...gelirler]) { await promisify(s.add(k)); }
+    ].map(function(k) { return Object.assign({}, k, { tip: "gelir", varsayilan: true }); });
+    var s = tx(STORES.KATEGORILER, "readwrite");
+    var hepsi = giderler.concat(gelirler);
+    for (var i = 0; i < hepsi.length; i++) { await promisify(s.add(hepsi[i])); }
   },
 };
 
-const AyarlarDB = {
-  async get(key) { await openDB(); const r = await promisify(tx(STORES.AYARLAR, "readonly").get(key)); return r ? r.value : null; },
-  async set(key, value) { await openDB(); return promisify(tx(STORES.AYARLAR, "readwrite").put({ key, value })); },
+var AyarlarDB = {
+  get: async function(key) { await openDB(); var r = await promisify(tx(STORES.AYARLAR, "readonly").get(key)); return r ? r.value : null; },
+  set: async function(key, value) { await openDB(); return promisify(tx(STORES.AYARLAR, "readwrite").put({ key: key, value: value })); },
 };
 
 async function initApp() {
   await openDB();
-  const sifre = await AyarlarDB.get("sifre");
+  var sifre = await AyarlarDB.get("sifre");
   if (!sifre) await AyarlarDB.set("sifre", "1234");
   await KategorilerDB.seedDefaults();
 }
+
+} // end guard
