@@ -1,23 +1,31 @@
 const IslemlerModule = (() => {
-  let _islemler = [], _kategoriler = [], _duzenleId = null, _silId = null, _aktifTip = 'gider';
+  let _islemler = [], _kategoriler = [], _duzenleId = null, _silId = null, _aktifTip = 'gider', _katTip = 'gider';
   const $ = id => document.getElementById(id);
 
   function paraBicim(s) {
-    return Number(s).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' TL';
+    return Number(s).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
   function tarihBicim(t) {
     if (!t) return '';
     const [y,m,d] = t.split('-');
     const ay = ['Oca','Sub','Mar','Nis','May','Haz','Tem','Agu','Eyl','Eki','Kas','Ara'];
-    return d + ' ' + ay[parseInt(m)-1] + ' ' + y;
+    return d + ' ' + ay[parseInt(m)-1];
+  }
+
+  function bugunTarih() {
+    const d = new Date();
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
   }
 
   async function yukle() {
     _islemler    = await IslemlerDB.getAll();
     _kategoriler = await KategorilerDB.getAll();
-    _islemler.sort((a,b) => { const td = b.tarih.localeCompare(a.tarih); return td !== 0 ? td : (b.olusturma||0)-(a.olusturma||0); });
-    renderList(); renderSummary(); doldurAyFilter();
+    _islemler.sort((a,b) => b.tarih.localeCompare(a.tarih) || (b.olusturma||0)-(a.olusturma||0));
+    renderList();
+    renderSummary();
+    doldurAyFilter();
+    doldurHgKat();
   }
 
   function renderSummary() {
@@ -41,38 +49,67 @@ const IslemlerModule = (() => {
     const liste = $('islem-list');
     const empty = $('empty-state');
     const items = filtreliIslemler();
-    [...liste.querySelectorAll('.islem-card,.islem-grup-baslik')].forEach(el=>el.remove());
+    [...liste.querySelectorAll('.islem-row,.islem-grup-baslik')].forEach(el=>el.remove());
     if (!items.length) { empty.style.display='flex'; return; }
     empty.style.display='none';
+
+    // Kayan bakiye hesapla (tum islemlere gore)
+    const sirali = [..._islemler].sort((a,b)=>a.tarih.localeCompare(b.tarih)||(a.olusturma||0)-(b.olusturma||0));
+    const bakiyeMap = {};
+    let b = 0;
+    for (const i of sirali) {
+      b += i.tip==='gelir' ? parseFloat(i.tutar) : -parseFloat(i.tutar);
+      bakiyeMap[i.id] = b;
+    }
+
     const gruplar = {};
-    for (const i of items) { const [y,m] = i.tarih.split('-'); const k=y+'-'+m; if(!gruplar[k]) gruplar[k]=[]; gruplar[k].push(i); }
-    const aylar=['Ocak','Subat','Mart','Nisan','Mayis','Haziran','Temmuz','Agustos','Eylul','Ekim','Kasim','Aralik'];
+    for (const i of items) {
+      const [y,m] = i.tarih.split('-');
+      const k = y+'-'+m;
+      if (!gruplar[k]) gruplar[k] = [];
+      gruplar[k].push(i);
+    }
+    const aylar = ['Ocak','Subat','Mart','Nisan','Mayis','Haziran','Temmuz','Agustos','Eylul','Ekim','Kasim','Aralik'];
     for (const [key,grup] of Object.entries(gruplar)) {
       const [y,m] = key.split('-');
-      const b = document.createElement('div'); b.className='islem-grup-baslik'; b.textContent=aylar[parseInt(m)-1]+' '+y; liste.appendChild(b);
-      for (const islem of grup) liste.appendChild(kartOlustur(islem));
+      const bas = document.createElement('div');
+      bas.className = 'islem-grup-baslik';
+      bas.textContent = aylar[parseInt(m)-1] + ' ' + y;
+      liste.appendChild(bas);
+      for (const islem of grup) liste.appendChild(rowOlustur(islem, bakiyeMap[islem.id]));
     }
   }
 
-  function kartOlustur(islem) {
+  function rowOlustur(islem, bakiye) {
     const div = document.createElement('div');
-    div.className = 'islem-card ' + islem.tip;
-    div.dataset.id = islem.id;
-    const icon = islem.tip==='gelir' ? '&#128229;' : '&#128228;';
-    div.innerHTML = '<span class="islem-tip-icon">'+icon+'</span><div class="islem-info"><div class="islem-kat">'+esc(islem.kategori)+'</div>'+(islem.aciklama?'<div class="islem-aciklama">'+esc(islem.aciklama)+'</div>':'')+'<div class="islem-tarih">'+tarihBicim(islem.tarih)+'</div></div><div class="islem-right"><span class="islem-tutar">'+paraBicim(islem.tutar)+'</span><div class="islem-actions"><button class="islem-action-btn duzenle" data-id="'+islem.id+'" title="Duzenle">&#9998;</button><button class="islem-action-btn sil" data-id="'+islem.id+'" title="Sil">&#128465;</button></div></div>';
-    div.querySelector('.duzenle').addEventListener('click', e => { e.stopPropagation(); modalAc(islem.id); });
-    div.querySelector('.sil').addEventListener('click', e => { e.stopPropagation(); silModalAc(islem.id); });
+    div.className = 'islem-row ' + islem.tip;
+    div.innerHTML =
+      '<div class="sol-bar"></div>' +
+      '<div class="islem-row-left">' +
+        '<div class="islem-kat-adi">' + esc(islem.kategori) + '</div>' +
+        (islem.aciklama ? '<div class="islem-aciklama-kisa">' + esc(islem.aciklama) + '</div>' : '') +
+        '<div class="islem-tarih-kisa">' + tarihBicim(islem.tarih) + '</div>' +
+      '</div>' +
+      '<div class="islem-row-right">' +
+        '<span class="islem-tutar-val">' + (islem.tip==='gider'?'-':'+') + paraBicim(islem.tutar) + '</span>' +
+        '<span class="islem-bakiye-val">' + paraBicim(bakiye||0) + '</span>' +
+        '<div class="islem-row-actions">' +
+          '<button class="row-action-btn duzenle" data-id="'+islem.id+'">&#9998;</button>' +
+          '<button class="row-action-btn sil" data-id="'+islem.id+'">&#128465;</button>' +
+        '</div>' +
+      '</div>';
+    div.querySelector('.duzenle').addEventListener('click', e=>{e.stopPropagation();modalAc(islem.id);});
+    div.querySelector('.sil').addEventListener('click', e=>{e.stopPropagation();silModalAc(islem.id);});
     return div;
   }
 
   function esc(s) { const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
 
   function doldurAyFilter() {
-    const sel = $('filter-ay');
-    const prev = sel.value;
-    while (sel.options.length > 1) sel.remove(1);
+    const sel = $('filter-ay'), prev = sel.value;
+    while (sel.options.length>1) sel.remove(1);
     const aylar=['Ocak','Subat','Mart','Nisan','Mayis','Haziran','Temmuz','Agustos','Eylul','Ekim','Kasim','Aralik'];
-    const aySet = new Set(_islemler.map(i=>{ const [y,m]=i.tarih.split('-'); return y+'-'+m; }));
+    const aySet = new Set(_islemler.map(i=>i.tarih.substring(0,7)));
     [...aySet].sort((a,b)=>b.localeCompare(a)).forEach(key=>{
       const [y,m]=key.split('-');
       const o=document.createElement('option'); o.value=key; o.textContent=aylar[parseInt(m)-1]+' '+y; sel.appendChild(o);
@@ -80,11 +117,24 @@ const IslemlerModule = (() => {
     if ([...sel.options].some(o=>o.value===prev)) sel.value=prev;
   }
 
-  function doldurKategoriSelect() {
+  function doldurHgKat() {
+    const sel = $('hg-kat');
+    if (!sel) return;
+    sel.innerHTML = '';
+    const kats = _kategoriler.sort((a,b)=>a.grup.localeCompare(b.grup)||a.ad.localeCompare(b.ad));
+    const gruplar={};
+    for(const k of kats){ if(!gruplar[k.grup]) gruplar[k.grup]=[]; gruplar[k.grup].push(k); }
+    for(const [g,ks] of Object.entries(gruplar)){
+      const og=document.createElement('optgroup'); og.label=g;
+      for(const k of ks){ const o=document.createElement('option'); o.value=g+' - '+k.ad+'|'+k.tip; o.textContent=k.ad; og.appendChild(o); }
+      sel.appendChild(og);
+    }
+  }
+
+  function doldurKategoriSelect(tip) {
     const sel = $('sel-kategori');
     sel.innerHTML='';
-    const kats = _kategoriler.filter(k=>k.tip===_aktifTip).sort((a,b)=>a.grup.localeCompare(b.grup)||a.ad.localeCompare(b.ad));
-    if (!kats.length) { const o=document.createElement('option'); o.textContent='Kategori yok'; sel.appendChild(o); return; }
+    const kats = _kategoriler.filter(k=>k.tip===tip).sort((a,b)=>a.grup.localeCompare(b.grup)||a.ad.localeCompare(b.ad));
     const gruplar={};
     for(const k of kats){ if(!gruplar[k.grup]) gruplar[k.grup]=[]; gruplar[k.grup].push(k); }
     for(const [g,ks] of Object.entries(gruplar)){
@@ -94,78 +144,120 @@ const IslemlerModule = (() => {
     }
   }
 
-  async function modalAc(duzenleId=null) {
-    _duzenleId=duzenleId;
-    $('modal-title').textContent = duzenleId ? 'Islemi Duzenle' : 'Yeni Islem';
-    if (duzenleId) {
-      const i=_islemler.find(x=>x.id===duzenleId); if(!i) return;
-      tipSec(i.tip); doldurKategoriSelect();
-      $('sel-kategori').value=i.kategori; $('inp-tutar').value=i.tutar; $('inp-aciklama').value=i.aciklama||''; $('inp-tarih').value=i.tarih;
-    } else {
-      tipSec('gider'); doldurKategoriSelect();
-      $('inp-tutar').value=''; $('inp-aciklama').value=''; $('inp-tarih').value=bugunTarih();
-    }
+  // HIZLI GIRIS
+  async function hgKaydet(tip) {
+    const aciklama = $('hg-aciklama').value.trim();
+    const tutar = parseFloat($('hg-tutar').value);
+    const katVal = $('hg-kat').value; // "GRUP - Ad|tip"
+    const kategori = katVal ? katVal.split('|')[0] : '';
+    if (!tutar || tutar <= 0) { $('hg-tutar').focus(); return; }
+    if (!kategori) { $('hg-kat').focus(); return; }
+    await IslemlerDB.add({ tip, kategori, tutar, aciklama, tarih: bugunTarih() });
+    $('hg-aciklama').value = '';
+    $('hg-tutar').value = '';
+    await yukle();
+  }
+
+  // MODAL DUZENLE
+  async function modalAc(duzenleId) {
+    _duzenleId = duzenleId;
+    const islem = _islemler.find(x=>x.id===duzenleId);
+    if (!islem) return;
+    tipSec(islem.tip);
+    doldurKategoriSelect(islem.tip);
+    $('sel-kategori').value = islem.kategori;
+    $('inp-tutar').value = islem.tutar;
+    $('inp-aciklama').value = islem.aciklama||'';
+    $('inp-tarih').value = islem.tarih;
     $('modal-islem').classList.remove('hidden');
-    setTimeout(()=>$('inp-tutar').focus(),300);
   }
 
   function modalKapat() { $('modal-islem').classList.add('hidden'); _duzenleId=null; }
-  function tipSec(tip) { _aktifTip=tip; $('btn-gider').classList.toggle('active',tip==='gider'); $('btn-gelir').classList.toggle('active',tip==='gelir'); doldurKategoriSelect(); }
-  function bugunTarih() { const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+
+  function tipSec(tip) {
+    _aktifTip = tip;
+    $('btn-gider').classList.toggle('active', tip==='gider');
+    $('btn-gelir').classList.toggle('active', tip==='gelir');
+    doldurKategoriSelect(tip);
+  }
 
   async function kaydet() {
-    const tutar=parseFloat($('inp-tutar').value);
-    const kategori=$('sel-kategori').value;
-    const aciklama=$('inp-aciklama').value.trim();
-    const tarih=$('inp-tarih').value;
-    if(!tutar||tutar<=0){alert('Lutfen gecerli bir tutar girin.');return;}
-    if(!kategori){alert('Lutfen kategori secin.');return;}
-    if(!tarih){alert('Lutfen tarih secin.');return;}
-    const islem={tip:_aktifTip,kategori,tutar,aciklama,tarih};
-    if(_duzenleId){islem.id=_duzenleId;await IslemlerDB.update(islem);}else{await IslemlerDB.add(islem);}
+    const tutar = parseFloat($('inp-tutar').value);
+    const kategori = $('sel-kategori').value;
+    const aciklama = $('inp-aciklama').value.trim();
+    const tarih = $('inp-tarih').value;
+    if (!tutar||tutar<=0) { alert('Gecerli bir tutar girin.'); return; }
+    if (!kategori) { alert('Kategori secin.'); return; }
+    if (!tarih) { alert('Tarih secin.'); return; }
+    const islem = { tip:_aktifTip, kategori, tutar, aciklama, tarih };
+    if (_duzenleId) { islem.id=_duzenleId; await IslemlerDB.update(islem); }
+    else { await IslemlerDB.add(islem); }
     modalKapat(); await yukle();
   }
 
-  function silModalAc(id){_silId=id;$('modal-sil').classList.remove('hidden');}
-  function silModalKapat(){$('modal-sil').classList.add('hidden');_silId=null;}
-  async function silOnayla(){if(_silId){await IslemlerDB.delete(_silId);silModalKapat();await yukle();}}
+  function silModalAc(id) { _silId=id; $('modal-sil').classList.remove('hidden'); }
+  function silModalKapat() { $('modal-sil').classList.add('hidden'); _silId=null; }
+  async function silOnayla() { if(_silId){ await IslemlerDB.delete(_silId); silModalKapat(); await yukle(); } }
 
-  function yeniKatModalAc(){$('inp-kat-grup').value='';$('inp-kat-ad').value='';$('modal-kategori').classList.remove('hidden');setTimeout(()=>$('inp-kat-grup').focus(),300);}
-  function yeniKatKapat(){$('modal-kategori').classList.add('hidden');}
-  async function yeniKatKaydet(){
-    const grup=$('inp-kat-grup').value.trim().toUpperCase();
-    const ad=$('inp-kat-ad').value.trim();
-    if(!grup||!ad){alert('Grup adi ve kategori adi gereklidir.');return;}
-    await KategorilerDB.add({tip:_aktifTip,grup,ad,varsayilan:false});
-    _kategoriler=await KategorilerDB.getAll();
-    doldurKategoriSelect();
-    $('sel-kategori').value=grup+' - '+ad;
+  // YENİ KATEGORİ
+  function yeniKatAc() { $('inp-kat-grup').value=''; $('inp-kat-ad').value=''; $('modal-kategori').classList.remove('hidden'); setTimeout(()=>$('inp-kat-grup').focus(),300); }
+  function yeniKatKapat() { $('modal-kategori').classList.add('hidden'); }
+  async function yeniKatKaydet() {
+    const grup = $('inp-kat-grup').value.trim().toUpperCase();
+    const ad = $('inp-kat-ad').value.trim();
+    if (!grup||!ad) { alert('Grup adi ve kategori adi gerekli.'); return; }
+    await KategorilerDB.add({ tip:_katTip, grup, ad, varsayilan:false });
+    _kategoriler = await KategorilerDB.getAll();
+    doldurHgKat();
+    if ($('sel-kategori')) doldurKategoriSelect(_aktifTip);
     yeniKatKapat();
   }
 
-  function baglaEventler(){
-    $('btn-yeni-islem').addEventListener('click',()=>modalAc());
-    $('modal-close').addEventListener('click',modalKapat);
-    $('btn-iptal').addEventListener('click',modalKapat);
-    $('btn-kaydet').addEventListener('click',kaydet);
-    $('btn-gider').addEventListener('click',()=>tipSec('gider'));
-    $('btn-gelir').addEventListener('click',()=>tipSec('gelir'));
-    $('btn-yeni-kat').addEventListener('click',yeniKatModalAc);
-    $('kat-close').addEventListener('click',yeniKatKapat);
-    $('kat-iptal').addEventListener('click',yeniKatKapat);
-    $('kat-kaydet').addEventListener('click',yeniKatKaydet);
-    $('sil-close').addEventListener('click',silModalKapat);
-    $('sil-iptal').addEventListener('click',silModalKapat);
-    $('sil-onayla').addEventListener('click',silOnayla);
-    $('filter-type').addEventListener('change',renderList);
-    $('filter-ay').addEventListener('change',renderList);
-    $('modal-islem').addEventListener('click',e=>{if(e.target===$('modal-islem'))modalKapat();});
-    $('modal-sil').addEventListener('click',e=>{if(e.target===$('modal-sil'))silModalKapat();});
-    $('modal-kategori').addEventListener('click',e=>{if(e.target===$('modal-kategori'))yeniKatKapat();});
-    [$('inp-tutar'),$('inp-aciklama'),$('inp-tarih')].forEach(el=>el.addEventListener('keydown',e=>{if(e.key==='Enter')kaydet();}));
-    $('inp-kat-ad').addEventListener('keydown',e=>{if(e.key==='Enter')yeniKatKaydet();});
+  function katTipSec(tip) {
+    _katTip = tip;
+    $('kat-btn-gider').classList.toggle('active', tip==='gider');
+    $('kat-btn-gelir').classList.toggle('active', tip==='gelir');
   }
 
-  async function init(){baglaEventler();await yukle();}
-  return {init};
+  function baglaEventler() {
+    // Hizli giris
+    $('hg-btn-gelir').addEventListener('click', ()=>hgKaydet('gelir'));
+    $('hg-btn-gider').addEventListener('click', ()=>hgKaydet('gider'));
+    $('hg-tutar').addEventListener('keydown', e=>{ if(e.key==='Enter') hgKaydet('gider'); });
+
+    // Filtreler
+    $('filter-type').addEventListener('change', renderList);
+    $('filter-ay').addEventListener('change', renderList);
+
+    // Kategori bar butonu
+    $('btn-yeni-kat-bar').addEventListener('click', yeniKatAc);
+
+    // Modal duzenle
+    $('modal-close').addEventListener('click', modalKapat);
+    $('btn-iptal').addEventListener('click', modalKapat);
+    $('btn-kaydet').addEventListener('click', kaydet);
+    $('btn-gider').addEventListener('click', ()=>tipSec('gider'));
+    $('btn-gelir').addEventListener('click', ()=>tipSec('gelir'));
+    $('btn-yeni-kat').addEventListener('click', yeniKatAc);
+    $('modal-islem').addEventListener('click', e=>{ if(e.target===$('modal-islem')) modalKapat(); });
+    [$('inp-tutar'),$('inp-aciklama'),$('inp-tarih')].forEach(el=>el&&el.addEventListener('keydown',e=>{ if(e.key==='Enter') kaydet(); }));
+
+    // Modal sil
+    $('sil-close').addEventListener('click', silModalKapat);
+    $('sil-iptal').addEventListener('click', silModalKapat);
+    $('sil-onayla').addEventListener('click', silOnayla);
+    $('modal-sil').addEventListener('click', e=>{ if(e.target===$('modal-sil')) silModalKapat(); });
+
+    // Modal kategori
+    $('kat-close').addEventListener('click', yeniKatKapat);
+    $('kat-iptal').addEventListener('click', yeniKatKapat);
+    $('kat-kaydet').addEventListener('click', yeniKatKaydet);
+    $('kat-btn-gider').addEventListener('click', ()=>katTipSec('gider'));
+    $('kat-btn-gelir').addEventListener('click', ()=>katTipSec('gelir'));
+    $('inp-kat-ad').addEventListener('keydown', e=>{ if(e.key==='Enter') yeniKatKaydet(); });
+    $('modal-kategori').addEventListener('click', e=>{ if(e.target===$('modal-kategori')) yeniKatKapat(); });
+  }
+
+  async function init() { baglaEventler(); await yukle(); }
+  return { init };
 })();
