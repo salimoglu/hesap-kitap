@@ -387,8 +387,12 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 
 .butce-wrap {
   display: flex; flex-direction: column;
-  height: 100%; overflow: hidden;
+  height: 100%; overflow-y: auto;
+  overflow-x: hidden;
   background: var(--bg-base);
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+  align-items: center;
 }
 
 /* Ay seçici bar */
@@ -397,6 +401,10 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
   padding: 8px 14px; flex-shrink: 0;
   background: var(--bg-card);
   border-bottom: 1px solid var(--border);
+  width: 100%; max-width: 700px;
+  border-radius: var(--radius-sm);
+  margin-top: 12px;
+  box-sizing: border-box;
 }
 .butce-ay-btn {
   background: var(--bg-elevated); border: 1px solid var(--border);
@@ -421,8 +429,12 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 
 /* Tablo sarıcı */
 .butce-tablo-wrap {
-  flex: 1; overflow-y: auto; overflow-x: hidden;
-  scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+  width: 100%; max-width: 700px;
+  overflow-x: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  margin-bottom: 24px;
+  box-sizing: border-box;
 }
 
 /* Ana tablo */
@@ -432,9 +444,9 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 }
 
 /* Sütun genişlikleri */
-.bt-col-label { width: 65%; padding: 7px 14px; text-align: left; }
-.bt-col-tutar { width: 22%; padding: 7px 10px; text-align: right; white-space: nowrap; }
-.bt-col-pct   { width: 13%; padding: 7px 10px; text-align: right; white-space: nowrap; }
+.bt-col-label { width: 60%; padding: 5px 10px; text-align: left; font-size: 11px; }
+.bt-col-tutar { width: 25%; padding: 5px 8px; text-align: right; white-space: nowrap; font-size: 11px; }
+.bt-col-pct   { width: 15%; padding: 5px 8px; text-align: right; white-space: nowrap; font-size: 11px; }
 
 /* Header */
 .butce-tablo thead tr {
@@ -442,19 +454,19 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
   border-bottom: 2px solid var(--border);
 }
 .butce-tablo thead th {
-  font-size: 10px; font-weight: 800; text-transform: uppercase;
+  font-size: 9px; font-weight: 800; text-transform: uppercase;
   letter-spacing: 0.8px; color: var(--text-muted);
-  padding: 8px 10px; text-align: right;
+  padding: 6px 8px; text-align: right;
 }
-.butce-tablo thead th:first-child { text-align: left; padding-left: 14px; }
+.butce-tablo thead th:first-child { text-align: left; padding-left: 10px; }
 
 /* Bölüm başlığı */
 .bt-bolum-baslik td {
-  font-family: var(--font-brand); font-size: 13px; letter-spacing: 2px;
+  font-family: var(--font-brand); font-size: 12px; letter-spacing: 1.5px;
   color: var(--gold); background: var(--bg-card);
   border-top: 2px solid var(--border);
   border-bottom: 1px solid var(--border);
-  padding: 7px 14px !important;
+  padding: 5px 10px !important;
 }
 
 /* Normal satır */
@@ -474,7 +486,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
   font-size: 13px; color: var(--text-primary);
 }
 .bt-toplam-row .bt-col-tutar {
-  font-family: var(--font-brand); font-size: 15px; color: var(--gold);
+  font-family: var(--font-brand); font-size: 13px; color: var(--gold);
 }
 .bt-hesap-row .bt-col-tutar {
   font-weight: 700; color: var(--text-primary);
@@ -491,13 +503,13 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 }
 .bt-harcanan { background: rgba(240,84,84,0.06); }
 .bt-harcanan .bt-col-label { color: var(--red); }
-.bt-harcanan .bt-col-tutar { font-family: var(--font-brand); font-size: 16px; color: var(--red); }
+.bt-harcanan .bt-col-tutar { font-family: var(--font-brand); font-size: 13px; color: var(--red); }
 .bt-kalan { background: rgba(52,201,122,0.06); }
 .bt-kalan .bt-col-label { color: var(--green); }
-.bt-kalan .bt-col-tutar { font-family: var(--font-brand); font-size: 17px; color: var(--green); }
+.bt-kalan .bt-col-tutar { font-family: var(--font-brand); font-size: 14px; color: var(--green); }
 .bt-kalan-negatif { background: rgba(240,84,84,0.1); }
 .bt-kalan-negatif .bt-col-label { color: var(--red); }
-.bt-kalan-negatif .bt-col-tutar { font-family: var(--font-brand); font-size: 17px; color: var(--red); }
+.bt-kalan-negatif .bt-col-tutar { font-family: var(--font-brand); font-size: 14px; color: var(--red); }
 
 /* Input alanı */
 .bt-input {
