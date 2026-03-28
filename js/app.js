@@ -98,10 +98,14 @@
     tabBtnler.forEach(btn => btn.classList.toggle("active", btn.dataset.tab === tabId));
     tabPaneller.forEach(panel => panel.classList.toggle("active", panel.id === "tab-" + tabId));
   }
-  tabBtnler.forEach(btn => btn.addEventListener("click", () => tabSec(btn.dataset.tab)));
+  tabBtnler.forEach(btn => btn.addEventListener("click", () => {
+    tabSec(btn.dataset.tab);
+    if (btn.dataset.tab === "butce" && typeof ButceModule !== "undefined") ButceModule.init();
+  }));
 
   // MODULLERI BASLAT
   await IslemlerModule.init();
+  if (typeof ButceModule !== "undefined") ButceModule.init();
 
   // ANIMASYONLAR
   const style = document.createElement("style");
