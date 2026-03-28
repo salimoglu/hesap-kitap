@@ -121,6 +121,8 @@ var AyarlarDB = {
   set: async function(key, value) { await openDB(); return promisify(tx(STORES.AYARLAR, "readwrite").put({ key: key, value: value })); },
 };
 
+} // end guard
+
 async function initApp() {
   await openDB();
   var sifre = await AyarlarDB.get("sifre");
@@ -128,4 +130,3 @@ async function initApp() {
   await KategorilerDB.seedDefaults();
 }
 
-} // end guard
