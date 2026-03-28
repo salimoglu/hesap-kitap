@@ -232,7 +232,6 @@ const IslemlerModule = (() => {
     _katDuzId="__GRUP__:"+eskiGrup;
     $("inp-duz-grup").value=eskiGrup;
     $("inp-duz-ad").style.display="none";
-    $("modal-kat-duzenle").querySelector("[for=inp-duz-ad]").style.display="none";
     $("modal-kat-duzenle").querySelector(".modal-title").textContent="Grup Adi Duzenle";
     $("modal-kat-duzenle").classList.remove("hidden");
     setTimeout(()=>$("inp-duz-grup").focus(),200);
@@ -268,7 +267,6 @@ const IslemlerModule = (() => {
     _katDuzId=null;
     const adInp=$("inp-duz-ad");
     adInp.style.display="";
-    $("modal-kat-duzenle").querySelector("[for=inp-duz-ad]").style.display="";
     $("modal-kat-duzenle").querySelector(".modal-title").textContent="Kategoriyi Duzenle";
   }
 
