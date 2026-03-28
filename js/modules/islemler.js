@@ -237,32 +237,44 @@ const IslemlerModule = (() => {
     setTimeout(()=>$("inp-duz-grup").focus(),200);
   }
   async function katDuzenleKaydetGenel(){
-    if(_katDuzId && _katDuzId.startsWith("__GRUP__:")){
-      const eskiGrup=_katDuzId.replace("__GRUP__:","");
-      const yeniGrup=($("inp-duz-grup").value||"").trim().toUpperCase();
-      if(!yeniGrup){alert("Grup adi bos olamaz.");return;}
-      const gruplaKats=_kategoriler.filter(k=>k.grup===eskiGrup);
-      for(const k of gruplaKats){await KategorilerDB.update({...k,grup:yeniGrup});}
-      // İşlemleri güncelle
-      for(const k of gruplaKats){
-        const eskiDeger=eskiGrup+" - "+k.ad;
-        const yeniDeger=yeniGrup+" - "+k.ad;
-        const etkilenen=_islemler.filter(i=>i.kategori===eskiDeger);
-        for(const i of etkilenen){await IslemlerDB.update({...i,kategori:yeniDeger});}
-        if(_seciliKat.value===eskiDeger){
-          _seciliKat={value:yeniDeger,label:k.ad,tip:k.tip};
-          $("hg-kat-trigger").textContent=k.ad;
-        }
-      }
-      _kategoriler=await KategorilerDB.getAll();
-      _islemler=await IslemlerDB.getAll();
-      katDuzenleKapatGenel();
-      renderKatListe();doldurGrupSelect(_katTip);renderHgList("");renderList();renderSummary();
-    } else {
-      await katDuzenleKaydet();
+  var katDuzIdStr = String(_katDuzId || "");
+  if(katDuzIdStr.startsWith("__GRUP__:")){
+    var eskiGrup = katDuzIdStr.replace("__GRUP__:","");
+    var yeniGrup = ($("inp-duz-grup").value||"").trim().toUpperCase();
+    if(!yeniGrup){alert("Grup adi bos olamaz.");return;}
+    var gruplaKats = _kategoriler.filter(function(k){return k.grup===eskiGrup;});
+    for(var ki=0;ki<gruplaKats.length;ki++){
+      var gk = gruplaKats[ki];
+      await KategorilerDB.update(Object.assign({},gk,{grup:yeniGrup}));
+      var eskiD = eskiGrup+" - "+gk.ad;
+      var yeniD = yeniGrup+" - "+gk.ad;
+      var etk = _islemler.filter(function(i){return i.kategori===eskiD;});
+      for(var ii=0;ii<etk.length;ii++){await IslemlerDB.update(Object.assign({},etk[ii],{kategori:yeniD}));}
+      if(_seciliKat.value===eskiD){_seciliKat={value:yeniD,label:gk.ad,tip:gk.tip};$("hg-kat-trigger").textContent=gk.ad;}
     }
+    _kategoriler=await KategorilerDB.getAll();
+    _islemler=await IslemlerDB.getAll();
+    katDuzenleKapatGenel();
+    renderKatListe();doldurGrupSelect(_katTip);renderHgList("");renderList();renderSummary();
+  } else {
+    var yeniGrup2 = ($("inp-duz-grup").value||"").trim().toUpperCase();
+    var yeniAd = ($("inp-duz-ad").value||"").trim();
+    if(!yeniGrup2||!yeniAd){alert("Grup ve kategori adi bos olamaz.");return;}
+    var k2 = _kategoriler.find(function(x){return x.id===_katDuzId;});
+    if(!k2){alert("Kategori bulunamadi: "+_katDuzId);return;}
+    var eskiDeger = k2.grup+" - "+k2.ad;
+    var yeniDeger = yeniGrup2+" - "+yeniAd;
+    await KategorilerDB.update(Object.assign({},k2,{grup:yeniGrup2,ad:yeniAd}));
+    var etkilenen2 = _islemler.filter(function(i){return i.kategori===eskiDeger;});
+    for(var j=0;j<etkilenen2.length;j++){await IslemlerDB.update(Object.assign({},etkilenen2[j],{kategori:yeniDeger}));}
+    if(_seciliKat.value===eskiDeger){_seciliKat={value:yeniDeger,label:yeniAd,tip:k2.tip};$("hg-kat-trigger").textContent=yeniAd;}
+    _kategoriler=await KategorilerDB.getAll();
+    _islemler=await IslemlerDB.getAll();
+    katDuzenleKapatGenel();
+    renderKatListe();doldurGrupSelect(_katTip);renderHgList("");renderList();renderSummary();
   }
-  function katDuzenleKapatGenel(){
+}
+function katDuzenleKapatGenel(){
     $("modal-kat-duzenle").classList.add("hidden");
     _katDuzId=null;
     const adInp=$("inp-duz-ad");
