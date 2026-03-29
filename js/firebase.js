@@ -4,6 +4,7 @@ if (typeof window._fbLoaded === "undefined") {
 window._fbLoaded = true;
 
 var _fbDb = null;
+  window._fbDb = _fbDb;
 var _fbReady = false;
 
 function fbInit() {
