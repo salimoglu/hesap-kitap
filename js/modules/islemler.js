@@ -380,7 +380,7 @@ function katDuzenleKapatGenel(){
     $("hg-btn-gelir").addEventListener("click",()=>hgKaydet("gelir"));
     $("hg-btn-gider").addEventListener("click",()=>hgKaydet("gider"));
     $("hg-tutar").addEventListener("keydown",e=>{if(e.key==="Enter")hgKaydet("gider");});
-    $("hg-kat-trigger").addEventListener("mousedown",function(e){e.preventDefault();e.stopPropagation();toggleHgDropdown();});
+    $("hg-kat-trigger").addEventListener("click",function(e){e.stopPropagation();toggleHgDropdown();});
     $("hg-kat-search-inp").addEventListener("input",function(){
       const q=this.value;
       $("hg-kat-search-clear").classList.toggle("visible",q.length>0);
@@ -397,7 +397,7 @@ function katDuzenleKapatGenel(){
       var wrap=document.getElementById("hg-kat-wrap");
       if(wrap&&!wrap.contains(e.target))closeHgDropdown();
     };
-    document.addEventListener("click",window._hgClickListener);
+        document.addEventListener("click",function(e){setTimeout(function(){var w=document.getElementById("hg-kat-wrap");if(w&&!w.contains(document.activeElement)&&!w.contains(e.target))closeHgDropdown();},0);});
   }
     $("filter-type").addEventListener("change",renderList);
     $("filter-ay").addEventListener("change",renderList);
@@ -446,3 +446,5 @@ function katDuzenleKapatGenel(){
 // v2
 
 // v3
+
+// v4
