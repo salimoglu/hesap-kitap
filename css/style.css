@@ -137,7 +137,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 }
 
 /* Dropdown panel */
-.hg-kat-dropdown {
+.hg-kat-dropdown { display: none;
   position: absolute;
   bottom: calc(100% + 4px);
   left: 0;
@@ -156,11 +156,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
   pointer-events: none;
   transition: opacity 0.15s ease, transform 0.15s ease;
 }
-.hg-kat-dropdown.open {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: all;
-}
+.hg-kat-dropdown.open { display: flex; flex-direction: column; opacity: 1; pointer-events: all; }
 
 /* Arama kutusu */
 .hg-kat-search {
