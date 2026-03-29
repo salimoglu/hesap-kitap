@@ -380,7 +380,7 @@ function katDuzenleKapatGenel(){
     $("hg-btn-gelir").addEventListener("click",()=>hgKaydet("gelir"));
     $("hg-btn-gider").addEventListener("click",()=>hgKaydet("gider"));
     $("hg-tutar").addEventListener("keydown",e=>{if(e.key==="Enter")hgKaydet("gider");});
-    $("hg-kat-trigger").addEventListener("click",e=>{e.stopPropagation();e.stopImmediatePropagation();toggleHgDropdown();});
+    $("hg-kat-trigger").addEventListener("mousedown",function(e){e.preventDefault();e.stopPropagation();toggleHgDropdown();});
     $("hg-kat-search-inp").addEventListener("input",function(){
       const q=this.value;
       $("hg-kat-search-clear").classList.toggle("visible",q.length>0);
@@ -444,3 +444,5 @@ function katDuzenleKapatGenel(){
 })();
 
 // v2
+
+// v3
