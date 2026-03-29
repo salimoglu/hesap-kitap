@@ -373,10 +373,9 @@ function katDuzenleKapatGenel(){
   function silModalKapat(){$("modal-sil").classList.add("hidden");_silId=null;}
   async function silOnayla(){if(_silId){await IslemlerDB.delete(_silId);silModalKapat();await yukle();}}
 
-  var _eventlerBaglandi=false;
   function baglaEventler(){
-    if(window._islemlerEventlerBaglandi)return;
-    window._islemlerEventlerBaglandi=true;
+    if(_eventlerBaglandi)return;
+    _eventlerBaglandi=true;
     $("hg-btn-gelir").addEventListener("click",()=>hgKaydet("gelir"));
     $("hg-btn-gider").addEventListener("click",()=>hgKaydet("gider"));
     $("hg-tutar").addEventListener("keydown",e=>{if(e.key==="Enter")hgKaydet("gider");});
