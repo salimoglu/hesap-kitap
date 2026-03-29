@@ -140,10 +140,27 @@ const IslemlerModule = (() => {
     }
   }
   function openHgDropdown(){
-    $("hg-kat-dropdown").classList.add("open");
+    var dd=$("hg-kat-dropdown");
+    dd.classList.add("open");
     const inp=$("hg-kat-search-inp");inp.value="";
     $("hg-kat-search-clear").classList.remove("visible");
-    renderHgList("");setTimeout(()=>inp.focus(),80);
+    renderHgList("");
+    setTimeout(function(){inp.focus();},80);
+    // Dışarı tıklanınca kapat — focusout ile
+    setTimeout(function(){
+      var wrap=$("hg-kat-wrap");
+      if(wrap&&!wrap._focusListenerAdded){
+        wrap._focusListenerAdded=true;
+        document.addEventListener("click",function _ddKapat(e){
+          var w=document.getElementById("hg-kat-wrap");
+          if(!w||!w.contains(e.target)){
+            closeHgDropdown();
+            document.removeEventListener("click",_ddKapat);
+            if(w)w._focusListenerAdded=false;
+          }
+        });
+      }
+    },10);
   }
   function closeHgDropdown(){$("hg-kat-dropdown").classList.remove("open");}
   function toggleHgDropdown(){
@@ -380,11 +397,7 @@ function katDuzenleKapatGenel(){
     $("hg-btn-gelir").addEventListener("click",()=>hgKaydet("gelir"));
     $("hg-btn-gider").addEventListener("click",()=>hgKaydet("gider"));
     $("hg-tutar").addEventListener("keydown",e=>{if(e.key==="Enter")hgKaydet("gider");});
-    // Trigger: clone ile eski listener temizle, temiz ekle
-        var oldTrigger=$("hg-kat-trigger");
-        var newTrigger=oldTrigger.cloneNode(true);
-        oldTrigger.parentNode.replaceChild(newTrigger,oldTrigger);
-        newTrigger.addEventListener("click",function(e){e.stopPropagation();toggleHgDropdown();});
+        $("hg-kat-trigger").addEventListener("click",function(e){e.stopPropagation();toggleHgDropdown();});
     $("hg-kat-search-inp").addEventListener("input",function(){
       const q=this.value;
       $("hg-kat-search-clear").classList.toggle("visible",q.length>0);
@@ -401,7 +414,7 @@ function katDuzenleKapatGenel(){
       var wrap=document.getElementById("hg-kat-wrap");
       if(wrap&&!wrap.contains(e.target))closeHgDropdown();
     };
-        document.addEventListener("click",function(e){setTimeout(function(){var w=document.getElementById("hg-kat-wrap");if(w&&!w.contains(document.activeElement)&&!w.contains(e.target))closeHgDropdown();},0);});
+    // disari tiklama: hg-kat-wrap blur ile yonetilir
   }
     $("filter-type").addEventListener("change",renderList);
     $("filter-ay").addEventListener("change",renderList);
