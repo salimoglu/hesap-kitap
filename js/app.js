@@ -5,9 +5,43 @@
   // 2. IndexedDB baslat
   await initApp();
 
-  // SIFRE KILIDI
   const lockScreen = document.getElementById("lock-screen");
   const appEl = document.getElementById("app");
+
+  // Uygulamayı ac (sifre ekranı olmadan)
+  async function uygulamaAc() {
+    lockScreen.classList.add("hidden");
+    appEl.classList.remove("hidden");
+    sessionStorage.setItem("girisYapildi", "1");
+
+    // Firebase sync
+    const syncEl = document.getElementById("sync-durum");
+    if (syncEl) syncEl.textContent = "☁";
+    try {
+      if (typeof fbVerileriYukle !== "undefined") await fbVerileriYukle();
+      if (syncEl) syncEl.textContent = "✓";
+    } catch(e) {
+      if (syncEl) syncEl.textContent = "";
+    }
+
+    // Modülleri baslat
+    if (typeof IslemlerModule !== "undefined") await IslemlerModule.init();
+    if (typeof ButceModule !== "undefined") ButceModule.init();
+  }
+
+  // Sayfa yenileme fonksiyonu (logo tiklama) - sifre sormaz
+  window.sayfaYenile = async function() {
+    if (typeof IslemlerModule !== "undefined") await IslemlerModule.init();
+    if (typeof BirikimModule !== "undefined") await BirikimModule.init();
+    if (typeof ButceModule !== "undefined") ButceModule.init();
+  };
+
+  // SESSION: daha önce giris yapildıysa sifre sorma
+  if (sessionStorage.getItem("girisYapildi") === "1") {
+    await uygulamaAc();
+  }
+
+  // SIFRE KILIDI
   let pinGiris = "";
   const MAX_PIN = 4;
 
@@ -17,7 +51,6 @@
       if (dot) dot.classList.toggle("filled", i <= pinGiris.length);
     }
   }
-
   function pinTemizle() {
     pinGiris = "";
     pinGoster();
@@ -29,21 +62,7 @@
     if (pinGiris === kayitliSifre) {
       lockScreen.style.animation = "fade-out 0.3s ease forwards";
       setTimeout(async () => {
-        lockScreen.classList.add("hidden");
-        appEl.classList.remove("hidden");
-
-        // 3. Firebase sync — arka planda
-        const syncEl = document.getElementById("sync-durum");
-        if (syncEl) syncEl.textContent = "☁";
-        try {
-          if (typeof fbVerileriYukle !== "undefined") {
-            await fbVerileriYukle();
-          }
-          if (syncEl) syncEl.textContent = "✓";
-        } catch(e) {
-          if (syncEl) syncEl.textContent = "";
-          console.warn("Firebase sync:", e.message);
-        }
+        await uygulamaAc();
       }, 280);
     } else {
       document.getElementById("pin-error").textContent = "Hatali sifre!";
@@ -73,18 +92,18 @@
   document.addEventListener("keydown", async (e) => {
     if (!lockScreen.classList.contains("hidden")) {
       if (e.key >= "0" && e.key <= "9" && pinGiris.length < MAX_PIN) {
-        pinGiris += e.key;
-        pinGoster();
+        pinGiris += e.key; pinGoster();
         if (pinGiris.length === MAX_PIN) setTimeout(pinKontrol, 100);
       } else if (e.key === "Backspace") {
-        pinGiris = pinGiris.slice(0, -1);
-        pinGoster();
+        pinGiris = pinGiris.slice(0, -1); pinGoster();
         document.getElementById("pin-error").textContent = "";
       }
     }
   });
 
+  // Kilitle butonu - session'u temizle
   document.getElementById("lock-btn").addEventListener("click", () => {
+    sessionStorage.removeItem("girisYapildi");
     appEl.classList.add("hidden");
     lockScreen.classList.remove("hidden");
     lockScreen.style.animation = "";
@@ -105,17 +124,6 @@
     if (btn.dataset.tab === "butce" && typeof ButceModule !== "undefined") ButceModule.init();
     if (btn.dataset.tab === "birikim" && typeof BirikimModule !== "undefined") BirikimModule.init();
   }));
-
-  // MODULLERI BASLAT
-  if (typeof IslemlerModule !== "undefined") IslemlerModule.init();
-  if (typeof ButceModule !== "undefined") ButceModule.init();
-
-  // LOGO TIKLANINCA YENİLE (sifre sormadan)
-  window.sayfaYenile = async function() {
-    if (typeof IslemlerModule !== "undefined") await IslemlerModule.init();
-    if (typeof BirikimModule !== "undefined") await BirikimModule.init();
-    if (typeof ButceModule !== "undefined") ButceModule.init();
-  };
 
   // ANIMASYONLAR
   const style = document.createElement("style");
