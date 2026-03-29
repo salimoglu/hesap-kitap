@@ -370,7 +370,10 @@ function katDuzenleKapatGenel(){
   function silModalKapat(){$("modal-sil").classList.add("hidden");_silId=null;}
   async function silOnayla(){if(_silId){await IslemlerDB.delete(_silId);silModalKapat();await yukle();}}
 
+  var _eventlerBaglandi=false;
   function baglaEventler(){
+    if(_eventlerBaglandi)return;
+    _eventlerBaglandi=true;
     $("hg-btn-gelir").addEventListener("click",()=>hgKaydet("gelir"));
     $("hg-btn-gider").addEventListener("click",()=>hgKaydet("gider"));
     $("hg-tutar").addEventListener("keydown",e=>{if(e.key==="Enter")hgKaydet("gider");});
@@ -386,7 +389,13 @@ function katDuzenleKapatGenel(){
       $("hg-kat-search-clear").classList.remove("visible");
       renderHgList("");$("hg-kat-search-inp").focus();
     });
-    document.addEventListener("click",e=>{if(!$("hg-kat-wrap").contains(e.target))closeHgDropdown();});
+    if(!window._hgClickListener){
+    window._hgClickListener=function(e){
+      var wrap=document.getElementById("hg-kat-wrap");
+      if(wrap&&!wrap.contains(e.target))closeHgDropdown();
+    };
+    document.addEventListener("click",window._hgClickListener);
+  }
     $("filter-type").addEventListener("change",renderList);
     $("filter-ay").addEventListener("change",renderList);
     // Kategoriler butonu
