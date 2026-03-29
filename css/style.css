@@ -689,3 +689,106 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
   z-index: 500;
 }
 .bk-modal-overlay.hidden { display: none; }
+
+
+/* ═══════════════════════════════════════
+   KREDİ KARTI MODÜLÜ
+═══════════════════════════════════════ */
+.kk-wrap {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 12px 12px 40px; overflow-y: auto; height: 100%;
+  scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+  box-sizing: border-box;
+}
+
+/* Özet bar */
+.kk-ozet-bar {
+  width: 100%; max-width: 860px;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-md); padding: 12px 20px;
+  display: flex; align-items: center; gap: 24px;
+  margin-bottom: 16px; flex-wrap: wrap;
+}
+.kk-ozet-item { display: flex; flex-direction: column; gap: 2px; }
+.kk-ozet-label { font-size: 10px; font-weight: 800; letter-spacing: 0.8px; color: var(--text-muted); text-transform: uppercase; }
+.kk-ozet-val { font-family: var(--font-brand); font-size: 20px; color: var(--text-primary); }
+.kk-ozet-val.kk-red { color: var(--red); }
+.kk-ekle-btn {
+  margin-left: auto; background: var(--gold); color: #0f1923;
+  border: none; border-radius: var(--radius-sm); padding: 8px 18px;
+  font-weight: 800; font-size: 13px; cursor: pointer; transition: opacity 0.15s;
+}
+.kk-ekle-btn:hover { opacity: 0.85; }
+
+/* Tablo */
+.kk-tablo-wrap {
+  width: 100%; max-width: 860px; overflow-x: auto;
+  border: 1px solid var(--border); border-radius: var(--radius-md);
+  margin-bottom: 20px;
+}
+.kk-tablo { width: 100%; border-collapse: collapse; font-size: 12px; }
+.kk-tablo thead th {
+  background: var(--bg-elevated); color: var(--text-muted);
+  font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px;
+  padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border);
+}
+.kk-row { border-bottom: 1px solid var(--border); transition: background 0.08s; }
+.kk-row:hover { background: var(--bg-elevated); }
+.kk-row-simdi { background: rgba(240,184,64,0.06); }
+.kk-row-gecmis { opacity: 0.5; }
+.kk-row td { padding: 8px 12px; vertical-align: top; }
+.kk-td-ay { font-weight: 700; font-size: 12px; white-space: nowrap; width: 90px; }
+.kk-td-toplam { width: 120px; white-space: nowrap; }
+.kk-tutar { font-family: var(--font-brand); font-size: 13px; color: var(--red); }
+.kk-td-detay { }
+.kk-kart-grup { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin-bottom: 3px; }
+.kk-kart-adi { font-size: 10px; font-weight: 700; color: var(--text-muted); min-width: 50px; }
+.kk-harcama-chip {
+  background: var(--bg-elevated); border: 1px solid var(--border);
+  border-radius: 4px; padding: 2px 7px; font-size: 11px;
+  color: var(--text-secondary); display: inline-flex; align-items: center; gap: 4px;
+}
+.kk-harcama-chip em { color: var(--text-primary); font-style: normal; font-weight: 700; }
+.kk-harcama-chip small { color: var(--text-muted); font-size: 10px; }
+
+/* Liste */
+.kk-liste-wrap {
+  width: 100%; max-width: 860px;
+  border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden;
+}
+.kk-liste-baslik {
+  background: var(--bg-elevated); padding: 8px 14px;
+  font-size: 10px; font-weight: 800; letter-spacing: 1px; color: var(--text-muted);
+  text-transform: uppercase; border-bottom: 1px solid var(--border);
+}
+.kk-liste-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px; border-bottom: 1px solid var(--border);
+  transition: background 0.08s; gap: 12px;
+}
+.kk-liste-row:last-child { border-bottom: none; }
+.kk-liste-row:hover { background: var(--bg-elevated); }
+.kk-liste-row.kk-bitti { opacity: 0.45; }
+.kk-liste-sol { flex: 1; min-width: 0; }
+.kk-liste-aciklama { font-size: 13px; font-weight: 700; color: var(--text-primary); }
+.kk-liste-meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.kk-bitti-badge {
+  background: var(--bg-elevated); border: 1px solid var(--border);
+  border-radius: 3px; padding: 1px 5px; font-size: 10px; color: var(--text-muted);
+}
+.kk-liste-sag { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.kk-aylik-tutar { font-family: var(--font-brand); font-size: 14px; color: var(--red); }
+.kk-sil-btn {
+  background: transparent; border: none; color: var(--text-muted);
+  font-size: 13px; cursor: pointer; padding: 3px 6px; border-radius: 3px; transition: color 0.1s;
+}
+.kk-sil-btn:hover { color: var(--red); }
+.kk-bos { padding: 24px; text-align: center; color: var(--text-muted); font-size: 13px; }
+
+/* Preview */
+.kk-hesap-preview {
+  background: var(--bg-elevated); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 8px 12px; font-size: 13px;
+  color: var(--text-secondary); min-height: 32px;
+}
+.kk-hesap-preview strong { color: var(--gold); font-family: var(--font-brand); }
