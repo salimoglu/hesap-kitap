@@ -63,41 +63,29 @@ function fbSyncKategoriler(kategoriler) {
 
 function fbVerileriYukle() {
   if (!_fbReady || !_fbDb) return Promise.resolve(false);
-  return _fbDb.ref("/").once("value").then(function(snap) {
-    var data = snap.val();
-    if (!data) return false;
-    var zincir = Promise.resolve();
-    if (data.islemler) {
-      zincir = zincir.then(function() {
-        return IslemlerDB.getAll().then(function(mevcutlar) {
-          var silme = mevcutlar.map(function(i) { return IslemlerDB.delete(i.id); });
-          return Promise.all(silme);
-        });
-      }).then(function() {
-        var eklemeler = Object.values(data.islemler).map(function(i) {
-          return IslemlerDB.add({
-            tip: i.tip, kategori: i.kategori, tutar: i.tutar,
-            aciklama: i.aciklama || "", tarih: i.tarih,
-            olusturma: i.olusturma || Date.now()
-          });
-        });
-        return Promise.all(eklemeler);
-      });
-    }
-    if (data.kategoriler) {
-      zincir = zincir.then(function() {
-        return KategorilerDB.getAll().then(function(mevcutlar) {
-          var fbKats = Object.values(data.kategoriler).filter(function(k) { return !k.varsayilan; });
-          var eklemeler = fbKats.filter(function(k) {
-            return !mevcutlar.some(function(m) { return m.grup===k.grup && m.ad===k.ad && m.tip===k.tip; });
-          }).map(function(k) {
-            return KategorilerDB.add({ tip: k.tip, grup: k.grup, ad: k.ad, varsayilan: false });
+  // Önce IndexedDB'de kayıt var mı bak
+  return IslemlerDB.getAll().then(function(mevcutlar) {
+    // IndexedDB doluysa Firebase'den yükleme yapma — veri silme riski var
+    if (mevcutlar.length > 0) return false;
+    // IndexedDB boşsa (yeni cihaz) Firebase'den yükle
+    return _fbDb.ref("/").once("value").then(function(snap) {
+      var data = snap.val();
+      if (!data) return false;
+      var zincir = Promise.resolve();
+      if (data.islemler) {
+        zincir = zincir.then(function() {
+          var eklemeler = Object.values(data.islemler).map(function(i) {
+            return IslemlerDB.add({
+              tip: i.tip, kategori: i.kategori, tutar: i.tutar,
+              aciklama: i.aciklama || "", tarih: i.tarih,
+              olusturma: i.olusturma || Date.now()
+            });
           });
           return Promise.all(eklemeler);
         });
-      });
-    }
-    return zincir.then(function() { return true; });
+      }
+      return zincir.then(function() { return true; });
+    });
   }).catch(function(e) {
     console.warn("FB yukle hatasi:", e.message);
     return false;
