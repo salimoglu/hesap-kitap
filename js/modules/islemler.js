@@ -442,3 +442,5 @@ function katDuzenleKapatGenel(){
   async function init(){baglaEventler();await yukle();}
   return{init};
 })();
+
+// v2
