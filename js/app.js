@@ -105,7 +105,6 @@
   }));
 
   // MODULLERI BASLAT
-  await IslemlerModule.init();
   if (typeof ButceModule !== "undefined") ButceModule.init();
 
   // ANIMASYONLAR
