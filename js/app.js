@@ -107,7 +107,6 @@
   // MODULLERI BASLAT
   await IslemlerModule.init();
   if (typeof ButceModule !== "undefined") ButceModule.init();
-  if (typeof BirikimModule !== "undefined") BirikimModule.init();
 
   // ANIMASYONLAR
   const style = document.createElement("style");
