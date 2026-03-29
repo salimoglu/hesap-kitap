@@ -126,6 +126,17 @@ const IslemlerModule = (() => {
     $("hg-kat-search-clear").classList.remove("visible");
     renderHgList("");
     setTimeout(()=>inp.focus(),80);
+    // Dışarı tıklayınca kapat — bir kerelik listener
+    setTimeout(function(){
+      function _kapat(e){
+        const w=document.getElementById("hg-kat-wrap");
+        if(w && !w.contains(e.target)){
+          closeHgDropdown();
+          document.removeEventListener("click",_kapat,true);
+        }
+      }
+      document.addEventListener("click",_kapat,true);
+    },200);
   }
   function closeHgDropdown(){$("hg-kat-dropdown").classList.remove("open");}
   function toggleHgDropdown(){
