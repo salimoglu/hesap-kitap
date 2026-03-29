@@ -1,6 +1,5 @@
 (async () => {
-
-  // 1. Firebase baslat (hata olsa bile devam et)
+  // 1. Firebase baslat
   try { if (typeof fbInit !== "undefined") fbInit(); } catch(e) {}
 
   // 2. IndexedDB baslat
@@ -18,6 +17,7 @@
       if (dot) dot.classList.toggle("filled", i <= pinGiris.length);
     }
   }
+
   function pinTemizle() {
     pinGiris = "";
     pinGoster();
@@ -31,13 +31,13 @@
       setTimeout(async () => {
         lockScreen.classList.add("hidden");
         appEl.classList.remove("hidden");
-        // 3. Firebase sync — uygulama actiktan sonra arka planda
+
+        // 3. Firebase sync — arka planda
         const syncEl = document.getElementById("sync-durum");
         if (syncEl) syncEl.textContent = "☁";
         try {
           if (typeof fbVerileriYukle !== "undefined") {
-            const yuklendi = await fbVerileriYukle();
-            }
+            await fbVerileriYukle();
           }
           if (syncEl) syncEl.textContent = "✓";
         } catch(e) {
@@ -73,10 +73,12 @@
   document.addEventListener("keydown", async (e) => {
     if (!lockScreen.classList.contains("hidden")) {
       if (e.key >= "0" && e.key <= "9" && pinGiris.length < MAX_PIN) {
-        pinGiris += e.key; pinGoster();
+        pinGiris += e.key;
+        pinGoster();
         if (pinGiris.length === MAX_PIN) setTimeout(pinKontrol, 100);
       } else if (e.key === "Backspace") {
-        pinGiris = pinGiris.slice(0, -1); pinGoster();
+        pinGiris = pinGiris.slice(0, -1);
+        pinGoster();
         document.getElementById("pin-error").textContent = "";
       }
     }
@@ -92,10 +94,12 @@
   // SEKME YONETIMI
   const tabBtnler = document.querySelectorAll(".tab-btn");
   const tabPaneller = document.querySelectorAll(".tab-panel");
+
   function tabSec(tabId) {
     tabBtnler.forEach(btn => btn.classList.toggle("active", btn.dataset.tab === tabId));
     tabPaneller.forEach(panel => panel.classList.toggle("active", panel.id === "tab-" + tabId));
   }
+
   tabBtnler.forEach(btn => btn.addEventListener("click", () => {
     tabSec(btn.dataset.tab);
     if (btn.dataset.tab === "butce" && typeof ButceModule !== "undefined") ButceModule.init();
@@ -127,5 +131,4 @@
     try { await navigator.serviceWorker.register("/hesap-kitap/sw.js"); }
     catch (err) { console.warn("SW hatasi:", err); }
   }
-
 })();
