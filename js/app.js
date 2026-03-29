@@ -110,6 +110,13 @@
   if (typeof IslemlerModule !== "undefined") IslemlerModule.init();
   if (typeof ButceModule !== "undefined") ButceModule.init();
 
+  // LOGO TIKLANINCA YENİLE (sifre sormadan)
+  window.sayfaYenile = async function() {
+    if (typeof IslemlerModule !== "undefined") await IslemlerModule.init();
+    if (typeof BirikimModule !== "undefined") await BirikimModule.init();
+    if (typeof ButceModule !== "undefined") ButceModule.init();
+  };
+
   // ANIMASYONLAR
   const style = document.createElement("style");
   style.textContent = `
