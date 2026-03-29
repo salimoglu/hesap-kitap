@@ -140,27 +140,12 @@ const IslemlerModule = (() => {
     }
   }
   function openHgDropdown(){
-    var dd=$("hg-kat-dropdown");
-    dd.classList.add("open");
-    const inp=$("hg-kat-search-inp");inp.value="";
+    $("hg-kat-dropdown").classList.add("open");
+    var inp=$("hg-kat-search-inp");
+    inp.value="";
     $("hg-kat-search-clear").classList.remove("visible");
     renderHgList("");
     setTimeout(function(){inp.focus();},80);
-    // Dışarı tıklanınca kapat — focusout ile
-    setTimeout(function(){
-      var wrap=$("hg-kat-wrap");
-      if(wrap&&!wrap._focusListenerAdded){
-        wrap._focusListenerAdded=true;
-        document.addEventListener("click",function _ddKapat(e){
-          var w=document.getElementById("hg-kat-wrap");
-          if(!w||!w.contains(e.target)){
-            closeHgDropdown();
-            document.removeEventListener("click",_ddKapat);
-            if(w)w._focusListenerAdded=false;
-          }
-        });
-      }
-    },10);
   }
   function closeHgDropdown(){$("hg-kat-dropdown").classList.remove("open");}
   function toggleHgDropdown(){
@@ -390,35 +375,26 @@ function katDuzenleKapatGenel(){
 
   var _eventlerBaglandi=false;
   function baglaEventler(){
-    if(_eventlerBaglandi)return;
-    _eventlerBaglandi=true;
-    if(_eventlerBaglandi)return;
-    _eventlerBaglandi=true;
+    if(window._islemlerEventlerBaglandi)return;
+    window._islemlerEventlerBaglandi=true;
     $("hg-btn-gelir").addEventListener("click",()=>hgKaydet("gelir"));
     $("hg-btn-gider").addEventListener("click",()=>hgKaydet("gider"));
     $("hg-tutar").addEventListener("keydown",e=>{if(e.key==="Enter")hgKaydet("gider");});
-        $("hg-kat-trigger").addEventListener("click",function(e){e.stopPropagation();toggleHgDropdown();});
+    $("hg-kat-trigger").addEventListener("click",function(e){e.stopPropagation();toggleHgDropdown();});
     $("hg-kat-search-inp").addEventListener("input",function(){
-      const q=this.value;
+      var q=this.value;
       $("hg-kat-search-clear").classList.toggle("visible",q.length>0);
       renderHgList(q);
     });
     $("hg-kat-search-inp").addEventListener("keydown",e=>{if(e.key==="Escape")closeHgDropdown();e.stopPropagation();});
-    $("hg-kat-search-clear").addEventListener("click",()=>{
+    $("hg-kat-search-clear").addEventListener("click",function(e){
+      e.stopPropagation();
       $("hg-kat-search-inp").value="";
       $("hg-kat-search-clear").classList.remove("visible");
       renderHgList("");$("hg-kat-search-inp").focus();
     });
-    if(!window._hgClickListener){
-    window._hgClickListener=function(e){
-      var wrap=document.getElementById("hg-kat-wrap");
-      if(wrap&&!wrap.contains(e.target))closeHgDropdown();
-    };
-    // disari tiklama: hg-kat-wrap blur ile yonetilir
-  }
     $("filter-type").addEventListener("change",renderList);
     $("filter-ay").addEventListener("change",renderList);
-    // Kategoriler butonu
     $("btn-yeni-kat-bar").addEventListener("click",katYonetimAc);
     $("kat-close").addEventListener("click",katYonetimKapat);
     $("modal-kategori").addEventListener("click",e=>{if(e.target===$("modal-kategori"))katYonetimKapat();});
@@ -427,22 +403,19 @@ function katDuzenleKapatGenel(){
     $("kat-kaydet").addEventListener("click",yeniKatKaydet);
     $("inp-kat-ad").addEventListener("keydown",e=>{if(e.key==="Enter")yeniKatKaydet();});
     $("sel-kat-grup").addEventListener("change",function(){
-      const wrap=$("yeni-grup-wrap");
+      var wrap=$("yeni-grup-wrap");
       if(this.value==="__YENI__"){wrap.style.display="flex";setTimeout(()=>$("inp-kat-grup-yeni").focus(),100);}
       else{wrap.style.display="none";}
     });
-    // Kategori düzenle modal
     $("kat-duz-close").addEventListener("click",katDuzenleKapatGenel);
     $("kat-duz-iptal").addEventListener("click",katDuzenleKapatGenel);
     $("kat-duz-kaydet").addEventListener("click",katDuzenleKaydetGenel);
     $("modal-kat-duzenle").addEventListener("click",e=>{if(e.target===$("modal-kat-duzenle"))katDuzenleKapatGenel();});
     [$("inp-duz-grup"),$("inp-duz-ad")].forEach(el=>el&&el.addEventListener("keydown",e=>{if(e.key==="Enter")katDuzenleKaydetGenel();}));
-    // Kategori sil modal
     $("kat-sil-close").addEventListener("click",katSilKapat);
     $("kat-sil-iptal").addEventListener("click",katSilKapat);
     $("kat-sil-onayla").addEventListener("click",katSilOnayla);
     $("modal-kat-sil").addEventListener("click",e=>{if(e.target===$("modal-kat-sil"))katSilKapat();});
-    // İşlem modal
     $("modal-close").addEventListener("click",modalKapat);
     $("btn-iptal").addEventListener("click",modalKapat);
     $("btn-kaydet").addEventListener("click",kaydet);
