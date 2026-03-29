@@ -12,14 +12,14 @@ var BirikimModule = (function() {
 
   /* Firebase */
   async function fbYukle(){
-    if(typeof _fbDb!=="undefined"&&_fbDb){
-      try{var s=await _fbDb.ref("birikim_manuel").once("value");_manuelIslemler=s.val()||{};}
+    if(typeof window._fbDb!=="undefined"&&window._fbDb){
+      try{var s=await window._fbDb.ref("birikim_manuel").once("value");_manuelIslemler=s.val()||{};}
       catch(e){_manuelIslemler={};}
     }
   }
   async function fbKaydet(){
-    if(typeof _fbDb!=="undefined"&&_fbDb){
-      try{await _fbDb.ref("birikim_manuel").set(_manuelIslemler);}catch(e){}
+    if(typeof window._fbDb!=="undefined"&&window._fbDb){
+      try{await window._fbDb.ref("birikim_manuel").set(_manuelIslemler);}catch(e){}
     }
   }
 
