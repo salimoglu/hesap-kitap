@@ -3,6 +3,7 @@ const IslemlerModule = (() => {
   let _aktifTip="gider", _katTip="gider";
   let _seciliKat={value:"",label:"",tip:""};
   let _katDuzId=null, _katSilId=null;
+  let _eventlerBaglandi=false;
   const $=id=>document.getElementById(id);
 
   function para(s){return Number(s).toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2});}
@@ -372,6 +373,8 @@ function katDuzenleKapatGenel(){
 
   var _eventlerBaglandi=false;
   function baglaEventler(){
+    if(_eventlerBaglandi)return;
+    _eventlerBaglandi=true;
     if(_eventlerBaglandi)return;
     _eventlerBaglandi=true;
     $("hg-btn-gelir").addEventListener("click",()=>hgKaydet("gelir"));
