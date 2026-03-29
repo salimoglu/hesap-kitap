@@ -101,11 +101,13 @@
   tabBtnler.forEach(btn => btn.addEventListener("click", () => {
     tabSec(btn.dataset.tab);
     if (btn.dataset.tab === "butce" && typeof ButceModule !== "undefined") ButceModule.init();
+    if (btn.dataset.tab === "birikim" && typeof BirikimModule !== "undefined") BirikimModule.init();
   }));
 
   // MODULLERI BASLAT
   await IslemlerModule.init();
   if (typeof ButceModule !== "undefined") ButceModule.init();
+  if (typeof BirikimModule !== "undefined") BirikimModule.init();
 
   // ANIMASYONLAR
   const style = document.createElement("style");
