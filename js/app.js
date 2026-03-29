@@ -37,8 +37,6 @@
         try {
           if (typeof fbVerileriYukle !== "undefined") {
             const yuklendi = await fbVerileriYukle();
-            if (yuklendi) {
-              await IslemlerModule.init();
             }
           }
           if (syncEl) syncEl.textContent = "✓";
@@ -105,6 +103,7 @@
   }));
 
   // MODULLERI BASLAT
+  if (typeof IslemlerModule !== "undefined") IslemlerModule.init();
   if (typeof ButceModule !== "undefined") ButceModule.init();
 
   // ANIMASYONLAR
