@@ -28,6 +28,7 @@
     if (typeof IslemlerModule !== "undefined") await IslemlerModule.init();
     if (typeof ButceModule !== "undefined") ButceModule.init();
   if (typeof KrediModule !== "undefined") KrediModule.init();
+  if (typeof AlacaklarModule !== "undefined") AlacaklarModule.init();
   }
 
   // Sayfa yenileme fonksiyonu (logo tiklama) - sifre sormaz
@@ -36,6 +37,7 @@
     if (typeof BirikimModule !== "undefined") await BirikimModule.init();
     if (typeof ButceModule !== "undefined") ButceModule.init();
     if (typeof KrediModule !== "undefined") KrediModule.init();
+    if (typeof AlacaklarModule !== "undefined") AlacaklarModule.init();
   };
 
   // SESSION: daha önce giris yapildıysa sifre sorma
@@ -126,6 +128,7 @@
     if (btn.dataset.tab === "butce" && typeof ButceModule !== "undefined") ButceModule.init();
     if (btn.dataset.tab === "birikim" && typeof BirikimModule !== "undefined") BirikimModule.init();
     if (btn.dataset.tab === "kredi" && typeof KrediModule !== "undefined") KrediModule.init();
+    if (btn.dataset.tab === "alacaklar" && typeof AlacaklarModule !== "undefined") AlacaklarModule.init();
   }));
 
   // ANIMASYONLAR
