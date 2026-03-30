@@ -823,3 +823,51 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .kr-td-tutar { font-family:var(--font-brand); font-size:13px; color:var(--red); text-align:right; white-space:nowrap; }
 .kr-td-no { color:var(--text-muted); }
 .kr-bos { padding:32px; text-align:center; color:var(--text-muted); font-size:13px; }
+
+
+/* ══ ALACAKLAR MODÜLİ ══ */
+.al-wrap { display:flex; flex-direction:column; align-items:center; padding:12px 12px 40px; overflow-y:auto; height:100%; box-sizing:border-box; scrollbar-width:thin; }
+.al-header { width:100%; max-width:760px; display:flex; align-items:center; justify-content:space-between; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-md); padding:14px 18px; margin-bottom:14px; flex-shrink:0; }
+.al-ozet { display:flex; gap:28px; }
+.al-ozet-item { display:flex; flex-direction:column; gap:2px; }
+.al-oz-label { font-size:10px; font-weight:800; letter-spacing:1px; color:var(--text-muted); text-transform:uppercase; }
+.al-oz-val { font-family:var(--font-brand); font-size:20px; letter-spacing:0.5px; }
+.al-yeni-btn { background:var(--gold); color:#0f1923; border:none; border-radius:var(--radius-sm); padding:8px 16px; font-size:13px; font-weight:800; cursor:pointer; transition:opacity 0.15s; white-space:nowrap; }
+.al-yeni-btn:hover { opacity:0.85; }
+.al-bolum-baslik { width:100%; max-width:760px; font-size:10px; font-weight:800; letter-spacing:2px; color:var(--text-muted); padding:8px 4px 4px; margin-top:4px; }
+.al-kapali-baslik { color:var(--border-light); margin-top:16px; }
+.al-liste { width:100%; max-width:760px; display:flex; flex-direction:column; gap:10px; margin-bottom:8px; }
+/* Alacak kartı */
+.al-kart { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-md); overflow:hidden; transition:border-color 0.15s; }
+.al-kart:hover { border-color:var(--border-light); }
+.al-kart-kapali { opacity:0.6; }
+.al-kart-header { display:flex; align-items:flex-start; justify-content:space-between; padding:12px 14px; gap:12px; }
+.al-kart-sol { flex:1; min-width:0; }
+.al-kart-kisi { font-size:15px; font-weight:800; color:var(--text-primary); }
+.al-kart-aciklama { font-size:12px; color:var(--text-muted); margin-top:2px; }
+.al-kart-meta { display:flex; align-items:center; gap:8px; margin-top:6px; }
+.al-kart-tip { font-size:10px; font-weight:800; padding:2px 8px; border-radius:10px; }
+.al-tip-p { background:rgba(56,189,248,0.15); color:#38bdf8; }
+.al-tip-t { background:rgba(240,184,64,0.15); color:var(--gold); }
+.al-kart-sag { display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0; }
+.al-kalan-val { font-family:var(--font-brand); font-size:18px; color:var(--green); display:flex; flex-direction:column; align-items:flex-end; }
+.al-kalan-label { font-family:var(--font-body,sans-serif); font-size:10px; color:var(--text-muted); font-weight:600; letter-spacing:0.5px; }
+.al-odendi-badge { font-size:11px; font-weight:800; color:var(--green); background:rgba(52,211,153,0.12); padding:3px 10px; border-radius:10px; }
+.al-kart-actions { display:flex; gap:4px; }
+/* Taksit plan */
+.al-plan { border-top:1px solid var(--border); }
+.al-plan-satir { display:flex; align-items:center; gap:10px; padding:7px 14px; border-bottom:1px solid var(--border); font-size:12px; transition:background 0.08s; }
+.al-plan-satir:last-child { border-bottom:none; }
+.al-plan-satir:hover { background:var(--bg-elevated); }
+.al-plan-satir.al-odendi { opacity:0.5; }
+.al-plan-ay { color:var(--text-muted); min-width:90px; flex-shrink:0; }
+.al-plan-no { color:var(--text-muted); min-width:40px; flex-shrink:0; }
+.al-plan-tutar { font-weight:700; color:var(--green); flex:1; }
+.al-odeme-btn { background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text-muted); font-size:11px; padding:3px 10px; cursor:pointer; transition:all 0.12s; white-space:nowrap; flex-shrink:0; }
+.al-odeme-btn:hover { border-color:var(--green); color:var(--green); }
+.al-odeme-btn.al-odendi-aktif { background:rgba(52,211,153,0.12); border-color:var(--green); color:var(--green); font-weight:700; }
+/* Tip seçici */
+.al-tip-secici { display:flex; gap:8px; margin-top:4px; }
+.al-tip-btn { flex:1; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text-muted); padding:8px; font-size:12px; font-weight:700; cursor:pointer; transition:all 0.15s; }
+.al-tip-btn.active { background:rgba(240,184,64,0.12); border-color:var(--gold); color:var(--gold); }
+.al-bos { padding:48px; text-align:center; color:var(--text-muted); width:100%; }
