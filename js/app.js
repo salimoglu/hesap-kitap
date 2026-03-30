@@ -1,4 +1,4 @@
-(async () => {
+﻿(async () => {
   // 1. Firebase baslat
   try { if (typeof fbInit !== "undefined") fbInit(); } catch(e) {}
 
@@ -26,10 +26,11 @@
 
     // Modülleri baslat
     if (typeof IslemlerModule !== "undefined") await IslemlerModule.init();
+    if (typeof BirikimModule !== "undefined") await BirikimModule.init();
     if (typeof ButceModule !== "undefined") ButceModule.init();
-  if (typeof KrediModule !== "undefined") KrediModule.init();
-  if (typeof AlacaklarModule !== "undefined") AlacaklarModule.init();
-  if (typeof UrunModule !== "undefined") UrunModule.init();
+    if (typeof KrediModule !== "undefined") KrediModule.init();
+    if (typeof AlacaklarModule !== "undefined") AlacaklarModule.init();
+    if (typeof UrunModule !== "undefined") UrunModule.init();
   }
 
   // Sayfa yenileme fonksiyonu (logo tiklama) - sifre sormaz
@@ -150,9 +151,12 @@
   `;
   document.head.appendChild(style);
 
-  // SERVICE WORKER
+  // SERVICE WORKER (sayfa klasörüne gore; hem kok hem /alt-klasor/ calisir)
   if ("serviceWorker" in navigator) {
-    try { await navigator.serviceWorker.register("/hesap-kitap/sw.js"); }
-    catch (err) { console.warn("SW hatasi:", err); }
+    try {
+      const swUrl = new URL("sw.js", window.location.href);
+      const scope = new URL("./", window.location.href).href;
+      await navigator.serviceWorker.register(swUrl.href, { scope });
+    } catch (err) { console.warn("SW hatasi:", err); }
   }
 })();

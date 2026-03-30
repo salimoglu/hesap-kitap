@@ -1,14 +1,22 @@
-/* sw.js v3 — cache guncellendi */
-const CACHE_NAME = "hesap-kitap-v3";
-const CACHE_URLS = [
-  "/hesap-kitap/",
-  "/hesap-kitap/index.html",
-  "/hesap-kitap/css/style.css",
-  "/hesap-kitap/js/firebase.js",
-  "/hesap-kitap/js/db.js",
-  "/hesap-kitap/js/app.js",
-  "/hesap-kitap/js/modules/islemler.js",
-  "/hesap-kitap/manifest.json",
+﻿/* sw.js v4 — base path otomatik (alt klasor veya kok) */
+function swUrl(rel) {
+  return new URL(rel, self.location.href).href;
+}
+var CACHE_NAME = "hesap-kitap-v4";
+var BASE = new URL("./", self.location.href).href;
+var CACHE_URLS = [
+  BASE,
+  swUrl("index.html"),
+  swUrl("css/style.css"),
+  swUrl("js/firebase.js"),
+  swUrl("js/db.js"),
+  swUrl("js/app.js"),
+  swUrl("js/modules/islemler.js"),
+  swUrl("js/modules/yukle.js"),
+  swUrl("js/modules/alacaklar.js"),
+  swUrl("js/modules/urun.js"),
+  swUrl("js/modules/birikim.js"),
+  swUrl("manifest.json"),
 ];
 
 self.addEventListener("install", function(e) {
@@ -31,7 +39,6 @@ self.addEventListener("activate", function(e) {
 
 self.addEventListener("fetch", function(e) {
   if (e.request.method !== "GET") return;
-  // Firebase ve CDN isteklerini cache leme — network first
   var url = e.request.url;
   if (url.includes("firebase") || url.includes("googleapis") || url.includes("gstatic")) {
     return;

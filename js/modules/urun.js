@@ -1,4 +1,4 @@
-/* urun.js - Urun Altin Deger Takibi */
+﻿/* urun.js - Urun Altin Deger Takibi */
 var UrunModule=(function(){
 var $=function(id){return document.getElementById(id);};
 var _urunler=[], _aktif=null, _guncelAltin=0;
@@ -7,22 +7,6 @@ function para(n){return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigi
 function gram(n){return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigits:3,maximumFractionDigits:3});}
 function uid(){return "u"+Date.now()+"_"+Math.random().toString(36).substr(2,5);}
 function tarihFmt(t){if(!t)return"";var p=t.split("-");return p[2]+"."+p[1]+"."+p[0];}
-
-/* Guncel altin fiyatini cek */
-async function altinFiyatCek(){
-  try{
-    // collectapi.com ucretsiz altin API
-    var r=await fetch("https://api.collectapi.com/economy/goldPrice",{
-      headers:{"authorization":"apikey 0","content-type":"application/json"}
-    });
-    // Alternatif: doviz.com
-    var r2=await fetch("https://api.genelpara.com/embed/altin/XAU_TRY/");
-    var d2=await r2.json();
-    if(d2&&d2.s) return parseFloat(d2.s.replace(",","."));
-  }catch(e){}
-  // Fallback: manuel guncelleme bekle, son bilinen deger don
-  return _guncelAltin||0;
-}
 
 /* Doviz.com'dan gram altin fiyati */
 async function altinCek(){
@@ -238,3 +222,4 @@ async function init(){
 }
 return{init:init};
 })();
+
