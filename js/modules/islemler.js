@@ -273,9 +273,7 @@ const IslemlerModule = (() => {
     if(!tutar||tutar<=0){$("hg-tutar").focus();return;}
     if(!_seciliKat.value){openHgDropdown();return;}
     const _yi={tip,kategori:_seciliKat.value,tutar,aciklama,tarih:bugun()};
-      const _yiId=await IslemlerDB.add(_yi);
-      if(typeof fbIslemKaydet!=="undefined")fbIslemKaydet(Object.assign({},_yi,{id:String(_yiId)})). catch(function(){});
-    $("hg-aciklama").value="";$("hg-tutar").value="";
+      const _yiId=await IslemlerDB.add(_yi);    $("hg-aciklama").value="";$("hg-tutar").value="";
     await yukle();
   }
 
@@ -299,14 +297,12 @@ const IslemlerModule = (() => {
     if(!tarih){alert("Tarih secin.");return;}
     const islem={tip:_aktifTip,kategori,tutar,aciklama,tarih};
     if(_duzenleId){islem.id=_duzenleId;await IslemlerDB.update(islem);}
-    else{const _nId=await IslemlerDB.add(islem);islem=Object.assign({},islem,{id:String(_nId)});}
-      if(typeof fbIslemKaydet!=="undefined")fbIslemKaydet(islem).catch(function(){});
+    else await IslemlerDB.add(islem);
     modalKapat();await yukle();
   }
   function silModalAc(id){_silId=id;$("modal-sil").classList.remove("hidden");}
   function silModalKapat(){$("modal-sil").classList.add("hidden");_silId=null;}
-  async function silOnayla(){if(_silId){await IslemlerDB.delete(_silId);
-      if(typeof fbIslemSil!=="undefined")fbIslemSil(String(_silId)).catch(function(){});silModalKapat();await yukle();}}
+  async function silOnayla(){if(_silId){await IslemlerDB.delete(_silId);silModalKapat();await yukle();}}
 
   function baglaEventler(){
     if(_baglandi)return;
