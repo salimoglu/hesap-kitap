@@ -8,44 +8,26 @@ function gram(n){return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigi
 function uid(){return "u"+Date.now()+"_"+Math.random().toString(36).substr(2,5);}
 function tarihFmt(t){if(!t)return"";var p=t.split("-");return p[2]+"."+p[1]+"."+p[0];}
 
-/* Guncel gram altin fiyati cek — cdn.jsdelivr.net (ucretsiz, CORS yok) */
+/* Guncel gram altin fiyati — @latest XAU/TRY */
 async function altinCek(){
-  try{
-    /* Birincil: fawazahmed0 currency API */
-    var r=await fetch("https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/xau.json");
-    var d=await r.json();
-    var tryPerOz=d&&d.xau&&d.xau.try;
-    if(tryPerOz&&tryPerOz>0){
-      var gramFiyat=tryPerOz/31.1035;
-      if(gramFiyat>100){_guncelAltin=gramFiyat;return gramFiyat;}
-    }
-  }catch(e){}
-  try{
-    /* Yedek: fallback URL */
-    var r2=await fetch("https://latest.currency-api.pages.dev/v1/currencies/xau.json");
-    var d2=await r2.json();
-    var tryPerOz2=d2&&d2.xau&&d2.xau.try;
-    if(tryPerOz2&&tryPerOz2>0){
-      var gramFiyat2=tryPerOz2/31.1035;
-      if(gramFiyat2>100){_guncelAltin=gramFiyat2;return gramFiyat2;}
-    }
-  }catch(e2){}
+  var urls=[
+    "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/xau.json",
+    "https://latest.currency-api.pages.dev/v1/currencies/xau.json"
+  ];
+  for(var i=0;i<urls.length;i++){
+    try{
+      var r=await fetch(urls[i]);
+      if(!r.ok)continue;
+      var d=await r.json();
+      var tryPerOz=d&&d.xau&&d.xau.try;
+      if(tryPerOz&&tryPerOz>100){
+        var gramFiyat=tryPerOz/31.1035;
+        _guncelAltin=gramFiyat;
+        return gramFiyat;
+      }
+    }catch(e){}
+  }
   return _guncelAltin||0;
-}
-
-/* Belirli bir tarih icin altın fiyati cek */
-async function altinTarihCek(tarih){
-  try{
-    /* tarih: YYYY-MM-DD formatinda */
-    var url="https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@"+tarih+"/v1/currencies/xau.json";
-    var r=await fetch(url);
-    var d=await r.json();
-    var tryPerOz=d&&d.xau&&d.xau.try;
-    if(tryPerOz&&tryPerOz>0){
-      return tryPerOz/31.1035;
-    }
-  }catch(e){}
-  return 0;
 }
 
 async function fbYukle(){
@@ -77,13 +59,16 @@ function render(){
   h+='<div class="ur-ozet-item"><span class="ur-oz-label">ALINAN TOPLAM</span><span class="ur-oz-val" style="color:var(--text-primary)">'+para(toplamUrunDeger)+' TL</span></div>';
   if(_guncelAltin>0){
     h+='<div class="ur-ozet-item"><span class="ur-oz-label">GUNCEL DEGER</span><span class="ur-oz-val" style="color:var(--gold)">'+para(toplamGuncelDeger)+' TL</span></div>';
-    h+='<div class="ur-ozet-item"><span class="ur-oz-label">DEGER DEGISIMI</span><span class="ur-oz-val" style="color:'+(toplamDegisim>=0?"var(--green)":"var(--red)")+'">'+(toplamDegisim>=0?"+":"")+para(toplamDegisim)+' TL</span></div>';
+    var renkClass=toplamDegisim>=0?"var(--green)":"var(--red)";
+    h+='<div class="ur-ozet-item"><span class="ur-oz-label">DEGİŞİM</span><span class="ur-oz-val" style="color:'+renkClass+'">'+(toplamDegisim>=0?"+":"")+para(toplamDegisim)+' TL</span></div>';
   }
   h+='</div><div class="ur-header-sag">';
-  h+='<div class="ur-altin-kutu"><span class="ur-altin-label">GRAM ALTIN</span>';
-  h+='<span class="ur-altin-fiyat" id="ur-altin-val">'+(_guncelAltin>0?para(_guncelAltin)+" TL":"Yukleniyor...")+'</span>';
-  h+='<button class="ur-guncelle-btn" id="ur-guncelle-btn" title="Fiyati guncelle">&#8635;</button></div>';
-  h+='<button class="ur-yeni-btn" id="ur-yeni-btn">+ Urun Ekle</button>';
+  h+='<div class="ur-altin-kutu">';
+  h+='<span class="ur-altin-label">GRAM ALTIN</span>';
+  h+='<span class="ur-altin-fiyat" id="ur-altin-val">'+(_guncelAltin>0?para(_guncelAltin)+" TL":"Yükleniyor...")+'</span>';
+  h+='<button class="ur-guncelle-btn" id="ur-guncelle-btn" title="Fiyati guncelle">&#8635;</button>';
+  h+='</div>';
+  h+='<button class="ur-yeni-btn" id="ur-yeni-btn">+ Ürün Ekle</button>';
   h+='</div></div>';
 
   h+='<div class="ur-tablo-wrap">';
@@ -92,7 +77,7 @@ function render(){
   } else {
     h+='<table class="ur-tablo"><thead><tr>';
     h+='<th>TARİH</th><th>ÜRÜN</th><th>ALINAN FİYAT</th>';
-    h+='<th>ALİMDAKİ ALTIN</th><th>GRAM KARSILIGI</th>';
+    h+='<th>ALİNDAKİ ALTIN</th><th>GRAM KARSILIGI</th>';
     h+='<th>GUNCEL DEGER</th><th>DEGİŞİM</th><th></th>';
     h+='</tr></thead><tbody>';
     _urunler.slice().sort(function(a,b){return b.tarih.localeCompare(a.tarih);}).forEach(function(u){
@@ -107,10 +92,14 @@ function render(){
       h+='<td class="ur-td-gram">'+gram(u.altinGram)+' gr</td>';
       h+='<td class="ur-td-guncel">'+(guncelDeger>0?para(guncelDeger)+" TL":"—")+'</td>';
       h+='<td class="ur-td-degisim '+(degisim>=0?"ur-artis":"ur-dusus")+'">';
-      if(guncelDeger>0){h+=(degisim>=0?"+":"")+para(degisim)+" TL<br><small>"+(degisimPct>=0?"+":"")+degisimPct.toFixed(1)+"%</small>";}else{h+="—";}
+      if(guncelDeger>0){
+        h+=(degisim>=0?"+":"")+para(degisim)+"TL<br><small>"+(degisimPct>=0?"+":"")+degisimPct.toFixed(1)+"%</small>";
+      }else{h+="—";}
       h+='</td>';
-      h+='<td class="ur-td-aksiyon"><button class="ur-duz-btn row-action-btn duzenle" data-id="'+u.id+'">&#9998;</button> <button class="ur-sil-btn row-action-btn sil" data-id="'+u.id+'">&#10005;</button></td>';
-      h+='</tr>';
+      h+='<td class="ur-td-aksiyon">';
+      h+='<button class="ur-duz-btn row-action-btn duzenle" data-id="'+u.id+'">&#9998;</button> ';
+      h+='<button class="ur-sil-btn row-action-btn sil" data-id="'+u.id+'">&#10005;</button>';
+      h+='</td></tr>';
     });
     h+='</tbody></table>';
   }
@@ -122,17 +111,24 @@ function render(){
   h+='<div class="modal-header"><h2 class="modal-title" id="ur-modal-baslik">Ürün Ekle</h2>';
   h+='<button class="modal-close" id="ur-modal-kapat">&#10005;</button></div>';
   h+='<div class="modal-body">';
-  h+='<div class="field-group"><label class="field-label">Tarih</label><input type="date" id="ur-tarih" class="field-input"/></div>';
-  h+='<div class="field-group"><label class="field-label">Ürün Adı</label><input type="text" id="ur-urun" class="field-input" placeholder="Telefon, Laptop..." maxlength="100"/></div>';
-  h+='<div class="field-group"><label class="field-label">Alınan Fiyat (TL)</label><input type="number" id="ur-fiyat" class="field-input" placeholder="0" min="0" step="0.01" inputmode="decimal"/></div>';
-  h+='<div class="field-group"><label class="field-label">Alımdaki Gram Altın Fiyatı (TL)<span id="ur-altin-yukleniyor" style="color:var(--gold);font-size:11px;margin-left:8px"></span></label>';
-  h+='<input type="number" id="ur-altin-fiyat" class="field-input" placeholder="Yukleniyor..." min="0" step="1" inputmode="decimal"/></div>';
-  h+='<div class="field-group ur-gram-sonuc hidden" id="ur-gram-sonuc">';
+  h+='<div class="field-group"><label class="field-label">Tarih</label>';
+  h+='<input type="date" id="ur-tarih" class="field-input"/></div>';
+  h+='<div class="field-group"><label class="field-label">Ürün Adı</label>';
+  h+='<input type="text" id="ur-urun" class="field-input" placeholder="Telefon, Laptop..." maxlength="100"/></div>';
+  h+='<div class="field-group"><label class="field-label">Alınan Fiyat (TL)</label>';
+  h+='<input type="number" id="ur-fiyat" class="field-input" placeholder="0" min="0" step="0.01" inputmode="decimal"/></div>';
+  h+='<div class="field-group">';
+  h+='<label class="field-label">Alımdaki Gram Altın Fiyatı (TL)';
+  h+='<span id="ur-altin-hint" style="margin-left:8px;font-size:11px;font-weight:400;color:var(--text-muted)">Alım tarihinizde gram altın kaç TL idi?</span></label>';
+  h+='<input type="number" id="ur-altin-fiyat" class="field-input" placeholder="Ornek: 3500" min="0" step="1" inputmode="decimal"/></div>';
+  h+='<div id="ur-gram-sonuc" class="field-group" style="display:none">';
   h+='<label class="field-label">GRAM ALTIN KARSILIGI</label>';
   h+='<div class="ur-gram-val" id="ur-gram-val">0.000 gram</div></div>';
   h+='</div>';
-  h+='<div class="modal-footer"><button class="btn-secondary" id="ur-iptal">İptal</button><button class="btn-primary" id="ur-kaydet">Kaydet</button></div>';
-  h+='</div></div>';
+  h+='<div class="modal-footer">';
+  h+='<button class="btn-secondary" id="ur-iptal">İptal</button>';
+  h+='<button class="btn-primary" id="ur-kaydet">Kaydet</button>';
+  h+='</div></div></div>';
 
   c.innerHTML=h;
   bagla();
@@ -145,34 +141,18 @@ function bagla(){
   $("ur-modal").addEventListener("click",function(e){if(e.target===$("ur-modal"))modalKapat();});
   $("ur-kaydet").addEventListener("click",kaydet);
 
-  /* Gram hesaplama */
+  /* Gram hesaplama - tutar veya altin fiyati degisince */
   function gramHesapla(){
     var fiyat=parseFloat($("ur-fiyat").value)||0;
     var altinF=parseFloat($("ur-altin-fiyat").value)||0;
     var wrap=$("ur-gram-sonuc"),val=$("ur-gram-val");
-    if(fiyat>0&&altinF>0){wrap.classList.remove("hidden");val.textContent=gram(fiyat/altinF)+" gram";}
-    else wrap.classList.add("hidden");
+    if(fiyat>0&&altinF>0){wrap.style.display="";val.textContent=gram(fiyat/altinF)+" gram";}
+    else wrap.style.display="none";
   }
   $("ur-fiyat").addEventListener("input",gramHesapla);
   $("ur-altin-fiyat").addEventListener("input",gramHesapla);
 
-  /* Tarih degisince o tarihteki altin fiyatini cek */
-  $("ur-tarih").addEventListener("change",async function(){
-    var tarih=this.value;
-    if(!tarih)return;
-    var el=$("ur-altin-yukleniyor"),inp=$("ur-altin-fiyat");
-    el.textContent="⏳ Yukleniyor...";
-    var fiyat=await altinTarihCek(tarih);
-    if(fiyat>0){
-      inp.value=Math.round(fiyat);
-      el.textContent="✓ "+para(fiyat)+" TL ("+tarih+")";
-      gramHesapla();
-    } else {
-      el.textContent="⚠ Manuel girin";
-    }
-  });
-
-  /* Guncelle butonu */
+  /* Guncelle butonu - anlik fiyat */
   $("ur-guncelle-btn").addEventListener("click",async function(){
     var btn=$("ur-guncelle-btn");
     btn.style.animation="spin 1s linear infinite";btn.disabled=true;
@@ -182,12 +162,14 @@ function bagla(){
       _guncelAltin=fiyat;
       var el=$("ur-altin-val");if(el)el.textContent=para(fiyat)+" TL";
       await fbKaydet();render();
-    } else {
-      alert("Fiyat alinamadi. Lutfen tekrar deneyin.");
+    }else{
+      alert("Fiyat alınamadı. Lütfen tekrar deneyin.");
     }
   });
 
-  document.querySelectorAll(".ur-duz-btn").forEach(function(btn){btn.addEventListener("click",function(){modalAc(btn.dataset.id);});});
+  document.querySelectorAll(".ur-duz-btn").forEach(function(btn){
+    btn.addEventListener("click",function(){modalAc(btn.dataset.id);});
+  });
   document.querySelectorAll(".ur-sil-btn").forEach(function(btn){
     btn.addEventListener("click",function(){
       if(!confirm("Silmek istiyor musunuz?"))return;
@@ -201,13 +183,19 @@ function modalAc(id){
   _aktif=id;
   $("ur-modal-baslik").textContent=id?"Ürünü Düzenle":"Ürün Ekle";
   var today=new Date().toISOString().split("T")[0];
-  $("ur-tarih").value=today;$("ur-urun").value="";$("ur-fiyat").value="";
-  $("ur-altin-fiyat").value=_guncelAltin>0?Math.round(_guncelAltin):"";
-  $("ur-gram-sonuc").classList.add("hidden");
-  $("ur-altin-yukleniyor").textContent="";
+  $("ur-tarih").value=today;
+  $("ur-urun").value="";
+  $("ur-fiyat").value="";
+  $("ur-altin-fiyat").value="";
+  $("ur-gram-sonuc").style.display="none";
   if(id){
     var u=_urunler.find(function(x){return x.id===id;});
-    if(u){$("ur-tarih").value=u.tarih;$("ur-urun").value=u.urun;$("ur-fiyat").value=u.fiyat;$("ur-altin-fiyat").value=u.altinFiyat;}
+    if(u){
+      $("ur-tarih").value=u.tarih;
+      $("ur-urun").value=u.urun;
+      $("ur-fiyat").value=u.fiyat;
+      $("ur-altin-fiyat").value=u.altinFiyat;
+    }
   }
   $("ur-modal").classList.remove("hidden");
   setTimeout(function(){$("ur-urun").focus();},100);
@@ -222,13 +210,17 @@ async function kaydet(){
   if(!tarih){alert("Tarih giriniz.");return;}
   if(!urun){$("ur-urun").focus();return;}
   if(!fiyat||fiyat<=0){$("ur-fiyat").focus();return;}
-  if(!altinFiyat||altinFiyat<=0){$("ur-altin-fiyat").focus();return;}
+  if(!altinFiyat||altinFiyat<=0){
+    $("ur-altin-fiyat").focus();
+    alert("Alım tarihindeki gram altın fiyatını giriniz.\nOrnek: 2022 için ~3500, 2023 için ~1600, 2024 için ~2800 gibi.");
+    return;
+  }
   var altinGram=fiyat/altinFiyat;
   var kayit={tarih:tarih,urun:urun,fiyat:fiyat,altinFiyat:altinFiyat,altinGram:altinGram};
   if(_aktif){
     var idx=_urunler.findIndex(function(x){return x.id===_aktif;});
     if(idx>=0){kayit.id=_aktif;_urunler[idx]=kayit;}
-  } else {
+  }else{
     kayit.id=uid();_urunler.push(kayit);
   }
   await fbKaydet();modalKapat();render();
@@ -237,13 +229,18 @@ async function kaydet(){
 async function init(){
   await fbYukle();
   render();
-  /* Guncel altin fiyatini arka planda cek */
+  /* Guncel altin fiyatini arka planda cek ve guncelle */
   altinCek().then(function(f){
-    if(f>0&&Math.abs(f-_guncelAltin)>10){
+    if(f>0&&Math.abs(f-(_guncelAltin||0))>50){
       _guncelAltin=f;
       fbKaydet();
       var el=$("ur-altin-val");
       if(el)el.textContent=para(f)+" TL";
+      render();
+    } else if(f>0&&!_guncelAltin){
+      _guncelAltin=f;
+      var el2=$("ur-altin-val");
+      if(el2)el2.textContent=para(f)+" TL";
       render();
     }
   });
