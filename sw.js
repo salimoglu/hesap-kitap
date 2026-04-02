@@ -1,58 +1,62 @@
-﻿/* sw.js v4 — base path otomatik (alt klasor veya kok) */
-function swUrl(rel) {
-  return new URL(rel, self.location.href).href;
-}
-var CACHE_NAME = "hesap-kitap-v4";
-var BASE = new URL("./", self.location.href).href;
-var CACHE_URLS = [
-  BASE,
-  swUrl("index.html"),
-  swUrl("css/style.css"),
-  swUrl("js/firebase.js"),
-  swUrl("js/db.js"),
-  swUrl("js/app.js"),
-  swUrl("js/modules/islemler.js"),
-  swUrl("js/modules/yukle.js"),
-  swUrl("js/modules/alacaklar.js"),
-  swUrl("js/modules/urun.js"),
-  swUrl("js/modules/birikim.js"),
-  swUrl("manifest.json"),
+// sw.js — Network First: her zaman gunceli al, cache sadece fallback
+const CACHE = "hesap-kitap-v4";
+const ASSETS = [
+  "/hesap-kitap/",
+  "/hesap-kitap/index.html",
+  "/hesap-kitap/css/style.css",
+  "/hesap-kitap/js/app.js",
+  "/hesap-kitap/js/db.js",
+  "/hesap-kitap/js/firebase.js",
+  "/hesap-kitap/js/modules/islemler.js",
+  "/hesap-kitap/js/modules/birikim.js",
+  "/hesap-kitap/js/modules/yukle.js",
+  "/hesap-kitap/js/modules/alacaklar.js",
+  "/hesap-kitap/js/modules/urun.js",
+  "/hesap-kitap/manifest.json"
 ];
 
-self.addEventListener("install", function(e) {
-  e.waitUntil(
-    caches.open(CACHE_NAME).then(function(cache) { return cache.addAll(CACHE_URLS); })
-  );
+// Install: cache'e al
+self.addEventListener("install", (e) => {
   self.skipWaiting();
-});
-
-self.addEventListener("activate", function(e) {
   e.waitUntil(
-    caches.keys().then(function(keys) {
-      return Promise.all(
-        keys.filter(function(k) { return k !== CACHE_NAME; }).map(function(k) { return caches.delete(k); })
-      );
-    })
+    caches.open(CACHE).then(cache => cache.addAll(ASSETS).catch(() => {}))
   );
-  self.clients.claim();
 });
 
-self.addEventListener("fetch", function(e) {
+// Activate: eski cache'leri temizle
+self.addEventListener("activate", (e) => {
+  e.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+    ).then(() => self.clients.claim())
+  );
+});
+
+// SKIP_WAITING mesaji
+self.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "SKIP_WAITING") self.skipWaiting();
+});
+
+// Fetch: NETWORK FIRST — once networkten dene, fail olursa cache
+self.addEventListener("fetch", (e) => {
+  // Firebase ve dis API isteklerini bypass et
+  if (!e.request.url.startsWith(self.location.origin)) return;
+  // POST isteklerini bypass et
   if (e.request.method !== "GET") return;
-  var url = e.request.url;
-  if (url.includes("firebase") || url.includes("googleapis") || url.includes("gstatic")) {
-    return;
-  }
+
   e.respondWith(
-    caches.match(e.request).then(function(cached) {
-      if (cached) return cached;
-      return fetch(e.request).then(function(response) {
-        if (response && response.status === 200 && response.type === "basic") {
-          var clone = response.clone();
-          caches.open(CACHE_NAME).then(function(cache) { cache.put(e.request, clone); });
+    fetch(e.request, {cache: "no-store"})
+      .then(response => {
+        // Basarili ise cache'i guncelle
+        if (response && response.status === 200) {
+          const clone = response.clone();
+          caches.open(CACHE).then(cache => cache.put(e.request, clone));
         }
         return response;
-      });
-    })
+      })
+      .catch(() => {
+        // Network fail: cache'den don
+        return caches.match(e.request);
+      })
   );
 });
