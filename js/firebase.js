@@ -1,96 +1,134 @@
-/* firebase.js — Firebase Realtime Database sync */
-/* Guard: cift yuklemeyi engelle */
-if (typeof window._fbLoaded === "undefined") {
-window._fbLoaded = true;
+// firebase.js
+const _fbConfig = {
+  apiKey: "AIzaSyAKnw9IVAh65FUCtxVcna7lSvAO3dx_4SM",
+  authDomain: "hesap-kitap-234d1.firebaseapp.com",
+  databaseURL: "https://hesap-kitap-234d1-default-rtdb.firebaseio.com",
+  projectId: "hesap-kitap-234d1",
+  storageBucket: "hesap-kitap-234d1.firebasestorage.app",
+  messagingSenderId: "444640499049",
+  appId: "1:444640499049:web:327244db97f698a69799f8"
+};
 
-var _fbDb = null;
-  window._fbDb = _fbDb;
-var _fbReady = false;
+let _fbDb = null;
 
 function fbInit() {
-  if (typeof firebase === "undefined") return;
   try {
     if (!firebase.apps.length) {
-      firebase.initializeApp({
-        apiKey: "AIzaSyAKnw9IVAh65FUCtxVcna7lSvAO3dx_4SM",
-        authDomain: "hesap-kitap-234d1.firebaseapp.com",
-        databaseURL: "https://hesap-kitap-234d1-default-rtdb.firebaseio.com",
-        projectId: "hesap-kitap-234d1",
-        storageBucket: "hesap-kitap-234d1.firebasestorage.app",
-        messagingSenderId: "444640499049",
-        appId: "1:444640499049:web:327244db97f698a69799f8"
-      });
+      firebase.initializeApp(_fbConfig);
     }
     _fbDb = firebase.database();
-    _fbReady = true;
-    console.log("Firebase baglandi");
-  } catch(e) {
-    console.warn("Firebase baslama hatasi:", e.message);
+    window._fbDb = _fbDb;
+  } catch (e) {
+    console.warn("Firebase init hatasi:", e);
   }
 }
 
-function fbIslemEkle(islem) {
-  if (!_fbReady || !_fbDb || !islem.id) return Promise.resolve();
-  return _fbDb.ref("islemler/" + islem.id).set({
-    tip: islem.tip, kategori: islem.kategori,
-    tutar: islem.tutar, aciklama: islem.aciklama || "",
-    tarih: islem.tarih, olusturma: islem.olusturma || Date.now()
-  }).catch(e => console.warn("FB ekle:", e.message));
-}
+// Firebase TEK kaynak — islemler her zaman Firebase'den yukle
+// IndexedDB karismasini onle: Firebase'den gelen veriyi dogrudan kullan
+async function fbVerileriYukle() {
+  if (!_fbDb) return;
+  try {
+    const snap = await _fbDb.ref("islemler").once("value");
+    const fbData = snap.val();
 
-function fbIslemGuncelle(islem) {
-  if (!_fbReady || !_fbDb || !islem.id) return Promise.resolve();
-  return _fbDb.ref("islemler/" + islem.id).update({
-    tip: islem.tip, kategori: islem.kategori,
-    tutar: islem.tutar, aciklama: islem.aciklama || "", tarih: islem.tarih
-  }).catch(e => console.warn("FB guncelle:", e.message));
-}
-
-function fbIslemSil(id) {
-  if (!_fbReady || !_fbDb) return Promise.resolve();
-  return _fbDb.ref("islemler/" + id).remove()
-    .catch(e => console.warn("FB sil:", e.message));
-}
-
-function fbSyncKategoriler(kategoriler) {
-  if (!_fbReady || !_fbDb) return Promise.resolve();
-  var data = {};
-  kategoriler.forEach(function(k) {
-    if (k.id) data[k.id] = { tip: k.tip, grup: k.grup, ad: k.ad, varsayilan: false };
-  });
-  return _fbDb.ref("kategoriler").set(data)
-    .catch(e => console.warn("FB kat sync:", e.message));
-}
-
-function fbVerileriYukle() {
-  if (!_fbReady || !_fbDb) return Promise.resolve(false);
-  // Önce IndexedDB'de kayıt var mı bak
-  return IslemlerDB.getAll().then(function(mevcutlar) {
-    // IndexedDB doluysa Firebase'den yükleme yapma — veri silme riski var
-    if (mevcutlar.length > 0) return false;
-    // IndexedDB boşsa (yeni cihaz) Firebase'den yükle
-    return _fbDb.ref("/").once("value").then(function(snap) {
-      var data = snap.val();
-      if (!data) return false;
-      var zincir = Promise.resolve();
-      if (data.islemler) {
-        zincir = zincir.then(function() {
-          var eklemeler = Object.values(data.islemler).map(function(i) {
-            return IslemlerDB.add({
-              tip: i.tip, kategori: i.kategori, tutar: i.tutar,
-              aciklama: i.aciklama || "", tarih: i.tarih,
-              olusturma: i.olusturma || Date.now()
-            });
-          });
-          return Promise.all(eklemeler);
+    if (!fbData || Object.keys(fbData).length === 0) {
+      // Firebase bos — IndexedDB'deki verileri Firebase'e yukle (ilk cihaz)
+      const idbIslemler = await getAllFromIDB();
+      if (idbIslemler && idbIslemler.length > 0) {
+        // ID bazinda dedupe yaparak Firebase'e yaz
+        const obj = {};
+        idbIslemler.forEach(function(item) {
+          if (item.id) obj[item.id] = item;
         });
+        await _fbDb.ref("islemler").set(obj);
       }
-      return zincir.then(function() { return true; });
-    });
-  }).catch(function(e) {
-    console.warn("FB yukle hatasi:", e.message);
-    return false;
+    } else {
+      // Firebase dolu — Firebase'i tek kaynak kabul et
+      // IndexedDB'yi Firebase verileriyle REPLACE et (ekle degil)
+      const fbIslemler = Object.values(fbData);
+
+      // Once IndexedDB'yi temizle, sonra Firebase'den yaz
+      await clearIDB();
+      for (const item of fbIslemler) {
+        if (item && item.id) {
+          await putToIDB(item);
+        }
+      }
+    }
+  } catch (e) {
+    console.warn("fbVerileriYukle hatasi:", e);
+  }
+}
+
+// Firebase'e islem kaydet (tekrar kontrollu)
+async function fbIslemKaydet(islem) {
+  if (!_fbDb || !islem || !islem.id) return;
+  try {
+    await _fbDb.ref("islemler/" + islem.id).set(islem);
+  } catch (e) {
+    console.warn("fbIslemKaydet hatasi:", e);
+  }
+}
+
+// Firebase'den islem sil
+async function fbIslemSil(id) {
+  if (!_fbDb || !id) return;
+  try {
+    await _fbDb.ref("islemler/" + id).remove();
+  } catch (e) {
+    console.warn("fbIslemSil hatasi:", e);
+  }
+}
+
+// IndexedDB yardimci fonksiyonlari
+function getAllFromIDB() {
+  return new Promise(function(resolve) {
+    try {
+      const req = indexedDB.open("HesapKitap", 1);
+      req.onsuccess = function(e) {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains("islemler")) { resolve([]); return; }
+        const tx = db.transaction("islemler", "readonly");
+        const store = tx.objectStore("islemler");
+        const all = store.getAll();
+        all.onsuccess = function() { resolve(all.result || []); };
+        all.onerror = function() { resolve([]); };
+      };
+      req.onerror = function() { resolve([]); };
+    } catch(e) { resolve([]); }
   });
 }
 
-} // end guard
+function clearIDB() {
+  return new Promise(function(resolve) {
+    try {
+      const req = indexedDB.open("HesapKitap", 1);
+      req.onsuccess = function(e) {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains("islemler")) { resolve(); return; }
+        const tx = db.transaction("islemler", "readwrite");
+        tx.objectStore("islemler").clear();
+        tx.oncomplete = function() { resolve(); };
+        tx.onerror = function() { resolve(); };
+      };
+      req.onerror = function() { resolve(); };
+    } catch(e) { resolve(); }
+  });
+}
+
+function putToIDB(item) {
+  return new Promise(function(resolve) {
+    try {
+      const req = indexedDB.open("HesapKitap", 1);
+      req.onsuccess = function(e) {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains("islemler")) { resolve(); return; }
+        const tx = db.transaction("islemler", "readwrite");
+        tx.objectStore("islemler").put(item);
+        tx.oncomplete = function() { resolve(); };
+        tx.onerror = function() { resolve(); };
+      };
+      req.onerror = function() { resolve(); };
+    } catch(e) { resolve(); }
+  });
+}
