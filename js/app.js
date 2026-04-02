@@ -1,54 +1,59 @@
-﻿(async () => {
-  // 1. Firebase baslat
+(async () => {
+  // Firebase + IndexedDB baslat
   try { if (typeof fbInit !== "undefined") fbInit(); } catch(e) {}
-
-  // 2. IndexedDB baslat
   await initApp();
 
   const lockScreen = document.getElementById("lock-screen");
   const appEl = document.getElementById("app");
 
-  // Uygulamayı ac (sifre ekranı olmadan)
+  // Uygulamayi ac — Firebase'den taze veri cek, modulleri baslat
   async function uygulamaAc() {
     lockScreen.classList.add("hidden");
     appEl.classList.remove("hidden");
     sessionStorage.setItem("girisYapildi", "1");
 
-    // Firebase sync
     const syncEl = document.getElementById("sync-durum");
-    if (syncEl) syncEl.textContent = "☁";
+    if (syncEl) syncEl.textContent = "\u2601";
+
     try {
       if (typeof fbVerileriYukle !== "undefined") await fbVerileriYukle();
-      if (syncEl) syncEl.textContent = "✓";
+      if (syncEl) syncEl.textContent = "\u2713";
     } catch(e) {
       if (syncEl) syncEl.textContent = "";
     }
 
-    // Modülleri baslat
     if (typeof IslemlerModule !== "undefined") await IslemlerModule.init();
-    if (typeof BirikimModule !== "undefined") await BirikimModule.init();
     if (typeof ButceModule !== "undefined") ButceModule.init();
     if (typeof KrediModule !== "undefined") KrediModule.init();
     if (typeof AlacaklarModule !== "undefined") AlacaklarModule.init();
     if (typeof UrunModule !== "undefined") UrunModule.init();
+    if (typeof BirikimModule !== "undefined") BirikimModule.init();
   }
 
-  // Sayfa yenileme fonksiyonu (logo tiklama) - sifre sormaz
+  // Logo tiklama: Firebase'den taze cek, modulleri yenile, sifre sorma
   window.sayfaYenile = async function() {
+    const syncEl = document.getElementById("sync-durum");
+    if (syncEl) syncEl.textContent = "\u2601";
+    try {
+      if (typeof fbVerileriYukle !== "undefined") await fbVerileriYukle();
+      if (syncEl) syncEl.textContent = "\u2713";
+    } catch(e) {
+      if (syncEl) syncEl.textContent = "";
+    }
     if (typeof IslemlerModule !== "undefined") await IslemlerModule.init();
-    if (typeof BirikimModule !== "undefined") await BirikimModule.init();
     if (typeof ButceModule !== "undefined") ButceModule.init();
     if (typeof KrediModule !== "undefined") KrediModule.init();
     if (typeof AlacaklarModule !== "undefined") AlacaklarModule.init();
     if (typeof UrunModule !== "undefined") UrunModule.init();
+    if (typeof BirikimModule !== "undefined") BirikimModule.init();
   };
 
-  // SESSION: daha önce giris yapildıysa sifre sorma
+  // Session varsa sifre sorma
   if (sessionStorage.getItem("girisYapildi") === "1") {
     await uygulamaAc();
   }
 
-  // SIFRE KILIDI
+  // PIN kilidi
   let pinGiris = "";
   const MAX_PIN = 4;
 
@@ -61,21 +66,23 @@
   function pinTemizle() {
     pinGiris = "";
     pinGoster();
-    document.getElementById("pin-error").textContent = "";
+    const err = document.getElementById("pin-error");
+    if (err) err.textContent = "";
   }
 
   async function pinKontrol() {
     const kayitliSifre = await AyarlarDB.get("sifre");
     if (pinGiris === kayitliSifre) {
       lockScreen.style.animation = "fade-out 0.3s ease forwards";
-      setTimeout(async () => {
-        await uygulamaAc();
-      }, 280);
+      setTimeout(async () => { await uygulamaAc(); }, 280);
     } else {
-      document.getElementById("pin-error").textContent = "Hatali sifre!";
+      const err = document.getElementById("pin-error");
+      if (err) err.textContent = "Hatali sifre!";
       const pinDisp = document.querySelector(".pin-display");
-      pinDisp.style.animation = "shake 0.4s ease";
-      setTimeout(() => { pinDisp.style.animation = ""; pinTemizle(); }, 400);
+      if (pinDisp) {
+        pinDisp.style.animation = "shake 0.4s ease";
+        setTimeout(() => { pinDisp.style.animation = ""; pinTemizle(); }, 400);
+      }
     }
   }
 
@@ -88,11 +95,13 @@
     });
   });
 
-  document.getElementById("pin-del").addEventListener("click", () => {
+  const delBtn = document.getElementById("pin-del");
+  if (delBtn) delBtn.addEventListener("click", () => {
     if (pinGiris.length > 0) {
       pinGiris = pinGiris.slice(0, -1);
       pinGoster();
-      document.getElementById("pin-error").textContent = "";
+      const err = document.getElementById("pin-error");
+      if (err) err.textContent = "";
     }
   });
 
@@ -103,13 +112,15 @@
         if (pinGiris.length === MAX_PIN) setTimeout(pinKontrol, 100);
       } else if (e.key === "Backspace") {
         pinGiris = pinGiris.slice(0, -1); pinGoster();
-        document.getElementById("pin-error").textContent = "";
+        const err = document.getElementById("pin-error");
+        if (err) err.textContent = "";
       }
     }
   });
 
-  // Kilitle butonu - session'u temizle
-  document.getElementById("lock-btn").addEventListener("click", () => {
+  // Kilitle butonu
+  const lockBtn = document.getElementById("lock-btn");
+  if (lockBtn) lockBtn.addEventListener("click", () => {
     sessionStorage.removeItem("girisYapildi");
     appEl.classList.add("hidden");
     lockScreen.classList.remove("hidden");
@@ -117,7 +128,7 @@
     pinTemizle();
   });
 
-  // SEKME YONETIMI
+  // Sekme yonetimi
   const tabBtnler = document.querySelectorAll(".tab-btn");
   const tabPaneller = document.querySelectorAll(".tab-panel");
 
@@ -135,7 +146,7 @@
     if (btn.dataset.tab === "urun" && typeof UrunModule !== "undefined") UrunModule.init();
   }));
 
-  // ANIMASYONLAR
+  // Animasyonlar
   const style = document.createElement("style");
   style.textContent = `
     @keyframes shake {
@@ -146,17 +157,25 @@
       80%{ transform: translateX(6px); }
     }
     @keyframes fade-out { to { opacity: 0; transform: scale(0.97); } }
-    .sync-durum { font-size: 13px; color: var(--text-muted); padding: 0 6px; transition: color 0.3s; }
-    .sync-durum.ok { color: var(--green); }
+    .sync-durum { font-size: 13px; color: var(--text-muted); padding: 0 6px; }
   `;
   document.head.appendChild(style);
 
-  // SERVICE WORKER (sayfa klasörüne gore; hem kok hem /alt-klasor/ calisir)
+  // Service Worker — her zaman en yeni versiyonu al
   if ("serviceWorker" in navigator) {
     try {
-      const swUrl = new URL("sw.js", window.location.href);
-      const scope = new URL("./", window.location.href).href;
-      await navigator.serviceWorker.register(swUrl.href, { scope });
-    } catch (err) { console.warn("SW hatasi:", err); }
+      const reg = await navigator.serviceWorker.register("/hesap-kitap/sw.js");
+      // Yeni SW gelince hemen aktive et
+      reg.addEventListener("updatefound", () => {
+        const newWorker = reg.installing;
+        if (newWorker) {
+          newWorker.addEventListener("statechange", () => {
+            if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+              newWorker.postMessage({ type: "SKIP_WAITING" });
+            }
+          });
+        }
+      });
+    } catch(err) { console.warn("SW hatasi:", err); }
   }
 })();
