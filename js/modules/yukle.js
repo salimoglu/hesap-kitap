@@ -141,10 +141,7 @@ async function afbYukle(){
     var s=await window._fbDb.ref("altin_kayitlar").once("value");
     var v=s.val();
     _kayitlar=v?Object.values(v):[];
-    _kayitlar.sort(function(a,b){
-      var ta=a.tarih||"";var tb=b.tarih||"";
-      return ta.localeCompare(tb);
-    });
+    _kayitlar.sort(function(a,b){return (a.tarih||"").localeCompare(b.tarih||"");});
   }catch(e){_kayitlar=[];}
 }
 async function afbKaydet(){
@@ -165,30 +162,60 @@ function kullanımSecenekleri(){
   return Object.keys(set).sort();
 }
 
+async function durumToggle(id){
+  var k=_kayitlar.find(function(x){return x.id===id;});
+  if(!k)return;
+  /* 3 durum: undefined/elimde -> satildi -> elimde */
+  if(!k.durum||k.durum==="elimde") k.durum="satildi";
+  else k.durum="elimde";
+  await afbKaydet();
+  arender();
+}
+
 function arender(){
   var c=$("altin-container");if(!c)return;
   var liste=filtreliListe();
-  var toplamAdet=_kayitlar.reduce(function(s,k){return s+(parseFloat(k.adet)||0);},0);
-  var toplamGram=_kayitlar.reduce(function(s,k){return s+(parseFloat(k.gram)||0);},0);
-  var toplamTL=_kayitlar.reduce(function(s,k){return s+(parseFloat(k.tlKarsiligi)||0);},0);
-  var ortGram=toplamGram>0?(toplamTL/toplamGram):0;
 
-  /* Filtre listesi */
-  var secenekler=kullanımSecenekleri();
+  /* Genel toplamlar — TÜM kayıtlar */
+  var genelAdet=_kayitlar.reduce(function(s,k){return s+(parseFloat(k.adet)||0);},0);
+  var genelGram=_kayitlar.reduce(function(s,k){return s+(parseFloat(k.gram)||0);},0);
+  var genelTL=_kayitlar.reduce(function(s,k){return s+(parseFloat(k.tlKarsiligi)||0);},0);
+  var genelOrt=genelGram>0?(genelTL/genelGram):0;
+
+  /* Elimdeki toplamlar — sadece durum="elimde" veya tanımsız */
+  var elimdeKayitlar=_kayitlar.filter(function(k){return !k.durum||k.durum==="elimde";});
+  var elimdeGram=elimdeKayitlar.reduce(function(s,k){return s+(parseFloat(k.gram)||0);},0);
+  var elimdeTL=elimdeKayitlar.reduce(function(s,k){return s+(parseFloat(k.tlKarsiligi)||0);},0);
 
   var h='<div class="alt-wrap">';
 
-  /* Ozet */
-  h+='<div class="alt-header"><div class="alt-ozet">';
-  h+='<div class="alt-oz-item"><span class="alt-oz-label">TOPLAM ADET</span><span class="alt-oz-val">'+toplamAdet+'</span></div>';
-  h+='<div class="alt-oz-item"><span class="alt-oz-label">TOPLAM GRAM</span><span class="alt-oz-val" style="color:var(--gold)">'+agr(toplamGram)+' gr</span></div>';
-  h+='<div class="alt-oz-item"><span class="alt-oz-label">TOPLAM ÖDENEN</span><span class="alt-oz-val">'+apara(toplamTL)+' TL</span></div>';
-  h+='<div class="alt-oz-item"><span class="alt-oz-label">ORT. GRAM FİYATI</span><span class="alt-oz-val">'+apara(ortGram)+' TL</span></div>';
-  h+='</div>';
+  /* Üst özet — 2 satır */
+  h+='<div class="alt-header">';
+  /* Satır 1: Genel toplam */
+  h+='<div class="alt-ozet-bolum">';
+  h+='<div class="alt-ozet-baslik">TÜM ALTINIM</div>';
+  h+='<div class="alt-ozet">';
+  h+='<div class="alt-oz-item"><span class="alt-oz-label">TOPLAM ADET</span><span class="alt-oz-val">'+genelAdet+'</span></div>';
+  h+='<div class="alt-oz-item"><span class="alt-oz-label">TOPLAM GRAM</span><span class="alt-oz-val" style="color:var(--gold)">'+agr(genelGram)+' gr</span></div>';
+  h+='<div class="alt-oz-item"><span class="alt-oz-label">TOPLAM ÖDENEN</span><span class="alt-oz-val">'+apara(genelTL)+' TL</span></div>';
+  h+='<div class="alt-oz-item"><span class="alt-oz-label">ORT. GRAM FİYATI</span><span class="alt-oz-val">'+apara(genelOrt)+' TL</span></div>';
+  h+='</div></div>';
+  /* Ayraç */
+  h+='<div class="alt-ozet-ayrac"></div>';
+  /* Satır 2: Elimdeki */
+  h+='<div class="alt-ozet-bolum">';
+  h+='<div class="alt-ozet-baslik alt-elimde-baslik">&#127950; ELİMDEKİ ALTIN</div>';
+  h+='<div class="alt-ozet">';
+  h+='<div class="alt-oz-item"><span class="alt-oz-label">GRAM</span><span class="alt-oz-val" style="color:var(--gold)">'+agr(elimdeGram)+' gr</span></div>';
+  h+='<div class="alt-oz-item"><span class="alt-oz-label">MALIYET</span><span class="alt-oz-val" style="color:var(--green)">'+apara(elimdeTL)+' TL</span></div>';
+  h+='<div class="alt-oz-item"><span class="alt-oz-label">KAYIT SAYISI</span><span class="alt-oz-val">'+elimdeKayitlar.length+' adet</span></div>';
+  h+='</div></div>';
+  /* Buton */
   h+='<button class="alt-yeni-btn" id="alt-yeni-btn">+ Altın Ekle</button>';
   h+='</div>';
 
-  /* Excel stili filtre — select dropdown */
+  /* Filtre */
+  var secenekler=kullanımSecenekleri();
   h+='<div class="alt-filtre-satir">';
   h+='<div class="alt-filtre-grup">';
   h+='<label class="alt-filtre-label">NEREDE KULLANILDI</label>';
@@ -200,7 +227,6 @@ function arender(){
     h+='<option value="'+s+'"'+sec+'>'+s+' ('+sayi+')</option>';
   });
   h+='</select></div>';
-  /* Filtreli toplam */
   if(_filtre!=="TUMU"){
     var fGram=liste.reduce(function(s,k){return s+(parseFloat(k.gram)||0);},0);
     var fTL=liste.reduce(function(s,k){return s+(parseFloat(k.tlKarsiligi)||0);},0);
@@ -211,14 +237,24 @@ function arender(){
   /* Tablo */
   h+='<div class="alt-tablo-dis">';
   h+='<table class="alt-tablo"><thead><tr>';
-  h+='<th>TARİH</th><th>ADET</th><th>GRAM</th><th>TL KARŞILIĞI</th><th>GRAM FİYATI</th><th>NASIL ALINDI</th><th>NEREDE KULLANILDI</th><th></th>';
+  h+='<th>DURUM</th><th>TARİH</th><th>ADET</th><th>GRAM</th><th>TL KARŞILIĞI</th><th>GRAM FİYATI</th><th>NASIL ALINDI</th><th>NEREDE KULLANILDI</th><th></th>';
   h+='</tr></thead><tbody>';
   if(!liste.length){
-    h+='<tr><td colspan="8" class="alt-bos">Kayıt bulunamadı</td></tr>';
+    h+='<tr><td colspan="9" class="alt-bos">Kayıt bulunamadı</td></tr>';
   } else {
     liste.forEach(function(k){
       var gF=k.gram>0?(k.tlKarsiligi/k.gram):0;
-      h+='<tr class="alt-satir">';
+      var satildi=k.durum==="satildi";
+      var rowClass=satildi?" alt-satir-satildi":"";
+      h+='<tr class="alt-satir'+rowClass+'">';
+      /* Durum toggle butonu */
+      h+='<td class="alt-td-durum">';
+      if(satildi){
+        h+='<button class="alt-durum-btn alt-satildi-btn" data-id="'+k.id+'" title="Satıldı — tıkla elimdeki yap">SATILDI</button>';
+      } else {
+        h+='<button class="alt-durum-btn alt-elimde-btn" data-id="'+k.id+'" title="Elimde — tıkla satıldı yap">ELİMDE</button>';
+      }
+      h+='</td>';
       h+='<td class="alt-td-tarih">'+atarihFmt(k.tarih)+'</td>';
       h+='<td style="text-align:center;color:var(--text-muted)">'+k.adet+'</td>';
       h+='<td class="alt-td-gram">'+agr(k.gram)+' gr</td>';
@@ -232,8 +268,7 @@ function arender(){
       h+='</td></tr>';
     });
   }
-  h+='</tbody></table></div>';
-  h+='</div>';
+  h+='</tbody></table></div></div>';
 
   /* Modal */
   var bugun=new Date().toISOString().split("T")[0];
@@ -251,6 +286,12 @@ function arender(){
   h+='<datalist id="alt-nerde-dl">';
   secenekler.forEach(function(s){h+='<option value="'+s+'"/>';});
   h+='</datalist></div>';
+  h+='<div class="field-group"><label class="field-label">Durum</label>';
+  h+='<div style="display:flex;gap:10px;margin-top:4px">';
+  h+='<button class="alt-modal-durum-btn active" id="alt-modal-elimde" data-d="elimde">&#127950; Elimde</button>';
+  h+='<button class="alt-modal-durum-btn" id="alt-modal-satildi" data-d="satildi">Satıldı</button>';
+  h+='</div>';
+  h+='<input type="hidden" id="alt-durum-val" value="elimde"/></div>';
   h+='</div>';
   h+='<div class="modal-footer"><button class="btn-secondary" id="alt-iptal">İptal</button>';
   h+='<button class="btn-primary" id="alt-kaydet">Kaydet</button></div>';
@@ -266,12 +307,20 @@ function abagla(){
   $("alt-iptal").addEventListener("click",amodalKapat);
   $("alt-modal").addEventListener("click",function(e){if(e.target===$("alt-modal"))amodalKapat();});
   $("alt-kaydet").addEventListener("click",akaydet);
-  /* Dropdown filtre */
   var sel=$("alt-filtre-nerde");
-  if(sel){
-    sel.value=_filtre;
-    sel.addEventListener("change",function(){_filtre=this.value;arender();});
-  }
+  if(sel){sel.value=_filtre;sel.addEventListener("change",function(){_filtre=this.value;arender();});}
+  /* Durum toggle — satırda */
+  document.querySelectorAll(".alt-durum-btn").forEach(function(btn){
+    btn.addEventListener("click",function(){durumToggle(btn.dataset.id);});
+  });
+  /* Modal durum seçici */
+  document.querySelectorAll(".alt-modal-durum-btn").forEach(function(btn){
+    btn.addEventListener("click",function(){
+      document.querySelectorAll(".alt-modal-durum-btn").forEach(function(b){b.classList.remove("active");});
+      btn.classList.add("active");
+      $("alt-durum-val").value=btn.dataset.d;
+    });
+  });
   document.querySelectorAll(".alt-duz-btn").forEach(function(btn){
     btn.addEventListener("click",function(){amodalAc(btn.dataset.id);});
   });
@@ -290,11 +339,15 @@ function amodalAc(id){
   $("alt-modal-baslik").textContent=id?"Kaydı Düzenle":"Altın Ekle";
   $("alt-tarih").value=bugun;$("alt-adet").value="";$("alt-gram").value="";
   $("alt-tl").value="";$("alt-nasil").value="";$("alt-nerde").value="";
+  $("alt-durum-val").value="elimde";
+  document.querySelectorAll(".alt-modal-durum-btn").forEach(function(b){b.classList.toggle("active",b.dataset.d==="elimde");});
   if(id){
     var k=_kayitlar.find(function(x){return x.id===id;});
     if(k){
       $("alt-tarih").value=k.tarih||bugun;$("alt-adet").value=k.adet;$("alt-gram").value=k.gram;
       $("alt-tl").value=k.tlKarsiligi;$("alt-nasil").value=k.nasilAlindi||"";$("alt-nerde").value=k.nerdeKullanildi||"";
+      var d=k.durum||"elimde";$("alt-durum-val").value=d;
+      document.querySelectorAll(".alt-modal-durum-btn").forEach(function(b){b.classList.toggle("active",b.dataset.d===d);});
     }
   }
   $("alt-modal").classList.remove("hidden");
@@ -309,10 +362,11 @@ async function akaydet(){
   var tl=parseFloat($("alt-tl").value)||0;
   var nasil=($("alt-nasil").value||"").trim();
   var nerde=($("alt-nerde").value||"").trim();
+  var durum=$("alt-durum-val").value||"elimde";
   if(!tarih){alert("Tarih giriniz.");return;}
   if(!gram||gram<=0){$("alt-gram").focus();return;}
   if(!tl||tl<=0){$("alt-tl").focus();return;}
-  var kayit={tarih:tarih,adet:adet,gram:gram,tlKarsiligi:tl,nasilAlindi:nasil,nerdeKullanildi:nerde};
+  var kayit={tarih:tarih,adet:adet,gram:gram,tlKarsiligi:tl,nasilAlindi:nasil,nerdeKullanildi:nerde,durum:durum};
   if(_aktif){
     var idx=_kayitlar.findIndex(function(x){return x.id===_aktif;});
     if(idx>=0){kayit.id=_aktif;_kayitlar[idx]=kayit;}
