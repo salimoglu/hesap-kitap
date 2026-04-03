@@ -911,3 +911,36 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 /* Gram sonuç kutusu */
 
 
+
+
+/* ══ ALTIN MODÜLİ ══ */
+.alt-wrap { display:flex; flex-direction:column; align-items:center; padding:12px 12px 40px; overflow-y:auto; height:100%; box-sizing:border-box; scrollbar-width:thin; }
+.alt-header { width:100%; max-width:1000px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-md); padding:14px 18px; margin-bottom:12px; }
+.alt-ozet { display:flex; gap:20px; flex-wrap:wrap; }
+.alt-oz-item { display:flex; flex-direction:column; gap:2px; }
+.alt-oz-label { font-size:10px; font-weight:800; letter-spacing:1px; color:var(--text-muted); text-transform:uppercase; }
+.alt-oz-val { font-family:var(--font-brand); font-size:18px; }
+.alt-yeni-btn { background:var(--gold); color:#0f1923; border:none; border-radius:var(--radius-sm); padding:8px 16px; font-size:13px; font-weight:800; cursor:pointer; white-space:nowrap; }
+.alt-yeni-btn:hover { opacity:0.85; }
+/* Filtre */
+.alt-filtre-bar { width:100%; max-width:1000px; display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:10px; }
+.alt-f-btn { background:var(--bg-elevated); border:1px solid var(--border); border-radius:20px; color:var(--text-muted); font-size:11px; font-weight:700; padding:4px 12px; cursor:pointer; transition:all 0.12s; white-space:nowrap; }
+.alt-f-btn:hover { border-color:var(--gold); color:var(--gold); }
+.alt-f-aktif { background:rgba(240,184,64,0.15); border-color:var(--gold); color:var(--gold); }
+.alt-filtre-ozet { width:100%; max-width:1000px; font-size:12px; color:var(--text-muted); padding:4px 2px; margin-bottom:6px; }
+/* Tablo */
+.alt-tablo-wrap { width:100%; max-width:1000px; border:1px solid var(--border); border-radius:var(--radius-md); overflow:hidden; overflow-x:auto; }
+.alt-tablo { width:100%; border-collapse:collapse; min-width:700px; }
+.alt-tablo thead th { font-size:10px; font-weight:800; letter-spacing:0.8px; color:var(--text-muted); padding:8px 12px; text-align:left; background:var(--bg-card); border-bottom:1px solid var(--border); white-space:nowrap; }
+.alt-tablo tbody tr { border-bottom:1px solid var(--border); transition:background 0.08s; }
+.alt-tablo tbody tr:last-child { border-bottom:none; }
+.alt-tablo tbody tr:hover { background:var(--bg-elevated); }
+.alt-tablo td { padding:8px 12px; font-size:12px; }
+.alt-td-tarih { color:var(--text-muted); white-space:nowrap; }
+.alt-td-gram { font-weight:700; color:var(--gold); white-space:nowrap; }
+.alt-td-tl { font-family:var(--font-brand); font-size:13px; white-space:nowrap; }
+.alt-td-gf { color:var(--text-muted); white-space:nowrap; font-size:11px; }
+.alt-td-nasil { color:var(--text-muted); font-size:11px; max-width:150px; }
+.alt-td-c { text-align:center; color:var(--text-muted); }
+.alt-kullanim-tag { background:rgba(240,184,64,0.12); color:var(--gold); border-radius:4px; padding:2px 8px; font-size:11px; font-weight:700; white-space:nowrap; }
+.alt-bos { padding:48px; text-align:center; color:var(--text-muted); }
