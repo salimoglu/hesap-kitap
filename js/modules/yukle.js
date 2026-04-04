@@ -719,3 +719,214 @@ function bagla(){
 async function vinit(){await fbYukle();render();}
 return{init:vinit};
 })();
+
+
+/* ===== MUHTAC MODULE ===== */
+var MuhtacModule=(function(){
+var $=function(id){return document.getElementById(id);};
+var _kisiler=[],_aktifKisi=null;
+
+function mp(n){return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2});}
+function muid(){return "mh"+Date.now()+"_"+Math.random().toString(36).substr(2,5);}
+function mTarih(t){if(!t)return"";var p=t.split("-");return p[2]+"."+p[1]+"."+p[0];}
+
+async function fbYukle(){
+  if(!window._fbDb)return;
+  try{
+    var s=await window._fbDb.ref("muhtac").once("value");
+    _kisiler=Object.values(s.val()||{});
+  }catch(e){}
+}
+async function fbKaydet(){
+  if(!window._fbDb)return;
+  try{
+    var obj={};_kisiler.forEach(function(k){obj[k.id]=k;});
+    await window._fbDb.ref("muhtac").set(obj);
+  }catch(e){}
+}
+
+/* Kişinin toplam aldığı zekat */
+function kisiToplam(k){
+  return (k.zekatlar||[]).reduce(function(s,z){return s+(z.miktar||0);},0);
+}
+
+function render(){
+  var c=$("muhtac-container");if(!c)return;
+  var genelToplam=_kisiler.reduce(function(s,k){return s+kisiToplam(k);},0);
+
+  var h='<div class="mh-wrap">';
+
+  /* Özet */
+  h+='<div class="mh-header">';
+  h+='<div class="mh-ozet">';
+  h+='<div class="mh-oz-item"><span class="mh-oz-label">TOPLAM KİŞİ</span><span class="mh-oz-val">'+_kisiler.length+'</span></div>';
+  h+='<div class="mh-oz-item"><span class="mh-oz-label">TOPLAM ZEKAT</span><span class="mh-oz-val" style="color:var(--green)">'+mp(genelToplam)+' TL</span></div>';
+  h+='</div>';
+  h+='<button class="mh-ekle-btn" id="mh-kisi-ekle-btn">+ Kişi Ekle</button>';
+  h+='</div>';
+
+  /* Kişi listesi */
+  if(!_kisiler.length){
+    h+='<div class="mh-bos"><div style="font-size:40px;margin-bottom:12px">🤲</div><div>Henüz kişi eklenmemiş</div><div style="font-size:12px;margin-top:6px;opacity:0.6">Zekat verdiğin kişileri buraya ekle</div></div>';
+  } else {
+    h+='<div class="mh-liste">';
+    _kisiler.forEach(function(k){
+      var top=kisiToplam(k);
+      var sonZekat=(k.zekatlar&&k.zekatlar.length)?k.zekatlar[k.zekatlar.length-1]:null;
+      h+='<div class="mh-kisi-kart" data-id="'+k.id+'">';
+      h+='<div class="mh-kisi-avatar">'+k.ad.charAt(0).toUpperCase()+'</div>';
+      h+='<div class="mh-kisi-bilgi">';
+      h+='<div class="mh-kisi-ad">'+k.ad+'</div>';
+      if(k.not)h+='<div class="mh-kisi-not">'+k.not+'</div>';
+      h+='<div class="mh-kisi-meta">';
+      h+='<span class="mh-meta-item">'+( k.zekatlar?k.zekatlar.length:0)+' kayıt</span>';
+      if(sonZekat)h+='<span class="mh-meta-item">Son: '+mTarih(sonZekat.tarih)+'</span>';
+      h+='</div></div>';
+      h+='<div class="mh-kisi-sag">';
+      h+='<div class="mh-kisi-toplam">'+mp(top)+' TL</div>';
+      h+='<div class="mh-kisi-toplam-label">toplam zekat</div>';
+      h+='</div>';
+      h+='<button class="mh-sil-kisi-btn row-action-btn sil" data-id="'+k.id+'" title="Kişiyi sil">&#10005;</button>';
+      h+='</div>';
+    });
+    h+='</div>';
+  }
+
+  /* Kişi detay paneli */
+  if(_aktifKisi){
+    var k=_kisiler.find(function(x){return x.id===_aktifKisi;});
+    if(k){
+      var zList=k.zekatlar||[];
+      var zToplam=kisiToplam(k);
+      h+='<div class="mh-detay-panel">';
+      h+='<div class="mh-detay-baslik">';
+      h+='<div class="mh-detay-avatar">'+k.ad.charAt(0).toUpperCase()+'</div>';
+      h+='<div>';
+      h+='<div class="mh-detay-ad">'+k.ad+'</div>';
+      if(k.not)h+='<div class="mh-detay-not">'+k.not+'</div>';
+      h+='</div>';
+      h+='<div class="mh-detay-toplam"><span>'+mp(zToplam)+' TL</span><span class="mh-detay-top-label">toplam</span></div>';
+      h+='<button class="mh-detay-kapat" id="mh-detay-kapat">&#10005;</button>';
+      h+='</div>';
+      /* Zekat ekle */
+      h+='<div class="mh-zekat-form">';
+      h+='<div class="mh-form-row">';
+      h+='<div class="field-group" style="flex:1"><label class="field-label">Tarih</label><input type="date" id="mh-z-tarih" class="field-input" value="'+new Date().toISOString().split("T")[0]+'"/></div>';
+      h+='<div class="field-group" style="flex:1"><label class="field-label">Miktar (TL)</label><input type="number" id="mh-z-miktar" class="field-input" placeholder="0" min="0" step="0.01" inputmode="decimal"/></div>';
+      h+='<div class="field-group" style="flex:2"><label class="field-label">Açıklama (isteğe bağlı)</label><input type="text" id="mh-z-aciklama" class="field-input" placeholder="Ramazan zekatı, fitre..." maxlength="100"/></div>';
+      h+='<button class="mh-ekle-btn" id="mh-zekat-kaydet-btn" style="align-self:flex-end;margin-bottom:0">Ekle</button>';
+      h+='</div></div>';
+      /* Zekat geçmişi */
+      h+='<div class="mh-zekat-liste">';
+      if(!zList.length){
+        h+='<div class="mh-bos" style="padding:24px">Henüz zekat kaydı yok</div>';
+      } else {
+        h+='<table class="mh-tablo"><thead><tr><th>TARİH</th><th>MİKTAR</th><th>AÇIKLAMA</th><th></th></tr></thead><tbody>';
+        zList.slice().reverse().forEach(function(z){
+          h+='<tr class="mh-satir">';
+          h+='<td class="mh-td-tarih">'+mTarih(z.tarih)+'</td>';
+          h+='<td class="mh-td-miktar">'+mp(z.miktar)+' TL</td>';
+          h+='<td class="mh-td-aciklama">'+(z.aciklama||'—')+'</td>';
+          h+='<td><button class="mh-sil-zekat-btn row-action-btn sil" data-zid="'+z.id+'">&#10005;</button></td>';
+          h+='</tr>';
+        });
+        /* Toplam */
+        h+='<tr class="mh-toplam-row"><td>Toplam</td><td>'+mp(zToplam)+' TL</td><td></td><td></td></tr>';
+        h+='</tbody></table>';
+      }
+      h+='</div></div>';
+    }
+  }
+
+  /* Modaller */
+  h+='<div class="bk-modal-overlay hidden" id="mh-modal"><div class="modal-box modal-sm">';
+  h+='<div class="modal-header"><h2 class="modal-title">Kişi Ekle</h2><button class="modal-close" id="mh-modal-kapat">&#10005;</button></div>';
+  h+='<div class="modal-body">';
+  h+='<div class="field-group"><label class="field-label">Ad Soyad</label><input type="text" id="mh-kisi-ad" class="field-input" placeholder="Ad Soyad..." maxlength="60"/></div>';
+  h+='<div class="field-group"><label class="field-label">Not (isteğe bağlı)</label><input type="text" id="mh-kisi-not" class="field-input" placeholder="Mahalle, açıklama..." maxlength="100"/></div>';
+  h+='</div>';
+  h+='<div class="modal-footer"><button class="btn-secondary" id="mh-modal-iptal">İptal</button><button class="btn-primary" id="mh-modal-kaydet">Kaydet</button></div>';
+  h+='</div></div>';
+  h+='</div>';
+
+  c.innerHTML=h;
+  bagla();
+}
+
+function bagla(){
+  /* Kişi kartına tıklayınca detay aç */
+  document.querySelectorAll(".mh-kisi-kart").forEach(function(el){
+    el.addEventListener("click",function(e){
+      if(e.target.classList.contains("mh-sil-kisi-btn")||e.target.closest(".mh-sil-kisi-btn"))return;
+      _aktifKisi=el.dataset.id;
+      render();
+      /* Detay paneline scroll */
+      var panel=document.querySelector(".mh-detay-panel");
+      if(panel)setTimeout(function(){panel.scrollIntoView({behavior:"smooth",block:"start"});},50);
+    });
+  });
+
+  /* Detay kapat */
+  var kapatBtn=$("mh-detay-kapat");
+  if(kapatBtn)kapatBtn.addEventListener("click",function(){_aktifKisi=null;render();});
+
+  /* Zekat kaydet */
+  var zKaydetBtn=$("mh-zekat-kaydet-btn");
+  if(zKaydetBtn){
+    zKaydetBtn.addEventListener("click",async function(){
+      var tarih=$("mh-z-tarih").value;
+      var miktar=parseFloat($("mh-z-miktar").value)||0;
+      var aciklama=($("mh-z-aciklama").value||"").trim();
+      if(!tarih||!miktar||miktar<=0){$("mh-z-miktar").focus();return;}
+      var k=_kisiler.find(function(x){return x.id===_aktifKisi;});
+      if(!k)return;
+      if(!k.zekatlar)k.zekatlar=[];
+      k.zekatlar.push({id:muid(),tarih:tarih,miktar:miktar,aciklama:aciklama});
+      await fbKaydet();
+      $("mh-z-miktar").value="";$("mh-z-aciklama").value="";
+      render();
+    });
+  }
+
+  /* Zekat sil */
+  document.querySelectorAll(".mh-sil-zekat-btn").forEach(function(btn){
+    btn.addEventListener("click",async function(){
+      if(!confirm("Bu zekat kaydını silmek istiyor musunuz?"))return;
+      var k=_kisiler.find(function(x){return x.id===_aktifKisi;});
+      if(k&&k.zekatlar)k.zekatlar=k.zekatlar.filter(function(z){return z.id!==btn.dataset.zid;});
+      await fbKaydet();render();
+    });
+  });
+
+  /* Kişi sil */
+  document.querySelectorAll(".mh-sil-kisi-btn").forEach(function(btn){
+    btn.addEventListener("click",async function(e){
+      e.stopPropagation();
+      if(!confirm("Bu kişiyi ve tüm zekat kayıtlarını silmek istiyor musunuz?"))return;
+      _kisiler=_kisiler.filter(function(k){return k.id!==btn.dataset.id;});
+      if(_aktifKisi===btn.dataset.id)_aktifKisi=null;
+      await fbKaydet();render();
+    });
+  });
+
+  /* Kişi Ekle modal */
+  $("mh-kisi-ekle-btn").addEventListener("click",function(){
+    $("mh-kisi-ad").value="";$("mh-kisi-not").value="";
+    $("mh-modal").classList.remove("hidden");
+    setTimeout(function(){$("mh-kisi-ad").focus();},100);
+  });
+  $("mh-modal-kapat").addEventListener("click",function(){$("mh-modal").classList.add("hidden");});
+  $("mh-modal-iptal").addEventListener("click",function(){$("mh-modal").classList.add("hidden");});
+  $("mh-modal").addEventListener("click",function(e){if(e.target===$("mh-modal"))$("mh-modal").classList.add("hidden");});
+  $("mh-modal-kaydet").addEventListener("click",async function(){
+    var ad=($("mh-kisi-ad").value||"").trim();
+    var not=($("mh-kisi-not").value||"").trim();
+    if(!ad){$("mh-kisi-ad").focus();return;}
+    _kisiler.push({id:muid(),ad:ad,not:not,zekatlar:[]});
+    await fbKaydet();$("mh-modal").classList.add("hidden");render();
+  });
+}
+
+async function minit(){await fbYukle();render();}
+return{init:minit};
+})();
