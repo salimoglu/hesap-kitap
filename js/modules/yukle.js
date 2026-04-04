@@ -424,8 +424,6 @@ return{init:ainit};
 /* ===== VEFA MODULE ===== */
 var VefaModule=(function(){
 var $=function(id){return document.getElementById(id);};
-
-/* Sabit veriler */
 var _uyeler=[],_aylar=[],_yatirimlar=[],_guncelGramFiyat=0;
 var AYLAR_TR=["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
 
@@ -433,7 +431,6 @@ function vpara(n){return Number(n||0).toLocaleString("tr-TR",{minimumFractionDig
 function vgr(n){return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2});}
 function vuid(){return "v"+Date.now()+"_"+Math.random().toString(36).substr(2,5);}
 
-/* Firebase */
 async function vfbYukle(){
   if(!window._fbDb)return;
   try{
@@ -457,111 +454,71 @@ async function vfbKaydet(){
   catch(e){console.warn("vefaKaydet:",e);}
 }
 
-/* Ay key: "2025-06" */
-function ayKey(yil,ay){return yil+"-"+String(ay).padStart(2,"0");}
 function ayLabel(key){var p=key.split("-");return AYLAR_TR[parseInt(p[1])-1]+" "+p[0];}
-
-/* Aylık ödemeler hesapla */
-function aylikOdemeHesapla(ayKey){
-  var ay=_aylar.find(function(a){return a.key===ayKey;});
-  if(!ay)return 0;
-  return ay.miktar||0;
-}
-function uyeToplamOdeme(uyeId){
-  return _aylar.reduce(function(s,a){
-    var ode=a.odemeler&&a.odemeler[uyeId];
-    return s+(ode?a.miktar:0);
-  },0);
-}
-function genelToplamOdeme(){
-  return _uyeler.reduce(function(s,u){return s+uyeToplamOdeme(u.id);},0);
-}
-
-/* Yatırım toplam değeri */
-function yatirimDeger(y){
-  /* Her yatırım: {id, ayKey, tip:"gram"|"ceyrek"|"yarim"|"tam"|"nakit", adet, gram, tutar, aciklama} */
-  if(y.tip==="nakit")return y.tutar||0;
-  if(_guncelGramFiyat>0)return (y.gram||0)*_guncelGramFiyat;
-  return y.tutar||0; /* Alım maliyeti */
-}
-function toplamYatirimDeger(){
-  return _yatirimlar.reduce(function(s,y){return s+yatirimDeger(y);},0);
-}
-function toplamYatirimMaliyet(){
-  return _yatirimlar.reduce(function(s,y){return s+(y.tutar||0);},0);
-}
+function uyeToplamOdeme(uid){return _aylar.reduce(function(s,a){return s+((a.odemeler&&a.odemeler[uid])?a.miktar:0);},0);}
+function genelToplamOdeme(){return _uyeler.reduce(function(s,u){return s+uyeToplamOdeme(u.id);},0);}
+function yatirimDeger(y){if(y.tip==="nakit")return y.tutar||0;if(_guncelGramFiyat>0)return (y.gram||0)*_guncelGramFiyat;return y.tutar||0;}
+function toplamYatirimDeger(){return _yatirimlar.reduce(function(s,y){return s+yatirimDeger(y);},0);}
+function toplamYatirimMaliyet(){return _yatirimlar.reduce(function(s,y){return s+(y.tutar||0);},0);}
 
 function vrender(){
   var c=$("vefa-container");if(!c)return;
+  var toplamOdeme=genelToplamOdeme();
+  var yatirimDegerT=toplamYatirimDeger();
+  var yatirimMaliyet=toplamYatirimMaliyet();
+  var karZarar=yatirimDegerT-yatirimMaliyet;
+  var karPct=yatirimMaliyet>0?((karZarar/yatirimMaliyet)*100):0;
+  var kRenk=karZarar>=0?"var(--green)":"var(--red)";
+
   var h='<div class="vf-wrap">';
 
-  /* ── Özet ── */
-  var toplamOdeme=genelToplamOdeme();
-  var yatirimDegerToplam=toplamYatirimDeger();
-  var yatirimMaliyet=toplamYatirimMaliyet();
-  var karZarar=yatirimDegerToplam-yatirimMaliyet;
-  var karPct=yatirimMaliyet>0?((karZarar/yatirimMaliyet)*100):0;
-
-  h+='<div class="vf-header">';
-  h+='<div class="vf-ozet">';
-  h+='<div class="vf-oz-item"><span class="vf-oz-label">TOPLAM TAHSILAT</span><span class="vf-oz-val">'+vpara(toplamOdeme)+' TL</span></div>';
+  /* Özet */
+  h+='<div class="vf-header"><div class="vf-ozet">';
+  h+='<div class="vf-oz-item"><span class="vf-oz-label">TOPLAM TAHSİLAT</span><span class="vf-oz-val">'+vpara(toplamOdeme)+' TL</span></div>';
   h+='<div class="vf-oz-item"><span class="vf-oz-label">YATIRIM MALİYETİ</span><span class="vf-oz-val">'+vpara(yatirimMaliyet)+' TL</span></div>';
-  h+='<div class="vf-oz-item"><span class="vf-oz-label">GÜNCEL DEĞER</span><span class="vf-oz-val" style="color:var(--gold)">'+vpara(yatirimDegerToplam)+' TL</span></div>';
-  var kRenk=karZarar>=0?"var(--green)":"var(--red)";
+  h+='<div class="vf-oz-item"><span class="vf-oz-label">GÜNCEL DEĞER</span><span class="vf-oz-val" style="color:var(--gold)">'+vpara(yatirimDegerT)+' TL</span></div>';
   h+='<div class="vf-oz-item"><span class="vf-oz-label">KAR / ZARAR</span><span class="vf-oz-val" style="color:'+kRenk+'">'+(karZarar>=0?"+":"")+vpara(karZarar)+' TL <small>'+(karPct>=0?"+":"")+karPct.toFixed(1)+'%</small></span></div>';
-  h+='</div>';
-  h+='<div class="vf-header-btns">';
+  h+='</div><div class="vf-header-btns">';
   h+='<button class="vf-btn-sec" id="vf-uye-ekle-btn">+ Üye Ekle</button>';
-  h+='<button class="vf-btn-sec" id="vf-ay-ekle-btn">+ Ay Ekle</button>';
-  h+='<button class="vf-btn-gold" id="vf-yatirim-ekle-btn">+ Yatırım Ekle</button>';
+  h+='<button class="vf-btn-gold" id="vf-ay-ekle-btn">+ Ay / Yatırım Ekle</button>';
   h+='</div></div>';
 
-  /* ── Tab seçici ── */
+  /* Tablar */
   h+='<div class="vf-tab-bar">';
-  h+='<button class="vf-tab-btn vf-tab-aktif" id="vf-tab-odemeler" data-vt="odemeler">Aylık Ödemeler</button>';
-  h+='<button class="vf-tab-btn" id="vf-tab-yatirimlar" data-vt="yatirimlar">Yatırımlar</button>';
-  h+='<button class="vf-tab-btn" id="vf-tab-uyeler" data-vt="uyeler">Üyeler</button>';
+  h+='<button class="vf-tab-btn vf-tab-aktif" data-vt="odemeler">Aylık Ödemeler</button>';
+  h+='<button class="vf-tab-btn" data-vt="yatirimlar">Yatırımlar</button>';
+  h+='<button class="vf-tab-btn" data-vt="uyeler">Üyeler</button>';
   h+='</div>';
 
-  /* ── Aylık Ödemeler Tablosu ── */
+  /* Panel: Ödemeler */
   h+='<div class="vf-panel" id="vf-panel-odemeler">';
   if(!_aylar.length){
-    h+='<div class="vf-bos">Henüz ay eklenmemiş. "+ Ay Ekle" butonuna tıklayın.</div>';
+    h+='<div class="vf-bos">Henüz ay eklenmemiş. Sağ üstten "+ Ay / Yatırım Ekle" butonuna tıklayın.</div>';
   } else {
-    h+='<div class="vf-tablo-dis"><table class="vf-tablo">';
-    /* Header */
-    h+='<thead><tr><th>AY</th><th>AYLIK ÖDEME</th>';
-    _uyeler.forEach(function(u){h+='<th>'+u.ad.split(" ")[0]+'</th>';});
-    h+='<th>TOPLAM TAHSILAT</th><th></th></tr></thead><tbody>';
-    /* Her ay */
+    h+='<div class="vf-tablo-dis"><table class="vf-tablo"><thead><tr>';
+    h+='<th>AY</th><th>AYLIK ÖDEME</th>';
+    _uyeler.forEach(function(u){h+='<th>'+u.ad.split(" ")[0]+'<br><span style="font-weight:400;font-size:10px">'+u.ad.split(" ")[1]+'</span></th>';});
+    h+='<th>TAHSİLAT</th><th></th></tr></thead><tbody>';
     var ayToplamToplam=0;
     _aylar.slice().sort(function(a,b){return a.key.localeCompare(b.key);}).forEach(function(ay){
-      var ayToplam=0;
-      h+='<tr class="vf-satir">';
-      h+='<td class="vf-td-ay">'+ayLabel(ay.key)+'</td>';
+      var ayTah=0;
+      h+='<tr class="vf-satir"><td class="vf-td-ay">'+ayLabel(ay.key)+'</td>';
       h+='<td class="vf-td-miktar">'+vpara(ay.miktar)+' TL</td>';
       _uyeler.forEach(function(u){
         var odedi=(ay.odemeler&&ay.odemeler[u.id])||false;
-        if(odedi)ayToplam+=ay.miktar;
-        h+='<td class="vf-td-uye">';
-        h+='<button class="vf-odeme-btn '+(odedi?"vf-odedi":"vf-bekliyor")+'" data-ay="'+ay.key+'" data-uid="'+u.id+'">';
-        h+=odedi?(vpara(ay.miktar)+' TL'):'—';
-        h+='</button></td>';
+        if(odedi)ayTah+=ay.miktar;
+        h+='<td><button class="vf-odeme-btn '+(odedi?"vf-odedi":"vf-bekliyor")+'" data-ay="'+ay.key+'" data-uid="'+u.id+'">'+(odedi?(vpara(ay.miktar)+' TL'):'—')+'</button></td>';
       });
-      ayToplamToplam+=ayToplam;
-      h+='<td class="vf-td-toplam">'+vpara(ayToplam)+' TL</td>';
-      h+='<td><button class="vf-sil-btn row-action-btn sil" data-ay="'+ay.key+'">&#10005;</button></td>';
-      h+='</tr>';
+      ayToplamToplam+=ayTah;
+      h+='<td class="vf-td-toplam">'+vpara(ayTah)+' TL</td>';
+      h+='<td><button class="vf-sil-btn row-action-btn sil" data-ay="'+ay.key+'">&#10005;</button></td></tr>';
     });
-    /* Ortalama satırı */
-    var aylikortalama=_aylar.length>0?(_aylar.reduce(function(s,a){return s+a.miktar;},0)/_aylar.length):0;
-    h+='<tr class="vf-ortalama-row"><td>Ortalama</td><td>'+vpara(aylikortalama)+' TL</td>';
-    _uyeler.forEach(function(u){
-      var uOrt=_aylar.length>0?(uyeToplamOdeme(u.id)/_aylar.length):0;
-      h+='<td>'+vpara(uOrt)+'</td>';
-    });
-    h+='<td>'+vpara(ayToplamToplam/_aylar.length)+'</td><td></td></tr>';
-    /* Toplam satırı */
+    /* Ortalama */
+    var ort=_aylar.reduce(function(s,a){return s+a.miktar;},0)/(_aylar.length||1);
+    h+='<tr class="vf-ortalama-row"><td>Ortalama</td><td>'+vpara(ort)+' TL</td>';
+    _uyeler.forEach(function(u){h+='<td>'+vpara(uyeToplamOdeme(u.id)/(_aylar.length||1))+' TL</td>';});
+    h+='<td>'+vpara(ayToplamToplam/(_aylar.length||1))+' TL</td><td></td></tr>';
+    /* Toplam */
     h+='<tr class="vf-toplam-row"><td>Toplam</td><td></td>';
     _uyeler.forEach(function(u){h+='<td>'+vpara(uyeToplamOdeme(u.id))+' TL</td>';});
     h+='<td>'+vpara(ayToplamToplam)+' TL</td><td></td></tr>';
@@ -569,128 +526,137 @@ function vrender(){
   }
   h+='</div>';
 
-  /* ── Yatırımlar Tablosu ── */
+  /* Panel: Yatırımlar */
   h+='<div class="vf-panel" id="vf-panel-yatirimlar" style="display:none">';
   if(!_yatirimlar.length){
     h+='<div class="vf-bos">Henüz yatırım eklenmemiş.</div>';
   } else {
-    /* Altın gramı özeti */
     var altinGram=_yatirimlar.filter(function(y){return y.tip!=="nakit";}).reduce(function(s,y){return s+(y.gram||0);},0);
-    var nakitToplam=_yatirimlar.filter(function(y){return y.tip==="nakit";}).reduce(function(s,y){return s+(y.tutar||0);},0);
-    h+='<div class="vf-yatirim-ozet">';
-    h+='<span>&#127950; <b>'+vgr(altinGram)+' gr</b> altın</span>';
-    h+='<span>💵 <b>'+vpara(nakitToplam)+' TL</b> nakit</span>';
-    if(_guncelGramFiyat>0){h+='<span style="color:var(--gold)">Gram Altın: '+vpara(_guncelGramFiyat)+' TL</span>';}
+    var nakitT=_yatirimlar.filter(function(y){return y.tip==="nakit";}).reduce(function(s,y){return s+(y.tutar||0);},0);
+    h+='<div class="vf-yatirim-ozet"><span>&#127950; <b>'+vgr(altinGram)+' gr</b> altın</span><span>💵 <b>'+vpara(nakitT)+' TL</b> nakit</span>';
+    if(_guncelGramFiyat>0)h+='<span style="color:var(--gold)">Gram Altın: '+vpara(_guncelGramFiyat)+' TL</span>';
     h+='</div>';
-    h+='<div class="vf-tablo-dis"><table class="vf-tablo">';
-    h+='<thead><tr><th>AY</th><th>TİP</th><th>ADET</th><th>GRAM</th><th>ALINAN TUTAR</th><th>GÜNCEL DEĞER</th><th>AÇIKLAMA</th><th></th></tr></thead><tbody>';
-
-    /* Ay bazlı gruplayarak göster */
-    var ayGruplari={};
-    _yatirimlar.forEach(function(y){if(!ayGruplari[y.ayKey])ayGruplari[y.ayKey]=[];ayGruplari[y.ayKey].push(y);});
-    Object.keys(ayGruplari).sort().forEach(function(key){
-      var grup=ayGruplari[key];
-      grup.forEach(function(y,i){
+    h+='<div class="vf-tablo-dis"><table class="vf-tablo"><thead><tr>';
+    h+='<th>AY</th><th>TİP</th><th>ADET</th><th>GRAM</th><th>MALİYET</th><th>GÜNCEL DEĞER</th><th>AÇIKLAMA</th><th></th></tr></thead><tbody>';
+    var ayG={};
+    _yatirimlar.forEach(function(y){if(!ayG[y.ayKey])ayG[y.ayKey]=[];ayG[y.ayKey].push(y);});
+    Object.keys(ayG).sort().forEach(function(key){
+      ayG[key].forEach(function(y,i){
         var gd=yatirimDeger(y);
+        var tipL={gram:"1 GRAM",ceyrek:"1 ÇEYREK",yarim:"1 YARIM",tam:"1 TAM",nakit:"NAKİT"}[y.tip]||y.tip;
         h+='<tr class="vf-satir">';
-        h+=i===0?'<td class="vf-td-ay" rowspan="'+grup.length+'">'+ayLabel(key)+'</td>':'';
-        var tipLabel={gram:"1 GRAM",ceyrek:"1 ÇEYREK",yarim:"1 YARIM",tam:"1 TAM",nakit:"NAKİT"}[y.tip]||y.tip;
-        h+='<td><span class="vf-tip-tag vf-tip-'+y.tip+'">'+tipLabel+'</span></td>';
-        h+='<td style="text-align:center">'+( y.tip!=="nakit"?(y.adet||1):"—")+'</td>';
+        if(i===0)h+='<td class="vf-td-ay" rowspan="'+ayG[key].length+'">'+ayLabel(key)+'</td>';
+        h+='<td><span class="vf-tip-tag vf-tip-'+y.tip+'">'+tipL+'</span></td>';
+        h+='<td style="text-align:center">'+(y.tip!=="nakit"?(y.adet||1):"—")+'</td>';
         h+='<td style="color:var(--gold);font-weight:700">'+(y.tip!=="nakit"?vgr(y.gram||0)+" gr":"—")+'</td>';
         h+='<td>'+vpara(y.tutar)+' TL</td>';
         h+='<td style="color:var(--gold)">'+(_guncelGramFiyat>0?vpara(gd)+' TL':"—")+'</td>';
         h+='<td style="color:var(--text-muted);font-size:11px">'+(y.aciklama||"")+'</td>';
-        h+='<td><button class="vf-sil-btn row-action-btn sil" data-yid="'+y.id+'">&#10005;</button></td>';
-        h+='</tr>';
+        h+='<td><button class="vf-sil-btn row-action-btn sil" data-yid="'+y.id+'">&#10005;</button></td></tr>';
       });
     });
-    /* Toplam satır */
-    var yMaliyet=toplamYatirimMaliyet();
+    var yM=toplamYatirimMaliyet();
     h+='<tr class="vf-toplam-row"><td>Toplam</td><td></td><td></td><td style="color:var(--gold);font-weight:700">'+vgr(altinGram)+' gr</td>';
-    h+='<td>'+vpara(yMaliyet)+' TL</td>';
-    h+='<td style="color:var(--gold)">'+((_guncelGramFiyat>0)?vpara(yatirimDegerToplam)+' TL':"—")+'</td>';
-    h+='<td></td><td></td></tr>';
+    h+='<td>'+vpara(yM)+' TL</td><td style="color:var(--gold)">'+(_guncelGramFiyat>0?vpara(yatirimDegerT)+' TL':"—")+'</td><td></td><td></td></tr>';
     h+='</tbody></table></div>';
   }
   h+='</div>';
 
-  /* ── Üyeler ── */
+  /* Panel: Üyeler */
   h+='<div class="vf-panel" id="vf-panel-uyeler" style="display:none">';
   h+='<div class="vf-uyeler-liste">';
   _uyeler.forEach(function(u){
-    h+='<div class="vf-uye-kart">';
-    h+='<div class="vf-uye-avatar">'+u.ad.charAt(0)+'</div>';
+    h+='<div class="vf-uye-kart"><div class="vf-uye-avatar">'+u.ad.charAt(0)+'</div>';
     h+='<div class="vf-uye-info"><div class="vf-uye-ad">'+u.ad+'</div><div class="vf-uye-rol">'+u.rol+'</div></div>';
     h+='<div class="vf-uye-toplam">'+vpara(uyeToplamOdeme(u.id))+' TL<span class="vf-uye-top-label">toplam ödeme</span></div>';
-    h+='<button class="vf-sil-btn row-action-btn sil" data-uid2="'+u.id+'" style="margin-left:auto">&#10005;</button>';
-    h+='</div>';
+    h+='<button class="vf-sil-btn row-action-btn sil" data-uid2="'+u.id+'" style="margin-left:auto">&#10005;</button></div>';
   });
   h+='</div></div>';
 
-  /* Modaller */
-  h+=vModalAyEkle()+vModalYatirimEkle()+vModalUyeEkle();
+  /* ── MODAL: Ay + Yatırım Ekle (tek modal) ── */
+  var buAy=new Date().getFullYear()+"-"+String(new Date().getMonth()+1).padStart(2,"0");
+  h+='<div class="bk-modal-overlay hidden" id="vf-modal"><div class="modal-box" style="max-width:560px">';
+  h+='<div class="modal-header"><h2 class="modal-title">Ay / Yatırım Ekle</h2><button class="modal-close" id="vf-modal-kapat">&#10005;</button></div>';
+  h+='<div class="modal-body">';
+  /* Ay ve miktar */
+  h+='<div style="display:flex;gap:12px;flex-wrap:wrap">';
+  h+='<div class="field-group" style="flex:1"><label class="field-label">Ay</label><input type="month" id="vf-ay-key" class="field-input" value="'+buAy+'"/></div>';
+  h+='<div class="field-group" style="flex:1"><label class="field-label">Aylık Ödeme (TL/kişi)</label><input type="number" id="vf-ay-miktar" class="field-input" placeholder="0" min="0" step="0.01" inputmode="decimal"/></div>';
   h+='</div>';
+  /* Kim ödedi */
+  h+='<div class="field-group"><label class="field-label">Kim Ödedi?</label><div class="vf-odeme-checklar" id="vf-odeme-checklar">';
+  _uyeler.forEach(function(u){
+    h+='<label class="vf-check-label"><input type="checkbox" class="vf-odeme-cb" value="'+u.id+'" checked> '+u.ad+'</label>';
+  });
+  h+='</div></div>';
+  /* Yatırım kalemleri */
+  h+='<div class="field-group">';
+  h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">';
+  h+='<label class="field-label" style="margin:0">Yatırımlar (opsiyonel — birden fazla ekleyebilirsin)</label>';
+  h+='<button class="vf-btn-sec" id="vf-kalem-ekle-btn" style="font-size:11px;padding:4px 10px">+ Kalem Ekle</button>';
+  h+='</div>';
+  h+='<div id="vf-kalemler"></div>';
+  h+='</div>';
+  h+='</div>';
+  h+='<div class="modal-footer"><button class="btn-secondary" id="vf-modal-iptal">İptal</button><button class="btn-primary" id="vf-modal-kaydet">Kaydet</button></div>';
+  h+='</div></div>';
 
+  /* Modal: Üye Ekle */
+  h+='<div class="bk-modal-overlay hidden" id="vf-uye-modal"><div class="modal-box modal-sm">';
+  h+='<div class="modal-header"><h2 class="modal-title">Üye Ekle</h2><button class="modal-close" id="vf-uye-modal-kapat">&#10005;</button></div>';
+  h+='<div class="modal-body">';
+  h+='<div class="field-group"><label class="field-label">Ad Soyad</label><input type="text" id="vf-uye-ad" class="field-input" placeholder="Ad Soyad..." maxlength="60"/></div>';
+  h+='<div class="field-group"><label class="field-label">Rol</label><input type="text" id="vf-uye-rol" class="field-input" value="Üye" maxlength="30"/></div>';
+  h+='</div>';
+  h+='<div class="modal-footer"><button class="btn-secondary" id="vf-uye-iptal">İptal</button><button class="btn-primary" id="vf-uye-kaydet">Kaydet</button></div>';
+  h+='</div></div>';
+
+  h+='</div>';
   c.innerHTML=h;
   vbagla();
 }
 
-function vModalAyEkle(){
-  var buAy=new Date().getFullYear()+"-"+String(new Date().getMonth()+1).padStart(2,"0");
-  var h='<div class="bk-modal-overlay hidden" id="vf-ay-modal"><div class="modal-box modal-sm">';
-  h+='<div class="modal-header"><h2 class="modal-title">Ay Ekle / Düzenle</h2><button class="modal-close" id="vf-ay-modal-kapat">&#10005;</button></div>';
-  h+='<div class="modal-body">';
-  h+='<div class="field-group"><label class="field-label">Ay</label><input type="month" id="vf-ay-key" class="field-input" value="'+buAy+'"/></div>';
-  h+='<div class="field-group"><label class="field-label">Aylık Ödeme Miktarı (TL / kişi)</label><input type="number" id="vf-ay-miktar" class="field-input" placeholder="0" min="0" step="0.01" inputmode="decimal"/></div>';
-  h+='<div class="field-group"><label class="field-label">Ödemeler</label><div id="vf-ay-odemeler"></div></div>';
-  h+='</div>';
-  h+='<div class="modal-footer"><button class="btn-secondary" id="vf-ay-iptal">İptal</button><button class="btn-primary" id="vf-ay-kaydet">Kaydet</button></div>';
-  h+='</div></div>';
-  return h;
-}
-
-function vModalYatirimEkle(){
-  var buAy=new Date().getFullYear()+"-"+String(new Date().getMonth()+1).padStart(2,"0");
-  var h='<div class="bk-modal-overlay hidden" id="vf-yatirim-modal"><div class="modal-box modal-sm">';
-  h+='<div class="modal-header"><h2 class="modal-title">Yatırım Ekle</h2><button class="modal-close" id="vf-yatirim-modal-kapat">&#10005;</button></div>';
-  h+='<div class="modal-body">';
-  h+='<div class="field-group"><label class="field-label">Ay</label><input type="month" id="vf-y-ay" class="field-input" value="'+buAy+'"/></div>';
-  h+='<div class="field-group"><label class="field-label">Yatırım Tipi</label>';
-  h+='<select id="vf-y-tip" class="field-input">';
+/* Yeni kalem satırı HTML'i */
+var _kalemSayac=0;
+function kalemSatiriHtml(){
+  var i=_kalemSayac++;
+  var h='<div class="vf-kalem-satir" id="vf-kalem-'+i+'">';
+  h+='<select class="vf-kalem-tip field-input" data-i="'+i+'" style="flex:1.2" id="vf-k-tip-'+i+'">';
   h+='<option value="gram">1 Gram Altın</option>';
   h+='<option value="ceyrek">Çeyrek Altın</option>';
   h+='<option value="yarim">Yarım Altın</option>';
   h+='<option value="tam">Tam Altın</option>';
   h+='<option value="nakit">Nakit</option>';
-  h+='</select></div>';
-  h+='<div id="vf-y-altin-wrap">';
-  h+='<div class="field-group"><label class="field-label">Adet</label><input type="number" id="vf-y-adet" class="field-input" value="1" min="1" step="1"/></div>';
-  h+='<div class="field-group"><label class="field-label">Gram</label><input type="number" id="vf-y-gram" class="field-input" placeholder="7.20" min="0" step="0.01" inputmode="decimal"/></div>';
+  h+='</select>';
+  h+='<input type="number" class="field-input vf-k-adet" id="vf-k-adet-'+i+'" placeholder="Adet" value="1" min="1" step="1" style="flex:0.7"/>';
+  h+='<input type="number" class="field-input vf-k-gram" id="vf-k-gram-'+i+'" placeholder="Gram" min="0" step="0.01" inputmode="decimal" style="flex:0.8"/>';
+  h+='<input type="number" class="field-input vf-k-tutar" id="vf-k-tutar-'+i+'" placeholder="TL" min="0" step="0.01" inputmode="decimal" style="flex:1"/>';
+  h+='<input type="text" class="field-input vf-k-aciklama" id="vf-k-aciklama-'+i+'" placeholder="Açıklama" maxlength="80" style="flex:1.2"/>';
+  h+='<button class="vf-kalem-sil-btn" data-i="'+i+'" style="flex-shrink:0;background:transparent;border:none;color:var(--red);font-size:16px;cursor:pointer;padding:4px">&#10005;</button>';
   h+='</div>';
-  h+='<div class="field-group"><label class="field-label">Alınan Tutar / Maliyet (TL)</label><input type="number" id="vf-y-tutar" class="field-input" placeholder="0" min="0" step="0.01" inputmode="decimal"/></div>';
-  h+='<div class="field-group"><label class="field-label">Açıklama</label><input type="text" id="vf-y-aciklama" class="field-input" placeholder="İsteğe bağlı..." maxlength="100"/></div>';
-  h+='</div>';
-  h+='<div class="modal-footer"><button class="btn-secondary" id="vf-yatirim-iptal">İptal</button><button class="btn-primary" id="vf-yatirim-kaydet">Kaydet</button></div>';
-  h+='</div></div>';
   return h;
 }
 
-function vModalUyeEkle(){
-  var h='<div class="bk-modal-overlay hidden" id="vf-uye-modal"><div class="modal-box modal-sm">';
-  h+='<div class="modal-header"><h2 class="modal-title">Üye Ekle</h2><button class="modal-close" id="vf-uye-modal-kapat">&#10005;</button></div>';
-  h+='<div class="modal-body">';
-  h+='<div class="field-group"><label class="field-label">Ad Soyad</label><input type="text" id="vf-uye-ad" class="field-input" placeholder="Ad Soyad..." maxlength="60"/></div>';
-  h+='<div class="field-group"><label class="field-label">Rol</label>';
-  h+='<input type="text" id="vf-uye-rol" class="field-input" placeholder="Üye, Başkan..." value="Üye" maxlength="30"/></div>';
-  h+='</div>';
-  h+='<div class="modal-footer"><button class="btn-secondary" id="vf-uye-iptal">İptal</button><button class="btn-primary" id="vf-uye-kaydet">Kaydet</button></div>';
-  h+='</div></div>';
-  return h;
+function kalemEkle(){
+  var wrap=$("vf-kalemler");
+  var div=document.createElement("div");
+  div.innerHTML=kalemSatiriHtml();
+  var satir=div.firstChild;
+  wrap.appendChild(satir);
+  /* Tip değişince gram/adet gizle */
+  satir.querySelector(".vf-kalem-tip").addEventListener("change",function(){
+    var nakit=this.value==="nakit";
+    satir.querySelector(".vf-k-adet").style.display=nakit?"none":"";
+    satir.querySelector(".vf-k-gram").style.display=nakit?"none":"";
+  });
+  /* Sil */
+  satir.querySelector(".vf-kalem-sil-btn").addEventListener("click",function(){
+    satir.remove();
+  });
 }
 
 function vbagla(){
-  /* Tab geçişi */
+  /* Tablar */
   document.querySelectorAll(".vf-tab-btn").forEach(function(btn){
     btn.addEventListener("click",function(){
       document.querySelectorAll(".vf-tab-btn").forEach(function(b){b.classList.remove("vf-tab-aktif");});
@@ -705,7 +671,7 @@ function vbagla(){
     btn.addEventListener("click",async function(){
       var key=btn.dataset.ay,uid=btn.dataset.uid;
       var ay=_aylar.find(function(a){return a.key===key;});
-      if(!ay){return;}
+      if(!ay)return;
       if(!ay.odemeler)ay.odemeler={};
       ay.odemeler[uid]=!ay.odemeler[uid];
       await vfbKaydet();vrender();
@@ -718,6 +684,7 @@ function vbagla(){
       if(btn.dataset.ay){
         if(!confirm("Bu ayı silmek istiyor musunuz?"))return;
         _aylar=_aylar.filter(function(a){return a.key!==btn.dataset.ay;});
+        _yatirimlar=_yatirimlar.filter(function(y){return y.ayKey!==btn.dataset.ay;});
       } else if(btn.dataset.yid){
         if(!confirm("Bu yatırımı silmek istiyor musunuz?"))return;
         _yatirimlar=_yatirimlar.filter(function(y){return y.id!==btn.dataset.yid;});
@@ -729,81 +696,74 @@ function vbagla(){
     });
   });
 
-  /* Ay Ekle modal */
+  /* Ana modal aç */
   $("vf-ay-ekle-btn").addEventListener("click",function(){
-    /* Üye checkbox'larını doldur */
-    var wrap=$("vf-ay-odemeler");
-    var html="";
-    _uyeler.forEach(function(u){
-      html+='<label style="display:flex;align-items:center;gap:8px;margin-bottom:6px;cursor:pointer;">';
-      html+='<input type="checkbox" value="'+u.id+'" checked style="width:16px;height:16px;"> ';
-      html+=u.ad+'</label>';
-    });
-    wrap.innerHTML=html;
-    $("vf-ay-modal").classList.remove("hidden");
+    /* Mevcut aydaki veriyi yükle */
+    var buAy=new Date().getFullYear()+"-"+String(new Date().getMonth()+1).padStart(2,"0");
+    $("vf-ay-key").value=buAy;$("vf-ay-miktar").value="";
+    $("vf-kalemler").innerHTML="";_kalemSayac=0;
+    /* Checkbox'ları sıfırla */
+    document.querySelectorAll(".vf-odeme-cb").forEach(function(cb){cb.checked=true;});
+    $("vf-modal").classList.remove("hidden");
     setTimeout(function(){$("vf-ay-miktar").focus();},100);
+    /* Ay değişince mevcut veriyi yükle */
+    $("vf-ay-key").onchange=function(){
+      var mevcut=_aylar.find(function(a){return a.key===$("vf-ay-key").value;});
+      if(mevcut){
+        $("vf-ay-miktar").value=mevcut.miktar;
+        document.querySelectorAll(".vf-odeme-cb").forEach(function(cb){
+          cb.checked=!!(mevcut.odemeler&&mevcut.odemeler[cb.value]);
+        });
+      } else {
+        $("vf-ay-miktar").value="";
+        document.querySelectorAll(".vf-odeme-cb").forEach(function(cb){cb.checked=true;});
+      }
+    };
   });
-  $("vf-ay-modal-kapat").addEventListener("click",function(){$("vf-ay-modal").classList.add("hidden");});
-  $("vf-ay-iptal").addEventListener("click",function(){$("vf-ay-modal").classList.add("hidden");});
-  $("vf-ay-modal").addEventListener("click",function(e){if(e.target===$("vf-ay-modal"))$("vf-ay-modal").classList.add("hidden");});
-  $("vf-ay-kaydet").addEventListener("click",async function(){
+  $("vf-modal-kapat").addEventListener("click",function(){$("vf-modal").classList.add("hidden");});
+  $("vf-modal-iptal").addEventListener("click",function(){$("vf-modal").classList.add("hidden");});
+  $("vf-modal").addEventListener("click",function(e){if(e.target===$("vf-modal"))$("vf-modal").classList.add("hidden");});
+
+  /* Kalem ekle butonu */
+  $("vf-kalem-ekle-btn").addEventListener("click",kalemEkle);
+
+  /* Modal kaydet */
+  $("vf-modal-kaydet").addEventListener("click",async function(){
     var key=$("vf-ay-key").value;
     var miktar=parseFloat($("vf-ay-miktar").value)||0;
     if(!key){alert("Ay seçiniz.");return;}
     if(!miktar||miktar<=0){$("vf-ay-miktar").focus();return;}
+
+    /* Ödemeler */
     var odemeler={};
-    document.querySelectorAll("#vf-ay-odemeler input[type=checkbox]").forEach(function(cb){
-      if(cb.checked)odemeler[cb.value]=true;
+    document.querySelectorAll(".vf-odeme-cb").forEach(function(cb){
+      odemeler[cb.value]=cb.checked;
     });
-    /* Mevcut ay varsa güncelle, yoksa ekle */
     var mevcut=_aylar.find(function(a){return a.key===key;});
-    if(mevcut){mevcut.miktar=miktar;mevcut.odemeler=Object.assign({},mevcut.odemeler,odemeler);}
+    if(mevcut){mevcut.miktar=miktar;mevcut.odemeler=odemeler;}
     else{_aylar.push({key:key,miktar:miktar,odemeler:odemeler});}
-    await vfbKaydet();
-    $("vf-ay-modal").classList.add("hidden");
-    vrender();
-  });
 
-  /* Yatırım Ekle modal */
-  $("vf-yatirim-ekle-btn").addEventListener("click",function(){
-    $("vf-yatirim-modal").classList.remove("hidden");
-    /* Tip değişince gram alanını göster/gizle */
-    $("vf-y-tip").addEventListener("change",function(){
-      $("vf-y-altin-wrap").style.display=this.value==="nakit"?"none":"";
+    /* Yatırım kalemleri */
+    var satirlar=document.querySelectorAll(".vf-kalem-satir");
+    satirlar.forEach(function(satir){
+      var i=satir.id.replace("vf-kalem-","");
+      var tip=$("vf-k-tip-"+i)?.value||"gram";
+      var tutar=parseFloat($("vf-k-tutar-"+i)?.value)||0;
+      if(!tutar||tutar<=0)return; /* boş satırları atla */
+      var kayit={id:vuid(),ayKey:key,tip:tip,tutar:tutar,aciklama:($("vf-k-aciklama-"+i)?.value||"").trim()};
+      if(tip!=="nakit"){
+        kayit.adet=parseInt($("vf-k-adet-"+i)?.value)||1;
+        kayit.gram=parseFloat($("vf-k-gram-"+i)?.value)||0;
+      }
+      _yatirimlar.push(kayit);
     });
-    setTimeout(function(){$("vf-y-tutar").focus();},100);
-  });
-  $("vf-yatirim-modal-kapat").addEventListener("click",function(){$("vf-yatirim-modal").classList.add("hidden");});
-  $("vf-yatirim-iptal").addEventListener("click",function(){$("vf-yatirim-modal").classList.add("hidden");});
-  $("vf-yatirim-modal").addEventListener("click",function(e){if(e.target===$("vf-yatirim-modal"))$("vf-yatirim-modal").classList.add("hidden");});
-  $("vf-yatirim-kaydet").addEventListener("click",async function(){
-    var ayKey=$("vf-y-ay").value;
-    var tip=$("vf-y-tip").value;
-    var tutar=parseFloat($("vf-y-tutar").value)||0;
-    var aciklama=$("vf-y-aciklama").value.trim();
-    if(!ayKey){alert("Ay seçiniz.");return;}
-    if(!tutar||tutar<=0){$("vf-y-tutar").focus();return;}
-    var kayit={id:vuid(),ayKey:ayKey,tip:tip,tutar:tutar,aciklama:aciklama};
-    if(tip!=="nakit"){
-      kayit.adet=parseInt($("vf-y-adet").value)||1;
-      kayit.gram=parseFloat($("vf-y-gram").value)||0;
-    }
-    _yatirimlar.push(kayit);
+
     await vfbKaydet();
-    $("vf-yatirim-modal").classList.add("hidden");
-    /* Yatırımlar tabına geç */
-    document.querySelectorAll(".vf-tab-btn").forEach(function(b){b.classList.remove("vf-tab-aktif");});
-    document.querySelectorAll(".vf-panel").forEach(function(p){p.style.display="none";});
-    $("vf-tab-yatirimlar").classList.add("vf-tab-aktif");
-    $("vf-panel-yatirimlar").style.display="";
+    $("vf-modal").classList.add("hidden");
     vrender();
-    /* Tekrar tab aç */
-    $("vf-panel-odemeler").style.display="none";
-    $("vf-panel-yatirimlar").style.display="";
-    $("vf-panel-uyeler").style.display="none";
   });
 
-  /* Üye Ekle modal */
+  /* Üye Ekle */
   $("vf-uye-ekle-btn").addEventListener("click",function(){
     $("vf-uye-ad").value="";$("vf-uye-rol").value="Üye";
     $("vf-uye-modal").classList.remove("hidden");
@@ -817,9 +777,7 @@ function vbagla(){
     var rol=($("vf-uye-rol").value||"Üye").trim();
     if(!ad){$("vf-uye-ad").focus();return;}
     _uyeler.push({id:vuid(),ad:ad,rol:rol});
-    await vfbKaydet();
-    $("vf-uye-modal").classList.add("hidden");
-    vrender();
+    await vfbKaydet();$("vf-uye-modal").classList.add("hidden");vrender();
   });
 }
 
