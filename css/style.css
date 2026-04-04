@@ -961,7 +961,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .alt-satir-satildi{opacity:0.4;}
 .alt-td-tarih{color:var(--text-muted);white-space:nowrap;font-size:13px;}
 .alt-td-gram{font-weight:800;color:var(--gold);white-space:nowrap;font-size:14px;}
-.alt-td-tl{font-family:var(--font-brand);font-size:14px;white-space:nowrap;}
+.alt-td-tl{font-size:13px;font-weight:600;white-space:nowrap;}
 .alt-td-gf{color:var(--text-muted);font-size:12px;white-space:nowrap;}
 .alt-td-nasil{color:var(--text-muted);font-size:12px;max-width:150px;}
 .alt-td-aks{white-space:nowrap;}
@@ -969,7 +969,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .alt-tag{background:rgba(240,184,64,0.14);color:var(--gold);border-radius:4px;padding:3px 10px;font-size:12px;font-weight:800;white-space:nowrap;}
 
 /* ── Durum butonları ── */
-.alt-durum-btn{border:none;border-radius:12px;font-size:11px;font-weight:800;padding:4px 12px;cursor:pointer;letter-spacing:0.5px;transition:all 0.12s;}
+.alt-durum-btn{border:none;border-radius:12px;font-size:12px;font-weight:500;padding:5px 14px;cursor:pointer;letter-spacing:1px;transition:all 0.12s;}
 .alt-elimde-btn{background:rgba(52,211,153,0.15);color:var(--green);}
 .alt-elimde-btn:hover{background:rgba(52,211,153,0.3);}
 .alt-satildi-btn{background:rgba(248,113,113,0.15);color:var(--red);}
