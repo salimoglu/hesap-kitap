@@ -1146,3 +1146,57 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .vf2-k-sil{background:transparent;border:none;color:var(--red);font-size:16px;cursor:pointer;padding:4px;}
 .vf2-gram-goster{flex:1;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-sm);padding:7px 10px;font-size:12px;color:var(--gold);font-weight:700;display:flex;align-items:center;}
 .vf2-bos{padding:32px;text-align:center;color:var(--text-muted);}
+
+
+/* ══ MUHTAC & ZEKAT MODÜLİ ══ */
+.mh-wrap{display:flex;flex-direction:column;gap:12px;padding:14px 14px 28px;width:100%;box-sizing:border-box;}
+/* Header */
+.mh-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px 20px;}
+.mh-ozet{display:flex;gap:28px;flex-wrap:wrap;}
+.mh-oz-item{display:flex;flex-direction:column;gap:4px;}
+.mh-oz-label{font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text-muted);text-transform:uppercase;}
+.mh-oz-val{font-family:var(--font-brand);font-size:24px;line-height:1;}
+.mh-ekle-btn{background:var(--green);color:#0f1923;border:none;border-radius:var(--radius-sm);padding:9px 18px;font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap;}
+.mh-ekle-btn:hover{opacity:0.85;}
+/* Liste */
+.mh-liste{display:flex;flex-direction:column;gap:8px;}
+.mh-kisi-kart{display:flex;align-items:center;gap:14px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 18px;cursor:pointer;transition:border-color 0.15s;}
+.mh-kisi-kart:hover{border-color:var(--green);}
+.mh-kisi-avatar{width:44px;height:44px;border-radius:50%;background:rgba(52,211,153,0.15);border:2px solid var(--green);display:flex;align-items:center;justify-content:center;font-family:var(--font-brand);font-size:22px;color:var(--green);flex-shrink:0;}
+.mh-kisi-bilgi{flex:1;}
+.mh-kisi-ad{font-size:15px;font-weight:800;margin-bottom:3px;}
+.mh-kisi-not{font-size:12px;color:var(--text-muted);margin-bottom:4px;}
+.mh-kisi-meta{display:flex;gap:12px;flex-wrap:wrap;}
+.mh-meta-item{font-size:11px;color:var(--text-muted);background:var(--bg-elevated);border-radius:4px;padding:2px 8px;}
+.mh-kisi-sag{display:flex;flex-direction:column;align-items:flex-end;gap:2px;margin-left:auto;}
+.mh-kisi-toplam{font-family:var(--font-brand);font-size:20px;color:var(--green);}
+.mh-kisi-toplam-label{font-size:10px;color:var(--text-muted);font-weight:600;}
+/* Detay paneli */
+.mh-detay-panel{background:var(--bg-card);border:1px solid var(--green);border-radius:var(--radius-md);overflow:hidden;}
+.mh-detay-baslik{display:flex;align-items:center;gap:14px;padding:16px 20px;background:rgba(52,211,153,0.06);border-bottom:1px solid var(--border);}
+.mh-detay-avatar{width:44px;height:44px;border-radius:50%;background:rgba(52,211,153,0.2);border:2px solid var(--green);display:flex;align-items:center;justify-content:center;font-family:var(--font-brand);font-size:22px;color:var(--green);flex-shrink:0;}
+.mh-detay-ad{font-size:16px;font-weight:800;}
+.mh-detay-not{font-size:12px;color:var(--text-muted);margin-top:2px;}
+.mh-detay-toplam{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:2px;}
+.mh-detay-toplam span:first-child{font-family:var(--font-brand);font-size:22px;color:var(--green);}
+.mh-detay-top-label{font-size:10px;color:var(--text-muted);font-weight:600;}
+.mh-detay-kapat{background:transparent;border:1px solid var(--border);border-radius:50%;width:28px;height:28px;cursor:pointer;color:var(--text-muted);font-size:14px;display:flex;align-items:center;justify-content:center;margin-left:8px;flex-shrink:0;}
+.mh-detay-kapat:hover{border-color:var(--red);color:var(--red);}
+/* Zekat ekleme formu */
+.mh-zekat-form{padding:14px 20px;border-bottom:1px solid var(--border);background:var(--bg-elevated);}
+.mh-form-row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;}
+.mh-form-row .field-group{margin:0;}
+/* Zekat listesi */
+.mh-zekat-liste{padding:0;}
+.mh-tablo{width:100%;border-collapse:collapse;}
+.mh-tablo thead th{font-size:11px;font-weight:800;letter-spacing:0.8px;color:var(--text-muted);padding:10px 16px;text-align:left;background:var(--bg-card);border-bottom:1px solid var(--border);}
+.mh-satir{border-bottom:1px solid var(--border);transition:background 0.08s;}
+.mh-satir:last-of-type{border-bottom:none;}
+.mh-satir:hover{background:var(--bg-elevated);}
+.mh-satir td{padding:11px 16px;font-size:13px;vertical-align:middle;}
+.mh-td-tarih{color:var(--text-muted);white-space:nowrap;font-size:13px;}
+.mh-td-miktar{font-family:var(--font-brand);font-size:16px;color:var(--green);font-weight:700;white-space:nowrap;}
+.mh-td-aciklama{color:var(--text-muted);font-size:12px;}
+.mh-toplam-row td{font-weight:800;font-size:14px;padding:10px 16px;background:var(--bg-elevated);border-top:2px solid var(--border);}
+.mh-toplam-row td:nth-child(2){color:var(--green);font-family:var(--font-brand);font-size:17px;}
+.mh-bos{padding:40px;text-align:center;color:var(--text-muted);font-size:14px;}
