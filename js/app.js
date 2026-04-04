@@ -30,6 +30,7 @@
     if (typeof BirikimModule !== "undefined") BirikimModule.init();
   if (typeof AltinModule !== "undefined") AltinModule.init();
   if (typeof VefaModule !== "undefined") VefaModule.init();
+  if (typeof MuhtacModule !== "undefined") MuhtacModule.init();
   }
 
   // Logo tiklama: Firebase'den taze cek, modulleri yenile, sifre sorma
@@ -148,6 +149,7 @@
     if (btn.dataset.tab === "urun" && typeof UrunModule !== "undefined") UrunModule.init();
     if (btn.dataset.tab === "altin" && typeof AltinModule !== "undefined") AltinModule.init();
     if (btn.dataset.tab === "vefa" && typeof VefaModule !== "undefined") VefaModule.init();
+    if (btn.dataset.tab === "muhtac" && typeof MuhtacModule !== "undefined") MuhtacModule.init();
   }));
 
   // Animasyonlar
