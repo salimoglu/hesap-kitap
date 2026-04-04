@@ -428,7 +428,7 @@ var _uyeler=[],_aylar=[],_gramFiyat=0;
 var AY_TR=["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
 
 /* Altın gramları (sabit) */
-var TIP_GR={gram:7.20,ceyrek:1.75,yarim:3.50,tam:7.00};
+var TIP_GR={gram:1.00,ceyrek:1.75,yarim:3.50,tam:7.00};
 var TIP_AD={gram:"1 GRAM",ceyrek:"1 ÇEYREK",yarim:"1 YARIM",tam:"1 TAM",nakit:"NAKİT"};
 var ALTIN_TIPLER=["gram","ceyrek","yarim","tam"];
 var TUM_TIPLER=["gram","ceyrek","yarim","tam","nakit"];
