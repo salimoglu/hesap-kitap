@@ -1048,3 +1048,15 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .vf-check-label{display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-elevated);}
 .vf-check-label:hover{border-color:var(--gold);}
 .vf-check-label input{width:14px;height:14px;accent-color:var(--gold);}
+
+.vf-bolum-baslik{font-size:11px;font-weight:800;letter-spacing:2px;color:var(--text-muted);padding:6px 2px 4px;margin-top:4px;}
+.vf-gram-badge{font-size:12px;color:var(--gold);background:rgba(240,184,64,0.12);border:1px solid rgba(240,184,64,0.3);border-radius:12px;padding:4px 12px;font-weight:700;}
+.vf-kalem-header{display:flex;gap:6px;padding:4px 0;margin-bottom:4px;font-size:10px;font-weight:800;letter-spacing:0.5px;color:var(--text-muted);}
+.vf-kalem-header span{flex:1;}
+.vf-kalem-satir{display:flex;gap:6px;align-items:center;margin-bottom:6px;}
+.vf-kalem-satir .field-input{padding:6px 8px;font-size:12px;flex:1;}
+.vf-kalem-satir .vf-k-tip{flex:1.5;}
+.vf-kalem-satir .vf-k-adet{flex:0.7;}
+.vf-kalem-satir .vf-k-gram{flex:0.8;}
+.vf-kalem-sil-btn{background:transparent;border:none;color:var(--red);font-size:16px;cursor:pointer;padding:4px;flex-shrink:0;}
+.vf-kalem-sil-btn:hover{opacity:0.7;}
