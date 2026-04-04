@@ -1092,18 +1092,18 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .vf2-btn-sec{background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-size:12px;font-weight:700;padding:6px 14px;cursor:pointer;}
 .vf2-btn-sec:hover{border-color:var(--gold);color:var(--gold);}
 /* İki kolon layout */
-.vf2-iki-kolon{display:flex;gap:14px;width:100%;align-items:flex-start;}
+.vf2-iki-kolon{display:flex;gap:14px;width:100%;align-items:flex-start;overflow-x:auto;}
 .vf2-kolon{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px;}
 .vf2-kolon-baslik{font-size:11px;font-weight:800;letter-spacing:1.5px;color:var(--text-muted);}
 /* Tablo */
-.vf2-tablo-dis{border:1px solid var(--border);border-radius:var(--radius-md);overflow:auto;max-height:calc(100vh - 380px);}
+.vf2-tablo-dis{border:1px solid var(--border);border-radius:var(--radius-md);overflow:auto;}
 .vf2-tablo{width:100%;border-collapse:collapse;}
 .vf2-tablo thead{position:sticky;top:0;z-index:2;}
 .vf2-tablo thead th{font-size:10px;font-weight:800;letter-spacing:0.5px;color:var(--text-muted);padding:8px 10px;text-align:left;background:var(--bg-card);border-bottom:1px solid var(--border);white-space:nowrap;}
 .vf2-tablo tbody tr{border-bottom:1px solid var(--border);}
 .vf2-tablo tbody tr:last-child{border-bottom:none;}
 .vf2-tablo tbody tr:hover{background:var(--bg-elevated);}
-.vf2-tablo td{padding:7px 10px;font-size:12px;vertical-align:middle;}
+.vf2-tablo td{padding:0 10px;font-size:12px;vertical-align:middle;height:38px;white-space:nowrap;}
 .vf2-td-ay{font-weight:700;white-space:nowrap;font-size:12px;}
 .vf2-td-top{font-family:var(--font-brand);font-size:13px;color:var(--gold);white-space:nowrap;}
 .vf2-td-gun{font-family:var(--font-brand);font-size:13px;color:var(--gold);white-space:nowrap;}
@@ -1138,3 +1138,18 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .vf2-kalem-satir{display:flex;gap:6px;align-items:center;margin-bottom:6px;}
 .vf2-kalem-satir .field-input{flex:1;padding:6px 8px;font-size:12px;}
 .vf2-k-sil{background:transparent;border:none;color:var(--red);font-size:16px;cursor:pointer;padding:4px;flex-shrink:0;}
+
+/* Sayı sütunları sağa hizalı */
+.vf2-tablo td:not(.vf2-td-ay):not(.vf2-td-aks){text-align:right;}
+.vf2-tablo th:not(:first-child){text-align:right;}
+/* Sabit satır yüksekliği — her iki tabloda eşit */
+.vf2-satir td{height:38px !important;line-height:38px;}
+.vf2-ort-row td,.vf2-tot-row td,.vf2-gr-row td{height:36px !important;line-height:36px;}
+/* TL ve sayı font'u daha net */
+.vf2-td-top{text-align:right !important;font-family:var(--font-brand);font-size:13px;color:var(--gold);}
+.vf2-td-gun{text-align:right !important;font-family:var(--font-brand);font-size:13px;color:var(--gold);}
+.vf2-td-yat{text-align:center !important;font-size:12px;font-weight:600;}
+.vf2-ode-btn{font-size:11px;min-width:72px;}
+/* İki kolon eşit satır — tablo overflow */
+.vf2-iki-kolon .vf2-tablo-dis{overflow:visible;}
+.vf2-wrap{overflow-x:auto;}
