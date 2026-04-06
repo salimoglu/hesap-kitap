@@ -15,7 +15,7 @@ const IslemlerModule = (() => {
     _islemler=await IslemlerDB.getAll();
     _kategoriler=await KategorilerDB.getAll();
     _islemler.sort((a,b)=>b.tarih.localeCompare(a.tarih)||(b.olusturma||0)-(a.olusturma||0));
-    renderList();renderSummary();doldurAyFilter();renderHgList("");
+    renderList();renderSummary();doldurAyFilter();renderHgList("");const _ht=$("hg-tarih");if(_ht&&!_ht.value)_ht.value=bugun();
   }
 
   function renderSummary(){
@@ -272,7 +272,7 @@ const IslemlerModule = (() => {
     const tutar=parseFloat($("hg-tutar").value);
     if(!tutar||tutar<=0){$("hg-tutar").focus();return;}
     if(!_seciliKat.value){openHgDropdown();return;}
-    const _yi={tip,kategori:_seciliKat.value,tutar,aciklama,tarih:bugun()};
+    const _tarihVal=$("hg-tarih");const _yi={tip,kategori:_seciliKat.value,tutar,aciklama,tarih:(_tarihVal&&_tarihVal.value)?_tarihVal.value:bugun()};
       const _yiId=await IslemlerDB.add(_yi);    $("hg-aciklama").value="";$("hg-tutar").value="";
     await yukle();
   }
