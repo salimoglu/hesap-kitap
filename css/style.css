@@ -114,6 +114,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .hg-aciklama { flex: 2; background: transparent; border: none; border-right: 1px solid var(--border); color: var(--text-primary); font-family: var(--font-body); font-size: 13px; padding: 0 12px; outline: none; min-width: 0; }
 .hg-aciklama::placeholder { color: var(--text-muted); }
 .hg-tutar { width: 90px; flex-shrink: 0; background: transparent; border: none; border-right: 1px solid var(--border); color: var(--text-primary); font-family: var(--font-brand); font-size: 16px; padding: 0 8px; outline: none; text-align: right; }
+.hg-tarih { background: transparent; border: none; border-right: 1px solid var(--border); color: var(--text-primary); font-size: 13px; padding: 0 8px; height: 100%; min-width: 120px; flex-shrink: 0; outline: none; }
 
 /* ══ KATEGORİ DROPDOWN — ARAMA KUTULU ══ */
 .hg-kat-wrap {
