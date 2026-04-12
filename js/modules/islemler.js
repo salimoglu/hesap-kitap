@@ -14,7 +14,7 @@ const IslemlerModule = (() => {
   async function yukle(){
     _islemler=await IslemlerDB.getAll();
     _kategoriler=await KategorilerDB.getAll();
-    _islemler.sort((a,b)=>b.tarih.localeCompare(a.tarih)||(b.olusturma||0)-(a.olusturma||0));
+    _islemler.sort((a,b)=>a.tarih.localeCompare(b.tarih)||(a.olusturma||0)-(b.olusturma||0));
     renderList();renderSummary();doldurAyFilter();renderHgList("");const _ht=$("hg-tarih");if(_ht&&!_ht.value)_ht.value=bugun();
   }
 
