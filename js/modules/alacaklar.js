@@ -84,7 +84,7 @@ function modalHtml(){
   return h;
 }
 function bagla(){
-  $("al-yeni-btn").addEventListener("click",function(){modalAc(null);});
+  $("al-yeni-btn").addEventListener("click",function(){modalAc(null,null);});
   $("al-modal-kapat").addEventListener("click",modalKapat);$("al-iptal").addEventListener("click",modalKapat);
   $("al-modal").addEventListener("click",function(e){if(e.target===$("al-modal"))modalKapat();});
   $("al-kaydet").addEventListener("click",kaydet);
@@ -96,7 +96,8 @@ function bagla(){
       $("al-taksit-wrap").style.display=_aktifTip==="taksit"?"":"none";
     });
   });
-  document.querySelectorAll(".al-duz-btn").forEach(function(btn){btn.addEventListener("click",function(){modalAc(btn.dataset.id);});});
+  document.querySelectorAll(".al-kisi-ekle-btn").forEach(function(btn){btn.addEventListener("click",function(){modalAc(null,decodeURIComponent(btn.dataset.kisi));});});
+  document.querySelectorAll(".al-duz-btn").forEach(function(btn){btn.addEventListener("click",function(){modalAc(btn.dataset.id,null);});});
   document.querySelectorAll(".al-sil-btn").forEach(function(btn){btn.addEventListener("click",function(){if(!confirm("Silmek istiyor musunuz?"))return;_kayitlar=_kayitlar.filter(function(x){return x.id!==btn.dataset.id;});fbKaydet();render();});});
   document.querySelectorAll(".al-odeme-btn").forEach(function(btn){
     btn.addEventListener("click",function(){
@@ -108,13 +109,13 @@ function bagla(){
     });
   });
 }
-function modalAc(id){
+function modalAc(id,kisiAdi){
   _aktif=id;_aktifTip="pesin";
   $("al-modal-baslik").textContent=id?"Alaca\u011f\u0131 D\u00fczenle":"Yeni Alacak";
   $("al-pesin-wrap").style.display="";$("al-taksit-wrap").style.display="none";
   document.querySelectorAll(".al-tip-btn").forEach(function(b){b.classList.toggle("active",b.dataset.tip==="pesin");});
   var today=new Date().toISOString().split("T")[0],thisMonth=today.substring(0,7);
-  $("al-kisi").value="";$("al-tutar").value="";$("al-aciklama").value="";$("al-tarih").value=today;$("al-taksit-sayi").value="1";$("al-bas-tarih").value=thisMonth;
+  $("al-kisi").value=kisiAdi||"";$("al-tutar").value="";$("al-aciklama").value="";$("al-tarih").value=today;$("al-taksit-sayi").value="1";$("al-bas-tarih").value=thisMonth;
   if(id){var k=_kayitlar.find(function(x){return x.id===id;});
     if(k){$("al-kisi").value=k.kisi;$("al-tutar").value=k.tutar;$("al-aciklama").value=k.aciklama||"";
       _aktifTip=k.tip;document.querySelectorAll(".al-tip-btn").forEach(function(b){b.classList.toggle("active",b.dataset.tip===k.tip);});
