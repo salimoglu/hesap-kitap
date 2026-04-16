@@ -1,5 +1,5 @@
 // sw.js — Network First: her zaman gunceli al, cache sadece fallback
-const CACHE = "hesap-kitap-v11";
+const CACHE = "hesap-kitap-v12";
 const ASSETS = [
   "/hesap-kitap/",
   "/hesap-kitap/index.html",
@@ -12,7 +12,10 @@ const ASSETS = [
   "/hesap-kitap/js/modules/yukle.js?v=20260416d",
   "/hesap-kitap/js/modules/alacaklar.js?v=20260416c",
   "/hesap-kitap/js/modules/urun.js",
-  "/hesap-kitap/manifest.json"
+  "/hesap-kitap/manifest.json",
+  "/hesap-kitap/icons/icon-180.png",
+  "/hesap-kitap/icons/icon-192.png",
+  "/hesap-kitap/icons/icon-512.png"
 ];
 
 // Install: cache'e al

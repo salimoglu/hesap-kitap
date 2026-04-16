@@ -45,6 +45,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .app { display: flex; flex-direction: column; height: 100dvh; overflow: hidden; }
 .topbar { display: flex; align-items: center; justify-content: space-between; box-sizing: border-box; height: calc(var(--topbar-h) + env(safe-area-inset-top, 0)); padding: env(safe-area-inset-top, 0) max(16px, env(safe-area-inset-right, 0)) 0 max(16px, env(safe-area-inset-left, 0)); background: var(--bg-card); border-bottom: 1px solid var(--border); flex-shrink: 0; z-index: 10; }
 .topbar-left { display: flex; align-items: center; gap: 10px; }
+.topbar-right { display: flex; align-items: center; gap: 4px; }
 .app-icon { font-size: 22px; }
 .app-name { font-family: var(--font-brand); font-size: 22px; letter-spacing: 2px; color: var(--gold); }
 .icon-btn { background: transparent; border: none; font-size: 20px; cursor: pointer; padding: 6px; border-radius: var(--radius-sm); transition: background 0.15s; }

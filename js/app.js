@@ -121,6 +121,30 @@
     }
   });
 
+  // PWA yukleme (masaustu + Android)
+  const installBtn = document.getElementById("install-btn");
+  let deferredInstallPrompt = null;
+  const standalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+  if (installBtn && standalone) installBtn.classList.add("hidden");
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    if (installBtn && !standalone) installBtn.classList.remove("hidden");
+  });
+  if (installBtn) {
+    installBtn.addEventListener("click", async () => {
+      if (!deferredInstallPrompt) return;
+      deferredInstallPrompt.prompt();
+      try { await deferredInstallPrompt.userChoice; } catch (err) {}
+      deferredInstallPrompt = null;
+      installBtn.classList.add("hidden");
+    });
+  }
+  window.addEventListener("appinstalled", () => {
+    deferredInstallPrompt = null;
+    if (installBtn) installBtn.classList.add("hidden");
+  });
+
   // Kilitle butonu
   const lockBtn = document.getElementById("lock-btn");
   if (lockBtn) lockBtn.addEventListener("click", () => {
