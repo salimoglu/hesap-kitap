@@ -68,8 +68,8 @@ function render(){
   var c=$("alacaklar-container");if(!c)return;
   var h='<div class="al-wrap">';
   h+='<div class="al-header"><div class="al-ozet">';
-  h+='<div class="al-ozet-item"><span class="al-oz-label">TOPLAM ALACAK</span><span class="al-oz-val" style="color:var(--green)">'+para(toplamAlacak())+' TL</span></div>';
-  var tg=toplamAltinGram();if(tg>0)h+='<div class="al-ozet-item"><span class="al-oz-label">ALTIN ALACAK</span><span class="al-oz-val" style="color:var(--gold)">'+tg.toFixed(2)+' gr</span></div>';
+  h+='<div class="al-ozet-item"><span class="al-oz-label">TOPLAM ALACAK</span><span class="al-oz-val al-oz-val-tl">'+para(toplamAlacak())+' TL</span></div>';
+  var tg=toplamAltinGram();if(tg>0)h+='<div class="al-ozet-item"><span class="al-oz-label">ALTIN ALACAK</span><span class="al-oz-val al-oz-val-au">'+tg.toFixed(2)+' gr</span></div>';
   h+='</div><button class="al-yeni-btn" id="al-yeni-btn">+ Yeni Alacak</button></div>';
   h+='<div class="al-kontrol-bar">';
   h+='<input id="al-ara" class="field-input" type="text" placeholder="Kişi veya açıklama ara..." value="'+(_araMetni||"").replace(/"/g,"&quot;")+'"/>';
@@ -92,11 +92,11 @@ function render(){
       h+='<div class="al-kisi-blok">';
       h+='<div class="al-kisi-header'+(acik?"":" al-kisi-header-kapali")+'" data-kisi="'+encodeURIComponent(ad)+'">';
       h+='<span class="al-kisi-ok">'+(acik?"▾":"▸")+'</span>';
-      h+='<div style="font-family:var(--font-brand);font-size:16px;letter-spacing:0.5px;flex:1">'+esc(ad)+'</div>';
-      if(kTL>0)h+='<span style="color:var(--green);font-size:13px;font-weight:700">'+para(kTL)+' TL</span>';
-      if(kGr>0)h+='<span style="color:var(--gold);font-size:13px;font-weight:700;margin-left:6px">'+kGr.toFixed(2)+' gr</span>';
+      h+='<div class="al-kisi-ad">'+esc(ad)+'</div>';
+      if(kTL>0)h+='<span class="al-kisi-tl">'+para(kTL)+' TL</span>';
+      if(kGr>0)h+='<span class="al-kisi-gr">'+kGr.toFixed(2)+' gr</span>';
       h+='<span class="al-kisi-adet">'+aktifAdet+' acik / '+kapaliAdet+' kapali</span>';
-      h+='<button class="al-kisi-ekle-btn" data-kisi="'+encodeURIComponent(ad)+'" style="background:transparent;border:1px solid var(--gold);border-radius:8px;color:var(--gold);font-size:12px;font-weight:700;padding:4px 10px;cursor:pointer;flex-shrink:0;margin-left:8px">+ Ekle</button>';
+      h+='<button class="al-kisi-ekle-btn" data-kisi="'+encodeURIComponent(ad)+'" type="button">+ Ekle</button>';
       h+='</div><div class="al-liste'+(acik?"":" hidden")+'">';
       var aktif=ks.filter(function(k){return kalanAlacak(k)>0;});
       var kapali=ks.filter(function(k){return kalanAlacak(k)<=0;});
@@ -113,13 +113,13 @@ function kartHtml(k){
   var h='<div class="al-kart'+(tamOdendi?" al-kart-kapali":"")+'"><div class="al-kart-header"><div class="al-kart-sol">';
   if(aciklama)h+='<div class="al-kart-aciklama">'+aciklama+'</div>';
   if(k.tip==="altin"){
-    h+='<div class="al-kart-meta"><span class="al-kart-tip" style="background:rgba(240,184,64,0.15);color:var(--gold)">&#129351; '+ALTIN_LABEL[k.altinTur||"gram"]+' x'+(parseFloat(k.altinAdet)||1)+'</span><span style="color:var(--text-muted);font-size:11px"> &middot; '+altinGram(k).toFixed(2)+' gr</span></div>';
+    h+='<div class="al-kart-meta"><span class="al-kart-tip al-tip-au">&#129351; '+ALTIN_LABEL[k.altinTur||"gram"]+' x'+(parseFloat(k.altinAdet)||1)+'</span><span class="al-kart-meta-ek"> &middot; '+altinGram(k).toFixed(2)+' gr</span></div>';
   }else{
-    h+='<div class="al-kart-meta"><span class="al-kart-tip '+(k.tip==="pesin"?"al-tip-p":"al-tip-t")+'">'+(k.tip==="pesin"?"Peşin":k.taksitSayisi+" Taksit")+'</span><span style="color:var(--text-muted);font-size:11px"> &middot; '+para(k.tutar)+' TL toplam</span></div>';
+    h+='<div class="al-kart-meta"><span class="al-kart-tip '+(k.tip==="pesin"?"al-tip-p":"al-tip-t")+'">'+(k.tip==="pesin"?"Peşin":k.taksitSayisi+" Taksit")+'</span><span class="al-kart-meta-ek"> &middot; '+para(k.tutar)+' TL toplam</span></div>';
   }
   h+='</div><div class="al-kart-sag">';
   if(k.tip==="altin"){
-    if(!tamOdendi)h+='<div class="al-kalan-val" style="color:var(--gold)">'+altinGram(k).toFixed(2)+'<span class="al-kalan-label">gr altin</span></div>';
+    if(!tamOdendi)h+='<div class="al-kalan-val al-kalan-altin">'+altinGram(k).toFixed(2)+'<span class="al-kalan-label">gr altin</span></div>';
     else h+='<div class="al-odendi-badge">&#10003; ALINDI</div>';
   }else{
     var kalan=kalanAlacak(k);
@@ -129,7 +129,7 @@ function kartHtml(k){
   h+='<div class="al-kart-actions"><button class="al-duz-btn row-action-btn duzenle" data-id="'+k.id+'">&#9998;</button><button class="al-sil-btn row-action-btn sil" data-id="'+k.id+'">&#10005;</button></div></div></div>';
   h+='<div class="al-plan">';
   if(k.tip==="altin"){
-    h+='<div class="al-plan-satir'+(k.odendi?" al-odendi":"")+'"><span class="al-plan-ay">'+tarihFmt(k.tarih)+'</span><span class="al-plan-tutar">'+altinGram(k).toFixed(2)+' gr</span>';
+    h+='<div class="al-plan-satir'+(k.odendi?" al-odendi":"")+'"><span class="al-plan-ay">'+tarihFmt(k.tarih)+'</span><span class="al-plan-tutar al-tutar-altin">'+altinGram(k).toFixed(2)+' gr</span>';
     h+='<button class="al-odeme-btn'+(k.odendi?" al-odendi-aktif":"")+'" data-id="'+k.id+'" data-no="-1">'+(k.odendi?"&#10003; Alindı":"Alindı işaretle")+'</button></div>';
   }else{
     var plan=taksitPlan(k);
