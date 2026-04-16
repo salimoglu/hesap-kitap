@@ -80,7 +80,7 @@ function toplamAltinGram(){return _kayitlar.filter(function(k){return k.tip==="a
 function kisilerMap(){var m={};_kayitlar.forEach(function(k){var ad=(k.kisi||"?").trim();if(!m[ad])m[ad]=[];m[ad].push(k);});return m;}
 function kisiAcikMi(ad,ks){
   if(typeof _kisiAcikMap[ad]==="boolean")return _kisiAcikMap[ad];
-  _kisiAcikMap[ad]=true;
+  _kisiAcikMap[ad]=false;
   return _kisiAcikMap[ad];
 }
 function render(){
