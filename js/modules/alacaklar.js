@@ -7,6 +7,7 @@ var ALTIN_GRAM={gram:1,ceyrek:1.75,yarim:3.5,tam:7,ata:7};
 var ALTIN_LABEL={gram:"Gram",ceyrek:"Çeyrek",yarim:"Yarım",tam:"Tam",ata:"Ata"};
 function para(n){return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2});}
 function uid(){return "a"+Date.now()+"_"+Math.random().toString(36).substr(2,5);}
+function esc(v){return String(v==null?"":v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");}
 function tarihFmt(t){if(!t)return"";var p=t.split("-");return p[2]+"."+p[1]+"."+p[0];}
 function ayFmt(t){if(!t)return"";var p=t.split("-");return AYLAR[parseInt(p[1],10)-1]+" "+p[0];}
 function ayEkle(bas,n){var d=new Date(bas+"-01");d.setMonth(d.getMonth()+n);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");}
@@ -60,7 +61,7 @@ function toplamAltinGram(){return _kayitlar.filter(function(k){return k.tip==="a
 function kisilerMap(){var m={};_kayitlar.forEach(function(k){var ad=(k.kisi||"?").trim();if(!m[ad])m[ad]=[];m[ad].push(k);});return m;}
 function kisiAcikMi(ad,ks){
   if(typeof _kisiAcikMap[ad]==="boolean")return _kisiAcikMap[ad];
-  _kisiAcikMap[ad]=ks.some(function(k){return kalanAlacak(k)>0;});
+  _kisiAcikMap[ad]=true;
   return _kisiAcikMap[ad];
 }
 function render(){
@@ -91,7 +92,7 @@ function render(){
       h+='<div class="al-kisi-blok">';
       h+='<div class="al-kisi-header'+(acik?"":" al-kisi-header-kapali")+'" data-kisi="'+encodeURIComponent(ad)+'">';
       h+='<span class="al-kisi-ok">'+(acik?"▾":"▸")+'</span>';
-      h+='<div style="font-family:var(--font-brand);font-size:16px;letter-spacing:0.5px;flex:1">'+ad+'</div>';
+      h+='<div style="font-family:var(--font-brand);font-size:16px;letter-spacing:0.5px;flex:1">'+esc(ad)+'</div>';
       if(kTL>0)h+='<span style="color:var(--green);font-size:13px;font-weight:700">'+para(kTL)+' TL</span>';
       if(kGr>0)h+='<span style="color:var(--gold);font-size:13px;font-weight:700;margin-left:6px">'+kGr.toFixed(2)+' gr</span>';
       h+='<span class="al-kisi-adet">'+aktifAdet+' acik / '+kapaliAdet+' kapali</span>';
@@ -108,8 +109,9 @@ function render(){
 }
 function kartHtml(k){
   var tamOdendi=(k.tip==="altin")?k.odendi:(kalanAlacak(k)<=0);
+  var aciklama=esc(k.aciklama||"");
   var h='<div class="al-kart'+(tamOdendi?" al-kart-kapali":"")+'"><div class="al-kart-header"><div class="al-kart-sol">';
-  if(k.aciklama)h+='<div class="al-kart-aciklama">'+k.aciklama+'</div>';
+  if(aciklama)h+='<div class="al-kart-aciklama">'+aciklama+'</div>';
   if(k.tip==="altin"){
     h+='<div class="al-kart-meta"><span class="al-kart-tip" style="background:rgba(240,184,64,0.15);color:var(--gold)">&#129351; '+ALTIN_LABEL[k.altinTur||"gram"]+' x'+(parseFloat(k.altinAdet)||1)+'</span><span style="color:var(--text-muted);font-size:11px"> &middot; '+altinGram(k).toFixed(2)+' gr</span></div>';
   }else{
@@ -130,7 +132,9 @@ function kartHtml(k){
     h+='<div class="al-plan-satir'+(k.odendi?" al-odendi":"")+'"><span class="al-plan-ay">'+tarihFmt(k.tarih)+'</span><span class="al-plan-tutar">'+altinGram(k).toFixed(2)+' gr</span>';
     h+='<button class="al-odeme-btn'+(k.odendi?" al-odendi-aktif":"")+'" data-id="'+k.id+'" data-no="-1">'+(k.odendi?"&#10003; Alindı":"Alindı işaretle")+'</button></div>';
   }else{
-    taksitPlan(k).forEach(function(t){
+    var plan=taksitPlan(k);
+    if(!plan.length)plan=[{ay:k.tarih?k.tarih.substring(0,7):"",tutar:parseFloat(k.tutar)||0,no:1,odendi:k.odendi||false}];
+    plan.forEach(function(t){
       h+='<div class="al-plan-satir'+(t.odendi?" al-odendi":"")+'"><span class="al-plan-ay">'+(k.tip==="pesin"?tarihFmt(k.tarih):ayFmt(t.ay))+'</span>';
       if(k.tip!=="pesin")h+='<span class="al-plan-no">'+t.no+'/'+k.taksitSayisi+'</span>';
       h+='<span class="al-plan-tutar">'+para(t.tutar)+' TL</span>';
@@ -258,6 +262,7 @@ async function kaydet(){
   }
   if(_aktif){var idx=_kayitlar.findIndex(function(x){return x.id===_aktif;});if(idx>=0){kayit.id=_aktif;if(_kayitlar[idx].odemeler)kayit.odemeler=_kayitlar[idx].odemeler;_kayitlar[idx]=kayit;}}
   else{kayit.id=uid();_kayitlar.push(kayit);}
+  _kisiAcikMap[kisi]=true;
   await fbKaydet();modalKapat();render();
 }
 async function init(){await fbYukle();_kayitlar=_kayitlar.map(normalizeKayit);render();}

@@ -1206,6 +1206,17 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .mh-toplam-row td:nth-child(2){font-size:15px;font-weight:600;color:var(--green);}
 .mh-bos{padding:32px;text-align:center;color:var(--text-muted);font-size:13px;}
 
+/* Alacaklar final visibility guarantees */
+.al-kisi-blok{overflow:visible!important;}
+.al-liste{display:flex!important;max-width:920px!important;}
+.al-kart{overflow:visible!important;}
+.al-kart-header{flex-wrap:wrap!important;}
+.al-kart-sag{margin-left:auto!important;align-items:flex-end!important;}
+.al-plan{display:block!important;}
+.al-plan-satir{display:flex!important;flex-wrap:wrap!important;align-items:center!important;row-gap:6px!important;}
+.al-plan-tutar{margin-left:auto!important;text-align:right!important;min-width:120px!important;}
+.al-odeme-btn{display:inline-flex!important;align-items:center!important;justify-content:center!important;margin-left:auto!important;}
+
 /* Alacaklar usability fixes */
 .al-liste{max-width:920px;}
 .al-kart-header{flex-wrap:wrap;}
