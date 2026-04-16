@@ -835,6 +835,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .al-oz-val { font-family:var(--font-brand); font-size:24px; letter-spacing:1px; line-height:1.1; }
 .al-oz-val-tl { color:var(--green); }
 .al-oz-val-au { color:var(--gold); }
+.al-oz-au-guncel { font-family:var(--font-body); font-size:15px; font-weight:700; color:var(--green); margin-left:4px; white-space:nowrap; }
 .al-yeni-btn { background:var(--gold); color:#0f1923; border:none; border-radius:var(--radius-sm); padding:8px 14px; font-family:var(--font-body); font-size:12px; font-weight:700; cursor:pointer; transition:opacity 0.15s; white-space:nowrap; }
 .al-yeni-btn:hover { opacity:0.85; }
 .al-bolum-baslik { width:100%; max-width:860px; font-size:10px; font-weight:800; letter-spacing:2px; color:var(--text-muted); padding:8px 4px 4px; margin-top:4px; }
@@ -2097,6 +2098,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .al-oz-val { font-family:var(--font-brand); font-size:24px; letter-spacing:1px; line-height:1.1; }
 .al-oz-val-tl { color:var(--green); }
 .al-oz-val-au { color:var(--gold); }
+.al-oz-au-guncel { font-family:var(--font-body); font-size:15px; font-weight:700; color:var(--green); margin-left:4px; white-space:nowrap; }
 .al-yeni-btn { background:var(--gold); color:#0f1923; border:none; border-radius:var(--radius-sm); padding:8px 14px; font-family:var(--font-body); font-size:12px; font-weight:700; cursor:pointer; transition:opacity 0.15s; white-space:nowrap; }
 .al-yeni-btn:hover { opacity:0.85; }
 .al-bolum-baslik { width:100%; max-width:860px; font-size:10px; font-weight:800; letter-spacing:2px; color:var(--text-muted); padding:8px 4px 4px; margin-top:4px; }

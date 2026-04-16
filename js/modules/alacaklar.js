@@ -1,7 +1,7 @@
 /* alacaklar.js */
 var AlacaklarModule=(function(){
 var $=function(id){return document.getElementById(id);};
-var _kayitlar=[],_aktif=null,_aktifTip="pesin",_araMetni="",_kisiAcikMap={};
+var _kayitlar=[],_aktif=null,_aktifTip="pesin",_araMetni="",_kisiAcikMap={},_gramAltinFiyatTL=0;
 var AYLAR=["Ocak","Subat","Mart","Nisan","Mayis","Haziran","Temmuz","Agustos","Eylul","Ekim","Kasim","Aralik"];
 var ALTIN_GRAM={gram:1,ceyrek:1.75,yarim:3.5,tam:7,ata:7};
 var ALTIN_LABEL={gram:"Gram",ceyrek:"Çeyrek",yarim:"Yarım",tam:"Tam",ata:"Ata"};
@@ -45,6 +45,25 @@ function normalizeKayit(k){
 }
 async function fbYukle(){if(!window._fbDb)return;try{var s=await window._fbDb.ref("alacaklar").once("value");var v=s.val();_kayitlar=v?Object.values(v):[];}catch(e){_kayitlar=[];}}
 async function fbKaydet(){if(!window._fbDb)return;try{var obj={};_kayitlar.forEach(function(x){obj[x.id]=x;});await window._fbDb.ref("alacaklar").set(obj);}catch(e){}}
+/* Altın modülüyle aynı kaynak: gram TL (Firebase), yoksa API tahmini (kaydedilmez) */
+async function altinGuncelFiyatYukle(){
+  _gramAltinFiyatTL=0;
+  if(typeof window._fbDb!=="undefined"&&window._fbDb){
+    try{
+      var s=await window._fbDb.ref("altin_guncel_fiyat").once("value");
+      var v=parseFloat(s.val());
+      if(v&&v>0)_gramAltinFiyatTL=v;
+    }catch(e){}
+  }
+  if(_gramAltinFiyatTL<=0){
+    try{
+      var r=await fetch("https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/xau.json");
+      var d=await r.json();
+      var tryPerOz=d&&d.xau&&d.xau.try;
+      if(tryPerOz&&tryPerOz>100)_gramAltinFiyatTL=tryPerOz/31.1035;
+    }catch(e){}
+  }
+}
 function taksitPlan(k){
   if(k.tip==="pesin")return [{ay:k.tarih?k.tarih.substring(0,7):"",tutar:parseFloat(k.tutar)||0,no:1,odendi:k.odendi||false}];
   if(k.tip==="altin")return [{ay:k.tarih?k.tarih.substring(0,7):"",tutar:0,no:1,odendi:k.odendi||false}];
@@ -69,7 +88,12 @@ function render(){
   var h='<div class="al-wrap">';
   h+='<div class="al-header"><div class="al-ozet">';
   h+='<div class="al-ozet-item"><span class="al-oz-label">TOPLAM ALACAK</span><span class="al-oz-val al-oz-val-tl">'+para(toplamAlacak())+' TL</span></div>';
-  var tg=toplamAltinGram();if(tg>0)h+='<div class="al-ozet-item"><span class="al-oz-label">ALTIN ALACAK</span><span class="al-oz-val al-oz-val-au">'+tg.toFixed(2)+' gr</span></div>';
+  var tg=toplamAltinGram();
+  if(tg>0){
+    h+='<div class="al-ozet-item"><span class="al-oz-label">ALTIN ALACAK</span><span class="al-oz-val al-oz-val-au">'+tg.toFixed(2)+' gr';
+    if(_gramAltinFiyatTL>0)h+='<span class="al-oz-au-guncel"> ≈ '+para(tg*_gramAltinFiyatTL)+' TL</span>';
+    h+='</span></div>';
+  }
   h+='</div><button class="al-yeni-btn" id="al-yeni-btn">+ Yeni Alacak</button></div>';
   h+='<div class="al-kontrol-bar">';
   h+='<input id="al-ara" class="field-input" type="text" placeholder="Kişi veya açıklama ara..." value="'+(_araMetni||"").replace(/"/g,"&quot;")+'"/>';
@@ -265,6 +289,6 @@ async function kaydet(){
   _kisiAcikMap[kisi]=true;
   await fbKaydet();modalKapat();render();
 }
-async function init(){await fbYukle();_kayitlar=_kayitlar.map(normalizeKayit);render();}
+async function init(){await fbYukle();_kayitlar=_kayitlar.map(normalizeKayit);await altinGuncelFiyatYukle();render();}
 return{init:init};
 })();
