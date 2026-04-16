@@ -71,40 +71,134 @@ return{init:binit};
 /* ===== KREDİ MODULE ===== */
 var KrediModule=(function(){
 var $=function(id){return document.getElementById(id);};
-var _h=[],_k=[],_aktif=null,_ay=new Date().getMonth(),_yil=new Date().getFullYear();
+var _h=[],_k=[],_aktif=null,_ay=new Date().getMonth(),_yil=new Date().getFullYear(),_krFormTip="taksit";
 var AYLAR=["Ocak","Subat","Mart","Nisan","Mayis","Haziran","Temmuz","Agustos","Eylul","Ekim","Kasim","Aralik"];
 function kpara(n){return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2});}
+function kesc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function kOptAttr(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/"/g,"&quot;");}
 function uid(){return "k"+Date.now()+"_"+Math.random().toString(36).substr(2,5);}
 function buAy(){return _yil+"-"+String(_ay+1).padStart(2,"0");}
 function ayEkle(bas,n){var d=new Date(bas+"-01");d.setMonth(d.getMonth()+n);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");}
 function ayInput(){return _yil+"-"+String(_ay+1).padStart(2,"0");}
+function tarihAyGoster(ym){if(!ym||ym.length<7)return ym||"";var p=ym.substring(0,7).split("-");return AYLAR[parseInt(p[1],10)-1]+" "+p[0];}
+function kHarcamaNormalize(h){
+  var x=Object.assign({},h);
+  x.odemeTipi=(x.odemeTipi==="herAy")?"herAy":"taksit";
+  x.tutar=parseFloat(x.tutar)||0;
+  x.taksit=Math.max(1,parseInt(x.taksit,10)||1);
+  var bt=(x.basTarih||"").toString();
+  x.basTarih=bt.length>=7?bt.substring(0,7):buAy();
+  return x;
+}
 async function kfbYukle(){if(typeof window._fbDb==="undefined"||!window._fbDb)return;try{var s=await window._fbDb.ref("kredi_harcamalar").once("value");var v=s.val();_h=v?Object.values(v):[];var sk=await window._fbDb.ref("kredi_kartlar").once("value");_k=sk.val()||[];}catch(e){_h=[];_k=[];}}
 async function kfbKaydet(){if(typeof window._fbDb==="undefined"||!window._fbDb)return;try{var obj={};_h.forEach(function(x){obj[x.id]=x;});await window._fbDb.ref("kredi_harcamalar").set(obj);await window._fbDb.ref("kredi_kartlar").set(_k);}catch(e){}}
-function taksitler(h){var r=[];for(var i=0;i<h.taksit;i++){r.push({ay:ayEkle(h.basTarih,i),tutar:h.tutar/h.taksit,no:i+1});}return r;}
+function taksitler(h){if(h.odemeTipi==="herAy")return [];var r=[];for(var i=0;i<h.taksit;i++){r.push({ay:ayEkle(h.basTarih,i),tutar:h.tutar/h.taksit,no:i+1});}return r;}
 function kartlar(){var s={};_h.forEach(function(h){s[h.kart]=1;});_k.forEach(function(k){s[k]=1;});return Object.keys(s).sort();}
-function ayToplam(ay,kart){var t=0;_h.forEach(function(h){if(kart&&h.kart!==kart)return;taksitler(h).forEach(function(x){if(x.ay===ay)t+=x.tutar;});});return t;}
-function kalanBorc(kart){var bugun=buAy(),t=0;_h.forEach(function(h){if(kart&&h.kart!==kart)return;taksitler(h).forEach(function(x){if(x.ay>=bugun)t+=x.tutar;});});return t;}
-function ayDetay(ay){var liste=[];_h.forEach(function(h){taksitler(h).forEach(function(x){if(x.ay===ay)liste.push({id:h.id,kart:h.kart,aciklama:h.aciklama,taksitTutar:x.tutar,no:x.no,toplamTaksit:h.taksit});});});return liste.sort(function(a,b){return a.kart.localeCompare(b.kart);});}
+function herAyUygun(h,ay){return h.odemeTipi==="herAy"&&ay>=h.basTarih.substring(0,7);}
+function ayToplam(ay,kart){var t=0;_h.forEach(function(h){if(kart&&h.kart!==kart)return;if(herAyUygun(h,ay))t+=h.tutar;else taksitler(h).forEach(function(x){if(x.ay===ay)t+=x.tutar;});});return t;}
+function kalanTaksitBorc(kart){var bugun=buAy(),t=0;_h.forEach(function(h){if(kart&&h.kart!==kart)return;if(h.odemeTipi==="herAy")return;taksitler(h).forEach(function(x){if(x.ay>=bugun)t+=x.tutar;});});return t;}
+function aylikSabitBorc(kart){var bugun=buAy(),t=0;_h.forEach(function(h){if(kart&&h.kart!==kart)return;if(herAyUygun(h,bugun))t+=h.tutar;});return t;}
+function kartTumPlanSatirlari(kart){
+  var satir=[];
+  _h.forEach(function(h){
+    if(h.kart!==kart)return;
+    if(h.odemeTipi==="herAy"){
+      satir.push({sortKey:h.basTarih+"-99",ayGoster:tarihAyGoster(h.basTarih)+" → sürekli",aciklama:h.aciklama,tur:"Her ay",tutar:h.tutar,id:h.id});
+      return;
+    }
+    taksitler(h).forEach(function(x){
+      satir.push({sortKey:x.ay+"-"+String(x.no).padStart(3,"0"),ayGoster:tarihAyGoster(x.ay),aciklama:h.aciklama,tur:x.no+"/"+h.taksit,tutar:x.tutar,id:h.id});
+    });
+  });
+  satir.sort(function(a,b){return a.sortKey.localeCompare(b.sortKey);});
+  return satir;
+}
+function ayDetay(ay){
+  var liste=[];
+  _h.forEach(function(h){
+    if(herAyUygun(h,ay)){
+      liste.push({id:h.id,kart:h.kart,aciklama:h.aciklama,taksitTutar:h.tutar,no:"—",toplamTaksit:"Her ay",isHerAy:true});
+      return;
+    }
+    taksitler(h).forEach(function(x){
+      if(x.ay===ay)liste.push({id:h.id,kart:h.kart,aciklama:h.aciklama,taksitTutar:x.tutar,no:x.no,toplamTaksit:h.taksit,isHerAy:false});
+    });
+  });
+  return liste.sort(function(a,b){return a.kart.localeCompare(b.kart);});
+}
+function krTipGoster(tip){
+  _krFormTip=tip==="herAy"?"herAy":"taksit";
+  var tw=$("kr-taksit-wrap"),tl=$("kr-tutar-label"),bl=$("kr-bastarihi-label");
+  document.querySelectorAll(".kr-tip-btn").forEach(function(b){b.classList.toggle("active",b.getAttribute("data-tip")===_krFormTip);});
+  if(_krFormTip==="herAy"){
+    if(tw)tw.classList.add("hidden");
+    if(tl)tl.textContent="Aylık tutar (TL)";
+    if(bl)bl.textContent="İlk ödeme ayı";
+  }else{
+    if(tw)tw.classList.remove("hidden");
+    if(tl)tl.textContent="Toplam tutar (TL)";
+    if(bl)bl.textContent="1. taksit ayı";
+  }
+}
+function krPlanModalKapat(){var m=$("kr-plan-modal");if(m)m.classList.add("hidden");}
+function krPlanModalAc(kartEncoded){
+  var kart=decodeURIComponent(kartEncoded||"");
+  var rows=kartTumPlanSatirlari(kart),body=$("kr-plan-body");
+  if(!body)return;
+  var p='<p class="kr-plan-aciklama">Tüm taksitler ve sürekli (her ay) ödemeler. Düzenli ödemeyi durdurmak için kaydı silin veya düzenleyin.</p>';
+  if(!rows.length){body.innerHTML=p+'<div class="kr-bos">Bu kart için kayıt yok</div>';$("kr-plan-baslik").textContent=kart;$("kr-plan-modal").classList.remove("hidden");return;}
+  var t='<table class="kr-tablo kr-plan-tablo"><thead><tr><th>Ay</th><th>Açıklama</th><th>Tür</th><th>Tutar</th><th></th></tr></thead><tbody>';
+  rows.forEach(function(r){
+    t+='<tr><td class="kr-td-no">'+kesc(r.ayGoster)+'</td><td class="kr-td-aciklama">'+kesc(r.aciklama)+'</td><td class="kr-td-no" style="text-align:center">'+kesc(r.tur)+'</td><td class="kr-td-tutar">'+kpara(r.tutar)+' TL</td>';
+    t+='<td><button type="button" class="kr-plan-duz row-action-btn duzenle" data-id="'+r.id+'">&#9998;</button></td></tr>';
+  });
+  t+='</tbody></table>';
+  body.innerHTML=p+t;
+  $("kr-plan-baslik").textContent=kart+" — Tüm ödemeler";
+  $("kr-plan-modal").classList.remove("hidden");
+  document.querySelectorAll(".kr-plan-duz").forEach(function(btn){
+    btn.addEventListener("click",function(){krPlanModalKapat();kmodalAc(btn.getAttribute("data-id"));});
+  });
+}
 function krender(){
   var c=$("kredi-container");if(!c)return;
   var aktifAy=buAy(),ayItems=ayDetay(aktifAy),ks=kartlar();
+  var taksKalan=kalanTaksitBorc(null),sabAylik=aylikSabitBorc(null);
   var h='<div class="kr-wrap"><div class="kr-header"><div class="kr-ozet">';
   h+='<div class="kr-ozet-item"><span class="kr-oz-label">BU AY ÖDEME</span><span class="kr-oz-val" style="color:var(--red)">'+kpara(ayToplam(aktifAy,null))+' TL</span></div>';
-  h+='<div class="kr-ozet-item"><span class="kr-oz-label">KALAN TOPLAM</span><span class="kr-oz-val" style="color:var(--gold)">'+kpara(kalanBorc(null))+' TL</span></div>';
-  h+='</div><button class="kr-yeni-btn" id="kr-yeni-btn">+ Harcama Ekle</button></div>';
-  if(ks.length){h+='<div class="kr-kart-ozet">';ks.forEach(function(kart){h+='<div class="kr-kart-chip"><div class="kr-chip-adi">'+kart+'</div><div class="kr-chip-buay">Bu ay: <b>'+kpara(ayToplam(aktifAy,kart))+' TL</b></div><div class="kr-chip-kalan">Kalan: '+kpara(kalanBorc(kart))+' TL</div></div>';});h+='</div>';}
-  h+='<div class="kr-ay-bar"><button class="kr-ay-btn" id="kr-geri">&#8249;</button><span class="kr-ay-label">'+AYLAR[_ay]+" "+_yil+'</span><button class="kr-ay-btn" id="kr-ileri">&#8250;</button></div>';
+  h+='<div class="kr-ozet-item"><span class="kr-oz-label">KALAN (TAKSİT)</span><span class="kr-oz-val" style="color:var(--gold)">'+kpara(taksKalan)+' TL</span>';
+  if(sabAylik>0)h+='<span class="kr-oz-sub">Düzenli: +'+kpara(sabAylik)+' TL/ay</span>';
+  h+='</div></div><button type="button" class="kr-yeni-btn" id="kr-yeni-btn">+ Harcama Ekle</button></div>';
+  if(ks.length){h+='<div class="kr-kart-ozet">';ks.forEach(function(kart){
+    h+='<div class="kr-kart-chip kr-kart-chip--tikl" role="button" tabindex="0" data-kart="'+encodeURIComponent(kart)+'"><div class="kr-chip-adi">'+kesc(kart)+'</div>';
+    h+='<div class="kr-chip-buay">Bu ay: <b>'+kpara(ayToplam(aktifAy,kart))+' TL</b></div>';
+    h+='<div class="kr-chip-kalan">Taksit kalan: '+kpara(kalanTaksitBorc(kart))+' TL</div>';
+    var sb=aylikSabitBorc(kart);if(sb>0)h+='<div class="kr-chip-sabit">Düzenli: '+kpara(sb)+' TL/ay</div>';
+    h+='<div class="kr-chip-tikla">Tüm plan — tıklayın</div></div>';
+  });h+='</div>';}
+  h+='<div class="kr-ay-bar"><button type="button" class="kr-ay-btn" id="kr-geri">&#8249;</button><span class="kr-ay-label">'+AYLAR[_ay]+" "+_yil+'</span><button type="button" class="kr-ay-btn" id="kr-ileri">&#8250;</button></div>';
   h+='<div class="kr-tablo-wrap">';
   if(!ayItems.length){h+='<div class="kr-bos">'+AYLAR[_ay]+' '+_yil+' için ödeme yok</div>';}
-  else{h+='<table class="kr-tablo"><thead><tr><th>KART</th><th>AÇIKLAMA</th><th>TAKSTİT</th><th>TUTAR</th><th></th></tr></thead><tbody>';ayItems.forEach(function(r){h+='<tr><td class="kr-td-kart">'+r.kart+'</td><td class="kr-td-aciklama">'+r.aciklama+'</td><td class="kr-td-no" style="text-align:center">'+r.no+'/'+r.toplamTaksit+'</td><td class="kr-td-tutar">'+kpara(r.taksitTutar)+' TL</td><td><button class="kr-duz-btn row-action-btn duzenle" data-id="'+r.id+'">&#9998;</button> <button class="kr-sil-btn row-action-btn sil" data-id="'+r.id+'">&#10005;</button></td></tr>';});h+='</tbody></table>';}
+  else{h+='<table class="kr-tablo"><thead><tr><th>KART</th><th>AÇIKLAMA</th><th>TÜR</th><th>TUTAR</th><th></th></tr></thead><tbody>';
+  ayItems.forEach(function(r){
+    var turStr=r.isHerAy?"Her ay":(r.no+"/"+r.toplamTaksit);
+    h+='<tr><td class="kr-td-kart">'+kesc(r.kart)+'</td><td class="kr-td-aciklama">'+kesc(r.aciklama)+'</td><td class="kr-td-no" style="text-align:center">'+turStr+'</td><td class="kr-td-tutar">'+kpara(r.taksitTutar)+' TL</td>';
+    h+='<td><button type="button" class="kr-duz-btn row-action-btn duzenle" data-id="'+r.id+'">&#9998;</button> <button type="button" class="kr-sil-btn row-action-btn sil" data-id="'+r.id+'">&#10005;</button></td></tr>';
+  });
+  h+='</tbody></table>';}
   h+='</div></div>';
-  h+='<div class="bk-modal-overlay hidden" id="kr-modal"><div class="modal-box modal-sm"><div class="modal-header"><h2 class="modal-title" id="kr-modal-baslik">Harcama Ekle</h2><button class="modal-close" id="kr-modal-kapat">&#10005;</button></div><div class="modal-body">';
-  h+='<div class="field-group"><label class="field-label">Kart Adı</label><input type="text" id="kr-kart" class="field-input" placeholder="Garanti..." list="kr-dl" autocomplete="off"/><datalist id="kr-dl">'+ks.map(function(k){return'<option value="'+k+'"/>';}).join('')+'</datalist></div>';
-  h+='<div class="field-group"><label class="field-label">Açıklama</label><input type="text" id="kr-aciklama" class="field-input" placeholder="Ürün/hizmet" maxlength="100"/></div>';
-  h+='<div class="field-group"><label class="field-label">Toplam Tutar (TL)</label><input type="number" id="kr-tutar" class="field-input" placeholder="0" min="0" step="0.01" inputmode="decimal"/></div>';
-  h+='<div class="field-group"><label class="field-label">Taksit Sayısı</label><input type="number" id="kr-taksit" class="field-input" value="1" min="1" max="60"/></div>';
-  h+='<div class="field-group"><label class="field-label">1. Taksit Ayı</label><input type="month" id="kr-bastarihi" class="field-input" value="'+ayInput()+'"/></div>';
-  h+='</div><div class="modal-footer"><button class="btn-secondary" id="kr-iptal">İptal</button><button class="btn-primary" id="kr-kaydet">Kaydet</button></div></div></div>';
+  h+='<div class="bk-modal-overlay hidden" id="kr-modal"><div class="modal-box modal-sm"><div class="modal-header"><h2 class="modal-title" id="kr-modal-baslik">Harcama Ekle</h2><button type="button" class="modal-close" id="kr-modal-kapat">&#10005;</button></div><div class="modal-body">';
+  h+='<div class="field-group"><label class="field-label">Kart Adı</label><input type="text" id="kr-kart" class="field-input" placeholder="Garanti..." list="kr-dl" autocomplete="off"/><datalist id="kr-dl">'+ks.map(function(k){return'<option value="'+kOptAttr(k)+'"/>';}).join("")+'</datalist></div>';
+  h+='<div class="field-group"><label class="field-label">Açıklama</label><input type="text" id="kr-aciklama" class="field-input" placeholder="Ürün / abonelik" maxlength="100"/></div>';
+  h+='<div class="field-group"><label class="field-label">Ödeme şekli</label><div class="kr-tip-sec">';
+  h+='<button type="button" class="kr-tip-btn active" id="kr-tip-taksit" data-tip="taksit">Taksitli</button>';
+  h+='<button type="button" class="kr-tip-btn" id="kr-tip-heray" data-tip="herAy">Her ay</button></div></div>';
+  h+='<div class="field-group"><label class="field-label" id="kr-tutar-label">Toplam tutar (TL)</label><input type="number" id="kr-tutar" class="field-input" placeholder="0" min="0" step="0.01" inputmode="decimal"/></div>';
+  h+='<div class="field-group" id="kr-taksit-wrap"><label class="field-label">Taksit sayısı</label><input type="number" id="kr-taksit" class="field-input" value="1" min="1" max="60"/></div>';
+  h+='<div class="field-group"><label class="field-label" id="kr-bastarihi-label">1. taksit ayı</label><input type="month" id="kr-bastarihi" class="field-input" value="'+ayInput()+'"/></div>';
+  h+='</div><div class="modal-footer"><button type="button" class="btn-secondary" id="kr-iptal">İptal</button><button type="button" class="btn-primary" id="kr-kaydet">Kaydet</button></div></div></div>';
+  h+='<div class="bk-modal-overlay hidden" id="kr-plan-modal"><div class="modal-box" style="max-width:560px"><div class="modal-header"><h2 class="modal-title" id="kr-plan-baslik">Kart planı</h2><button type="button" class="modal-close" id="kr-plan-kapat">&#10005;</button></div>';
+  h+='<div class="modal-body kr-plan-modal-body" id="kr-plan-body"></div><div class="modal-footer"><button type="button" class="btn-secondary" id="kr-plan-kapat2">Kapat</button></div></div></div>';
   c.innerHTML=h;kbagla();
 }
 function kbagla(){
@@ -114,13 +208,52 @@ function kbagla(){
   $("kr-kaydet").addEventListener("click",kkaydet);
   $("kr-geri").addEventListener("click",function(){_ay--;if(_ay<0){_ay=11;_yil--;}krender();});
   $("kr-ileri").addEventListener("click",function(){_ay++;if(_ay>11){_ay=0;_yil++;}krender();});
-  document.querySelectorAll(".kr-duz-btn").forEach(function(btn){btn.addEventListener("click",function(){kmodalAc(btn.dataset.id);});});
-  document.querySelectorAll(".kr-sil-btn").forEach(function(btn){btn.addEventListener("click",function(){if(!confirm("Silmek?"))return;_h=_h.filter(function(x){return x.id!==btn.dataset.id;});kfbKaydet();krender();});});
+  document.querySelectorAll(".kr-duz-btn").forEach(function(btn){btn.addEventListener("click",function(){kmodalAc(btn.getAttribute("data-id"));});});
+  document.querySelectorAll(".kr-sil-btn").forEach(function(btn){
+    btn.addEventListener("click",function(){
+      if(!confirm("Silmek?"))return;
+      _h=_h.filter(function(x){return x.id!==btn.getAttribute("data-id");});
+      kfbKaydet();krender();
+    });
+  });
+  $("kr-tip-taksit").addEventListener("click",function(){krTipGoster("taksit");});
+  $("kr-tip-heray").addEventListener("click",function(){krTipGoster("herAy");});
+  var pm=$("kr-plan-modal");
+  if(pm)pm.addEventListener("click",function(e){if(e.target===pm)krPlanModalKapat();});
+  $("kr-plan-kapat").addEventListener("click",krPlanModalKapat);
+  $("kr-plan-kapat2").addEventListener("click",krPlanModalKapat);
+  document.querySelectorAll(".kr-kart-chip--tikl").forEach(function(el){
+    el.addEventListener("click",function(){krPlanModalAc(el.getAttribute("data-kart"));});
+    el.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();krPlanModalAc(el.getAttribute("data-kart"));}});
+  });
 }
-function kmodalAc(id){_aktif=id;$("kr-modal-baslik").textContent=id?"Düzenle":"Harcama Ekle";if(id){var x=_h.find(function(h){return h.id===id;});if(x){$("kr-kart").value=x.kart;$("kr-aciklama").value=x.aciklama;$("kr-tutar").value=x.tutar;$("kr-taksit").value=x.taksit;$("kr-bastarihi").value=x.basTarih;}}else{$("kr-kart").value="";$("kr-aciklama").value="";$("kr-tutar").value="";$("kr-taksit").value="1";$("kr-bastarihi").value=ayInput();}$("kr-modal").classList.remove("hidden");setTimeout(function(){$("kr-kart").focus();},100);}
+function kmodalAc(id){
+  _aktif=id;
+  $("kr-modal-baslik").textContent=id?"Düzenle":"Harcama Ekle";
+  if(id){
+    var x=_h.find(function(h){return h.id===id;});
+    if(x){
+      $("kr-kart").value=x.kart;$("kr-aciklama").value=x.aciklama;$("kr-tutar").value=x.tutar;$("kr-taksit").value=x.taksit;$("kr-bastarihi").value=x.basTarih;
+      krTipGoster(x.odemeTipi==="herAy"?"herAy":"taksit");
+    }
+  }else{
+    $("kr-kart").value="";$("kr-aciklama").value="";$("kr-tutar").value="";$("kr-taksit").value="1";$("kr-bastarihi").value=ayInput();
+    krTipGoster("taksit");
+  }
+  $("kr-modal").classList.remove("hidden");setTimeout(function(){$("kr-kart").focus();},100);
+}
 function kmodalKapat(){$("kr-modal").classList.add("hidden");_aktif=null;}
-async function kkaydet(){var kart=($("kr-kart").value||"").trim(),aciklama=($("kr-aciklama").value||"").trim(),tutar=parseFloat($("kr-tutar").value)||0,taksit=parseInt($("kr-taksit").value)||1,basTarih=$("kr-bastarihi").value;if(!kart||!aciklama||!tutar||!basTarih)return;if(_k.indexOf(kart)<0)_k.push(kart);if(_aktif){var i=_h.findIndex(function(x){return x.id===_aktif;});if(i>=0)_h[i]={id:_aktif,kart:kart,aciklama:aciklama,tutar:tutar,taksit:taksit,basTarih:basTarih};}else{_h.push({id:uid(),kart:kart,aciklama:aciklama,tutar:tutar,taksit:taksit,basTarih:basTarih});}await kfbKaydet();kmodalKapat();krender();}
-async function kinit(){await kfbYukle();krender();}
+async function kkaydet(){
+  var kart=($("kr-kart").value||"").trim(),aciklama=($("kr-aciklama").value||"").trim(),tutar=parseFloat($("kr-tutar").value)||0,basTarih=($("kr-bastarihi").value||"").substring(0,7),taksit=parseInt($("kr-taksit").value,10)||1,tip=_krFormTip;
+  if(!kart||!aciklama||!tutar||!basTarih)return;
+  if(tip==="taksit"&&(!taksit||taksit<1))return;
+  if(_k.indexOf(kart)<0)_k.push(kart);
+  var rec={kart:kart,aciklama:aciklama,tutar:tutar,basTarih:basTarih,odemeTipi:tip,taksit:tip==="taksit"?taksit:1};
+  if(_aktif){var i=_h.findIndex(function(x){return x.id===_aktif;});if(i>=0){rec.id=_aktif;_h[i]=rec;}}
+  else{rec.id=uid();_h.push(rec);}
+  await kfbKaydet();kmodalKapat();krender();
+}
+async function kinit(){await kfbYukle();_h=_h.map(kHarcamaNormalize);krender();}
 return{init:kinit};
 })();
 
