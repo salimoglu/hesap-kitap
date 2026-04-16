@@ -1206,6 +1206,29 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .mh-toplam-row td:nth-child(2){font-size:15px;font-weight:600;color:var(--green);}
 .mh-bos{padding:32px;text-align:center;color:var(--text-muted);font-size:13px;}
 
+/* Alacaklar usability fixes */
+.al-liste{max-width:920px;}
+.al-kart-header{flex-wrap:wrap;}
+.al-kart-sag{align-items:flex-end;margin-left:auto;}
+.al-kart-actions{align-self:flex-end;}
+.al-plan-satir{display:flex;flex-wrap:wrap;row-gap:6px;}
+.al-plan-ay{min-width:84px;}
+.al-plan-no{min-width:34px;}
+.al-plan-tutar{margin-left:auto;min-width:120px;text-align:right;}
+.al-odeme-btn{margin-left:auto;}
+.al-kontrol-bar{width:100%;max-width:920px;display:flex;gap:8px;align-items:center;margin:0 0 12px;}
+.al-kontrol-bar .field-input{flex:1;min-width:180px;}
+.al-kisi-blok{width:100%;max-width:920px;margin-bottom:12px;border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.al-kisi-header{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--bg-elevated);border-bottom:1px solid var(--border);cursor:pointer;}
+.al-kisi-header-kapali{border-bottom:none;}
+.al-kisi-ok{color:var(--text-muted);font-size:14px;width:14px;text-align:center;flex-shrink:0;}
+.al-kisi-adet{color:var(--text-muted);font-size:11px;font-weight:700;white-space:nowrap;margin-left:6px;}
+
+@media (max-width: 720px){
+  .al-kontrol-bar{flex-wrap:wrap;}
+  .al-kontrol-bar .btn-secondary{flex:1;}
+}
+
 /* ══ ALACAKLAR LAYOUT FIX ══ */
 .al-kart-sag { flex-direction: row; align-items: center; gap: 8px; }
 .al-kalan-val { font-size: 14px; font-weight: 800; white-space: nowrap; }
