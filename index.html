@@ -8,7 +8,7 @@
   <title>Hesap Kitap</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📒</text></svg>" />
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="css/style.css?v=20260416d" />
+  <link rel="stylesheet" href="css/style.css?v=20260416e" />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -47,7 +47,6 @@
 
   <div id="app" class="app hidden">
     <header class="topbar">
-      <div class="topbar-left">
       <div class="topbar-left" onclick="sayfaYenile()" style="cursor:pointer" title="Yenile">
         <span class="app-name">HESAP K&#304;TAP</span>
       </div>
@@ -117,13 +116,13 @@
         </div>
       </section>
       <section id="tab-butce" class="tab-panel"><div class="butce-wrap"><div id="butce-container"><!-- ButceModule render edilecek --></div></div></section>
-      <section id="tab-birikim" class="tab-panel"><div id="birikim-container" style="height:100%;overflow:hidden;"></div></section>
-      <section id="tab-kredi" class="tab-panel"><div id="kredi-container" style="height:100%;overflow:hidden;"></div></section>
-      <section id="tab-alacaklar" class="tab-panel"><div id="alacaklar-container" style="height:100%;overflow:hidden;"></div></section>
-      <section id="tab-urun" class="tab-panel"><div id="urun-container" style="height:100%;overflow:hidden;"></div></section>
-      <section id="tab-altin" class="tab-panel"><div id="altin-container" style="height:100%;overflow:hidden;"></div></section>
-      <section id="tab-vefa" class="tab-panel"><div id="vefa-container" style="height:100%;overflow:hidden;"></div></section>
-      <section id="tab-muhtac" class="tab-panel"><div id="muhtac-container" style="height:100%;overflow:hidden;"></div></section>
+      <section id="tab-birikim" class="tab-panel"><div id="birikim-container" class="module-host"></div></section>
+      <section id="tab-kredi" class="tab-panel"><div id="kredi-container" class="module-host"></div></section>
+      <section id="tab-alacaklar" class="tab-panel"><div id="alacaklar-container" class="module-host"></div></section>
+      <section id="tab-urun" class="tab-panel"><div id="urun-container" class="module-host"></div></section>
+      <section id="tab-altin" class="tab-panel"><div id="altin-container" class="module-host"></div></section>
+      <section id="tab-vefa" class="tab-panel"><div id="vefa-container" class="module-host"></div></section>
+      <section id="tab-muhtac" class="tab-panel"><div id="muhtac-container" class="module-host"></div></section>
     </main>
   </div>
 
