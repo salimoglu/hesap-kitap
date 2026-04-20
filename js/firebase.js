@@ -10,18 +10,34 @@ const _fbConfig = {
 };
 
 let _fbDb = null;
+window._fbReady = Promise.resolve(false);
 
-function fbInit() {
+async function fbInit() {
   try {
     if (!firebase.apps.length) firebase.initializeApp(_fbConfig);
     _fbDb = firebase.database();
     window._fbDb = _fbDb;
-    firebase.auth().signInAnonymously().catch(function(e){ console.warn("Auth:", e); });
+
+    window._fbReady = new Promise(function(resolve) {
+      var done = false;
+      var finish = function(ok) { if (done) return; done = true; resolve(ok); };
+      try {
+        firebase.auth().onAuthStateChanged(function(u) { if (u) finish(true); });
+        firebase.auth().signInAnonymously().catch(function(e) {
+          console.warn("Auth:", e);
+          finish(false);
+        });
+      } catch(e) { console.warn("Auth init:", e); finish(false); }
+      setTimeout(function(){ finish(false); }, 8000);
+    });
+
+    await window._fbReady;
   } catch(e) { console.warn("Firebase init:", e); }
 }
 
 async function fbVerileriYukle() {
   if (!_fbDb) return;
+  try { await window._fbReady; } catch(e) {}
   try {
     const snap = await _fbDb.ref("islemler").once("value");
     const fbData = snap.val();
