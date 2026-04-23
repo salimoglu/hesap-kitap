@@ -17,6 +17,574 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+</head>
+<body>
+
+  <div id="lock-screen" class="lock-screen">
+    <div class="lock-inner">
+      <div class="lock-logo">
+        <span class="lock-icon">&#128221;</span>
+        <h1 class="lock-title">HESAP K&#304;TAP</h1>
+        <p class="lock-sub">Ki&#351;isel Finans Takibi</p>
+      </div>
+      <div class="pin-display">
+        <span class="pin-dot" id="d1"></span><span class="pin-dot" id="d2"></span>
+        <span class="pin-dot" id="d3"></span><span class="pin-dot" id="d4"></span>
+      </div>
+      <p class="pin-error" id="pin-error"></p>
+      <div class="numpad">
+        <button class="num-btn" data-n="1">1</button>
+        <button class="num-btn" data-n="2">2</button>
+        <button class="num-btn" data-n="3">3</button>
+        <button class="num-btn" data-n="4">4</button>
+        <button class="num-btn" data-n="5">5</button>
+        <button class="num-btn" data-n="6">6</button>
+        <button class="num-btn" data-n="7">7</button>
+        <button class="num-btn" data-n="8">8</button>
+        <button class="num-btn" data-n="9">9</button>
+        <button class="num-btn num-empty"></button>
+        <button class="num-btn" data-n="0">0</button>
+        <button class="num-btn num-del" id="pin-del">&#9003;</button>
+      </div>
+      <p class="lock-hint">Klavyeden de girebilirsiniz</p>
+    </div>
+  </div>
+
+  <div id="app" class="app hidden">
+    <header class="topbar">
+      <div class="topbar-left" onclick="sayfaYenile()" style="cursor:pointer" title="Yenile">
+        <span class="app-name">HESAP K&#304;TAP</span>
+      </div>
+      <div class="topbar-right">
+        <span id="sync-durum" class="sync-durum" title="Bulut senkron"></span>
+        <button class="icon-btn hidden" id="install-btn" title="Uygulamayi yukle">&#11015;</button>
+        <button class="icon-btn" id="lock-btn">&#128274;</button>
+      </div>
+    </header>
+
+    <nav class="tab-nav">
+      <button class="tab-btn active" data-tab="islemler"><span class="tab-icon">&#128184;</span><span class="tab-label">&#304;&#351;lemler</span></button>
+      <button class="tab-btn" data-tab="butce"><span class="tab-icon">&#128202;</span><span class="tab-label">B&#252;t&#231;e</span></button>
+      <button class="tab-btn" data-tab="birikim"><span class="tab-icon">&#127974;</span><span class="tab-label">Birikim</span></button>
+      <button class="tab-btn" data-tab="kredi"><span class="tab-icon">&#128179;</span><span class="tab-label">Kredi K.</span></button>
+      <button class="tab-btn" data-tab="alacaklar"><span class="tab-icon">&#129309;</span><span class="tab-label">Alacaklar</span></button>
+      <button class="tab-btn" data-tab="urun"><span class="tab-icon">&#128230;</span><span class="tab-label">&#220;r&#252;n</span></button>
+      <button class="tab-btn" data-tab="altin"><span class="tab-icon">&#129351;</span><span class="tab-label">Alt&#305;n</span></button>
+      <button class="tab-btn" data-tab="vefa"><span class="tab-icon">&#128332;</span><span class="tab-label">Vefa</span></button>
+      <button class="tab-btn" data-tab="muhtac"><span class="tab-icon">&#129330;</span><span class="tab-label">Muhta&#231;</span></button>
+    </nav>
+
+    <main class="content">
+      <section id="tab-islemler" class="tab-panel active">
+        <div class="islemler-wrap">
+          <div class="ozet-bar">
+            <div class="ozet-item"><span class="ozet-label">Gelir</span><span class="ozet-val gelir" id="total-gelir">0,00</span></div>
+            <div class="ozet-sep"></div>
+            <div class="ozet-item"><span class="ozet-label">Gider</span><span class="ozet-val gider" id="total-gider">0,00</span></div>
+            <div class="ozet-sep"></div>
+            <div class="ozet-item"><span class="ozet-label">Net Bakiye</span><span class="ozet-val net" id="total-net">0,00</span></div>
+          </div>
+          <div class="filtre-bar">
+            <select id="filter-type" class="filter-select">
+              <option value="hepsi">T&#252;m&#252;</option>
+              <option value="gelir">Gelir</option>
+              <option value="gider">Gider</option>
+            </select>
+            <select id="filter-ay" class="filter-select"><option value="hepsi">T&#252;m Aylar</option></select>
+            <button class="btn-yeni-kat-bar" id="btn-yeni-kat-bar">&#9776; Kategoriler</button>
+          </div>
+          <div class="islem-scroll" id="islem-list">
+            <div class="empty-state" id="empty-state">
+              <span class="empty-icon">&#128221;</span>
+              <p>Hen&#252;z i&#351;lem yok</p>
+              <span>A&#351;a&#287;&#305;dan h&#305;zl&#305; giri&#351; yap&#305;n</span>
+            </div>
+          </div>
+          <div class="hizli-giris">
+            <input type="text" class="hg-aciklama" id="hg-aciklama" placeholder="A&#231;&#305;klama..." maxlength="100" />
+            <input type="number" class="hg-tutar" id="hg-tutar" placeholder="0,00" min="0" step="0.01" inputmode="decimal" />
+            <div class="hg-kat-wrap" id="hg-kat-wrap">
+              <button class="hg-kat-trigger" id="hg-kat-trigger" type="button">Kategori...</button>
+              <div class="hg-kat-dropdown" id="hg-kat-dropdown">
+                <div class="hg-kat-search">
+                  <span class="hg-kat-search-icon">&#128269;</span>
+                  <input type="text" class="hg-kat-search-inp" id="hg-kat-search-inp" placeholder="Ara..." autocomplete="off" spellcheck="false" />
+                  <button class="hg-kat-search-clear" id="hg-kat-search-clear" type="button">&#10005;</button>
+                </div>
+                <div class="hg-kat-list" id="hg-kat-list"></div>
+              </div>
+            </div>
+            <input type="date" class="hg-tarih" id="hg-tarih" /><div class="hg-btn-group">
+              <button class="hg-btn gelir" id="hg-btn-gelir">+ Gelir</button>
+              <button class="hg-btn gider" id="hg-btn-gider">&#8722; Gider</button>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section id="tab-butce" class="tab-panel"><div class="butce-wrap"><div id="butce-container"><!-- ButceModule render edilecek --></div></div></section>
+      <section id="tab-birikim" class="tab-panel"><div id="birikim-container" class="module-host"></div></section>
+      <section id="tab-kredi" class="tab-panel"><div id="kredi-container" class="module-host"></div></section>
+      <section id="tab-alacaklar" class="tab-panel"><div id="alacaklar-container" class="module-host"></div></section>
+      <section id="tab-urun" class="tab-panel"><div id="urun-container" class="module-host"></div></section>
+      <section id="tab-altin" class="tab-panel"><div id="altin-container" class="module-host"></div></section>
+      <section id="tab-vefa" class="tab-panel"><div id="vefa-container" class="module-host"></div></section>
+      <section id="tab-muhtac" class="tab-panel"><div id="muhtac-container" class="module-host"></div></section>
+    </main>
+  </div>
+
+  <!-- MODAL: İŞLEM DÜZENLE -->
+  <div id="modal-islem" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modal-title">&#304;&#351;lemi D&#252;zenle</h2>
+        <button class="modal-close" id="modal-close">&#10005;</button>
+      </div>
+      <div class="modal-body">
+        <div class="field-group">
+          <label class="field-label">&#304;&#351;lem T&#252;r&#252;</label>
+          <div class="tip-toggle">
+            <button class="tip-btn active" data-tip="gider" id="btn-gider">&#128228; Gider</button>
+            <button class="tip-btn" data-tip="gelir" id="btn-gelir">&#128229; Gelir</button>
+          </div>
+        </div>
+        <div class="field-group">
+          <div class="label-row">
+            <label class="field-label" for="sel-kategori">Kategori</label>
+          </div>
+          <select id="sel-kategori" class="field-select"></select>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="inp-tutar">Tutar (TL) *</label>
+          <input type="number" id="inp-tutar" class="field-input" placeholder="0,00" min="0" step="0.01" inputmode="decimal" />
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="inp-aciklama">A&#231;&#305;klama</label>
+          <input type="text" id="inp-aciklama" class="field-input" placeholder="&#304;ste&#287;e ba&#287;l&#305;..." maxlength="200" />
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="inp-tarih">Tarih *</label>
+          <input type="date" id="inp-tarih" class="field-input" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="btn-iptal">&#304;ptal</button>
+        <button class="btn-primary" id="btn-kaydet">Kaydet</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: KATEGORİ YÖNETİMİ (Liste + Ekle) -->
+  <div id="modal-kategori" class="modal-overlay hidden">
+    <div class="modal-box modal-kat-box">
+      <div class="modal-header">
+        <h2 class="modal-title">Kategoriler</h2>
+        <button class="modal-close" id="kat-close">&#10005;</button>
+      </div>
+
+      <!-- Tip seçici -->
+      <div class="kat-tip-bar">
+        <button class="kat-tip-tab active" id="kat-tab-gider" data-tip="gider">Gider</button>
+        <button class="kat-tip-tab" id="kat-tab-gelir" data-tip="gelir">Gelir</button>
+      </div>
+
+      <!-- Mevcut kategoriler listesi -->
+      <div class="kat-liste-wrap" id="kat-liste-wrap"></div>
+
+      <!-- Yeni kategori ekle -->
+      <div class="kat-ekle-form">
+        <div class="kat-ekle-baslik">+ Yeni Kategori Ekle</div>
+        <div class="kat-ekle-row">
+          <div class="field-group" style="flex:1">
+            <label class="field-label" for="sel-kat-grup">Grup</label>
+            <select id="sel-kat-grup" class="field-select"></select>
+          </div>
+        </div>
+        <div class="field-group" id="yeni-grup-wrap" style="display:none">
+          <label class="field-label" for="inp-kat-grup-yeni">Yeni Grup Ad&#305;</label>
+          <input type="text" id="inp-kat-grup-yeni" class="field-input" placeholder="orn: SAGLIK" maxlength="50" />
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="inp-kat-ad">Kategori Ad&#305;</label>
+          <input type="text" id="inp-kat-ad" class="field-input" placeholder="orn: Dis Tedavisi" maxlength="50" />
+        </div>
+        <button class="btn-primary" id="kat-kaydet" style="width:100%;margin-top:4px">Ekle</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: KATEGORİ DÜZENLE -->
+  <div id="modal-kat-duzenle" class="modal-overlay hidden">
+    <div class="modal-box modal-sm">
+      <div class="modal-header">
+        <h2 class="modal-title">Kategoriyi D&#252;zenle</h2>
+        <button class="modal-close" id="kat-duz-close">&#10005;</button>
+      </div>
+      <div class="modal-body">
+        <div class="field-group">
+          <label class="field-label" for="inp-duz-grup">Grup Ad&#305;</label>
+          <input type="text" id="inp-duz-grup" class="field-input" maxlength="50" />
+        </div>
+        <div class="field-group" id="duz-ad-wrap">
+          <label class="field-label" for="inp-duz-ad">Kategori Ad&#305;</label>
+          <input type="text" id="inp-duz-ad" class="field-input" maxlength="50" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="kat-duz-iptal">&#304;ptal</button>
+        <button class="btn-primary" id="kat-duz-kaydet">Kaydet</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: KATEGORİ SİL ONAYI -->
+  <div id="modal-kat-sil" class="modal-overlay hidden">
+    <div class="modal-box modal-sm">
+      <div class="modal-header">
+        <h2 class="modal-title">Kategoriyi Sil</h2>
+        <button class="modal-close" id="kat-sil-close">&#10005;</button>
+      </div>
+      <div class="modal-body">
+        <p class="confirm-text" id="kat-sil-text">Bu kategoriyi silmek istedi&#287;inizden emin misiniz?</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="kat-sil-iptal">&#304;ptal</button>
+        <button class="btn-danger" id="kat-sil-onayla">Sil</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- MODAL: İŞLEM SİL -->
+  <div id="modal-sil" class="modal-overlay hidden">
+    <div class="modal-box modal-sm">
+      <div class="modal-header">
+        <h2 class="modal-title">&#304;&#351;lemi Sil</h2>
+        <button class="modal-close" id="sil-close">&#10005;</button>
+      </div>
+      <div class="modal-body">
+        <p class="confirm-text">Bu i&#351;lemi silmek istedi&#287;inizden emin misiniz?</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="sil-iptal">&#304;ptal</button>
+        <button class="btn-danger" id="sil-onayla">Sil</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/firebase.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/modules/islemler.js"></script>
+  <script src="js/modules/yukle.js?v=20260416d"></script>
+  <script src="js/modules/alacaklar.js?v=20260416d"></script>
+  <script src="js/modules/urun.js"></script>
+  <script src="js/modules/birikim.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0f1923" />
+  <meta name="apple-mobile-web-app-title" content="Hesap Kitap" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>Hesap Kitap</title>
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="css/style.css?v=20260416f" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+</head>
+<body>
+
+  <div id="lock-screen" class="lock-screen">
+    <div class="lock-inner">
+      <div class="lock-logo">
+        <span class="lock-icon">&#128221;</span>
+        <h1 class="lock-title">HESAP K&#304;TAP</h1>
+        <p class="lock-sub">Ki&#351;isel Finans Takibi</p>
+      </div>
+      <div class="pin-display">
+        <span class="pin-dot" id="d1"></span><span class="pin-dot" id="d2"></span>
+        <span class="pin-dot" id="d3"></span><span class="pin-dot" id="d4"></span>
+      </div>
+      <p class="pin-error" id="pin-error"></p>
+      <div class="numpad">
+        <button class="num-btn" data-n="1">1</button>
+        <button class="num-btn" data-n="2">2</button>
+        <button class="num-btn" data-n="3">3</button>
+        <button class="num-btn" data-n="4">4</button>
+        <button class="num-btn" data-n="5">5</button>
+        <button class="num-btn" data-n="6">6</button>
+        <button class="num-btn" data-n="7">7</button>
+        <button class="num-btn" data-n="8">8</button>
+        <button class="num-btn" data-n="9">9</button>
+        <button class="num-btn num-empty"></button>
+        <button class="num-btn" data-n="0">0</button>
+        <button class="num-btn num-del" id="pin-del">&#9003;</button>
+      </div>
+      <p class="lock-hint">Klavyeden de girebilirsiniz</p>
+    </div>
+  </div>
+
+  <div id="app" class="app hidden">
+    <header class="topbar">
+      <div class="topbar-left" onclick="sayfaYenile()" style="cursor:pointer" title="Yenile">
+        <span class="app-name">HESAP K&#304;TAP</span>
+      </div>
+      <div class="topbar-right">
+        <span id="sync-durum" class="sync-durum" title="Bulut senkron"></span>
+        <button class="icon-btn hidden" id="install-btn" title="Uygulamayi yukle">&#11015;</button>
+        <button class="icon-btn" id="lock-btn">&#128274;</button>
+      </div>
+    </header>
+
+    <nav class="tab-nav">
+      <button class="tab-btn active" data-tab="islemler"><span class="tab-icon">&#128184;</span><span class="tab-label">&#304;&#351;lemler</span></button>
+      <button class="tab-btn" data-tab="butce"><span class="tab-icon">&#128202;</span><span class="tab-label">B&#252;t&#231;e</span></button>
+      <button class="tab-btn" data-tab="birikim"><span class="tab-icon">&#127974;</span><span class="tab-label">Birikim</span></button>
+      <button class="tab-btn" data-tab="kredi"><span class="tab-icon">&#128179;</span><span class="tab-label">Kredi K.</span></button>
+      <button class="tab-btn" data-tab="alacaklar"><span class="tab-icon">&#129309;</span><span class="tab-label">Alacaklar</span></button>
+      <button class="tab-btn" data-tab="urun"><span class="tab-icon">&#128230;</span><span class="tab-label">&#220;r&#252;n</span></button>
+      <button class="tab-btn" data-tab="altin"><span class="tab-icon">&#129351;</span><span class="tab-label">Alt&#305;n</span></button>
+      <button class="tab-btn" data-tab="vefa"><span class="tab-icon">&#128332;</span><span class="tab-label">Vefa</span></button>
+      <button class="tab-btn" data-tab="muhtac"><span class="tab-icon">&#129330;</span><span class="tab-label">Muhta&#231;</span></button>
+    </nav>
+
+    <main class="content">
+      <section id="tab-islemler" class="tab-panel active">
+        <div class="islemler-wrap">
+          <div class="ozet-bar">
+            <div class="ozet-item"><span class="ozet-label">Gelir</span><span class="ozet-val gelir" id="total-gelir">0,00</span></div>
+            <div class="ozet-sep"></div>
+            <div class="ozet-item"><span class="ozet-label">Gider</span><span class="ozet-val gider" id="total-gider">0,00</span></div>
+            <div class="ozet-sep"></div>
+            <div class="ozet-item"><span class="ozet-label">Net Bakiye</span><span class="ozet-val net" id="total-net">0,00</span></div>
+          </div>
+          <div class="filtre-bar">
+            <select id="filter-type" class="filter-select">
+              <option value="hepsi">T&#252;m&#252;</option>
+              <option value="gelir">Gelir</option>
+              <option value="gider">Gider</option>
+            </select>
+            <select id="filter-ay" class="filter-select"><option value="hepsi">T&#252;m Aylar</option></select>
+            <button class="btn-yeni-kat-bar" id="btn-yeni-kat-bar">&#9776; Kategoriler</button>
+          </div>
+          <div class="islem-scroll" id="islem-list">
+            <div class="empty-state" id="empty-state">
+              <span class="empty-icon">&#128221;</span>
+              <p>Hen&#252;z i&#351;lem yok</p>
+              <span>A&#351;a&#287;&#305;dan h&#305;zl&#305; giri&#351; yap&#305;n</span>
+            </div>
+          </div>
+          <div class="hizli-giris">
+            <input type="text" class="hg-aciklama" id="hg-aciklama" placeholder="A&#231;&#305;klama..." maxlength="100" />
+            <input type="number" class="hg-tutar" id="hg-tutar" placeholder="0,00" min="0" step="0.01" inputmode="decimal" />
+            <div class="hg-kat-wrap" id="hg-kat-wrap">
+              <button class="hg-kat-trigger" id="hg-kat-trigger" type="button">Kategori...</button>
+              <div class="hg-kat-dropdown" id="hg-kat-dropdown">
+                <div class="hg-kat-search">
+                  <span class="hg-kat-search-icon">&#128269;</span>
+                  <input type="text" class="hg-kat-search-inp" id="hg-kat-search-inp" placeholder="Ara..." autocomplete="off" spellcheck="false" />
+                  <button class="hg-kat-search-clear" id="hg-kat-search-clear" type="button">&#10005;</button>
+                </div>
+                <div class="hg-kat-list" id="hg-kat-list"></div>
+              </div>
+            </div>
+            <input type="date" class="hg-tarih" id="hg-tarih" /><div class="hg-btn-group">
+              <button class="hg-btn gelir" id="hg-btn-gelir">+ Gelir</button>
+              <button class="hg-btn gider" id="hg-btn-gider">&#8722; Gider</button>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section id="tab-butce" class="tab-panel"><div class="butce-wrap"><div id="butce-container"><!-- ButceModule render edilecek --></div></div></section>
+      <section id="tab-birikim" class="tab-panel"><div id="birikim-container" class="module-host"></div></section>
+      <section id="tab-kredi" class="tab-panel"><div id="kredi-container" class="module-host"></div></section>
+      <section id="tab-alacaklar" class="tab-panel"><div id="alacaklar-container" class="module-host"></div></section>
+      <section id="tab-urun" class="tab-panel"><div id="urun-container" class="module-host"></div></section>
+      <section id="tab-altin" class="tab-panel"><div id="altin-container" class="module-host"></div></section>
+      <section id="tab-vefa" class="tab-panel"><div id="vefa-container" class="module-host"></div></section>
+      <section id="tab-muhtac" class="tab-panel"><div id="muhtac-container" class="module-host"></div></section>
+    </main>
+  </div>
+
+  <!-- MODAL: İŞLEM DÜZENLE -->
+  <div id="modal-islem" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modal-title">&#304;&#351;lemi D&#252;zenle</h2>
+        <button class="modal-close" id="modal-close">&#10005;</button>
+      </div>
+      <div class="modal-body">
+        <div class="field-group">
+          <label class="field-label">&#304;&#351;lem T&#252;r&#252;</label>
+          <div class="tip-toggle">
+            <button class="tip-btn active" data-tip="gider" id="btn-gider">&#128228; Gider</button>
+            <button class="tip-btn" data-tip="gelir" id="btn-gelir">&#128229; Gelir</button>
+          </div>
+        </div>
+        <div class="field-group">
+          <div class="label-row">
+            <label class="field-label" for="sel-kategori">Kategori</label>
+          </div>
+          <select id="sel-kategori" class="field-select"></select>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="inp-tutar">Tutar (TL) *</label>
+          <input type="number" id="inp-tutar" class="field-input" placeholder="0,00" min="0" step="0.01" inputmode="decimal" />
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="inp-aciklama">A&#231;&#305;klama</label>
+          <input type="text" id="inp-aciklama" class="field-input" placeholder="&#304;ste&#287;e ba&#287;l&#305;..." maxlength="200" />
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="inp-tarih">Tarih *</label>
+          <input type="date" id="inp-tarih" class="field-input" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="btn-iptal">&#304;ptal</button>
+        <button class="btn-primary" id="btn-kaydet">Kaydet</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: KATEGORİ YÖNETİMİ (Liste + Ekle) -->
+  <div id="modal-kategori" class="modal-overlay hidden">
+    <div class="modal-box modal-kat-box">
+      <div class="modal-header">
+        <h2 class="modal-title">Kategoriler</h2>
+        <button class="modal-close" id="kat-close">&#10005;</button>
+      </div>
+
+      <!-- Tip seçici -->
+      <div class="kat-tip-bar">
+        <button class="kat-tip-tab active" id="kat-tab-gider" data-tip="gider">Gider</button>
+        <button class="kat-tip-tab" id="kat-tab-gelir" data-tip="gelir">Gelir</button>
+      </div>
+
+      <!-- Mevcut kategoriler listesi -->
+      <div class="kat-liste-wrap" id="kat-liste-wrap"></div>
+
+      <!-- Yeni kategori ekle -->
+      <div class="kat-ekle-form">
+        <div class="kat-ekle-baslik">+ Yeni Kategori Ekle</div>
+        <div class="kat-ekle-row">
+          <div class="field-group" style="flex:1">
+            <label class="field-label" for="sel-kat-grup">Grup</label>
+            <select id="sel-kat-grup" class="field-select"></select>
+          </div>
+        </div>
+        <div class="field-group" id="yeni-grup-wrap" style="display:none">
+          <label class="field-label" for="inp-kat-grup-yeni">Yeni Grup Ad&#305;</label>
+          <input type="text" id="inp-kat-grup-yeni" class="field-input" placeholder="orn: SAGLIK" maxlength="50" />
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="inp-kat-ad">Kategori Ad&#305;</label>
+          <input type="text" id="inp-kat-ad" class="field-input" placeholder="orn: Dis Tedavisi" maxlength="50" />
+        </div>
+        <button class="btn-primary" id="kat-kaydet" style="width:100%;margin-top:4px">Ekle</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: KATEGORİ DÜZENLE -->
+  <div id="modal-kat-duzenle" class="modal-overlay hidden">
+    <div class="modal-box modal-sm">
+      <div class="modal-header">
+        <h2 class="modal-title">Kategoriyi D&#252;zenle</h2>
+        <button class="modal-close" id="kat-duz-close">&#10005;</button>
+      </div>
+      <div class="modal-body">
+        <div class="field-group">
+          <label class="field-label" for="inp-duz-grup">Grup Ad&#305;</label>
+          <input type="text" id="inp-duz-grup" class="field-input" maxlength="50" />
+        </div>
+        <div class="field-group" id="duz-ad-wrap">
+          <label class="field-label" for="inp-duz-ad">Kategori Ad&#305;</label>
+          <input type="text" id="inp-duz-ad" class="field-input" maxlength="50" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="kat-duz-iptal">&#304;ptal</button>
+        <button class="btn-primary" id="kat-duz-kaydet">Kaydet</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: KATEGORİ SİL ONAYI -->
+  <div id="modal-kat-sil" class="modal-overlay hidden">
+    <div class="modal-box modal-sm">
+      <div class="modal-header">
+        <h2 class="modal-title">Kategoriyi Sil</h2>
+        <button class="modal-close" id="kat-sil-close">&#10005;</button>
+      </div>
+      <div class="modal-body">
+        <p class="confirm-text" id="kat-sil-text">Bu kategoriyi silmek istedi&#287;inizden emin misiniz?</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="kat-sil-iptal">&#304;ptal</button>
+        <button class="btn-danger" id="kat-sil-onayla">Sil</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- MODAL: İŞLEM SİL -->
+  <div id="modal-sil" class="modal-overlay hidden">
+    <div class="modal-box modal-sm">
+      <div class="modal-header">
+        <h2 class="modal-title">&#304;&#351;lemi Sil</h2>
+        <button class="modal-close" id="sil-close">&#10005;</button>
+      </div>
+      <div class="modal-body">
+        <p class="confirm-text">Bu i&#351;lemi silmek istedi&#287;inizden emin misiniz?</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="sil-iptal">&#304;ptal</button>
+        <button class="btn-danger" id="sil-onayla">Sil</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/firebase.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/modules/islemler.js"></script>
+  <script src="js/modules/yukle.js?v=20260416d"></script>
+  <script src="js/modules/alacaklar.js?v=20260416d"></script>
+  <script src="js/modules/urun.js"></script>
+  <script src="js/modules/birikim.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0f1923" />
+  <meta name="apple-mobile-web-app-title" content="Hesap Kitap" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>Hesap Kitap</title>
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="css/style.css?v=20260416f" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 </head>
 <body>
 
