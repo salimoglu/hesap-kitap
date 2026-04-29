@@ -1,4 +1,4 @@
-/* yukle.js - ButceModule + KrediModule */
+undefined/* yukle.js - ButceModule + KrediModule */
 
 /* ===== BUTCE MODULE ===== */
 var ButceModule=(function(){
