@@ -1218,10 +1218,10 @@ function render(){
   /* Özet */
   h+='<div class="mh-header">';
   h+='<div class="mh-ozet">';
-  h+='<div class="mh-oz-item"><span class="mh-oz-label">Toplam Kişi</span><span class="mh-oz-val">'+_kisiler.length+'</span></div>';
-  h+='<div class="mh-oz-item"><span class="mh-oz-label">Toplam Zekat</span><span class="mh-oz-val" style="color:var(--green)">'+mp(genelToplam)+' TL</span></div>';
+  h+='<div class="mh-oz-item"><span class="mh-oz-label">Kayıtlı kişi</span><span class="mh-oz-val mh-oz-val--sayi">'+_kisiler.length+'</span></div>';
+  h+='<div class="mh-oz-item mh-oz-item--vurgu"><span class="mh-oz-label">Verilen zekat</span><span class="mh-oz-val mh-oz-val--para">'+mp(genelToplam)+' TL</span></div>';
   h+='</div>';
-  h+='<button class="mh-ekle-btn" id="mh-kisi-ekle-btn">+ Kişi Ekle</button>';
+  h+='<button type="button" class="mh-ekle-btn" id="mh-kisi-ekle-btn">Yeni kişi</button>';
   h+='</div>';
 
   /* Kişi listesi */
@@ -1232,56 +1232,63 @@ function render(){
     _kisiler.forEach(function(k){
       var top=kisiToplam(k);
       var sonZ=(k.zekatlar&&k.zekatlar.length)?k.zekatlar[k.zekatlar.length-1]:null;
-      h+='<div class="mh-kisi-kart" data-id="'+k.id+'">';
-      h+='<div class="mh-kisi-avatar">'+k.ad.charAt(0).toUpperCase()+'</div>';
-      h+='<div class="mh-kisi-bilgi">';
+      h+='<div class="mh-kisi-kart" data-id="'+k.id+'" role="button" tabindex="0">';
+      h+='<div class="mh-kisi-avatar" aria-hidden="true">'+k.ad.charAt(0).toUpperCase()+'</div>';
+      h+='<div class="mh-kisi-bil">';
       h+='<div class="mh-kisi-ad">'+k.ad+'</div>';
       if(k.not)h+='<div class="mh-kisi-not">'+k.not+'</div>';
       h+='<div class="mh-kisi-meta">';
-      h+='<span class="mh-meta-item">'+(k.zekatlar?k.zekatlar.length:0)+' kayıt</span>';
-      if(sonZ)h+='<span class="mh-meta-item">Son: '+mTarih(sonZ.tarih)+'</span>';
+      h+='<span class="mh-pill">'+(k.zekatlar?k.zekatlar.length:0)+' ödeme</span>';
+      if(sonZ)h+='<span class="mh-pill mh-pill--soft">Son '+mTarih(sonZ.tarih)+'</span>';
       h+='</div></div>';
       h+='<div class="mh-kisi-sag">';
-      h+='<div class="mh-kisi-toplam">'+mp(top)+' TL</div>';
-      h+='<div class="mh-kisi-toplam-label">toplam zekat</div>';
+      h+='<div class="mh-kisi-toplam">'+mp(top)+'</div>';
+      h+='<div class="mh-kisi-toplam-label">TL</div>';
       h+='</div>';
-      h+='<button class="mh-sil-kisi-btn row-action-btn sil" data-id="'+k.id+'">&#10005;</button>';
+      h+='<button type="button" class="mh-sil-kisi-btn row-action-btn sil" data-id="'+k.id+'" title="Kişiyi sil">&#10005;</button>';
       h+='</div>';
     });
     h+='</div>';
   }
 
-  /* Kişi Ekle Modal */
-  h+='<div class="bk-modal-overlay hidden" id="mh-modal"><div class="modal-box modal-sm">';
-  h+='<div class="modal-header"><h2 class="modal-title">Kişi Ekle</h2><button class="modal-close" id="mh-modal-kapat">&#10005;</button></div>';
-  h+='<div class="modal-body">';
-  h+='<div class="field-group"><label class="field-label">Ad Soyad</label><input type="text" id="mh-kisi-ad" class="field-input" placeholder="Ad Soyad..." maxlength="60"/></div>';
-  h+='<div class="field-group"><label class="field-label">Not (mahalle, açıklama...)</label><input type="text" id="mh-kisi-not" class="field-input" placeholder="isteğe bağlı" maxlength="100"/></div>';
+  /* Kişi Ekle / Düzenle Modal */
+  h+='<div class="bk-modal-overlay hidden" id="mh-modal"><div class="modal-box modal-sm mh-kisi-modal">';
+  h+='<div class="modal-header"><h2 class="modal-title" id="mh-modal-baslik">Kişi ekle</h2><button type="button" class="modal-close" id="mh-modal-kapat" aria-label="Kapat">&#10005;</button></div>';
+  h+='<div class="modal-body mh-kisi-form-body">';
+  h+='<input type="hidden" id="mh-kisi-id" value=""/>';
+  h+='<div class="field-group"><label class="field-label" for="mh-kisi-ad">Ad soyad</label><input type="text" id="mh-kisi-ad" class="field-input" placeholder="Ad Soyad" maxlength="60" autocomplete="name"/></div>';
+  h+='<div class="field-group"><label class="field-label" for="mh-kisi-not">Not <span class="mh-label-hint">isteğe bağlı</span></label><input type="text" id="mh-kisi-not" class="field-input" placeholder="Mahalle, ihtiyaç özeti..." maxlength="120"/></div>';
   h+='</div>';
-  h+='<div class="modal-footer"><button class="btn-secondary" id="mh-modal-iptal">İptal</button><button class="btn-primary" id="mh-modal-kaydet">Kaydet</button></div>';
+  h+='<div class="modal-footer"><button type="button" class="btn-secondary" id="mh-modal-iptal">İptal</button><button type="button" class="btn-primary" id="mh-modal-kaydet">Kaydet</button></div>';
   h+='</div></div>';
 
-  /* Kişi Detay Modal — popup */
-  h+='<div class="bk-modal-overlay hidden" id="mh-detay-modal"><div class="modal-box" style="max-width:520px;max-height:80vh;display:flex;flex-direction:column">';
-  h+='<div class="modal-header" style="flex-shrink:0">';
-  h+='<div style="display:flex;align-items:center;gap:12px;flex:1">';
-  h+='<div class="mh-detay-avatar" id="mh-d-avatar"></div>';
-  h+='<div><div class="mh-detay-ad" id="mh-d-ad"></div><div class="mh-detay-not" id="mh-d-not"></div></div>';
-  h+='<div style="margin-left:auto;text-align:right"><div class="mh-detay-toplam-rakam" id="mh-d-toplam"></div><div class="mh-detay-toplam-label">toplam zekat</div></div>';
+  /* Kişi Detay Modal */
+  h+='<div class="bk-modal-overlay hidden" id="mh-detay-modal"><div class="modal-box mh-detay-kutu">';
+  h+='<div class="modal-header mh-detay-head">';
+  h+='<div class="mh-detay-ust">';
+  h+='<div class="mh-detay-avatar" id="mh-d-avatar" aria-hidden="true"></div>';
+  h+='<div class="mh-detay-baslik-blok">';
+  h+='<div class="mh-detay-ad" id="mh-d-ad"></div>';
+  h+='<div class="mh-detay-not" id="mh-d-not"></div>';
   h+='</div>';
-  h+='<button class="modal-close" id="mh-detay-kapat">&#10005;</button>';
-  h+='</div>';
-  /* Zekat ekle formu */
-  h+='<div class="mh-zekat-form" style="flex-shrink:0">';
-  h+='<div class="mh-form-baslik">+ Zekat Ekle</div>';
-  h+='<div class="mh-form-row">';
-  h+='<div class="field-group"><label class="field-label">Tarih</label><input type="date" id="mh-z-tarih" class="field-input" value="'+bugun+'"/></div>';
-  h+='<div class="field-group" style="flex:1.2"><label class="field-label">Miktar (TL)</label><input type="number" id="mh-z-miktar" class="field-input" placeholder="0" min="0" step="0.01" inputmode="decimal"/></div>';
-  h+='<div class="field-group" style="flex:2"><label class="field-label">Açıklama</label><input type="text" id="mh-z-aciklama" class="field-input" placeholder="Ramazan zekatı..." maxlength="100"/></div>';
-  h+='<button class="mh-zekat-ekle-btn" id="mh-zekat-kaydet-btn">Ekle</button>';
+  h+='<div class="mh-detay-toplam-blok">';
+  h+='<div class="mh-detay-toplam-rakam" id="mh-d-toplam"></div>';
+  h+='<div class="mh-detay-toplam-label">Toplam</div>';
   h+='</div></div>';
-  /* Zekat geçmişi */
-  h+='<div class="mh-zekat-liste" id="mh-d-liste" style="overflow-y:auto;flex:1"></div>';
+  h+='<div class="mh-detay-ak">';
+  h+='<button type="button" class="mh-btn-duzenle" id="mh-bilgi-duzenle">Bilgileri düzenle</button>';
+  h+='<button type="button" class="modal-close" id="mh-detay-kapat" aria-label="Kapat">&#10005;</button>';
+  h+='</div>';
+  h+='</div>';
+  h+='<div class="mh-zekat-form">';
+  h+='<div class="mh-form-baslik">Zekat kaydı ekle</div>';
+  h+='<div class="mh-form-grid">';
+  h+='<div class="field-group"><label class="field-label" for="mh-z-tarih">Tarih</label><input type="date" id="mh-z-tarih" class="field-input" value="'+bugun+'"/></div>';
+  h+='<div class="field-group"><label class="field-label" for="mh-z-miktar">Miktar (TL)</label><input type="number" id="mh-z-miktar" class="field-input" placeholder="0" min="0" step="0.01" inputmode="decimal"/></div>';
+  h+='<div class="field-group mh-form-ac-full"><label class="field-label" for="mh-z-aciklama">Açıklama</label><input type="text" id="mh-z-aciklama" class="field-input" placeholder="Örn. ramazan yardımı" maxlength="100"/></div>';
+  h+='<button type="button" class="mh-zekat-ekle-btn" id="mh-zekat-kaydet-btn">Ekle</button>';
+  h+='</div></div>';
+  h+='<div class="mh-zekat-liste" id="mh-d-liste"></div>';
   h+='</div></div>';
 
   h+='</div>';
@@ -1330,6 +1337,24 @@ function kisiDetayGuncelle(kid){
 
 var _aktifKisi=null;
 
+function kisiModalAc(id){
+  $("mh-kisi-id").value=id||"";
+  if(id){
+    var k=_kisiler.find(function(x){return x.id===id;});
+    if(k){
+      $("mh-kisi-ad").value=k.ad;
+      $("mh-kisi-not").value=k.not||"";
+    }
+    $("mh-modal-baslik").textContent="Bilgileri düzenle";
+  } else {
+    $("mh-kisi-ad").value="";
+    $("mh-kisi-not").value="";
+    $("mh-modal-baslik").textContent="Kişi ekle";
+  }
+  $("mh-modal").classList.remove("hidden");
+  setTimeout(function(){$("mh-kisi-ad").focus();},80);
+}
+
 function bagla(){
   /* Kişi kartına tıkla — popup aç */
   document.querySelectorAll(".mh-kisi-kart").forEach(function(el){
@@ -1339,10 +1364,19 @@ function bagla(){
       kisiDetayGuncelle(_aktifKisi);
       $("mh-detay-modal").classList.remove("hidden");
     });
+    el.addEventListener("keydown",function(e){
+      if(e.key==="Enter"||e.key===" "){ e.preventDefault(); el.click(); }
+    });
   });
   /* Detay kapat */
   $("mh-detay-kapat").addEventListener("click",function(){$("mh-detay-modal").classList.add("hidden");_aktifKisi=null;});
   $("mh-detay-modal").addEventListener("click",function(e){if(e.target===$("mh-detay-modal")){$("mh-detay-modal").classList.add("hidden");_aktifKisi=null;}});
+  /* Kişi bilgisi düzenle */
+  $("mh-bilgi-duzenle").addEventListener("click",function(){
+    if(!_aktifKisi)return;
+    $("mh-detay-modal").classList.add("hidden");
+    kisiModalAc(_aktifKisi);
+  });
   /* Zekat ekle */
   $("mh-zekat-kaydet-btn").addEventListener("click",async function(){
     if(!_aktifKisi)return;
@@ -1370,24 +1404,33 @@ function bagla(){
     });
   });
   /* Kişi Ekle modal */
-  $("mh-kisi-ekle-btn").addEventListener("click",function(){
-    $("mh-kisi-ad").value="";$("mh-kisi-not").value="";
-    $("mh-modal").classList.remove("hidden");
-    setTimeout(function(){$("mh-kisi-ad").focus();},100);
-  });
+  $("mh-kisi-ekle-btn").addEventListener("click",function(){kisiModalAc(null);});
   $("mh-modal-kapat").addEventListener("click",function(){$("mh-modal").classList.add("hidden");});
   $("mh-modal-iptal").addEventListener("click",function(){$("mh-modal").classList.add("hidden");});
   $("mh-modal").addEventListener("click",function(e){if(e.target===$("mh-modal"))$("mh-modal").classList.add("hidden");});
   $("mh-modal-kaydet").addEventListener("click",async function(){
+    var kid=$("mh-kisi-id").value;
     var ad=($("mh-kisi-ad").value||"").trim();
     var not=($("mh-kisi-not").value||"").trim();
     if(!ad){$("mh-kisi-ad").focus();return;}
-    _kisiler.push({id:muid(),ad:ad,not:not,zekatlar:[]});
-    await fbKaydet();$("mh-modal").classList.add("hidden");render();
+    var geriDetay=null;
+    if(kid){
+      var kk=_kisiler.find(function(x){return x.id===kid;});
+      if(kk){kk.ad=ad;kk.not=not;geriDetay=kid;}
+    } else {
+      _kisiler.push({id:muid(),ad:ad,not:not,zekatlar:[]});
+    }
+    await fbKaydet();
+    $("mh-modal").classList.add("hidden");
+    render();
+    if(geriDetay){
+      _aktifKisi=geriDetay;
+      kisiDetayGuncelle(geriDetay);
+      $("mh-detay-modal").classList.remove("hidden");
+    }
   });
 }
 
 async function minit(){await fbYukle();render();}
 return{init:minit};
 })();
-undefined
