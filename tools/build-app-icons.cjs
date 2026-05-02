@@ -315,6 +315,10 @@ async function main() {
     [256, "icon-256.png"],
     [192, "icon-192.png"],
     [180, "icon-180.png"],
+    [512, "pwa-win-512.png"],
+    [256, "pwa-win-256.png"],
+    [192, "pwa-win-192.png"],
+    [180, "pwa-win-180.png"],
   ];
   for (const [size, name] of outputs) {
     const out = master.clone();
