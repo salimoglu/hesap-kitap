@@ -4,6 +4,7 @@
  * PowerShell/Drawing ile renk bozulmasi olabiliyor; Jimp ile RGBA korunur.
  */
 const path = require("path");
+const fs = require("fs/promises");
 const { Jimp } = require("jimp");
 
 const REPO_ROOT = path.join(__dirname, "..");
@@ -324,6 +325,17 @@ async function main() {
     const out = master.clone();
     out.resize({ w: size, h: size });
     await out.write(path.join(ICONS_DIR, name));
+  }
+
+  try {
+    const { default: pngToIco } = await import("png-to-ico");
+    const icoBuf = await pngToIco([
+      path.join(ICONS_DIR, "pwa-win-192.png"),
+      path.join(ICONS_DIR, "pwa-win-512.png"),
+    ]);
+    await fs.writeFile(path.join(ICONS_DIR, "favicon.ico"), Buffer.from(icoBuf));
+  } catch (e) {
+    console.warn("favicon.ico:", e.message);
   }
 
   console.log("OK", { R, cx: C.cx, cy: C.cy, out: ICONS_DIR });

@@ -12,25 +12,25 @@
   "theme_color": "#0f1923",
   "icons": [
     {
-      "src": "icons/pwa-win-192.png?v=20260208win",
+      "src": "icons/pwa-win-192.png?v=20260209desk",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "icons/pwa-win-256.png?v=20260208win",
+      "src": "icons/pwa-win-256.png?v=20260209desk",
       "sizes": "256x256",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "icons/pwa-win-512.png?v=20260208win",
+      "src": "icons/pwa-win-512.png?v=20260209desk",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "icons/pwa-win-512.png?v=20260208win",
+      "src": "icons/pwa-win-512.png?v=20260209desk",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"

@@ -13,5 +13,8 @@
   "type": "commonjs",
   "dependencies": {
     "jimp": "^1.6.0"
+  },
+  "devDependencies": {
+    "png-to-ico": "^3.0.1"
   }
 }
