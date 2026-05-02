@@ -2665,3 +2665,6 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
   .ay-nav-btn { min-width:38px; padding:0 10px; font-size:12px; }
   .ay-nav-select { font-size:12px; padding:6px 4px; }
 }
+
+/* === ALTIN: SON GUNCELLEME ETIKETI === */
+.alt-fiyat-yas{font-size:10px;color:var(--text-muted);font-style:italic;margin-left:2px;letter-spacing:0.5px;}
