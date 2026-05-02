@@ -426,6 +426,9 @@ function arender(){
 
   c.innerHTML=h;
   abagla();
+  /* En son girilen kayit altta -- tabloyu sona kaydir */
+  var tdis=c.querySelector(".alt-tablo-dis");
+  if(tdis){ requestAnimationFrame(function(){ tdis.scrollTop=tdis.scrollHeight; }); }
 }
 
 function acsvIhracEt(){

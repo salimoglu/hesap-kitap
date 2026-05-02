@@ -2718,3 +2718,19 @@ html.theme-light .modal-box { box-shadow: 0 8px 24px rgba(120, 90, 30, 0.15); }
 html.theme-light .bk-modal-overlay { background: rgba(80, 60, 30, 0.45); }
 html.theme-light .num-btn:active { background: var(--bg-card); }
 html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 42, 0.12); border-color: rgba(184, 134, 42, 0.35); }
+
+/* === ALTIN: OZET SABIT, TABLO ICINDE SCROLL + EN ALTA OTOMATIK === */
+.module-host > .alt-wrap {
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+.alt-wrap > .alt-header,
+.alt-wrap > .alt-filtre-satir {
+  flex-shrink: 0;
+}
+.alt-wrap > .alt-tablo-dis {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none !important;
+}
