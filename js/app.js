@@ -28,9 +28,10 @@
     if (typeof AlacaklarModule !== "undefined") AlacaklarModule.init();
     if (typeof UrunModule !== "undefined") UrunModule.init();
     if (typeof BirikimModule !== "undefined") BirikimModule.init();
-  if (typeof AltinModule !== "undefined") AltinModule.init();
-  if (typeof VefaModule !== "undefined") VefaModule.init();
-  if (typeof MuhtacModule !== "undefined") MuhtacModule.init();
+    if (typeof AltinModule !== "undefined") AltinModule.init();
+    if (typeof VefaModule !== "undefined") VefaModule.init();
+    if (typeof ArabamModule !== "undefined") ArabamModule.init();
+    if (typeof MuhtacModule !== "undefined") MuhtacModule.init();
   }
 
   // Logo tiklama: Firebase'den taze cek, modulleri yenile, sifre sorma
@@ -49,6 +50,10 @@
     if (typeof AlacaklarModule !== "undefined") AlacaklarModule.init();
     if (typeof UrunModule !== "undefined") UrunModule.init();
     if (typeof BirikimModule !== "undefined") BirikimModule.init();
+    if (typeof AltinModule !== "undefined") AltinModule.init();
+    if (typeof VefaModule !== "undefined") VefaModule.init();
+    if (typeof ArabamModule !== "undefined") ArabamModule.init();
+    if (typeof MuhtacModule !== "undefined") MuhtacModule.init();
   };
 
   // Session varsa sifre sorma
@@ -156,7 +161,7 @@
   });
 
   // Sekme yonetimi
-  const TAB_SIRA = ["islemler", "butce", "birikim", "kredi", "alacaklar", "urun", "altin", "vefa", "muhtac"];
+  const TAB_SIRA = ["islemler", "butce", "birikim", "kredi", "alacaklar", "urun", "altin", "vefa", "arabam", "muhtac"];
   const tabBtnler = document.querySelectorAll(".tab-btn");
   const tabPaneller = document.querySelectorAll(".tab-panel");
 
@@ -210,6 +215,7 @@
       }
     }
     if (tabId === "vefa" && typeof VefaModule !== "undefined") VefaModule.init();
+    if (tabId === "arabam" && typeof ArabamModule !== "undefined") ArabamModule.init();
     if (tabId === "muhtac" && typeof MuhtacModule !== "undefined") MuhtacModule.init();
   }
 

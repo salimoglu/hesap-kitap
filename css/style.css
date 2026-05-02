@@ -77,6 +77,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .module-host > .kr-wrap,
 .module-host > .al-wrap,
 .module-host > .ur-wrap,
+.module-host > .ar-wrap,
 .module-host > .alt-wrap,
 .module-host > .vf-wrap,
 .module-host > .vf2-wrap,
@@ -1375,6 +1376,66 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .mh-toplam-row td:nth-child(2){font-size:15px;font-weight:600;color:var(--green);}
 .mh-bos{padding:32px;text-align:center;color:var(--text-muted);font-size:13px;}
 
+/* ══ ARABAM MODÜLÜ ══ */
+.ar-wrap{display:flex;flex-direction:column;gap:12px;padding:12px 12px 24px;width:100%;box-sizing:border-box;}
+.ar-header{display:flex;align-items:stretch;justify-content:space-between;flex-wrap:wrap;gap:12px 16px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:12px;padding:14px 18px;}
+.ar-ozet{display:flex;gap:20px 28px;flex-wrap:wrap;align-items:flex-end;}
+.ar-oz-item{display:flex;flex-direction:column;gap:4px;min-width:96px;}
+.ar-oz-item--vurgu{padding:8px 14px;margin:-8px -14px;border-radius:10px;background:rgba(52,211,153,0.06);border:1px solid rgba(52,211,153,0.22);}
+.ar-oz-label{font-size:10px;font-weight:600;letter-spacing:0.12em;color:var(--text-muted);text-transform:uppercase;}
+.ar-oz-val{font-size:22px;font-weight:600;line-height:1.15;color:var(--text-primary);font-variant-numeric:tabular-nums;}
+.ar-oz-val--tl{color:var(--green);}
+.ar-ekle-btn{background:var(--green);color:#0f1923;border:none;border-radius:10px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;align-self:center;}
+.ar-ekle-btn:hover{opacity:0.92;}
+.ar-liste{display:flex;flex-direction:column;gap:8px;}
+.ar-kart{display:flex;align-items:center;gap:12px;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:12px 16px;cursor:pointer;transition:border-color 0.15s,box-shadow 0.15s;}
+.ar-kart:hover{border-color:var(--gold);box-shadow:0 2px 12px rgba(0,0,0,0.06);}
+.ar-kart:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 2px rgba(240,184,64,0.35);}
+.ar-kart-sol{flex:1;min-width:0;}
+.ar-plaka{font-size:16px;font-weight:800;letter-spacing:1px;color:var(--gold);font-family:var(--font-brand);}
+.ar-marka-model{font-size:13px;color:var(--text-secondary);margin-top:2px;}
+.ar-kart-meta{margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;}
+.ar-pill{font-size:10px;font-weight:600;color:var(--text-muted);background:var(--bg-elevated);border:1px solid var(--border);border-radius:999px;padding:3px 10px;}
+.ar-kart-sag{display:flex;flex-direction:column;align-items:flex-end;gap:2px;margin-left:auto;padding-right:36px;position:relative;min-width:88px;}
+.ar-kart-tutar{font-size:16px;font-weight:600;color:var(--green);font-variant-numeric:tabular-nums;}
+.ar-kart-tutar-lbl{font-size:10px;color:var(--text-muted);}
+.ar-sil-arac-btn{position:absolute;top:50%;right:4px;transform:translateY(-50%);}
+.ar-bos{padding:40px 24px;text-align:center;color:var(--text-muted);font-size:14px;line-height:1.5;}
+.ar-label-hint{font-weight:400;opacity:0.75;font-size:10px;text-transform:none;letter-spacing:0;}
+.ar-arac-modal-kutu{max-width:min(440px,calc(100vw - 32px));}
+.ar-detay-kutu{max-width:min(560px,calc(100vw - 32px));max-height:min(90dvh,calc(100dvh - 32px));display:flex;flex-direction:column;}
+.ar-detay-head{flex-wrap:wrap;align-items:flex-start;gap:10px;flex-shrink:0;}
+.ar-detay-ust{display:flex;align-items:flex-start;gap:12px;flex:1;min-width:0;}
+.ar-detay-baslik-blok{flex:1;min-width:0;}
+.ar-detay-plaka{font-size:20px;font-weight:800;letter-spacing:1px;color:var(--gold);font-family:var(--font-brand);}
+.ar-detay-marka{font-size:14px;color:var(--text-secondary);margin-top:2px;}
+.ar-detay-tarihler{font-size:11px;color:var(--text-muted);margin-top:6px;line-height:1.45;}
+.ar-detay-tarihler div + div{margin-top:2px;}
+.ar-detay-toplam-blok{text-align:right;flex-shrink:0;padding-left:10px;}
+.ar-detay-toplam-rakam{font-size:18px;font-weight:600;color:var(--green);font-variant-numeric:tabular-nums;}
+.ar-detay-toplam-lbl{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;}
+.ar-detay-ak{display:flex;align-items:flex-start;gap:8px;flex-shrink:0;margin-left:auto;}
+.ar-btn-duzenle{background:transparent;border:1px solid var(--border);color:var(--text-secondary);border-radius:var(--radius-sm);padding:7px 12px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.ar-btn-duzenle:hover{border-color:var(--gold);color:var(--gold);}
+.ar-gider-form{padding:14px 16px;border-bottom:1px solid var(--border);background:var(--bg-elevated);flex-shrink:0;}
+.ar-gider-form-baslik{font-size:10px;font-weight:700;letter-spacing:0.14em;color:var(--text-muted);text-transform:uppercase;margin-bottom:10px;}
+.ar-gider-grid{display:grid;grid-template-columns:1fr 1fr auto;gap:10px 12px;align-items:end;}
+.ar-gider-grid .field-group{margin:0;}
+.ar-gider-grid-full{grid-column:1 / -2;}
+.ar-gider-grid .ar-gider-ekle-btn{grid-column:3;grid-row:1 / span 3;align-self:stretch;display:flex;align-items:center;justify-content:center;}
+.ar-gider-ekle-btn{background:var(--green);color:#0f1923;border:none;border-radius:10px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;}
+@media (max-width:520px){
+  .ar-gider-grid{grid-template-columns:1fr;}
+  .ar-gider-grid-full{grid-column:1;}
+  .ar-gider-grid .ar-gider-ekle-btn{grid-column:1;grid-row:auto;width:100%;}
+}
+.ar-gider-liste{padding:8px 0 16px;flex:1;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;}
+.ar-bos-kucuk{padding:20px;text-align:center;color:var(--text-muted);font-size:13px;}
+.ar-tablo{width:100%;border-collapse:collapse;font-size:13px;}
+.ar-tablo thead th{font-size:10px;font-weight:700;letter-spacing:0.06em;color:var(--text-muted);text-transform:uppercase;padding:8px 10px;text-align:left;background:var(--bg-card);border-bottom:1px solid var(--border);}
+.ar-tablo td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.ar-td-tutar{font-weight:600;color:var(--green);white-space:nowrap;}
+
 /* Alacaklar final visibility guarantees */
 .al-kisi-blok{overflow:visible!important;}
 .al-liste{display:flex!important;max-width:920px!important;}
@@ -1501,6 +1562,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .module-host > .kr-wrap,
 .module-host > .al-wrap,
 .module-host > .ur-wrap,
+.module-host > .ar-wrap,
 .module-host > .alt-wrap,
 .module-host > .vf-wrap,
 .module-host > .vf2-wrap,
