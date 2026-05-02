@@ -206,52 +206,40 @@ function _altinParseSayi(v){
   var n=parseFloat(s);
   return isNaN(n)?0:n;
 }
+var _altinSonHata="";
 async function guncelAltinCek(){
-  /* 1) Truncgil v4 — birincil (TR borsa, anlik) */
-  try{
-    var r=await fetch("https://finans.truncgil.com/v4/today.json",{cache:"no-store"});
-    if(r.ok){
+  _altinSonHata="";
+  var kaynaklar=[
+    {ad:"Truncgil v4", url:"https://finans.truncgil.com/v4/today.json", parse:function(d){
+      var gra=d&&(d.GRA||d["gram-altin"]||d.gram_altin);
+      return gra?_altinParseSayi(gra.Selling||gra.selling||gra.satis||gra.Buying):0;
+    }},
+    {ad:"Truncgil v3", url:"https://finans.truncgil.com/v3/today.json", parse:function(d){
+      var gra=d&&(d.GRA||d["gram-altin"]||d.gram_altin);
+      return gra?_altinParseSayi(gra.Selling||gra.selling||gra.satis||gra.Buying):0;
+    }},
+    {ad:"fawazahmed0", url:"https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/xau.json", parse:function(d){
+      var oz=d&&d.xau&&d.xau.try;
+      return (oz&&oz>100)?(oz/31.1035):0;
+    }}
+  ];
+  for(var i=0;i<kaynaklar.length;i++){
+    var k=kaynaklar[i];
+    try{
+      var r=await fetch(k.url,{cache:"no-store"});
+      if(!r.ok){_altinSonHata=k.ad+": HTTP "+r.status;console.warn("[Altin] "+_altinSonHata);continue;}
       var d=await r.json();
-      var gra=d&&(d.GRA||d["gram-altin"]);
-      var num=gra&&_altinParseSayi(gra.Selling||gra.selling||gra.satis||gra.Buying);
-      if(num>100){_guncelGramFiyat=num;return num;}
+      var num=k.parse(d);
+      if(num>100){console.log("[Altin] "+k.ad+" basarili:",num);return num;}
+      _altinSonHata=k.ad+": Gecersiz veri (num="+num+")";
+      console.warn("[Altin] "+_altinSonHata, d);
+    }catch(e){
+      _altinSonHata=k.ad+": "+(e&&e.message?e.message:e);
+      console.warn("[Altin] "+k.ad+" exception:",e);
     }
-  }catch(e){console.warn("[Altin] Truncgil v4:",e);}
-  /* 2) Truncgil v3 — yedek */
-  try{
-    var r=await fetch("https://finans.truncgil.com/v3/today.json",{cache:"no-store"});
-    if(r.ok){
-      var d=await r.json();
-      var gra=d&&(d.GRA||d["gram-altin"]);
-      var num=gra&&_altinParseSayi(gra.Selling||gra.selling||gra.satis||gra.Buying);
-      if(num>100){_guncelGramFiyat=num;return num;}
-    }
-  }catch(e){console.warn("[Altin] Truncgil v3:",e);}
-  /* 3) Genelpara — yedek */
-  try{
-    var r=await fetch("https://api.genelpara.com/embed/altin.json",{cache:"no-store"});
-    if(r.ok){
-      var d=await r.json();
-      var ga=d&&(d["gram-altin"]||(d.altin&&d.altin["gram-altin"]));
-      if(ga){
-        var num=_altinParseSayi(ga.satis||ga.Satis||ga.alis||ga.Alis);
-        if(num>100){_guncelGramFiyat=num;return num;}
-      }
-    }
-  }catch(e){console.warn("[Altin] Genelpara:",e);}
-  /* 4) fawazahmed0 — son care (XAU/TRY ons -> gram) */
-  try{
-    var r=await fetch("https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/xau.json",{cache:"no-store"});
-    if(r.ok){
-      var d=await r.json();
-      var tryPerOz=d&&d.xau&&d.xau.try;
-      if(tryPerOz&&tryPerOz>100){
-        _guncelGramFiyat=tryPerOz/31.1035;
-        return _guncelGramFiyat;
-      }
-    }
-  }catch(e){console.warn("[Altin] fawazahmed0:",e);}
-  return _guncelGramFiyat||0;
+  }
+  /* TUM KAYNAKLAR BASARISIZ - eski cache'lenmis degeri DONDURME, 0 don */
+  return 0;
 }
 
 async function afbYukle(){
@@ -503,8 +491,23 @@ function abagla(){
       _guncelGramFiyat=f;
       await afbFiyatKaydet(f);
       arender();
+      /* Mini bilgi: degisim varsa goster */
+      if(oncekiFiyat>0){
+        var fark=f-oncekiFiyat;
+        var pct=(fark/oncekiFiyat)*100;
+        if(Math.abs(pct)>=0.01){
+          console.log("[Altin] Fiyat guncellendi: "+apara(oncekiFiyat)+" -> "+apara(f)+" TL ("+(fark>=0?"+":"")+pct.toFixed(2)+"%)");
+        }
+      }
     } else {
-      alert("Gram altın fiyatı alınamadı.\n\nİnternet bağlantınızı kontrol edin.\nKaynak: finans.truncgil.com / genelpara.com\n\n"+(oncekiFiyat>0?("Son bilinen fiyat: "+apara(oncekiFiyat)+" TL"):"Önbellekte fiyat yok."));
+      alert("Gram altın fiyatı alınamadı.\n\n"+
+            "DENENEN KAYNAKLAR:\n"+
+            "1) Truncgil v4 (finans.truncgil.com)\n"+
+            "2) Truncgil v3\n"+
+            "3) fawazahmed0 (jsdelivr CDN)\n\n"+
+            "SON HATA: "+(_altinSonHata||"bilinmiyor")+"\n\n"+
+            "F12 ile konsolu açıp [Altin] etiketli mesajları inceleyebilirsiniz.\n\n"+
+            (oncekiFiyat>0?("Mevcut fiyat (eski): "+apara(oncekiFiyat)+" TL"):"Önbellekte fiyat yok."));
     }
   });
   /* Filtre */
