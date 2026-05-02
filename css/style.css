@@ -27,7 +27,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .lock-screen { position: fixed; inset: 0; background: var(--bg-base); display: flex; align-items: center; justify-content: center; z-index: 1000; }
 .lock-inner { display: flex; flex-direction: column; align-items: center; gap: 28px; padding: 32px 24px; width: 100%; max-width: 360px; }
 .lock-logo { text-align: center; }
-.lock-app-icon { width: min(132px, 30vw); height: min(132px, 30vw); border-radius: 50%; object-fit: cover; display: block; margin: 0 auto 14px; box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35); }
+.lock-app-icon { width: min(132px, 30vw); height: min(132px, 30vw); border-radius: 50%; object-fit: contain; object-position: center; display: block; margin: 0 auto 14px; box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35); }
 .lock-title { font-family: var(--font-brand); font-size: 36px; letter-spacing: 3px; color: var(--gold); }
 .lock-sub { color: var(--text-secondary); font-size: 13px; margin-top: 4px; }
 .pin-display { display: flex; gap: 20px; }
@@ -46,7 +46,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .topbar { display: flex; align-items: center; justify-content: space-between; box-sizing: border-box; height: calc(var(--topbar-h) + env(safe-area-inset-top, 0)); padding: env(safe-area-inset-top, 0) max(16px, env(safe-area-inset-right, 0)) 0 max(16px, env(safe-area-inset-left, 0)); background: var(--bg-card); border-bottom: 1px solid var(--border); flex-shrink: 0; z-index: 10; }
 .topbar-left { display: flex; align-items: center; gap: 10px; }
 .app-logo-wrap { width: 36px; height: 36px; border-radius: 50%; overflow: hidden; flex-shrink: 0; border: 2px solid var(--border); box-sizing: border-box; display: block; }
-.app-logo-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.app-logo-img { width: 100%; height: 100%; object-fit: contain; object-position: center; display: block; }
 .topbar-right { display: flex; align-items: center; gap: 4px; }
 .app-icon { font-size: 22px; }
 .app-name { font-family: var(--font-brand); font-size: 22px; letter-spacing: 2px; color: var(--gold); }
@@ -1513,7 +1513,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .lock-screen { position: fixed; inset: 0; background: var(--bg-base); display: flex; align-items: center; justify-content: center; z-index: 1000; }
 .lock-inner { display: flex; flex-direction: column; align-items: center; gap: 28px; padding: 32px 24px; width: 100%; max-width: 360px; }
 .lock-logo { text-align: center; }
-.lock-app-icon { width: min(132px, 30vw); height: min(132px, 30vw); border-radius: 50%; object-fit: cover; display: block; margin: 0 auto 14px; box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35); }
+.lock-app-icon { width: min(132px, 30vw); height: min(132px, 30vw); border-radius: 50%; object-fit: contain; object-position: center; display: block; margin: 0 auto 14px; box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35); }
 .lock-title { font-family: var(--font-brand); font-size: 36px; letter-spacing: 3px; color: var(--gold); }
 .lock-sub { color: var(--text-secondary); font-size: 13px; margin-top: 4px; }
 .pin-display { display: flex; gap: 20px; }
@@ -1532,7 +1532,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .topbar { display: flex; align-items: center; justify-content: space-between; box-sizing: border-box; height: calc(var(--topbar-h) + env(safe-area-inset-top, 0)); padding: env(safe-area-inset-top, 0) max(16px, env(safe-area-inset-right, 0)) 0 max(16px, env(safe-area-inset-left, 0)); background: var(--bg-card); border-bottom: 1px solid var(--border); flex-shrink: 0; z-index: 10; }
 .topbar-left { display: flex; align-items: center; gap: 10px; }
 .app-logo-wrap { width: 36px; height: 36px; border-radius: 50%; overflow: hidden; flex-shrink: 0; border: 2px solid var(--border); box-sizing: border-box; display: block; }
-.app-logo-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.app-logo-img { width: 100%; height: 100%; object-fit: contain; object-position: center; display: block; }
 .app-icon { font-size: 22px; }
 .app-name { font-family: var(--font-brand); font-size: 22px; letter-spacing: 2px; color: var(--gold); }
 .icon-btn { background: transparent; border: none; font-size: 20px; cursor: pointer; padding: 6px; border-radius: var(--radius-sm); transition: background 0.15s; }

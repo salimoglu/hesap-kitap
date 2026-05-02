@@ -161,7 +161,7 @@
   });
 
   // Sekme yonetimi
-  const TAB_SIRA = ["islemler", "butce", "birikim", "kredi", "alacaklar", "urun", "altin", "vefa", "arabam", "muhtac"];
+  const TAB_SIRA = ["islemler", "butce", "birikim", "arabam", "kredi", "alacaklar", "urun", "altin", "vefa", "muhtac"];
   const tabBtnler = document.querySelectorAll(".tab-btn");
   const tabPaneller = document.querySelectorAll(".tab-panel");
 
@@ -291,7 +291,7 @@
   // Service Worker — her zaman en yeni versiyonu al
   if ("serviceWorker" in navigator) {
     try {
-      const reg = await navigator.serviceWorker.register("/hesap-kitap/sw.js");
+      const reg = await navigator.serviceWorker.register("/hesap-kitap/sw.js", { updateViaCache: "none" });
       // Yeni SW gelince hemen aktive et
       reg.addEventListener("updatefound", () => {
         const newWorker = reg.installing;
