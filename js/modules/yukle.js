@@ -692,6 +692,8 @@ async function fbKaydet(){
 function render(){
   var c=$("vefa-container");if(!c)return;
   var sirali=_aylar.slice().sort(function(a,b){return a.key.localeCompare(b.key);});
+  /* Telefondaki kartlar: en guncel ay ustte, asagi dogru gecmise */
+  var siraliKart=sirali.slice().reverse();
   var tah=tTahsilat();
   var deg=tDeger();
   var altin=altinOzet();
@@ -835,7 +837,7 @@ function render(){
   if(!sirali.length){
     h+='<div class="vf2-card vf2-card-bos">Henüz kayıt yok. "+ Yatırım Ekle" butonuna tıklayın.</div>';
   } else {
-    sirali.forEach(function(ay){
+    siraliKart.forEach(function(ay){
       var tg={};TUM_TIPLER.forEach(function(t){tg[t]=[];});
       (ay.yatirimlar||[]).forEach(function(y){if(tg[y.tip])tg[y.tip].push(y);});
       var ayOdeme=ay.toplamOdeme||0;
