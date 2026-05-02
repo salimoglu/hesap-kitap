@@ -1,5 +1,5 @@
 // sw.js — Network First: her zaman gunceli al, cache sadece fallback
-const CACHE = "hesap-kitap-v34";
+const CACHE = "hesap-kitap-v35";
 const ASSETS = [
   "/hesap-kitap/",
   "/hesap-kitap/index.html",
@@ -15,6 +15,7 @@ const ASSETS = [
   "/hesap-kitap/manifest.json",
   "/hesap-kitap/icons/icon-180.png",
   "/hesap-kitap/icons/icon-192.png",
+  "/hesap-kitap/icons/icon-256.png",
   "/hesap-kitap/icons/icon-512.png"
 ];
 
