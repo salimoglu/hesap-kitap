@@ -980,12 +980,11 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 
 
 
- to{transform:rotate(360deg)} }
 .ur-yeni-btn { background:var(--gold); color:#0f1923; border:none; border-radius:var(--radius-sm); padding:8px 16px; font-size:13px; font-weight:800; cursor:pointer; white-space:nowrap; }
 .ur-yeni-btn:hover { opacity:0.85; }
 /* Tablo */
 .ur-tablo-wrap { width:100%; max-width:1000px; border:1px solid var(--border); border-radius:var(--radius-md); overflow:hidden; overflow-x:auto; }
-.ur-tablo { width:100%; border-collapse:collapse; min-width:700px; }
+.ur-tablo { width:100%; border-collapse:collapse; min-width:820px; }
 .ur-tablo thead th { font-size:10px; font-weight:800; letter-spacing:0.8px; color:var(--text-muted); padding:8px 12px; text-align:left; background:var(--bg-card); border-bottom:1px solid var(--border); white-space:nowrap; }
 .ur-tablo tbody tr { border-bottom:1px solid var(--border); transition:background 0.08s; }
 .ur-tablo tbody tr:last-child { border-bottom:none; }
@@ -994,6 +993,20 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .ur-td-tarih { color:var(--text-muted); white-space:nowrap; }
 .ur-td-urun { font-weight:700; color:var(--text-primary); }
 .ur-td-fiyat { font-family:var(--font-brand); font-size:13px; white-space:nowrap; }
+.ur-td-gun { text-align:center; color:var(--text-secondary); font-size:12px; font-weight:700; }
+.ur-td-gunluk { text-align:right; color:var(--gold); font-size:12px; font-weight:800; white-space:nowrap; }
+.ur-gunluk-birim { font-size:10px; font-weight:600; color:var(--text-muted); margin-left:2px; }
+.ur-hesap-panel { margin-top:4px; padding:12px 14px; background:var(--bg-elevated); border:1px dashed var(--border); border-radius:var(--radius-sm); }
+.ur-hesap-baslik { font-size:10px; font-weight:800; letter-spacing:1px; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px; }
+.ur-hesap-metin { font-size:14px; line-height:1.5; color:var(--text-primary); }
+.ur-hesap-line { margin-bottom:6px; }
+.ur-hesap-line:last-child { margin-bottom:0; }
+.ur-hesap-etik { font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-right:6px; }
+.ur-hesap-vurgu { color:var(--gold); font-size:16px; }
+.ur-hesap-formul { font-size:12px; color:var(--text-muted); margin-left:6px; }
+.ur-hesap-hint { font-size:10px; color:var(--text-muted); font-weight:400; }
+.ur-hesap-muted { font-size:12px; color:var(--text-muted); }
+.ur-legend { width:100%; max-width:1000px; box-sizing:border-box; font-size:11px; color:var(--text-muted); margin:-6px 0 10px 0; line-height:1.4; padding:0 6px; }
 
 
 
@@ -2328,12 +2341,11 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 
 
 
- to{transform:rotate(360deg)} }
 .ur-yeni-btn { background:var(--gold); color:#0f1923; border:none; border-radius:var(--radius-sm); padding:8px 16px; font-size:13px; font-weight:800; cursor:pointer; white-space:nowrap; }
 .ur-yeni-btn:hover { opacity:0.85; }
 /* Tablo */
 .ur-tablo-wrap { width:100%; max-width:1000px; border:1px solid var(--border); border-radius:var(--radius-md); overflow:hidden; overflow-x:auto; }
-.ur-tablo { width:100%; border-collapse:collapse; min-width:700px; }
+.ur-tablo { width:100%; border-collapse:collapse; min-width:820px; }
 .ur-tablo thead th { font-size:10px; font-weight:800; letter-spacing:0.8px; color:var(--text-muted); padding:8px 12px; text-align:left; background:var(--bg-card); border-bottom:1px solid var(--border); white-space:nowrap; }
 .ur-tablo tbody tr { border-bottom:1px solid var(--border); transition:background 0.08s; }
 .ur-tablo tbody tr:last-child { border-bottom:none; }
@@ -2342,6 +2354,20 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .ur-td-tarih { color:var(--text-muted); white-space:nowrap; }
 .ur-td-urun { font-weight:700; color:var(--text-primary); }
 .ur-td-fiyat { font-family:var(--font-brand); font-size:13px; white-space:nowrap; }
+.ur-td-gun { text-align:center; color:var(--text-secondary); font-size:12px; font-weight:700; }
+.ur-td-gunluk { text-align:right; color:var(--gold); font-size:12px; font-weight:800; white-space:nowrap; }
+.ur-gunluk-birim { font-size:10px; font-weight:600; color:var(--text-muted); margin-left:2px; }
+.ur-hesap-panel { margin-top:4px; padding:12px 14px; background:var(--bg-elevated); border:1px dashed var(--border); border-radius:var(--radius-sm); }
+.ur-hesap-baslik { font-size:10px; font-weight:800; letter-spacing:1px; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px; }
+.ur-hesap-metin { font-size:14px; line-height:1.5; color:var(--text-primary); }
+.ur-hesap-line { margin-bottom:6px; }
+.ur-hesap-line:last-child { margin-bottom:0; }
+.ur-hesap-etik { font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-right:6px; }
+.ur-hesap-vurgu { color:var(--gold); font-size:16px; }
+.ur-hesap-formul { font-size:12px; color:var(--text-muted); margin-left:6px; }
+.ur-hesap-hint { font-size:10px; color:var(--text-muted); font-weight:400; }
+.ur-hesap-muted { font-size:12px; color:var(--text-muted); }
+.ur-legend { width:100%; max-width:1000px; box-sizing:border-box; font-size:11px; color:var(--text-muted); margin:-6px 0 10px 0; line-height:1.4; padding:0 6px; }
 
 
 
@@ -2988,6 +3014,7 @@ html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 42, 0.12); border-
 
   /* Ürün: tablo satırı ekrana sığsın (kart değil, aynı tablo) */
   .ur-wrap { padding: 8px 8px 28px; align-items: stretch !important; }
+  .ur-legend { font-size: 10px; margin: -4px 0 8px 0; padding: 0 4px; }
   .ur-header { flex-direction: column; align-items: stretch; padding: 10px 12px; gap: 8px; }
   .ur-ozet { gap: 14px; justify-content: space-around; }
   .ur-oz-val { font-size: 16px !important; }
@@ -3004,11 +3031,13 @@ html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 42, 0.12); border-
     vertical-align: bottom;
   }
   .ur-tablo td { padding: 7px 4px; font-size: 11px; vertical-align: top; }
-  .ur-tablo th:nth-child(1), .ur-tablo td:nth-child(1) { width: 19%; }
-  .ur-tablo th:nth-child(2), .ur-tablo td:nth-child(2) { width: 41%; }
-  .ur-tablo th:nth-child(3), .ur-tablo td:nth-child(3) { width: 27%; text-align: right; }
-  .ur-tablo th:nth-child(4), .ur-tablo td:nth-child(4) { width: 13%; padding-left: 2px; padding-right: 2px; }
-  .ur-td-tarih { font-size: 10px; white-space: normal; line-height: 1.2; }
+  .ur-tablo th:nth-child(1), .ur-tablo td:nth-child(1) { width: 14%; }
+  .ur-tablo th:nth-child(2), .ur-tablo td:nth-child(2) { width: 26%; }
+  .ur-tablo th:nth-child(3), .ur-tablo td:nth-child(3) { width: 18%; text-align: right; }
+  .ur-tablo th:nth-child(4), .ur-tablo td:nth-child(4) { width: 9%; }
+  .ur-tablo th:nth-child(5), .ur-tablo td:nth-child(5) { width: 18%; text-align: right; }
+  .ur-tablo th:nth-child(6), .ur-tablo td:nth-child(6) { width: 15%; padding-left: 2px; padding-right: 2px; }
+  .ur-td-tarih { font-size: 9px; white-space: normal; line-height: 1.2; }
   .ur-td-urun {
     font-size: 11px;
     line-height: 1.25;
@@ -3016,9 +3045,17 @@ html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 42, 0.12); border-
     word-break: break-word;
     hyphens: auto;
   }
-  .ur-td-fiyat { font-size: 10px; white-space: normal; line-height: 1.2; text-align: right; font-family: var(--font-body); }
+  .ur-td-fiyat { font-size: 9px; white-space: normal; line-height: 1.2; font-family: var(--font-body); }
+  .ur-td-gun { font-size: 10px; padding: 7px 2px !important; }
+  .ur-td-gunluk { font-size: 9px; white-space: normal; line-height: 1.15; padding: 7px 2px !important; }
+  .ur-gunluk-birim { display: block; font-size: 8px; margin-left: 0; margin-top: 2px; }
   .ur-td-aksiyon { white-space: normal; text-align: center; vertical-align: middle; }
   .ur-td-aksiyon .row-action-btn { display: block; margin: 0 auto 3px; font-size: 12px; padding: 2px; line-height: 1; }
   .ur-td-aksiyon .row-action-btn:last-child { margin-bottom: 0; }
   .ur-bos { padding: 28px 14px; font-size: 13px; }
+  .ur-hesap-panel { padding: 10px 12px; margin-top: 0; }
+  .ur-hesap-metin { font-size: 13px; }
+  .ur-hesap-vurgu { font-size: 15px; }
 }
+
+
