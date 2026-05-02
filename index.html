@@ -12,7 +12,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png" />
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="css/style.css?v=20260416f" />
+  <link rel="stylesheet" href="css/style.css?v=20260502a" />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -90,7 +90,11 @@
               <option value="gelir">Gelir</option>
               <option value="gider">Gider</option>
             </select>
-            <select id="filter-ay" class="filter-select"><option value="hepsi">T&#252;m Aylar</option></select>
+            <div class="ay-nav">
+              <button class="ay-nav-btn" id="ay-nav-prev" type="button" title="&#214;nceki ay">&#9664;</button>
+              <select id="filter-ay" class="filter-select ay-nav-select" title="Ay se&#231;"><option value="hepsi">T&#252;m Aylar</option></select>
+              <button class="ay-nav-btn" id="ay-nav-next" type="button" title="Sonraki ay">&#9654;</button>
+            </div>
             <button class="btn-yeni-kat-bar" id="btn-yeni-kat-bar">&#9776; Kategoriler</button>
           </div>
           <div class="islem-scroll" id="islem-list">
@@ -273,7 +277,7 @@
 
   <script src="js/firebase.js"></script>
   <script src="js/db.js"></script>
-  <script src="js/modules/islemler.js"></script>
+  <script src="js/modules/islemler.js?v=20260502a"></script>
   <script src="js/modules/yukle.js?v=20260416d"></script>
   <script src="js/modules/alacaklar.js?v=20260416d"></script>
   <script src="js/modules/urun.js"></script>

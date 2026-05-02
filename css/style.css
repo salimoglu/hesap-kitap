@@ -2646,3 +2646,22 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .mh-toplam-row td{font-size:13px;font-weight:700;padding:9px 16px;background:var(--bg-elevated);border-top:2px solid var(--border);}
 .mh-toplam-row td:nth-child(2){font-size:15px;font-weight:600;color:var(--green);}
 .mh-bos{padding:32px;text-align:center;color:var(--text-muted);font-size:13px;}
+
+/* === ISLEMLER -- AY NAVIGATORU === */
+.ay-nav { display:flex; align-items:stretch; gap:4px; flex:1 1 auto; min-width:0; }
+.ay-nav-btn { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--gold); font-size:13px; font-weight:800; padding:0 12px; cursor:pointer; line-height:1; flex-shrink:0; transition:all 0.12s; min-width:34px; display:flex; align-items:center; justify-content:center; }
+.ay-nav-btn:hover:not(:disabled) { background:var(--bg-elevated); border-color:var(--gold); }
+.ay-nav-btn:active:not(:disabled) { transform:scale(0.92); }
+.ay-nav-btn:disabled,
+.ay-nav-btn.disabled { opacity:0.28; cursor:default; color:var(--text-muted); }
+.ay-nav-select { flex:1; min-width:0; text-align:center; text-align-last:center; font-weight:700; }
+
+.islem-devir { display:flex; justify-content:space-between; align-items:center; padding:6px 14px; background:var(--bg-card); border-bottom:1px dashed var(--border); font-size:12px; color:var(--text-muted); }
+.islem-devir .dv-lbl { font-size:10px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:var(--text-muted); }
+.islem-devir .dv-val { font-family:var(--font-brand); font-size:15px; font-weight:600; }
+
+@media (max-width: 600px) {
+  .ay-nav { flex:1 1 100%; order:5; }
+  .ay-nav-btn { min-width:38px; padding:0 10px; font-size:12px; }
+  .ay-nav-select { font-size:12px; padding:6px 4px; }
+}
