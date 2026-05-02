@@ -830,16 +830,97 @@ function render(){
   }
   h+='</tbody></table></div>';
 
-  /* DURUM ÖZETİ */
-  var kzS=deg-tah;
-  h+='<div class="vf2-durum-ozet"><div class="vf2-kolon-baslik">📋 DURUM ÖZETİ</div>';
-  h+='<table class="vf2-oz-tablo"><thead><tr><th>AÇIKLAMA</th><th>TUTAR</th></tr></thead><tbody>';
-  h+='<tr><td>Toplam Ödeme</td><td>'+p(tah)+' TL</td></tr>';
-  h+='<tr><td>Altın Güncel Değer</td><td style="color:var(--gold)">'+(_gramFiyat>0?p(altin.guncel_deger)+' TL':'—')+'</td></tr>';
-  h+='<tr><td>Nakit</td><td style="color:var(--green)">'+p(nakit.toplam)+' TL</td></tr>';
-  h+='<tr><td>Toplam Değerleme</td><td style="color:var(--gold)">'+(_gramFiyat>0||nakit.toplam>0?p(deg)+' TL':'—')+'</td></tr>';
-  h+='<tr class="vf2-tot-row"><td>Kar / Zarar</td><td style="color:'+(kzS>=0?"var(--green)":"var(--red)")+'">'+(kzS>=0?"+":"")+p(kzS)+' TL</td></tr>';
-  h+='</tbody></table></div>';
+  /* ── MOBIL KART LISTESI (CSS ile mobilde gosterilir) ── */
+  h+='<div class="vf2-cards">';
+  if(!sirali.length){
+    h+='<div class="vf2-card vf2-card-bos">Henüz kayıt yok. "+ Yatırım Ekle" butonuna tıklayın.</div>';
+  } else {
+    sirali.forEach(function(ay){
+      var tg={};TUM_TIPLER.forEach(function(t){tg[t]=[];});
+      (ay.yatirimlar||[]).forEach(function(y){if(tg[y.tip])tg[y.tip].push(y);});
+      var ayOdeme=ay.toplamOdeme||0;
+      var ayDeger=(ay.yatirimlar||[]).reduce(function(s,y){return s+yDeger(y);},0);
+      var ayNakit=(tg.nakit||[]).reduce(function(s,y){return s+(y.nakitTL||0);},0);
+      var kp=kisiBasiOdeme(ay);
+      h+='<div class="vf2-card">';
+      h+='<div class="vf2-card-header"><span class="vf2-card-ay">'+ayLbl(ay.key)+'</span>';
+      h+='<div class="vf2-card-aks"><button class="vf2-duz-btn row-action-btn duzenle" data-ay="'+ay.key+'">&#9998;</button><button class="vf2-sil-btn row-action-btn sil" data-ay="'+ay.key+'">&#10005;</button></div></div>';
+      /* Uye butonlari */
+      h+='<div class="vf2-card-uyeler">';
+      _uyeler.forEach(function(u){
+        var odedi=(ay.odemeler&&ay.odemeler[u.id])||false;
+        var ad=u.ad.split(" ")[0];
+        h+='<button class="vf2-ode-btn vf2-card-uye-btn '+(odedi?"vf2-odedi":"vf2-bek")+'" data-ay="'+ay.key+'" data-uid="'+u.id+'"><span class="vf2-card-uye-ad">'+ad+'</span><span class="vf2-card-uye-deg">'+(odedi?p(kp)+' TL':'— bekliyor')+'</span></button>';
+      });
+      h+='</div>';
+      /* Bilgi satirlari */
+      h+='<div class="vf2-card-info">';
+      h+='<div class="vf2-card-row"><span>Kişi Başı</span><b>'+p(kp)+' TL</b></div>';
+      h+='<div class="vf2-card-row"><span>Toplam Ödeme</span><b style="color:var(--gold)">'+p(ayOdeme)+' TL</b></div>';
+      var altinChips="";
+      ALTIN_TIPLER.forEach(function(t){
+        var ad=tg[t].reduce(function(s,y){return s+(y.adet||0);},0);
+        if(ad>0)altinChips+='<span class="vf2-tip-tag vf2-tip-'+t+'">'+TIP_AD[t]+' × '+ad+'</span>';
+      });
+      if(altinChips){
+        h+='<div class="vf2-card-row vf2-card-row-chips"><span>Altın</span><div class="vf2-card-chips">'+altinChips+'</div></div>';
+      }
+      if(ayNakit>0){
+        h+='<div class="vf2-card-row"><span>Nakit</span><b style="color:var(--green)">'+p(ayNakit)+' TL</b></div>';
+      }
+      if(_gramFiyat>0||ayNakit>0){
+        h+='<div class="vf2-card-row"><span>Güncel Değer</span><b style="color:var(--gold)">'+p(ayDeger)+' TL</b></div>';
+      }
+      h+='</div>';
+      h+='</div>';
+    });
+    /* Genel toplam karti */
+    var n=sirali.length;
+    var ortOdeme=sirali.reduce(function(s,a){return s+(a.toplamOdeme||0);},0)/n;
+    var totUye={};_uyeler.forEach(function(u){totUye[u.id]=0;});
+    var totAdet={},totGram={};ALTIN_TIPLER.forEach(function(t){totAdet[t]=0;totGram[t]=0;});
+    var totNakit=0,totDeger=0,totOdeme=0;
+    sirali.forEach(function(ay){
+      var tg2={};TUM_TIPLER.forEach(function(t){tg2[t]=[];});
+      (ay.yatirimlar||[]).forEach(function(y){if(tg2[y.tip])tg2[y.tip].push(y);});
+      totOdeme+=(ay.toplamOdeme||0);
+      totDeger+=(ay.yatirimlar||[]).reduce(function(s,y){return s+yDeger(y);},0);
+      totNakit+=(tg2.nakit||[]).reduce(function(s,y){return s+(y.nakitTL||0);},0);
+      var kp2=kisiBasiOdeme(ay);
+      _uyeler.forEach(function(u){if(ay.odemeler&&ay.odemeler[u.id])totUye[u.id]+=kp2;});
+      ALTIN_TIPLER.forEach(function(t){
+        var ad=tg2[t].reduce(function(s,y){return s+(y.adet||0);},0);
+        totAdet[t]+=ad;
+        tg2[t].forEach(function(y){totGram[t]+=yGram(y);});
+      });
+    });
+    h+='<div class="vf2-card vf2-card-total">';
+    h+='<div class="vf2-card-header"><span class="vf2-card-ay">📊 GENEL TOPLAM</span></div>';
+    h+='<div class="vf2-card-uyeler">';
+    _uyeler.forEach(function(u){
+      var ad=u.ad.split(" ")[0];
+      h+='<div class="vf2-card-uye-tot"><span class="vf2-card-uye-ad">'+ad+'</span><b>'+p(totUye[u.id])+'</b></div>';
+    });
+    h+='</div>';
+    h+='<div class="vf2-card-info">';
+    h+='<div class="vf2-card-row"><span>Toplam Ödeme</span><b style="color:var(--gold)">'+p(totOdeme)+' TL</b></div>';
+    h+='<div class="vf2-card-row"><span>Aylık Ortalama</span><b>'+p(ortOdeme)+' TL</b></div>';
+    var totChips="";
+    ALTIN_TIPLER.forEach(function(t){
+      if(totAdet[t]>0)totChips+='<span class="vf2-tip-tag vf2-tip-'+t+'">'+TIP_AD[t]+' × '+totAdet[t]+' ('+p(totGram[t])+' gr)</span>';
+    });
+    if(totChips){
+      h+='<div class="vf2-card-row vf2-card-row-chips"><span>Altın Toplam</span><div class="vf2-card-chips">'+totChips+'</div></div>';
+    }
+    if(totNakit>0){
+      h+='<div class="vf2-card-row"><span>Nakit Toplam</span><b style="color:var(--green)">'+p(totNakit)+' TL</b></div>';
+    }
+    if(_gramFiyat>0||totNakit>0){
+      h+='<div class="vf2-card-row"><span>Toplam Güncel Değer</span><b style="color:var(--gold)">'+p(totDeger)+' TL</b></div>';
+    }
+    h+='</div></div>';
+  }
+  h+='</div>';
 
   /* MODALLER */
   h+='<div class="bk-modal-overlay hidden" id="vf2-modal"><div class="modal-box" style="max-width:540px">';
