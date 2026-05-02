@@ -2985,4 +2985,40 @@ html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 42, 0.12); border-
   .vf2-fiyat-badge { font-size: 11px !important; padding: 4px 9px !important; }
   .vf2-oz-btns { width: 100%; gap: 6px; flex-wrap: wrap; }
   .vf2-oz-btns button { flex: 1 1 calc(33% - 6px); min-width: 0; padding: 8px 6px !important; font-size: 11px !important; }
+
+  /* Ürün: tablo satırı ekrana sığsın (kart değil, aynı tablo) */
+  .ur-wrap { padding: 8px 8px 28px; align-items: stretch !important; }
+  .ur-header { flex-direction: column; align-items: stretch; padding: 10px 12px; gap: 8px; }
+  .ur-ozet { gap: 14px; justify-content: space-around; }
+  .ur-oz-val { font-size: 16px !important; }
+  .ur-yeni-btn { width: 100%; text-align: center; padding: 9px 14px; }
+  .ur-tablo-wrap { max-width: 100%; overflow-x: hidden; border-radius: 10px; }
+  .ur-tablo { min-width: 0 !important; width: 100%; table-layout: fixed; }
+  .ur-tablo thead th {
+    padding: 7px 4px;
+    font-size: 8px;
+    letter-spacing: 0.15px;
+    white-space: normal;
+    line-height: 1.15;
+    word-break: break-word;
+    vertical-align: bottom;
+  }
+  .ur-tablo td { padding: 7px 4px; font-size: 11px; vertical-align: top; }
+  .ur-tablo th:nth-child(1), .ur-tablo td:nth-child(1) { width: 19%; }
+  .ur-tablo th:nth-child(2), .ur-tablo td:nth-child(2) { width: 41%; }
+  .ur-tablo th:nth-child(3), .ur-tablo td:nth-child(3) { width: 27%; text-align: right; }
+  .ur-tablo th:nth-child(4), .ur-tablo td:nth-child(4) { width: 13%; padding-left: 2px; padding-right: 2px; }
+  .ur-td-tarih { font-size: 10px; white-space: normal; line-height: 1.2; }
+  .ur-td-urun {
+    font-size: 11px;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    hyphens: auto;
+  }
+  .ur-td-fiyat { font-size: 10px; white-space: normal; line-height: 1.2; text-align: right; font-family: var(--font-body); }
+  .ur-td-aksiyon { white-space: normal; text-align: center; vertical-align: middle; }
+  .ur-td-aksiyon .row-action-btn { display: block; margin: 0 auto 3px; font-size: 12px; padding: 2px; line-height: 1; }
+  .ur-td-aksiyon .row-action-btn:last-child { margin-bottom: 0; }
+  .ur-bos { padding: 28px 14px; font-size: 13px; }
 }
