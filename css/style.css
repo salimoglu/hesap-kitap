@@ -3022,7 +3022,7 @@ html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 42, 0.12); border-
   .ur-tablo-wrap { max-width: 100%; overflow-x: hidden; border-radius: 10px; }
   .ur-tablo { min-width: 0 !important; width: 100%; table-layout: fixed; }
   .ur-tablo thead th {
-    padding: 7px 4px;
+    padding: 8px 5px;
     font-size: 8px;
     letter-spacing: 0.15px;
     white-space: normal;
@@ -3030,20 +3030,38 @@ html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 42, 0.12); border-
     word-break: break-word;
     vertical-align: bottom;
   }
-  .ur-tablo td { padding: 7px 4px; font-size: 11px; vertical-align: top; }
-  .ur-tablo th:nth-child(1), .ur-tablo td:nth-child(1) { width: 14%; }
-  .ur-tablo th:nth-child(2), .ur-tablo td:nth-child(2) { width: 26%; }
-  .ur-tablo th:nth-child(3), .ur-tablo td:nth-child(3) { width: 18%; text-align: right; }
-  .ur-tablo th:nth-child(4), .ur-tablo td:nth-child(4) { width: 9%; }
-  .ur-tablo th:nth-child(5), .ur-tablo td:nth-child(5) { width: 18%; text-align: right; }
-  .ur-tablo th:nth-child(6), .ur-tablo td:nth-child(6) { width: 15%; padding-left: 2px; padding-right: 2px; }
-  .ur-td-tarih { font-size: 9px; white-space: normal; line-height: 1.2; }
+  .ur-tablo thead th:nth-child(1) { white-space: nowrap; }
+  .ur-tablo td { padding: 8px 5px; font-size: 11px; vertical-align: top; }
+  /* Tarih / urun: daha genis bogum, ince dikey ayirici, padding ile nefes */
+  .ur-tablo th:nth-child(1), .ur-tablo td:nth-child(1) {
+    width: 22%;
+    padding-right: 10px !important;
+    border-right: 1px solid var(--border);
+  }
+  .ur-tablo th:nth-child(2), .ur-tablo td:nth-child(2) {
+    width: 28%;
+    padding-left: 10px !important;
+  }
+  .ur-tablo th:nth-child(3), .ur-tablo td:nth-child(3) { width: 16%; text-align: right; }
+  .ur-tablo th:nth-child(4), .ur-tablo td:nth-child(4) { width: 8%; }
+  .ur-tablo th:nth-child(5), .ur-tablo td:nth-child(5) { width: 16%; text-align: right; }
+  .ur-tablo th:nth-child(6), .ur-tablo td:nth-child(6) { width: 10%; padding-left: 4px; padding-right: 4px; }
+  .ur-td-tarih {
+    font-size: 10px;
+    white-space: nowrap;
+    line-height: 1.35;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text-secondary);
+  }
   .ur-td-urun {
     font-size: 11px;
-    line-height: 1.25;
-    overflow-wrap: anywhere;
+    line-height: 1.35;
+    overflow-wrap: break-word;
     word-break: break-word;
     hyphens: auto;
+    padding-top: 9px !important;
+    padding-bottom: 9px !important;
   }
   .ur-td-fiyat { font-size: 9px; white-space: normal; line-height: 1.2; font-family: var(--font-body); }
   .ur-td-gun { font-size: 10px; padding: 7px 2px !important; }
