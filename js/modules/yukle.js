@@ -1,5 +1,28 @@
 /* yukle.js - ButceModule + KrediModule */
 
+/* ===== ORTAK YARDIMCI: CSV INDIRME ===== */
+/* Excel-uyumlu CSV uretir (UTF-8 BOM + ; ayraci + virgul ondalik). */
+window.csvDownload = window.csvDownload || function(filename, rows){
+  var BOM = "\uFEFF";
+  function cell(v){
+    if (v === null || v === undefined) return "";
+    var s = String(v);
+    if (/[";\r\n]/.test(s)) s = '"' + s.replace(/"/g, '""') + '"';
+    return s;
+  }
+  var csv = BOM + rows.map(function(r){ return r.map(cell).join(";"); }).join("\r\n");
+  var blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(url); a.remove(); }, 200);
+};
+window.csvNum = window.csvNum || function(n){
+  if (n === null || n === undefined || n === "") return "";
+  return Number(n).toFixed(2).replace(".", ",");
+};
+
 /* ===== BUTCE MODULE ===== */
 var ButceModule=(function(){
 var $=function(id){return document.getElementById(id);};
@@ -64,7 +87,43 @@ function brender(){
   c.innerHTML=h;bbagla();
 }
 function bguncelle(){hesapla();var g=gelir(),hr=harcanan(),kalan=g-hr,tm=toplamMaas();document.querySelectorAll("[data-hesap]").forEach(function(el){el.textContent=bpara(_veri[el.dataset.hesap]||0);});document.querySelectorAll("[data-pct]").forEach(function(el){el.textContent=bpct(_veri[el.dataset.pct]||0,tm);});var hEl=$("bt-harcanan");if(hEl)hEl.textContent=bpara(hr);var kEl=$("bt-kalan");if(kEl)kEl.textContent=bpara(kalan);var kPct=$("bt-kalan-pct");if(kPct)kPct.textContent=bpct(kalan,tm);}
-function bbagla(){document.querySelectorAll(".bt-input").forEach(function(inp){inp.addEventListener("change",async function(){_veri[this.dataset.id]=parseFloat(this.value)||0;bguncelle();await bkaydet();});inp.addEventListener("keydown",function(e){if(e.key==="Enter"){var all=[...document.querySelectorAll(".bt-input")];var i=all.indexOf(this);if(all[i+1])all[i+1].focus();}});});document.querySelectorAll(".bt-ekle-btn").forEach(function(btn){btn.addEventListener("click",function(){satirEkle(btn.dataset.bolum);});});document.querySelectorAll(".bt-sil-btn").forEach(function(btn){btn.addEventListener("click",function(){satirSil(btn.dataset.bolum,btn.dataset.id);});});var bg=$("b-geri"),bi=$("b-ileri");if(bg)bg.addEventListener("click",async function(){_ay--;if(_ay<0){_ay=11;_yil--;}await byukle();brender();});if(bi)bi.addEventListener("click",async function(){_ay++;if(_ay>11){_ay=0;_yil++;}await byukle();brender();});}
+function bcsvIhracEt(){
+  hesapla();
+  var g=gelir(),hr=harcanan(),kalan=g-hr,tm=toplamMaas();
+  var rows=[];
+  rows.push(["BUTCE RAPORU"]);
+  rows.push(["Ay", AYLAR[_ay]+" "+_yil]);
+  rows.push(["Olusturma", new Date().toLocaleString("tr-TR")]);
+  rows.push([]);
+  rows.push(["BOLUM","KATEGORI","TUTAR (TL)","% (TOPLAM MAAS)"]);
+  YAPI.forEach(function(bolum){
+    var top=null;
+    bolum.s.forEach(function(s){
+      if(s.l==="TOPLAM"){ top=s; return; }
+      var v=_veri[s.id]||0;
+      var pct=tm?((v/tm)*100):0;
+      rows.push([bolum.t, s.l, csvNum(v), csvNum(pct)]);
+    });
+    (_ozel[bolum.b]||[]).forEach(function(s){
+      var v=_veri[s.id]||0;
+      var pct=tm?((v/tm)*100):0;
+      rows.push([bolum.t, s.label, csvNum(v), csvNum(pct)]);
+    });
+    if(top){
+      var v=_veri[top.id]||0;
+      var pct=tm?((v/tm)*100):0;
+      rows.push([bolum.t, top.l, csvNum(v), csvNum(pct)]);
+    }
+  });
+  rows.push([]);
+  rows.push(["SONUC", "TOPLAM HARCANAN", csvNum(hr), csvNum(tm?((hr/tm)*100):0)]);
+  rows.push(["SONUC", "KALAN",           csvNum(kalan), csvNum(tm?((kalan/tm)*100):0)]);
+  rows.push(["SONUC", "GELIR (Salim+Bugra+Borc)", csvNum(g), csvNum(tm?((g/tm)*100):0)]);
+  rows.push(["SONUC", "TOPLAM MAAS",     csvNum(tm), csvNum(100)]);
+  var fname="butce_"+_yil+"_"+String(_ay+1).padStart(2,"0")+".csv";
+  csvDownload(fname, rows);
+}
+function bbagla(){document.querySelectorAll(".bt-input").forEach(function(inp){inp.addEventListener("change",async function(){_veri[this.dataset.id]=parseFloat(this.value)||0;bguncelle();await bkaydet();});inp.addEventListener("keydown",function(e){if(e.key==="Enter"){var all=[...document.querySelectorAll(".bt-input")];var i=all.indexOf(this);if(all[i+1])all[i+1].focus();}});});document.querySelectorAll(".bt-ekle-btn").forEach(function(btn){btn.addEventListener("click",function(){satirEkle(btn.dataset.bolum);});});document.querySelectorAll(".bt-sil-btn").forEach(function(btn){btn.addEventListener("click",function(){satirSil(btn.dataset.bolum,btn.dataset.id);});});var bg=$("b-geri"),bi=$("b-ileri");if(bg)bg.addEventListener("click",async function(){_ay--;if(_ay<0){_ay=11;_yil--;}await byukle();brender();});if(bi)bi.addEventListener("click",async function(){_ay++;if(_ay>11){_ay=0;_yil++;}await byukle();brender();});var bc=$("b-csv");if(bc)bc.addEventListener("click",bcsvIhracEt);}
 async function binit(){await byukle();brender();}
 return{init:binit};
 })();
@@ -248,6 +307,7 @@ function arender(){
   h+='<button class="alt-fiyat-guncelle" id="alt-fiyat-guncelle" title="Fiyatı güncelle">&#8635;</button>';
   h+='</div>';
   h+='<button class="alt-yeni-btn" id="alt-yeni-btn">+ Altın Ekle</button>';
+  h+='<button class="alt-yeni-btn alt-csv-btn" id="alt-csv-btn" style="margin-left:6px;background:var(--bg-elevated);color:var(--gold);border:1px solid var(--gold)" title="CSV / Excel raporu indir">&#8595; CSV</button>';
   h+='</div>';
 
   /* Filtre */
@@ -318,8 +378,54 @@ function arender(){
   abagla();
 }
 
+function acsvIhracEt(){
+  var liste=filtreliListe();
+  var rows=[];
+  rows.push(["ALTIN RAPORU"]);
+  rows.push(["Filtre", _filtre==="TUMU"?"Tum kayitlar":_filtre]);
+  rows.push(["Olusturma", new Date().toLocaleString("tr-TR")]);
+  rows.push(["Guncel gram fiyati (TL)", csvNum(_guncelGramFiyat)]);
+  rows.push([]);
+  /* Ozet */
+  var genelAdet=_kayitlar.reduce(function(s,k){return s+(parseFloat(k.adet)||0);},0);
+  var genelGram=_kayitlar.reduce(function(s,k){return s+(parseFloat(k.gram)||0);},0);
+  var genelTL=_kayitlar.reduce(function(s,k){return s+(parseFloat(k.tlKarsiligi)||0);},0);
+  var genelOrt=genelGram>0?(genelTL/genelGram):0;
+  var elimde=_kayitlar.filter(function(k){return !k.durum||k.durum==="elimde";});
+  var elimdeGram=elimde.reduce(function(s,k){return s+(parseFloat(k.gram)||0);},0);
+  var elimdeMaliyet=elimde.reduce(function(s,k){return s+(parseFloat(k.tlKarsiligi)||0);},0);
+  var elimdeGuncelDeger=_guncelGramFiyat>0?(elimdeGram*_guncelGramFiyat):0;
+  var elimdeKarZarar=elimdeGuncelDeger-elimdeMaliyet;
+  rows.push(["OZET","Toplam adet", genelAdet]);
+  rows.push(["OZET","Toplam gram", csvNum(genelGram)]);
+  rows.push(["OZET","Toplam odenen (TL)", csvNum(genelTL)]);
+  rows.push(["OZET","Ort. gram fiyati (TL)", csvNum(genelOrt)]);
+  rows.push(["OZET","Elimdeki gram", csvNum(elimdeGram)]);
+  rows.push(["OZET","Elimdeki maliyet (TL)", csvNum(elimdeMaliyet)]);
+  rows.push(["OZET","Elimdeki guncel deger (TL)", csvNum(elimdeGuncelDeger)]);
+  rows.push(["OZET","Kar / Zarar (TL)", csvNum(elimdeKarZarar)]);
+  rows.push([]);
+  /* Kayitlar */
+  rows.push(["DURUM","TARIH","ADET","GRAM","TL KARSILIGI","GRAM FIYATI","NASIL ALINDI","NEREDE KULLANILDI"]);
+  liste.forEach(function(k){
+    var gF=k.gram>0?(k.tlKarsiligi/k.gram):0;
+    rows.push([
+      k.durum==="satildi"?"SATILDI":"ELIMDE",
+      k.tarih||"",
+      k.adet||0,
+      csvNum(k.gram),
+      csvNum(k.tlKarsiligi),
+      csvNum(gF),
+      k.nasilAlindi||"",
+      k.nerdeKullanildi||""
+    ]);
+  });
+  var fname="altin_"+(new Date().toISOString().split("T")[0])+".csv";
+  csvDownload(fname, rows);
+}
 function abagla(){
   $("alt-yeni-btn").addEventListener("click",function(){amodalAc(null);});
+  var aCsv=$("alt-csv-btn");if(aCsv)aCsv.addEventListener("click",acsvIhracEt);
   $("alt-modal-kapat").addEventListener("click",amodalKapat);
   $("alt-iptal").addEventListener("click",amodalKapat);
   $("alt-modal").addEventListener("click",function(e){if(e.target===$("alt-modal"))amodalKapat();});
@@ -568,7 +674,7 @@ function render(){
   h+='</div></div>';
 
   if(_gramFiyat>0)h+='<span class="vf2-fiyat-badge">🥇 '+p(_gramFiyat)+' TL/gr</span>';
-  h+='<div class="vf2-oz-btns"><button class="vf2-btn-sec" id="vf2-uye-btn">+ Üye</button><button class="vf2-btn-gold" id="vf2-yatirim-btn">+ Yatırım Ekle</button></div>';
+  h+='<div class="vf2-oz-btns"><button class="vf2-btn-sec" id="vf2-uye-btn">+ Üye</button><button class="vf2-btn-sec" id="vf2-csv-btn" title="CSV / Excel raporu indir">&#8595; CSV</button><button class="vf2-btn-gold" id="vf2-yatirim-btn">+ Yatırım Ekle</button></div>';
   h+='</div>';
 
   /* ── ANA TABLO ── */
@@ -766,6 +872,100 @@ function modalAc(ayKey){
   setTimeout(function(){$("vf2-ay-top").focus();},100);
 }
 
+function vfCsvIhracEt(){
+  var sirali=_aylar.slice().sort(function(a,b){return a.key.localeCompare(b.key);});
+  var altin=altinOzet();
+  var nakit=nakitOzet();
+  var tah=tTahsilat();
+  var deg=tDeger();
+  var rows=[];
+  rows.push(["VEFA RAPORU"]);
+  rows.push(["Olusturma", new Date().toLocaleString("tr-TR")]);
+  rows.push(["Guncel gram fiyati (TL)", csvNum(_gramFiyat)]);
+  rows.push([]);
+  /* Genel ozet */
+  rows.push(["GENEL OZET",""]);
+  rows.push(["Toplam tahsilat (TL)", csvNum(tah)]);
+  rows.push(["Altin guncel deger (TL)", csvNum(altin.guncel_deger)]);
+  rows.push(["Nakit toplam (TL)", csvNum(nakit.toplam)]);
+  rows.push(["Toplam degerleme (TL)", csvNum(deg)]);
+  rows.push(["Kar / Zarar (TL)", csvNum(deg-tah)]);
+  rows.push([]);
+  /* Altin tip detayi */
+  rows.push(["ALTIN TIP DETAYI"]);
+  rows.push(["TIP","ADET","GRAM","GUNCEL DEGER (TL)"]);
+  ALTIN_TIPLER.forEach(function(t){
+    var o=altin.tipDetay[t]; if(!o) return;
+    rows.push([TIP_AD[t], o.adet, csvNum(o.gram), csvNum(o.deger)]);
+  });
+  rows.push(["TOPLAM", altin.toplam_adet, csvNum(altin.toplam_gram), csvNum(altin.guncel_deger)]);
+  rows.push([]);
+  /* Aylik tablo */
+  var basliklar=["AY"];
+  _uyeler.forEach(function(u){basliklar.push(u.ad);});
+  basliklar.push("KISI BASI (TL)","TOPLAM ODEME (TL)");
+  ALTIN_TIPLER.forEach(function(t){basliklar.push(TIP_AD[t]+" (adet)");});
+  basliklar.push("NAKIT (TL)","GUNCEL DEGER (TL)");
+  rows.push(basliklar);
+
+  var uyeToplam={};_uyeler.forEach(function(u){uyeToplam[u.id]=0;});
+  var cAdet={},cGram={};ALTIN_TIPLER.forEach(function(t){cAdet[t]=0;cGram[t]=0;});
+  var cOdeme=0,cDeger=0,cNakit=0;
+
+  sirali.forEach(function(ay){
+    var tg={};TUM_TIPLER.forEach(function(t){tg[t]=[];});
+    (ay.yatirimlar||[]).forEach(function(y){if(tg[y.tip])tg[y.tip].push(y);});
+    var ayOdeme=ay.toplamOdeme||0;
+    var ayDeger=(ay.yatirimlar||[]).reduce(function(s,y){return s+yDeger(y);},0);
+    var ayNakit=(tg.nakit||[]).reduce(function(s,y){return s+(y.nakitTL||0);},0);
+    var kp=kisiBasiOdeme(ay);
+    cOdeme+=ayOdeme;cDeger+=ayDeger;cNakit+=ayNakit;
+    var r=[ayLbl(ay.key)];
+    _uyeler.forEach(function(u){
+      var odedi=(ay.odemeler&&ay.odemeler[u.id])||false;
+      r.push(odedi?csvNum(kp):"");
+      if(odedi)uyeToplam[u.id]+=kp;
+    });
+    r.push(csvNum(kp));
+    r.push(csvNum(ayOdeme));
+    ALTIN_TIPLER.forEach(function(t){
+      var ad=tg[t].reduce(function(s,y){return s+(y.adet||0);},0);
+      cAdet[t]+=ad;
+      tg[t].forEach(function(y){cGram[t]+=yGram(y);});
+      r.push(ad>0?ad:"");
+    });
+    r.push(ayNakit>0?csvNum(ayNakit):"");
+    r.push(csvNum(ayDeger));
+    rows.push(r);
+  });
+  /* Toplam satiri */
+  if(sirali.length){
+    var t=["TOPLAM"];
+    _uyeler.forEach(function(u){t.push(csvNum(uyeToplam[u.id]));});
+    t.push("");
+    t.push(csvNum(cOdeme));
+    ALTIN_TIPLER.forEach(function(tp){t.push(cAdet[tp]>0?cAdet[tp]:"");});
+    t.push(cNakit>0?csvNum(cNakit):"");
+    t.push(csvNum(cDeger));
+    rows.push(t);
+    /* Gram satiri */
+    var gr=["GRAM"];
+    _uyeler.forEach(function(){gr.push("");});
+    gr.push("","");
+    ALTIN_TIPLER.forEach(function(tp){gr.push(cGram[tp]>0?csvNum(cGram[tp]):"");});
+    gr.push("","");
+    rows.push(gr);
+  }
+  /* Nakit detay */
+  if(nakit.liste&&nakit.liste.length){
+    rows.push([]);
+    rows.push(["NAKIT KAYITLAR"]);
+    rows.push(["TUTAR (TL)","ACIKLAMA"]);
+    nakit.liste.forEach(function(y){rows.push([csvNum(y.nakitTL), y.aciklama||""]);});
+  }
+  var fname="vefa_"+(new Date().toISOString().split("T")[0])+".csv";
+  csvDownload(fname, rows);
+}
 function bagla(){
   document.querySelectorAll(".vf2-ode-btn").forEach(function(btn){
     btn.addEventListener("click",async function(){
@@ -788,6 +988,7 @@ function bagla(){
     modalAc(buAy);
     $("vf2-ay-key").onchange=function(){modalAc(this.value);};
   });
+  var vfCsv=$("vf2-csv-btn");if(vfCsv)vfCsv.addEventListener("click",vfCsvIhracEt);
   $("vf2-modal-kapat").addEventListener("click",function(){$("vf2-modal").classList.add("hidden");});
   $("vf2-iptal").addEventListener("click",function(){$("vf2-modal").classList.add("hidden");});
   $("vf2-modal").addEventListener("click",function(e){if(e.target===$("vf2-modal"))$("vf2-modal").classList.add("hidden");});
