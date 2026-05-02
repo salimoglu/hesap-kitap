@@ -85,10 +85,13 @@
             <div class="ozet-item"><span class="ozet-label">Net Bakiye</span><span class="ozet-val net" id="total-net">0,00</span></div>
           </div>
           <div class="filtre-bar">
-            <select id="filter-type" class="filter-select">
+            <select id="filter-type" class="filter-select" title="T&#252;r">
               <option value="hepsi">T&#252;m&#252;</option>
               <option value="gelir">Gelir</option>
               <option value="gider">Gider</option>
+            </select>
+            <select id="filter-grup" class="filter-select" title="Grup">
+              <option value="hepsi">T&#252;m Gruplar</option>
             </select>
             <div class="ay-nav">
               <button class="ay-nav-btn" id="ay-nav-prev" type="button" title="&#214;nceki ay">&#9664;</button>
@@ -277,7 +280,7 @@
 
   <script src="js/firebase.js"></script>
   <script src="js/db.js"></script>
-  <script src="js/modules/islemler.js?v=20260502a"></script>
+  <script src="js/modules/islemler.js?v=20260502b"></script>
   <script src="js/modules/yukle.js?v=20260416d"></script>
   <script src="js/modules/alacaklar.js?v=20260416d"></script>
   <script src="js/modules/urun.js"></script>

@@ -16,6 +16,13 @@ const IslemlerModule = (() => {
   function tumAyKeys(){return [...new Set(_islemler.map(i=>i.tarih.substring(0,7)))].sort();}
   function sonAyKey(){const a=tumAyKeys();return a.length?a[a.length-1]:buAy();}
   function ayLabel(key){if(!key||key==="hepsi")return"Tum Aylar";const[y,m]=key.split("-");return AYLAR[parseInt(m)-1]+" "+y;}
+  function islemGrubu(i){return String(i&&i.kategori||"").split(" - ")[0]||"";}
+  function tumGruplar(){
+    const s=new Set();
+    for(const k of _kategoriler){if(k&&k.grup)s.add(k.grup);}
+    for(const i of _islemler){const g=islemGrubu(i);if(g)s.add(g);}
+    return [...s].sort((a,b)=>a.localeCompare(b,"tr"));
+  }
 
   async function yukle(){
     _islemler=await IslemlerDB.getAll();
@@ -25,6 +32,7 @@ const IslemlerModule = (() => {
     if(_aktifAyKey===null){_aktifAyKey=sonAyKey();}
     else if(_aktifAyKey!=="hepsi" && !aylar.includes(_aktifAyKey)){_aktifAyKey=sonAyKey();}
     doldurAyFilter();
+    doldurGrupFilter();
     renderAyNav();
     renderList();
     renderSummary();
@@ -45,7 +53,13 @@ const IslemlerModule = (() => {
 
   function filtreliIslemler(){
     const tip=$("filter-type").value;
-    return _islemler.filter(i=>(tip==="hepsi"||i.tip===tip)&&(_aktifAyKey==="hepsi"||i.tarih.startsWith(_aktifAyKey)));
+    const gSel=$("filter-grup");const grup=gSel?gSel.value:"hepsi";
+    return _islemler.filter(i=>{
+      if(tip!=="hepsi"&&i.tip!==tip)return false;
+      if(_aktifAyKey!=="hepsi"&&!i.tarih.startsWith(_aktifAyKey))return false;
+      if(grup!=="hepsi"&&islemGrubu(i)!==grup)return false;
+      return true;
+    });
   }
 
   function renderAyNav(){
@@ -144,6 +158,18 @@ const IslemlerModule = (() => {
       o.value=key;o.textContent=AYLAR[parseInt(m)-1]+" "+y;sel.appendChild(o);
     });
     if([...sel.options].some(o=>o.value===_aktifAyKey))sel.value=_aktifAyKey;
+    else sel.value="hepsi";
+  }
+
+  function doldurGrupFilter(){
+    const sel=$("filter-grup");if(!sel)return;
+    const prev=sel.value;
+    while(sel.options.length>1)sel.remove(1);
+    for(const g of tumGruplar()){
+      const o=document.createElement("option");
+      o.value=g;o.textContent=g;sel.appendChild(o);
+    }
+    if([...sel.options].some(o=>o.value===prev))sel.value=prev;
     else sel.value="hepsi";
   }
 
@@ -281,7 +307,7 @@ const IslemlerModule = (() => {
       if(_seciliKat.value===ed){_seciliKat={value:yd,label:ya,tip:k.tip};$("hg-kat-trigger").textContent=ya;}
     }
     _kategoriler=await KategorilerDB.getAll();_islemler=await IslemlerDB.getAll();
-    katDuzenleKapatGenel();renderKatListe();doldurGrupSelect(_katTip);renderHgList("");renderList();renderSummary();
+    katDuzenleKapatGenel();renderKatListe();doldurGrupSelect(_katTip);doldurGrupFilter();renderHgList("");renderList();renderSummary();
   }
 
   function katSilAc(k){_katSilId=k.id;$("kat-sil-text").textContent=k.grup+" - "+k.ad+" silinsin mi?";$("modal-kat-sil").classList.remove("hidden");}
@@ -290,7 +316,7 @@ const IslemlerModule = (() => {
     if(!_katSilId)return;
     await KategorilerDB.delete(_katSilId);
     _kategoriler=await KategorilerDB.getAll();
-    katSilKapat();renderKatListe();doldurGrupSelect(_katTip);renderHgList("");
+    katSilKapat();renderKatListe();doldurGrupSelect(_katTip);doldurGrupFilter();renderHgList("");
   }
 
   function doldurGrupSelect(tip){
@@ -307,7 +333,7 @@ const IslemlerModule = (() => {
     await KategorilerDB.add({tip:_katTip,grup,ad,varsayilan:false});
     $("inp-kat-ad").value="";
     _kategoriler=await KategorilerDB.getAll();
-    renderKatListe();doldurGrupSelect(_katTip);renderHgList($("hg-kat-search-inp").value||"");
+    renderKatListe();doldurGrupSelect(_katTip);doldurGrupFilter();renderHgList($("hg-kat-search-inp").value||"");
   }
 
   function doldurKategoriSelect(tip){
@@ -392,6 +418,7 @@ const IslemlerModule = (() => {
     $("hg-kat-dropdown").addEventListener("click",e=>e.stopPropagation());
     document.addEventListener("click",()=>closeHgDropdown());
     $("filter-type").addEventListener("change",renderList);
+    const fg=$("filter-grup");if(fg)fg.addEventListener("change",renderList);
     $("filter-ay").addEventListener("change",ayFilterDegisti);
     const aPrev=$("ay-nav-prev");if(aPrev)aPrev.addEventListener("click",()=>ayNavGit(-1));
     const aNext=$("ay-nav-next");if(aNext)aNext.addEventListener("click",()=>ayNavGit(1));
