@@ -1292,6 +1292,22 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .mh-kisi-form-body{padding-top:4px;}
 .mh-label-hint{font-weight:400;opacity:0.75;font-size:10px;text-transform:none;letter-spacing:0;}
 
+/* Kişi ekle/düzenle — ortada (detay ile aynı) */
+#mh-modal.bk-modal-overlay{
+  align-items:center;
+  justify-content:center;
+  padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));
+}
+#mh-modal .mh-kisi-modal{
+  width:100%;
+  max-width:min(440px,calc(100vw - 32px));
+  max-height:min(70dvh,calc(100dvh - 32px));
+  margin:0;
+  border-radius:var(--radius-lg);
+  animation:mh-detay-modal-in 0.22s ease;
+  box-shadow:0 20px 60px rgba(0,0,0,0.38);
+}
+
 /* Kişi detay — ortada açılır (bk-modal varsayılanı alttan sheet) */
 #mh-detay-modal.bk-modal-overlay{
   align-items:center;
