@@ -9,10 +9,10 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="mobile-web-app-capable" content="yes" />
   <title>Hesap Kitap</title>
-  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
-  <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png?v=20260503icon" />
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png?v=20260503icon" />
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="css/style.css?v=20260503f" />
+  <link rel="stylesheet" href="css/style.css?v=20260503icon" />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <script>
     /* Tema yonetimi: flash onleme + toggle */
@@ -64,7 +64,7 @@
   <div id="lock-screen" class="lock-screen">
     <div class="lock-inner">
       <div class="lock-logo">
-        <span class="lock-icon">&#128221;</span>
+        <img class="lock-app-icon" src="icons/icon-192.png?v=20260503icon" alt="" width="128" height="128" decoding="async" />
         <h1 class="lock-title">HESAP K&#304;TAP</h1>
         <p class="lock-sub">Ki&#351;isel Finans Takibi</p>
       </div>
@@ -94,6 +94,7 @@
   <div id="app" class="app hidden">
     <header class="topbar">
       <div class="topbar-left" onclick="sayfaYenile()" style="cursor:pointer" title="Yenile">
+        <img class="app-logo-img" src="icons/icon-192.png?v=20260503icon" alt="" width="36" height="36" decoding="async" />
         <span class="app-name">HESAP K&#304;TAP</span>
       </div>
       <div class="topbar-right">
