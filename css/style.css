@@ -2668,3 +2668,53 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 
 /* === ALTIN: SON GUNCELLEME ETIKETI === */
 .alt-fiyat-yas{font-size:10px;color:var(--text-muted);font-style:italic;margin-left:2px;letter-spacing:0.5px;}
+
+/* === TEMA DEGISIMI: ACIK (KREM) TEMA === */
+html.theme-light {
+  --bg-base:      #f4ecd8;
+  --bg-card:      #faf3df;
+  --bg-elevated:  #ffffff;
+  --bg-input:     #fcf6e6;
+  --border:       #d6c69d;
+  --border-light: #b89e6e;
+  --text-primary:   #2c1f0d;
+  --text-secondary: #5b4828;
+  --text-muted:     #8a7548;
+  --gold:       #b8862a;
+  --gold-dim:   #97681c;
+  --green:      #2a7e3d;
+  --red:        #c4332e;
+  color-scheme: light;
+}
+
+/* color-scheme: dark olan input/select'leri acik temada normalize et */
+html.theme-light .filter-select,
+html.theme-light .field-input,
+html.theme-light .field-select,
+html.theme-light input,
+html.theme-light select,
+html.theme-light textarea { color-scheme: light; }
+
+/* Tema toggle butonu */
+.theme-toggle-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 34px; height: 34px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  color: var(--gold);
+  padding: 0;
+  transition: all 0.18s ease;
+  flex-shrink: 0;
+}
+.theme-toggle-btn:hover { background: var(--bg-elevated); border-color: var(--gold); }
+.theme-toggle-btn:active { transform: scale(0.92); }
+.theme-toggle-btn svg { display: block; width: 18px; height: 18px; }
+
+/* Acik temada bazi sert rgba'lari yumusatma */
+html.theme-light .topbar { box-shadow: 0 1px 3px rgba(120, 90, 30, 0.08); }
+html.theme-light .modal-box { box-shadow: 0 8px 24px rgba(120, 90, 30, 0.15); }
+html.theme-light .bk-modal-overlay { background: rgba(80, 60, 30, 0.45); }
+html.theme-light .num-btn:active { background: var(--bg-card); }
+html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 42, 0.12); border-color: rgba(184, 134, 42, 0.35); }
