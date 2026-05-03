@@ -795,7 +795,7 @@ function render(){
         ALTIN_TIPLER.forEach(function(t){
           var y=tg[t][ri];
           if(ri===0&&y){cAdet[t]+=(y.adet||0);cGram[t]+=yGram(y);}
-          if(y)h+='<td class="vf2-td-yat">'+y.adet+' adet</td>';
+          if(y)h+='<td class="vf2-td-alt-adet">'+y.adet+' adet</td>';
           else h+='<td class="vf2-td-bos">—</td>';
         });
         /* Nakit sütunu — sadece ilk satırda göster */
@@ -820,14 +820,14 @@ function render(){
     h+='<tr class="vf2-tot-row"><td>Toplam</td>';
     _uyeler.forEach(function(u){h+='<td>'+p(uyeToplam[u.id])+'</td>';});
     h+='<td>'+p(cOdeme)+'</td><td class="vf2-th-sep"></td>';
-    ALTIN_TIPLER.forEach(function(t){h+='<td>'+(cAdet[t]>0?cAdet[t]+' adet':'—')+'</td>';});
+    ALTIN_TIPLER.forEach(function(t){h+='<td class="vf2-td-alt-adet">'+(cAdet[t]>0?cAdet[t]+' adet':'—')+'</td>';});
     h+='<td>'+(cNakit>0?p(cNakit)+' TL':'—')+'</td>';
     h+='<td style="color:var(--gold)">'+(_gramFiyat>0||cNakit>0?p(cDeger):'—')+'</td><td></td></tr>';
     /* Gram */
     h+='<tr class="vf2-gr-row"><td>Gram</td>';
     _uyeler.forEach(function(){h+='<td>—</td>';});
     h+='<td>—</td><td class="vf2-th-sep"></td>';
-    ALTIN_TIPLER.forEach(function(t){h+='<td>'+(cGram[t]>0?p(cGram[t])+' gr':'—')+'</td>';});
+    ALTIN_TIPLER.forEach(function(t){h+='<td class="vf2-td-alt-gram">'+(cGram[t]>0?p(cGram[t])+' gr':'—')+'</td>';});
     h+='<td>—</td><td></td><td></td></tr>';
   }
   h+='</tbody></table></div>';
