@@ -3133,6 +3133,19 @@ html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 42, 0.12); border-
     padding-bottom: max(32px, env(safe-area-inset-bottom, 0px));
   }
 
+  /* Ürün: kaydırma #urun-container'da — iç flex+overflow zinciri bazı mobil tarayıcılarda kesiyordu */
+  #urun-container.module-host {
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  #urun-container > .ur-wrap {
+    flex: 0 0 auto !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    min-height: 0;
+  }
   /* Ürün: tablo — sütun % toplamı 100; overflow-x kaydırılabilir */
   .ur-wrap { padding: 8px 8px max(28px, env(safe-area-inset-bottom, 0px)); align-items: stretch !important; overflow-y: auto; min-height: 0; -webkit-overflow-scrolling: touch; }
   .ur-legend { font-size: 10px; margin: -4px 0 8px 0; padding: 0 4px; }
@@ -3140,13 +3153,14 @@ html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 42, 0.12); border-
   .ur-ozet { gap: 14px; justify-content: space-around; }
   .ur-oz-val { font-size: 16px !important; }
   .ur-yeni-btn { width: 100%; text-align: center; padding: 9px 14px; }
+  /* Tablo yüksekliği içeriğe göre büyüsün; dikey kaydırma .ur-wrap / .module-host üzerinde */
   .ur-tablo-wrap {
     max-width: 100%;
     overflow-x: auto;
-    overflow-y: hidden;
+    overflow-y: visible;
     -webkit-overflow-scrolling: touch;
     border-radius: 10px;
-    flex: 1 1 auto;
+    flex: 0 0 auto;
     min-height: 0;
   }
   .ur-tablo { min-width: 0 !important; width: 100%; table-layout: fixed; }
