@@ -94,12 +94,12 @@ function render(){
     h+='</div>';
   } else {
     h+='<table class="ur-tablo"><thead><tr>';
-    h+='<th title="Satın alma tarihi">TARİH</th>';
-    h+='<th>ÜRÜN</th>';
-    h+='<th title="Ödenen toplam tutar">FİYAT</th>';
+    h+='<th title="Satın alma tarihi"><span class="ur-th-desktop">TARİH</span><span class="ur-th-mob">TAR.</span></th>';
+    h+='<th><span class="ur-th-desktop">ÜRÜN</span><span class="ur-th-mob">ÜRÜN</span></th>';
+    h+='<th title="Ödenen toplam tutar"><span class="ur-th-desktop">FİYAT</span><span class="ur-th-mob">FİY.</span></th>';
     h+='<th title="Satın alma ile bugün veya son güne kadar (dahil)">GÜN</th>';
-    h+='<th title="Planlanan son kullanım günü">SON GÜN</th>';
-    h+='<th title="Fiyat ÷ gün">GÜNLÜK</th>';
+    h+='<th title="Planlanan son kullanım günü"><span class="ur-th-desktop">SON GÜN</span><span class="ur-th-mob">SON</span></th>';
+    h+='<th title="Fiyat ÷ gün"><span class="ur-th-desktop">GÜNLÜK</span><span class="ur-th-mob">GÜN.LK</span></th>';
     h+='<th></th>';
     h+='</tr></thead><tbody>';
     _urunler.slice().sort(function(a,b){return b.tarih.localeCompare(a.tarih);}).forEach(function(u){
@@ -124,7 +124,7 @@ function render(){
   h+='</div></div>';
 
   h+='<div class="bk-modal-overlay hidden" id="ur-modal">';
-  h+='<div class="modal-box modal-sm">';
+  h+='<div class="modal-box modal-sm ur-urun-dialog">';
   h+='<div class="modal-header">';
   h+='<h2 class="modal-title" id="ur-modal-baslik">Ürün Ekle</h2>';
   h+='<button class="modal-close" id="ur-modal-kapat">&#10005;</button>';
@@ -147,7 +147,7 @@ function render(){
   h+='</div></div></div>';
 
   h+='<div class="bk-modal-overlay hidden" id="ur-omur-modal">';
-  h+='<div class="modal-box modal-sm">';
+  h+='<div class="modal-box modal-sm ur-urun-dialog">';
   h+='<div class="modal-header">';
   h+='<h2 class="modal-title">Kullanım ömrü — son gün</h2>';
   h+='<button type="button" class="modal-close" id="ur-omur-kapat">&#10005;</button>';
