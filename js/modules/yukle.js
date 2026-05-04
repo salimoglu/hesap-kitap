@@ -1198,6 +1198,35 @@ function mp(n){return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigits
 function muid(){return "mh"+Date.now()+"_"+Math.random().toString(36).substr(2,5);}
 function mTarih(t){if(!t)return"";var p=t.split("-");return p[2]+"."+p[1]+"."+p[0];}
 function kisiToplam(k){return (k.zekatlar||[]).reduce(function(s,z){return s+(z.miktar||0);},0);}
+function mhEsc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");}
+function mhAyEtiket(ayKey){
+  if(!ayKey||ayKey.length<7)return ayKey||"";
+  var d=new Date(ayKey+"-01T12:00:00");
+  if(isNaN(d.getTime()))return ayKey;
+  var t=d.toLocaleDateString("tr-TR",{month:"long",year:"numeric"});
+  return t.charAt(0).toUpperCase()+t.slice(1);
+}
+function mhAylikOzetDizi(){
+  var m={};
+  _kisiler.forEach(function(k){
+    (k.zekatlar||[]).forEach(function(z){
+      if(!z||!z.tarih)return;
+      var key=String(z.tarih).slice(0,7);
+      if(key.length!==7||key.charAt(4)!=="-")return;
+      if(!m[key])m[key]={toplam:0,satirlar:[]};
+      var mik=Number(z.miktar)||0;
+      m[key].toplam+=mik;
+      var s=m[key].satirlar.find(function(r){return r.kid===k.id;});
+      if(!s){s={kid:k.id,ad:k.ad,miktar:0,parca:[]};m[key].satirlar.push(s);}
+      s.miktar+=mik;
+      s.parca.push(z);
+    });
+  });
+  return Object.keys(m).sort().reverse().map(function(key){
+    var sat=m[key].satirlar.slice().sort(function(a,b){return b.miktar-a.miktar;});
+    return {key:key,etik:mhAyEtiket(key),toplam:m[key].toplam,satirlar:sat};
+  });
+}
 
 async function fbYukle(){
   if(!window._fbDb)return;
@@ -1223,6 +1252,39 @@ function render(){
   h+='</div>';
   h+='<button type="button" class="mh-ekle-btn" id="mh-kisi-ekle-btn">Yeni kişi</button>';
   h+='</div>';
+
+  var aylar=mhAylikOzetDizi();
+  if(aylar.length){
+    h+='<div class="mh-ay-ozet">';
+    h+='<div class="mh-ay-ozet-baslik">Aylık zekat özeti</div>';
+    aylar.forEach(function(ay){
+      var aid="mh-ay-"+ay.key.replace(/[^0-9a-z-]/gi,"");
+      h+='<div class="mh-ay-satir">';
+      h+='<button type="button" class="mh-ay-baslik" aria-expanded="false" aria-controls="'+aid+'-det" id="'+aid+'-btn">';
+      h+='<span class="mh-ay-etik">'+mhEsc(ay.etik)+'</span>';
+      h+='<span class="mh-ay-tutar">'+mp(ay.toplam)+' TL</span>';
+      h+='<span class="mh-ay-chev" aria-hidden="true">▾</span>';
+      h+='</button>';
+      h+='<div class="mh-ay-detay hidden" id="'+aid+'-det" role="region" aria-labelledby="'+aid+'-btn">';
+      if(ay.satirlar.length){
+        h+='<table class="mh-ay-tablo"><thead><tr><th>Kişi</th><th>Toplam</th></tr></thead><tbody>';
+        ay.satirlar.forEach(function(s){
+          h+='<tr><td class="mh-ay-td-ad">'+mhEsc(s.ad)+'</td><td class="mh-ay-td-mik">'+mp(s.miktar)+' TL</td></tr>';
+          if(s.parca.length>1){
+            s.parca.slice().sort(function(a,b){return (b.tarih||"").localeCompare(a.tarih||"");}).forEach(function(z){
+              var ac=(z.aciklama||"").trim();
+              h+='<tr class="mh-ay-parca"><td colspan="2">'+mTarih(z.tarih)+" · "+mp(z.miktar)+" TL"+(ac?" · "+mhEsc(ac):"")+"</td></tr>";
+            });
+          }
+        });
+        h+='</tbody></table>';
+      } else {
+        h+='<div class="mh-ay-bos">Bu ay için dağıtım kaydı yok.</div>';
+      }
+      h+='</div></div>';
+    });
+    h+='</div>';
+  }
 
   /* Kişi listesi */
   if(!_kisiler.length){
@@ -1428,6 +1490,16 @@ function bagla(){
       kisiDetayGuncelle(geriDetay);
       $("mh-detay-modal").classList.remove("hidden");
     }
+  });
+  document.querySelectorAll(".mh-ay-baslik").forEach(function(btn){
+    btn.addEventListener("click",function(){
+      var cid=btn.getAttribute("aria-controls");
+      var det=cid?document.getElementById(cid):null;
+      if(!det)return;
+      var acik=btn.getAttribute("aria-expanded")==="true";
+      btn.setAttribute("aria-expanded",acik?"false":"true");
+      if(acik)det.classList.add("hidden");else det.classList.remove("hidden");
+    });
   });
 }
 
