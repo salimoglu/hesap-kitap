@@ -23,12 +23,17 @@ window.csvNum = window.csvNum || function(n){
   return Number(n).toFixed(2).replace(".", ",");
 };
 
-/** RTDB .set([...]) ile yazilan diziler okunurken {0:a,1:b} nesnesi olarak gelir — .forEach/.slice icin diziye cevir */
+/** RTDB dizileri cogu zaman {0:a,1:b} gelir; tek kayit duz nesne ise Object.values alanlari parcalamaz */
 function rtdbToArray(val){
-  if (val == null) return [];
-  if (Array.isArray(val)) return val;
-  if (typeof val === "object") return Object.values(val);
-  return [];
+  if(val==null)return[];
+  if(Array.isArray(val))return val;
+  if(typeof val!=="object")return[];
+  var keys=Object.keys(val);
+  if(!keys.length)return[];
+  var allNumeric=keys.every(function(k){return/^(0|[1-9]\d*)$/.test(k);});
+  if(!allNumeric&&typeof val.id==="string"&&val.ad!=null&&val.key==null)return [val];
+  if(!allNumeric&&val.key!=null&&String(val.key).length>=7&&String(val.key).indexOf("-")===4)return [val];
+  return Object.values(val);
 }
 
 /* ===== BUTCE MODULE ===== */
@@ -683,16 +688,21 @@ function tGram(){return tumY().reduce(function(s,y){return s+yGram(y);},0);}
 
 async function fbYukle(){
   if(!window._fbDb)return;
+  var defU=[{id:"u1",ad:"Zafer EROĞLU",rol:"Başkan"},{id:"u2",ad:"Fatma İNCE",rol:"Üye"},{id:"u3",ad:"Güler UÇAR",rol:"Üye"},{id:"u4",ad:"Salim EROĞLU",rol:"Üye"}];
   try{
     var s=await window._fbDb.ref("vefa2").once("value");
     var d=s.val()||{};
-    var defU=[{id:"u1",ad:"Zafer EROĞLU",rol:"Başkan"},{id:"u2",ad:"Fatma İNCE",rol:"Üye"},{id:"u3",ad:"Güler UÇAR",rol:"Üye"},{id:"u4",ad:"Salim EROĞLU",rol:"Üye"}];
     _uyeler=rtdbToArray(d.uyeler);
-    if(!_uyeler.length)_uyeler=defU;
-    _aylar=rtdbToArray(d.aylar);
+    if(!_uyeler.length)_uyeler=defU.slice();
+    _aylar=rtdbToArray(d.aylar).filter(function(a){return a&&typeof a.key==="string";});
     var gf=await window._fbDb.ref("altin_guncel_fiyat").once("value");
     _gramFiyat=gf.val()||0;
-  }catch(e){}
+  }catch(e){
+    console.warn("[Vefa2] fbYukle",e);
+    _uyeler=defU.slice();
+    _aylar=[];
+    _gramFiyat=0;
+  }
 }
 async function fbKaydet(){
   if(!window._fbDb)return;
@@ -701,7 +711,7 @@ async function fbKaydet(){
 
 function render(){
   var c=$("vefa-container");if(!c)return;
-  var sirali=_aylar.slice().sort(function(a,b){return a.key.localeCompare(b.key);});
+  var sirali=_aylar.slice().filter(function(a){return a&&typeof a.key==="string";}).sort(function(a,b){return a.key.localeCompare(b.key);});
   /* Telefondaki kartlar: en guncel ay ustte, asagi dogru gecmise */
   var siraliKart=sirali.slice().reverse();
   var tah=tTahsilat();
@@ -1035,7 +1045,7 @@ function modalAc(ayKey){
 }
 
 function vfCsvIhracEt(){
-  var sirali=_aylar.slice().sort(function(a,b){return a.key.localeCompare(b.key);});
+  var sirali=_aylar.slice().filter(function(a){return a&&typeof a.key==="string";}).sort(function(a,b){return a.key.localeCompare(b.key);});
   var altin=altinOzet();
   var nakit=nakitOzet();
   var tah=tTahsilat();

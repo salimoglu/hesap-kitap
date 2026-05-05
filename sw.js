@@ -1,18 +1,18 @@
 // sw.js — Network First: her zaman gunceli al, cache sadece fallback
-const CACHE = "hesap-kitap-v56";
+const CACHE = "hesap-kitap-v57";
 const ASSETS = [
   "/hesap-kitap/",
   "/hesap-kitap/index.html",
   "/hesap-kitap/css/style.css?v=20260505islemoz",
-  "/hesap-kitap/js/app.js",
+  "/hesap-kitap/js/app.js?v=20260504",
   "/hesap-kitap/js/db.js",
   "/hesap-kitap/js/firebase.js",
   "/hesap-kitap/js/modules/islemler.js?v=20260505islemoz",
   "/hesap-kitap/js/modules/birikim.js",
-  "/hesap-kitap/js/modules/yukle.js?v=20260505rtdbfix",
-  "/hesap-kitap/js/modules/alacaklar.js",
+  "/hesap-kitap/js/modules/yukle.js?v=20260505vefadatfix",
+  "/hesap-kitap/js/modules/alacaklar.js?v=20260416d",
   "/hesap-kitap/js/modules/urun.js?v=20260505rtdbfix",
-  "/hesap-kitap/js/modules/arabam.js",
+  "/hesap-kitap/js/modules/arabam.js?v=20260504",
   "/hesap-kitap/manifest.json?v=20260209desk",
   "/hesap-kitap/icons/favicon.ico?v=20260209desk",
   "/hesap-kitap/icons/icon-180.png?v=20260209desk",
