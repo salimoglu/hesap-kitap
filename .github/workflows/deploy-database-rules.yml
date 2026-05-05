@@ -1,14 +1,9 @@
 name: Deploy Firebase DB rules
 
+# GitHub repo → Settings → Secrets → Actions → FIREBASE_TOKEN
+# Token: herhangi bir makinede bir kez: npx firebase-tools@latest login:ci
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - "database.rules.json"
-      - "firebase.json"
-      - ".firebaserc"
-      - ".github/workflows/deploy-database-rules.yml"
 
 jobs:
   deploy:
