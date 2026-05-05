@@ -127,14 +127,14 @@ const IslemlerModule = (() => {
       genG+=ayG;genGi+=ayGi;
       const oz=document.createElement("div");oz.className="islem-ay-ozet";
       const ayNet=ayG-ayGi;
-      oz.innerHTML="<span>"+AYLAR[parseInt(m)-1]+":</span><span class='ao-gelir'>"+para(ayG)+"</span><span class='ao-sep'>&#8722;</span><span class='ao-gider'>"+para(ayGi)+"</span><span class='ao-sep'>=</span><span class='ao-net'>"+(ayNet>=0?"":"-")+para(Math.abs(ayNet))+"</span>";
+      oz.innerHTML="<span class='ao-lbl'>"+AYLAR[parseInt(m)-1]+":</span><span class='ao-gelir'>"+para(ayG)+"</span><span class='ao-sep'>&#8722;</span><span class='ao-gider'>"+para(ayGi)+"</span><span class='ao-sep'>=</span><span class='ao-net'>"+(ayNet>=0?"":"-")+para(Math.abs(ayNet))+"</span>";
       liste.appendChild(oz);
     }
     if(Object.keys(gruplar).length){
       const gt=document.createElement("div");gt.className="islem-genel-toplam";
       const gNet=genG-genGi;
       const lbl=_aktifAyKey==="hepsi"?"TOPLAM":"AY TOPLAMI";
-      gt.innerHTML="<span>"+lbl+":</span><span style='color:var(--green);font-family:var(--font-brand)'>"+para(genG)+"</span><span style='color:var(--text-muted)'>&#8722;</span><span style='color:var(--red);font-family:var(--font-brand)'>"+para(genGi)+"</span><span style='color:var(--text-muted)'>=</span><span class='gt-val'>"+(gNet>=0?"":"-")+para(Math.abs(gNet))+"</span>";
+      gt.innerHTML="<span class='gt-lbl'>"+lbl+":</span><span class='gt-gelir'>"+para(genG)+"</span><span class='gt-sep'>&#8722;</span><span class='gt-gider'>"+para(genGi)+"</span><span class='gt-sep'>=</span><span class='gt-val'>"+(gNet>=0?"":"-")+para(Math.abs(gNet))+"</span>";
       liste.appendChild(gt);
     }
   }
