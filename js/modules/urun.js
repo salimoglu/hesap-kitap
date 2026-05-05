@@ -48,7 +48,7 @@ async function fbYukle(){
   try{
     var s=await window._fbDb.ref("urunler").once("value");
     var v=s.val();
-    _urunler=v?Object.values(v):[];
+    _urunler=Array.isArray(v)?v:(v&&typeof v==="object"?Object.values(v):[]);
   }catch(e){_urunler=[];}
 }
 

@@ -23,6 +23,14 @@ window.csvNum = window.csvNum || function(n){
   return Number(n).toFixed(2).replace(".", ",");
 };
 
+/** RTDB .set([...]) ile yazilan diziler okunurken {0:a,1:b} nesnesi olarak gelir — .forEach/.slice icin diziye cevir */
+function rtdbToArray(val){
+  if (val == null) return [];
+  if (Array.isArray(val)) return val;
+  if (typeof val === "object") return Object.values(val);
+  return [];
+}
+
 /* ===== BUTCE MODULE ===== */
 var ButceModule=(function(){
 var $=function(id){return document.getElementById(id);};
@@ -138,7 +146,7 @@ function uid(){return "k"+Date.now()+"_"+Math.random().toString(36).substr(2,5);
 function buAy(){return _yil+"-"+String(_ay+1).padStart(2,"0");}
 function ayEkle(bas,n){var d=new Date(bas+"-01");d.setMonth(d.getMonth()+n);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");}
 function ayInput(){return _yil+"-"+String(_ay+1).padStart(2,"0");}
-async function kfbYukle(){if(typeof window._fbDb==="undefined"||!window._fbDb)return;try{var s=await window._fbDb.ref("kredi_harcamalar").once("value");var v=s.val();_h=v?Object.values(v):[];var sk=await window._fbDb.ref("kredi_kartlar").once("value");_k=sk.val()||[];}catch(e){_h=[];_k=[];}}
+async function kfbYukle(){if(typeof window._fbDb==="undefined"||!window._fbDb)return;try{var s=await window._fbDb.ref("kredi_harcamalar").once("value");var v=s.val();_h=v?Object.values(v):[];var sk=await window._fbDb.ref("kredi_kartlar").once("value");_k=rtdbToArray(sk.val());}catch(e){_h=[];_k=[];}}
 async function kfbKaydet(){if(typeof window._fbDb==="undefined"||!window._fbDb)return;try{var obj={};_h.forEach(function(x){obj[x.id]=x;});await window._fbDb.ref("kredi_harcamalar").set(obj);await window._fbDb.ref("kredi_kartlar").set(_k);}catch(e){}}
 function taksitler(h){var r=[];for(var i=0;i<h.taksit;i++){r.push({ay:ayEkle(h.basTarih,i),tutar:h.tutar/h.taksit,no:i+1});}return r;}
 function kartlar(){var s={};_h.forEach(function(h){s[h.kart]=1;});_k.forEach(function(k){s[k]=1;});return Object.keys(s).sort();}
@@ -247,7 +255,7 @@ async function afbYukle(){
   try{
     var s=await window._fbDb.ref("altin_kayitlar").once("value");
     var v=s.val();
-    _kayitlar=v?Object.values(v):[];
+    _kayitlar=rtdbToArray(v);
     _kayitlar.sort(function(a,b){return (a.tarih||"").localeCompare(b.tarih||"");});
     /* Kayıtlı güncel fiyat */
     var sf=await window._fbDb.ref("altin_guncel_fiyat").once("value");
@@ -678,8 +686,10 @@ async function fbYukle(){
   try{
     var s=await window._fbDb.ref("vefa2").once("value");
     var d=s.val()||{};
-    _uyeler=d.uyeler||[{id:"u1",ad:"Zafer EROĞLU",rol:"Başkan"},{id:"u2",ad:"Fatma İNCE",rol:"Üye"},{id:"u3",ad:"Güler UÇAR",rol:"Üye"},{id:"u4",ad:"Salim EROĞLU",rol:"Üye"}];
-    _aylar=d.aylar||[];
+    var defU=[{id:"u1",ad:"Zafer EROĞLU",rol:"Başkan"},{id:"u2",ad:"Fatma İNCE",rol:"Üye"},{id:"u3",ad:"Güler UÇAR",rol:"Üye"},{id:"u4",ad:"Salim EROĞLU",rol:"Üye"}];
+    _uyeler=rtdbToArray(d.uyeler);
+    if(!_uyeler.length)_uyeler=defU;
+    _aylar=rtdbToArray(d.aylar);
     var gf=await window._fbDb.ref("altin_guncel_fiyat").once("value");
     _gramFiyat=gf.val()||0;
   }catch(e){}
