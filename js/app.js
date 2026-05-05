@@ -1,6 +1,6 @@
 (async () => {
   // Firebase + IndexedDB baslat
-  try { if (typeof fbInit !== "undefined") fbInit(); } catch(e) {}
+  try { if (typeof fbInit !== "undefined") await fbInit(); } catch (e) {}
   await initApp();
 
   const lockScreen = document.getElementById("lock-screen");

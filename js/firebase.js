@@ -10,6 +10,7 @@ const _fbConfig = {
 };
 
 let _fbDb = null;
+window._fbAuthOk = false;
 window._fbReady = Promise.resolve(false);
 
 async function fbInit() {
@@ -18,26 +19,43 @@ async function fbInit() {
     _fbDb = firebase.database();
     window._fbDb = _fbDb;
 
-    window._fbReady = new Promise(function(resolve) {
-      var done = false;
-      var finish = function(ok) { if (done) return; done = true; resolve(ok); };
+    /* Persistence ilk snapshot'ini bekle; 8sn timeout yok — zaman asiminda erken false verip
+       yetkisiz okuma / bos senkron tetiklenmesin */
+    window._fbReady = (async function() {
       try {
-        firebase.auth().onAuthStateChanged(function(u) { if (u) finish(true); });
-        firebase.auth().signInAnonymously().catch(function(e) {
-          console.warn("Auth:", e);
-          finish(false);
+        await new Promise(function(resolve) {
+          var unsub = firebase.auth().onAuthStateChanged(function() {
+            unsub();
+            resolve();
+          });
         });
-      } catch(e) { console.warn("Auth init:", e); finish(false); }
-      setTimeout(function(){ finish(false); }, 8000);
-    });
+        if (!firebase.auth().currentUser) {
+          await firebase.auth().signInAnonymously();
+        }
+        window._fbAuthOk = !!firebase.auth().currentUser;
+        return window._fbAuthOk;
+      } catch (e) {
+        console.warn("Auth:", e);
+        window._fbAuthOk = false;
+        return false;
+      }
+    })();
 
     await window._fbReady;
-  } catch(e) { console.warn("Firebase init:", e); }
+  } catch (e) {
+    console.warn("Firebase init:", e);
+    window._fbAuthOk = false;
+    window._fbReady = Promise.resolve(false);
+  }
 }
 
 async function fbVerileriYukle() {
   if (!_fbDb) return;
-  try { await window._fbReady; } catch(e) {}
+  try { await window._fbReady; } catch (e) {}
+  if (!window._fbAuthOk) {
+    console.warn("fbVerileriYukle: oturum yok; islemler yerel IndexedDB'de birakiliyor.");
+    return;
+  }
   try {
     const snap = await _fbDb.ref("islemler").once("value");
     const fbData = snap.val();
@@ -49,6 +67,15 @@ async function fbVerileriYukle() {
         mevcut.forEach(function(item) { obj[String(item.id)] = Object.assign({}, item); });
         await _fbDb.ref("islemler").set(obj);
       }
+      return;
+    }
+    var entries = Object.entries(fbData);
+    var gecerli = 0;
+    for (var gi = 0; gi < entries.length; gi++) {
+      if (entries[gi][1]) gecerli++;
+    }
+    if (gecerli === 0) {
+      console.warn("fbVerileriYukle: islemler sunucuda bos veya gecersiz; IndexedDB korunuyor.");
       return;
     }
     await new Promise(function(resolve) {
@@ -67,7 +94,6 @@ async function fbVerileriYukle() {
       req2.onerror = function() { resolve(null); };
     });
     if (!idb) return;
-    var entries = Object.entries(fbData);
     for (var i = 0; i < entries.length; i++) {
       var item = entries[i][1];
       if (!item) continue;
