@@ -111,6 +111,42 @@ async function fbCikisBulut() {
   await firebase.auth().signOut();
 }
 
+/** Tek kullanici: veriler yanlislikla users/{uid}/ altinda kaldiysa koke kopyala (kok bos ise). */
+async function fbUsersAltindaVarsaKokeTasi() {
+  var u = fbMevcutKullanici();
+  if (!_fbDb || !u || u.isAnonymous) return;
+  var pfx = "users/" + u.uid + "/";
+  var anahtarlar = [
+    "islemler", "kategoriler", "vefa2", "urunler", "alacaklar", "arabam", "muhtac",
+    "kredi_harcamalar", "kredi_kartlar", "altin_kayitlar", "altin_guncel_fiyat",
+    "altin_guncel_fiyat_tarih", "birikim_manuel"
+  ];
+  for (var i = 0; i < anahtarlar.length; i++) {
+    var k = anahtarlar[i];
+    try {
+      var rs = await _fbDb.ref(k).once("value");
+      if (rs.val() != null) continue;
+      var us = await _fbDb.ref(pfx + k).once("value");
+      var v = us.val();
+      if (v != null) await _fbDb.ref(k).set(v);
+    } catch (e) {
+      console.warn("[KokeTasi] " + k, e);
+    }
+  }
+  for (var y = 2018; y <= 2035; y++) {
+    for (var mo = 1; mo <= 12; mo++) {
+      var bk = "butce_" + y + "_" + mo;
+      try {
+        var r0 = await _fbDb.ref(bk).once("value");
+        if (r0.val() != null) continue;
+        var u0 = await _fbDb.ref(pfx + bk).once("value");
+        var bv = u0.val();
+        if (bv != null) await _fbDb.ref(bk).set(bv);
+      } catch (e2) {}
+    }
+  }
+}
+
 async function fbVerileriYukle() {
   if (!_fbDb) return;
   try { await window._fbReady; } catch (e) {}
@@ -119,6 +155,7 @@ async function fbVerileriYukle() {
     return;
   }
   try {
+    await fbUsersAltindaVarsaKokeTasi();
     const snap = await _fbDb.ref("islemler").once("value");
     const fbData = snap.val();
     await openDB();
