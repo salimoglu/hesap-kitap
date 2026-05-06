@@ -54,6 +54,16 @@ function fbMevcutKullanici() {
   }
 }
 
+/** RTDB isteklerinden once cagirin; yeni oturumda tokenin yazilmamasini onler. */
+async function fbKimlikTokenAl() {
+  try {
+    var u = firebase.auth().currentUser;
+    if (u) await u.getIdToken(true);
+  } catch (e) {
+    console.warn("fbKimlikTokenAl:", e);
+  }
+}
+
 function fbAuthHataMetni(err) {
   var c = err && err.code ? err.code : "";
   if (c === "auth/invalid-email") return "Gecersiz e-posta adresi.";

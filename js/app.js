@@ -46,6 +46,7 @@
     if (syncEl) syncEl.textContent = "\u2601";
 
     try {
+      if (typeof fbKimlikTokenAl === "function") await fbKimlikTokenAl();
       if (typeof fbVerileriYukle !== "undefined") await fbVerileriYukle();
       if (syncEl) syncEl.textContent = "\u2713";
     } catch(e) {
@@ -53,15 +54,15 @@
     }
 
     if (typeof IslemlerModule !== "undefined") await IslemlerModule.init();
-    if (typeof ButceModule !== "undefined") ButceModule.init();
-    if (typeof KrediModule !== "undefined") KrediModule.init();
-    if (typeof AlacaklarModule !== "undefined") AlacaklarModule.init();
-    if (typeof UrunModule !== "undefined") UrunModule.init();
-    if (typeof BirikimModule !== "undefined") BirikimModule.init();
-    if (typeof AltinModule !== "undefined") AltinModule.init();
-    if (typeof VefaModule !== "undefined") VefaModule.init();
-    if (typeof ArabamModule !== "undefined") ArabamModule.init();
-    if (typeof MuhtacModule !== "undefined") MuhtacModule.init();
+    if (typeof ButceModule !== "undefined") await ButceModule.init();
+    if (typeof KrediModule !== "undefined") await KrediModule.init();
+    if (typeof AlacaklarModule !== "undefined") await AlacaklarModule.init();
+    if (typeof UrunModule !== "undefined") await UrunModule.init();
+    if (typeof BirikimModule !== "undefined") await BirikimModule.init();
+    if (typeof AltinModule !== "undefined") await AltinModule.init();
+    if (typeof VefaModule !== "undefined") await VefaModule.init();
+    if (typeof ArabamModule !== "undefined") await ArabamModule.init();
+    if (typeof MuhtacModule !== "undefined") await MuhtacModule.init();
   }
 
   window.sayfaYenile = async function() {
@@ -71,21 +72,22 @@
     const syncEl = document.getElementById("sync-durum");
     if (syncEl) syncEl.textContent = "\u2601";
     try {
+      if (typeof fbKimlikTokenAl === "function") await fbKimlikTokenAl();
       if (typeof fbVerileriYukle !== "undefined") await fbVerileriYukle();
       if (syncEl) syncEl.textContent = "\u2713";
     } catch(e) {
       if (syncEl) syncEl.textContent = "";
     }
     if (typeof IslemlerModule !== "undefined") await IslemlerModule.init();
-    if (typeof ButceModule !== "undefined") ButceModule.init();
-    if (typeof KrediModule !== "undefined") KrediModule.init();
-    if (typeof AlacaklarModule !== "undefined") AlacaklarModule.init();
-    if (typeof UrunModule !== "undefined") UrunModule.init();
-    if (typeof BirikimModule !== "undefined") BirikimModule.init();
-    if (typeof AltinModule !== "undefined") AltinModule.init();
-    if (typeof VefaModule !== "undefined") VefaModule.init();
-    if (typeof ArabamModule !== "undefined") ArabamModule.init();
-    if (typeof MuhtacModule !== "undefined") MuhtacModule.init();
+    if (typeof ButceModule !== "undefined") await ButceModule.init();
+    if (typeof KrediModule !== "undefined") await KrediModule.init();
+    if (typeof AlacaklarModule !== "undefined") await AlacaklarModule.init();
+    if (typeof UrunModule !== "undefined") await UrunModule.init();
+    if (typeof BirikimModule !== "undefined") await BirikimModule.init();
+    if (typeof AltinModule !== "undefined") await AltinModule.init();
+    if (typeof VefaModule !== "undefined") await VefaModule.init();
+    if (typeof ArabamModule !== "undefined") await ArabamModule.init();
+    if (typeof MuhtacModule !== "undefined") await MuhtacModule.init();
   };
 
   try {

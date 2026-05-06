@@ -2,6 +2,7 @@
 var UrunModule=(function(){
 var $=function(id){return document.getElementById(id);};
 var _urunler=[],_aktif=null,_omurId=null;
+var _urRtdbOk=false;
 
 function para(n){return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2});}
 function uid(){return "u"+Date.now()+"_"+Math.random().toString(36).substr(2,5);}
@@ -44,15 +45,18 @@ function gunlukMaliyet(tarihStr,fiyat,sonTarihStr){
 }
 
 async function fbYukle(){
-  if(typeof window._fbDb==="undefined"||!window._fbDb)return;
+  if(typeof window._fbDb==="undefined"||!window._fbDb){_urRtdbOk=false;return;}
+  _urRtdbOk=false;
   try{
     var s=await window._fbDb.ref("urunler").once("value");
     var v=s.val();
     _urunler=Array.isArray(v)?v:(v&&typeof v==="object"?Object.values(v):[]);
-  }catch(e){_urunler=[];}
+    _urRtdbOk=true;
+  }catch(e){_urunler=[];console.warn("[Urun] yukle",e);}
 }
 
 async function fbKaydet(){
+  if(!_urRtdbOk)return;
   if(typeof window._fbDb==="undefined"||!window._fbDb)return;
   try{
     var obj={};
