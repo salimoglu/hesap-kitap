@@ -111,13 +111,70 @@ async function fbCikisBulut() {
   await firebase.auth().signOut();
 }
 
-/** Tek kullanici: veriler yanlislikla users/{uid}/ altinda kaldiysa koke kopyala (kok bos ise). */
+function _kokDoluSay(v) {
+  if (v == null) return false;
+  if (typeof v !== "object") return true;
+  var ks = Object.keys(v);
+  if (!ks.length) return false;
+  var g = 0;
+  for (var i = 0; i < ks.length; i++) {
+    if (v[ks[i]]) g++;
+  }
+  return g > 0;
+}
+
+function _islemlerAdet(v) {
+  if (!v || typeof v !== "object") return 0;
+  var ks = Object.keys(v),
+    n = 0;
+  for (var i = 0; i < ks.length; i++) {
+    if (v[ks[i]]) n++;
+  }
+  return n;
+}
+
+/**
+ * Kok dusuk veya bos, users/{uid} daha zengin ise koke tasir (Google / e-posta farkli UID).
+ */
 async function fbUsersAltindaVarsaKokeTasi() {
   var u = fbMevcutKullanici();
   if (!_fbDb || !u || u.isAnonymous) return;
-  var pfx = "users/" + u.uid + "/";
+
+  var pickUid = u.uid;
+  var bestN = 0;
+  try {
+    var usSnap = await _fbDb.ref("users").once("value");
+    var uv = usSnap.val();
+    if (uv && typeof uv === "object") {
+      for (var uid in uv) {
+        var isl = uv[uid] && uv[uid].islemler;
+        var n = _islemlerAdet(isl);
+        if (n > bestN) {
+          bestN = n;
+          pickUid = uid;
+        }
+      }
+    }
+  } catch (e) {
+    console.warn("[KokeTasi] users listesi", e);
+  }
+
+  var rootIslSnap = await _fbDb.ref("islemler").once("value");
+  var rootN = _islemlerAdet(rootIslSnap.val());
+  var pfx = "users/" + pickUid + "/";
+
+  if (bestN > rootN && bestN > 0) {
+    try {
+      var islSrc = await _fbDb.ref(pfx + "islemler").once("value");
+      var islVal = islSrc.val();
+      if (islVal != null) await _fbDb.ref("islemler").set(islVal);
+    } catch (e2) {
+      console.warn("[KokeTasi] islemler", e2);
+    }
+  }
+
   var anahtarlar = [
-    "islemler", "kategoriler", "vefa2", "urunler", "alacaklar", "arabam", "muhtac",
+    "kategoriler", "vefa2", "urunler", "alacaklar", "arabam", "muhtac",
     "kredi_harcamalar", "kredi_kartlar", "altin_kayitlar", "altin_guncel_fiyat",
     "altin_guncel_fiyat_tarih", "birikim_manuel"
   ];
@@ -125,12 +182,12 @@ async function fbUsersAltindaVarsaKokeTasi() {
     var k = anahtarlar[i];
     try {
       var rs = await _fbDb.ref(k).once("value");
-      if (rs.val() != null) continue;
+      if (_kokDoluSay(rs.val())) continue;
       var us = await _fbDb.ref(pfx + k).once("value");
-      var v = us.val();
-      if (v != null) await _fbDb.ref(k).set(v);
-    } catch (e) {
-      console.warn("[KokeTasi] " + k, e);
+      var val = us.val();
+      if (val != null) await _fbDb.ref(k).set(val);
+    } catch (e3) {
+      console.warn("[KokeTasi] " + k, e3);
     }
   }
   for (var y = 2018; y <= 2035; y++) {
@@ -138,12 +195,15 @@ async function fbUsersAltindaVarsaKokeTasi() {
       var bk = "butce_" + y + "_" + mo;
       try {
         var r0 = await _fbDb.ref(bk).once("value");
-        if (r0.val() != null) continue;
+        if (_kokDoluSay(r0.val())) continue;
         var u0 = await _fbDb.ref(pfx + bk).once("value");
         var bv = u0.val();
         if (bv != null) await _fbDb.ref(bk).set(bv);
-      } catch (e2) {}
+      } catch (e4) {}
     }
+  }
+  if (bestN > rootN && bestN > 0) {
+    console.log("[KokeTasi] Islemler: kok " + rootN + " -> users/" + pickUid + " (" + bestN + ") ile guncellendi.");
   }
 }
 
