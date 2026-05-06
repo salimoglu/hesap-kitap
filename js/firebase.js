@@ -25,20 +25,23 @@ async function fbInit() {
       console.warn("getRedirectResult:", e);
     }
 
-    /* Persistence ilk snapshot'ini bekle; 8sn timeout yok — zaman asiminda erken false verip
-       yetkisiz okuma / bos senkron tetiklenmesin */
-    window._fbReady = new Promise(function(resolve) {
-      var ilk = true;
-      firebase.auth().onAuthStateChanged(function(user) {
-        window._fbAuthOk = !!user;
-        if (ilk) {
-          ilk = false;
-          resolve(!!user);
-        }
+    /* Kalici oturum tam oturana kadar bekle (ilk bos snapshot ile RTDB okunmasin). */
+    if (firebase.auth && typeof firebase.auth().authStateReady === "function") {
+      await firebase.auth().authStateReady();
+    } else {
+      await new Promise(function(resolve) {
+        var t = setTimeout(resolve, 3000);
+        firebase.auth().onAuthStateChanged(function() {
+          clearTimeout(t);
+          resolve();
+        });
       });
+    }
+    window._fbAuthOk = !!firebase.auth().currentUser;
+    window._fbReady = Promise.resolve(window._fbAuthOk);
+    firebase.auth().onAuthStateChanged(function(user) {
+      window._fbAuthOk = !!user;
     });
-
-    await window._fbReady;
   } catch (e) {
     console.warn("Firebase init:", e);
     window._fbAuthOk = false;
@@ -111,99 +114,18 @@ async function fbCikisBulut() {
   await firebase.auth().signOut();
 }
 
-function _kokDoluSay(v) {
-  if (v == null) return false;
-  if (typeof v !== "object") return true;
-  var ks = Object.keys(v);
-  if (!ks.length) return false;
-  var g = 0;
-  for (var i = 0; i < ks.length; i++) {
-    if (v[ks[i]]) g++;
+/** RTDB cagrisindan once: currentUser + _fbDb (yeniden baglanti). */
+async function fbRtdbOturumHazir() {
+  if (typeof firebase === "undefined" || !firebase.auth) return;
+  var tries = 0;
+  while (tries < 60) {
+    if (firebase.auth().currentUser) break;
+    tries++;
+    await new Promise(function(r) { setTimeout(r, 50); });
   }
-  return g > 0;
-}
-
-function _islemlerAdet(v) {
-  if (!v || typeof v !== "object") return 0;
-  var ks = Object.keys(v),
-    n = 0;
-  for (var i = 0; i < ks.length; i++) {
-    if (v[ks[i]]) n++;
-  }
-  return n;
-}
-
-/**
- * Kok dusuk veya bos, users/{uid} daha zengin ise koke tasir (Google / e-posta farkli UID).
- */
-async function fbUsersAltindaVarsaKokeTasi() {
-  var u = fbMevcutKullanici();
-  if (!_fbDb || !u || u.isAnonymous) return;
-
-  var pickUid = u.uid;
-  var bestN = 0;
-  try {
-    var usSnap = await _fbDb.ref("users").once("value");
-    var uv = usSnap.val();
-    if (uv && typeof uv === "object") {
-      for (var uid in uv) {
-        var isl = uv[uid] && uv[uid].islemler;
-        var n = _islemlerAdet(isl);
-        if (n > bestN) {
-          bestN = n;
-          pickUid = uid;
-        }
-      }
-    }
-  } catch (e) {
-    console.warn("[KokeTasi] users listesi", e);
-  }
-
-  var rootIslSnap = await _fbDb.ref("islemler").once("value");
-  var rootN = _islemlerAdet(rootIslSnap.val());
-  var pfx = "users/" + pickUid + "/";
-
-  if (bestN > rootN && bestN > 0) {
-    try {
-      var islSrc = await _fbDb.ref(pfx + "islemler").once("value");
-      var islVal = islSrc.val();
-      if (islVal != null) await _fbDb.ref("islemler").set(islVal);
-    } catch (e2) {
-      console.warn("[KokeTasi] islemler", e2);
-    }
-  }
-
-  var anahtarlar = [
-    "kategoriler", "vefa", "vefa2", "urunler", "alacaklar", "arabam", "muhtac",
-    "kredi_harcamalar", "kredi_kartlar", "altin_kayitlar", "altin_guncel_fiyat",
-    "altin_guncel_fiyat_tarih", "birikim_manuel"
-  ];
-  for (var i = 0; i < anahtarlar.length; i++) {
-    var k = anahtarlar[i];
-    try {
-      var rs = await _fbDb.ref(k).once("value");
-      if (_kokDoluSay(rs.val())) continue;
-      var us = await _fbDb.ref(pfx + k).once("value");
-      var val = us.val();
-      if (val != null) await _fbDb.ref(k).set(val);
-    } catch (e3) {
-      console.warn("[KokeTasi] " + k, e3);
-    }
-  }
-  for (var y = 2018; y <= 2035; y++) {
-    for (var mo = 1; mo <= 12; mo++) {
-      var bk = "butce_" + y + "_" + mo;
-      try {
-        var r0 = await _fbDb.ref(bk).once("value");
-        if (_kokDoluSay(r0.val())) continue;
-        var u0 = await _fbDb.ref(pfx + bk).once("value");
-        var bv = u0.val();
-        if (bv != null) await _fbDb.ref(bk).set(bv);
-      } catch (e4) {}
-    }
-  }
-  if (bestN > rootN && bestN > 0) {
-    console.log("[KokeTasi] Islemler: kok " + rootN + " -> users/" + pickUid + " (" + bestN + ") ile guncellendi.");
+  if (!_fbDb && firebase.apps && firebase.apps.length) {
+    _fbDb = firebase.database();
+    window._fbDb = _fbDb;
   }
 }
 
@@ -215,7 +137,6 @@ async function fbVerileriYukle() {
     return;
   }
   try {
-    await fbUsersAltindaVarsaKokeTasi();
     const snap = await _fbDb.ref("islemler").once("value");
     const fbData = snap.val();
     await openDB();

@@ -4,7 +4,6 @@ var BirikimModule = (function() {
   var _islemler = [];
   var _manuelIslemler = {}; // { kalemAd: [{id,tarih,tutar,aciklama}] }
   var _aktifKalem = null;
-  var _bkRtdbOk = false;
 
   function para(n){return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2});}
   function bugun(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
@@ -13,16 +12,14 @@ var BirikimModule = (function() {
 
   /* Firebase */
   async function fbYukle(){
-    _bkRtdbOk = false;
     if(typeof window._fbDb!=="undefined"&&window._fbDb){
-      try{var s=await window._fbDb.ref("birikim_manuel").once("value");_manuelIslemler=s.val()||{};_bkRtdbOk=true;}
-      catch(e){_manuelIslemler={};console.warn("[Birikim] yukle",e);}
+      try{var s=await window._fbDb.ref("birikim_manuel").once("value");_manuelIslemler=s.val()||{};}
+      catch(e){_manuelIslemler={};console.error("[Birikim] yukle",(e&&e.code)||e.message||e);}
     }
   }
   async function fbKaydet(){
-    if(!_bkRtdbOk)return;
     if(typeof window._fbDb!=="undefined"&&window._fbDb){
-      try{await window._fbDb.ref("birikim_manuel").set(_manuelIslemler);}catch(e){}
+      try{await window._fbDb.ref("birikim_manuel").set(_manuelIslemler);}catch(e){console.error("[Birikim] kaydet",e);}
     }
   }
 

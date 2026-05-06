@@ -2,7 +2,6 @@
 var AlacaklarModule=(function(){
 var $=function(id){return document.getElementById(id);};
 var _kayitlar=[],_aktif=null,_aktifTip="pesin",_araMetni="",_kisiAcikMap={},_gramAltinFiyatTL=0;
-var _alcRtdbOk=false;
 var AYLAR=["Ocak","Subat","Mart","Nisan","Mayis","Haziran","Temmuz","Agustos","Eylul","Ekim","Kasim","Aralik"];
 var ALTIN_GRAM={gram:1,ceyrek:1.75,yarim:3.5,tam:7,ata:7};
 var ALTIN_LABEL={gram:"Gram",ceyrek:"Çeyrek",yarim:"Yarım",tam:"Tam",ata:"Ata"};
@@ -44,8 +43,8 @@ function normalizeKayit(k){
   }
   return kk;
 }
-async function fbYukle(){if(!window._fbDb){_alcRtdbOk=false;return;}_alcRtdbOk=false;try{var s=await window._fbDb.ref("alacaklar").once("value");var v=s.val();_kayitlar=v?Object.values(v):[];_alcRtdbOk=true;}catch(e){_kayitlar=[];console.warn("[Alacaklar] yukle",e);}}
-async function fbKaydet(){if(!_alcRtdbOk)return;if(!window._fbDb)return;try{var obj={};_kayitlar.forEach(function(x){obj[x.id]=x;});await window._fbDb.ref("alacaklar").set(obj);}catch(e){}}
+async function fbYukle(){if(!window._fbDb){return;}try{var s=await window._fbDb.ref("alacaklar").once("value");var v=s.val();_kayitlar=v?Object.values(v):[];}catch(e){_kayitlar=[];console.error("[Alacaklar] yukle",(e&&e.code)||e.message||e);}}
+async function fbKaydet(){if(!window._fbDb)return;try{var obj={};_kayitlar.forEach(function(x){obj[x.id]=x;});await window._fbDb.ref("alacaklar").set(obj);}catch(e){console.error("[Alacaklar] kaydet",e);}}
 /* Altın modülüyle aynı kaynak: gram TL (Firebase), yoksa API tahmini (kaydedilmez) */
 async function altinGuncelFiyatYukle(){
   _gramAltinFiyatTL=0;

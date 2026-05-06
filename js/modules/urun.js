@@ -2,7 +2,6 @@
 var UrunModule=(function(){
 var $=function(id){return document.getElementById(id);};
 var _urunler=[],_aktif=null,_omurId=null;
-var _urRtdbOk=false;
 
 function para(n){return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2});}
 function uid(){return "u"+Date.now()+"_"+Math.random().toString(36).substr(2,5);}
@@ -45,19 +44,21 @@ function gunlukMaliyet(tarihStr,fiyat,sonTarihStr){
 }
 
 async function fbYukle(){
-  if(typeof window._fbDb==="undefined"||!window._fbDb){_urRtdbOk=false;return;}
-  _urRtdbOk=false;
+  if(!window._fbDb)return;
   try{
     var s=await window._fbDb.ref("urunler").once("value");
     var v=s.val();
     _urunler=Array.isArray(v)?v:(v&&typeof v==="object"?Object.values(v):[]);
-    _urRtdbOk=true;
-  }catch(e){_urunler=[];console.warn("[Urun] yukle",e);}
+    if(!_urunler.length){
+      var s2=await window._fbDb.ref("urun").once("value");
+      var v2=s2.val();
+      _urunler=Array.isArray(v2)?v2:(v2&&typeof v2==="object"?Object.values(v2):[]);
+    }
+  }catch(e){_urunler=[];console.error("[Urun] yukle",(e&&e.code)||e.message||e);}
 }
 
 async function fbKaydet(){
-  if(!_urRtdbOk)return;
-  if(typeof window._fbDb==="undefined"||!window._fbDb)return;
+  if(!window._fbDb)return;
   try{
     var obj={};
     _urunler.forEach(function(x){
@@ -66,7 +67,7 @@ async function fbKaydet(){
       obj[x.id]=o;
     });
     await window._fbDb.ref("urunler").set(obj);
-  }catch(e){}
+  }catch(e){console.error("[Urun] kaydet",e);}
 }
 
 function render(){

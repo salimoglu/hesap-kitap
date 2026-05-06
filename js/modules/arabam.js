@@ -16,7 +16,6 @@ var ArabamModule = (function () {
 
   var _araclar = [];
   var _aktifAracId = null;
-  var _arRtdbOk = false;
 
   function mp(n) {
     return Number(n || 0).toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -36,29 +35,27 @@ var ArabamModule = (function () {
 
   async function fbYukle() {
     if (typeof window._fbDb === "undefined" || !window._fbDb) {
-      _arRtdbOk = false;
       return;
     }
-    _arRtdbOk = false;
     try {
       var s = await window._fbDb.ref("arabam").once("value");
       var v = s.val();
       _araclar = v ? Object.values(v) : [];
-      _arRtdbOk = true;
     } catch (e) {
       _araclar = [];
-      console.warn("[Arabam] yukle", e);
+      console.error("[Arabam] yukle", (e && e.code) || e.message || e);
     }
   }
 
   async function fbKaydet() {
-    if (!_arRtdbOk) return;
     if (typeof window._fbDb === "undefined" || !window._fbDb) return;
     try {
       var obj = {};
       _araclar.forEach(function (a) { obj[a.id] = a; });
       await window._fbDb.ref("arabam").set(obj);
-    } catch (e) {}
+    } catch (e) {
+      console.error("[Arabam] kaydet", e);
+    }
   }
 
   function aracBul(id) {
