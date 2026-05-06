@@ -44,16 +44,15 @@ function normalizeKayit(k){
   }
   return kk;
 }
-async function fbYukle(){if(!window._fbDb){_alcRtdbOk=false;return;}_alcRtdbOk=false;try{var s=await window._fbDb.ref("alacaklar").once("value");var v=s.val();_kayitlar=v?Object.values(v):[];_alcRtdbOk=true;}catch(e){_kayitlar=[];console.warn("[Alacaklar] yukle",e);}}
-async function fbKaydet(){if(!_alcRtdbOk)return;if(!window._fbDb)return;try{var obj={};_kayitlar.forEach(function(x){obj[x.id]=x;});await window._fbDb.ref("alacaklar").set(obj);}catch(e){}}
+async function fbYukle(){var rA=typeof fbUserRef==="function"?fbUserRef("alacaklar"):null;if(!rA){_alcRtdbOk=false;return;}_alcRtdbOk=false;try{var s=await rA.once("value");var v=s.val();_kayitlar=v?Object.values(v):[];_alcRtdbOk=true;}catch(e){_kayitlar=[];console.warn("[Alacaklar] yukle",e);}}
+async function fbKaydet(){if(!_alcRtdbOk)return;var wA=typeof fbUserRef==="function"?fbUserRef("alacaklar"):null;if(!wA)return;try{var obj={};_kayitlar.forEach(function(x){obj[x.id]=x;});await wA.set(obj);}catch(e){}}
 /* Altın modülüyle aynı kaynak: gram TL (Firebase), yoksa API tahmini (kaydedilmez) */
 async function altinGuncelFiyatYukle(){
   _gramAltinFiyatTL=0;
   if(typeof window._fbDb!=="undefined"&&window._fbDb){
     try{
-      var s=await window._fbDb.ref("altin_guncel_fiyat").once("value");
-      var v=parseFloat(s.val());
-      if(v&&v>0)_gramAltinFiyatTL=v;
+      var rF=typeof fbUserRef==="function"?fbUserRef("altin_guncel_fiyat"):null;
+      if(rF){var s=await rF.once("value");var v=parseFloat(s.val());if(v&&v>0)_gramAltinFiyatTL=v;}
     }catch(e){}
   }
   if(_gramAltinFiyatTL<=0){

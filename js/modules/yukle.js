@@ -77,8 +77,8 @@ function hesapla(){YAPI.forEach(function(b){b.s.forEach(function(s){if(s.h)_veri
 function gelir(){return(_veri.salim_maas||0)+(_veri.bugra_maas||0)+(_veri.gelecek_borc||0);}
 function toplamMaas(){return(_veri.salim_maas||0)+(_veri.bugra_maas||0);}
 function harcanan(){return(_veri.z_top||0)+(_veri.i_top||0)+(_veri.y_top||0);}
-async function byukle(){var key="butce_"+_yil+"_"+(_ay+1);if(typeof window._fbDb==="undefined"||!window._fbDb){_bRtdbOk=false;return;}_bRtdbOk=false;try{var s=await window._fbDb.ref(key).once("value");var d=s.val()||{};_veri=d.veri||{};_ozel=d.ozel||{};_bRtdbOk=true;}catch(e){console.warn("[Butce] yukle",e);_veri={};_ozel={};}}
-async function bkaydet(){var key="butce_"+_yil+"_"+(_ay+1);if(!_bRtdbOk)return;if(typeof window._fbDb==="undefined"||!window._fbDb)return;try{await window._fbDb.ref(key).set({veri:_veri,ozel:_ozel});}catch(e){}}
+async function byukle(){var key="butce_"+_yil+"_"+(_ay+1);var br=typeof fbUserRef==="function"?fbUserRef(key):null;if(!br){_bRtdbOk=false;return;}_bRtdbOk=false;try{var s=await br.once("value");var d=s.val()||{};_veri=d.veri||{};_ozel=d.ozel||{};_bRtdbOk=true;}catch(e){console.warn("[Butce] yukle",e);_veri={};_ozel={};}}
+async function bkaydet(){var key="butce_"+_yil+"_"+(_ay+1);if(!_bRtdbOk)return;var bw=typeof fbUserRef==="function"?fbUserRef(key):null;if(!bw)return;try{await bw.set({veri:_veri,ozel:_ozel});}catch(e){}}
 function satirEkle(bolum){var label=prompt("Yeni satır adı:");if(!label||!label.trim())return;if(!_ozel[bolum])_ozel[bolum]=[];var id=uid();_ozel[bolum].push({id:id,label:label.trim().toUpperCase()});_veri[id]=0;bkaydet();brender();}
 function satirSil(bolum,id){if(!confirm("Silmek?"))return;if(_ozel[bolum])_ozel[bolum]=_ozel[bolum].filter(function(s){return s.id!==id;});delete _veri[id];bkaydet();brender();}
 function brender(){
@@ -153,8 +153,8 @@ function uid(){return "k"+Date.now()+"_"+Math.random().toString(36).substr(2,5);
 function buAy(){return _yil+"-"+String(_ay+1).padStart(2,"0");}
 function ayEkle(bas,n){var d=new Date(bas+"-01");d.setMonth(d.getMonth()+n);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");}
 function ayInput(){return _yil+"-"+String(_ay+1).padStart(2,"0");}
-async function kfbYukle(){if(typeof window._fbDb==="undefined"||!window._fbDb){_kRtdbOk=false;return;}_kRtdbOk=false;try{var s=await window._fbDb.ref("kredi_harcamalar").once("value");var v=s.val();_h=v?Object.values(v):[];var sk=await window._fbDb.ref("kredi_kartlar").once("value");_k=rtdbToArray(sk.val());_kRtdbOk=true;}catch(e){_h=[];_k=[];console.warn("[Kredi] yukle",e);}}
-async function kfbKaydet(){if(!_kRtdbOk)return;if(typeof window._fbDb==="undefined"||!window._fbDb)return;try{var obj={};_h.forEach(function(x){obj[x.id]=x;});await window._fbDb.ref("kredi_harcamalar").set(obj);await window._fbDb.ref("kredi_kartlar").set(_k);}catch(e){}}
+async function kfbYukle(){var rH=typeof fbUserRef==="function"?fbUserRef("kredi_harcamalar"):null,rK=typeof fbUserRef==="function"?fbUserRef("kredi_kartlar"):null;if(!rH||!rK){_kRtdbOk=false;return;}_kRtdbOk=false;try{var s=await rH.once("value");var v=s.val();_h=v?Object.values(v):[];var sk=await rK.once("value");_k=rtdbToArray(sk.val());_kRtdbOk=true;}catch(e){_h=[];_k=[];console.warn("[Kredi] yukle",e);}}
+async function kfbKaydet(){if(!_kRtdbOk)return;var wH=typeof fbUserRef==="function"?fbUserRef("kredi_harcamalar"):null,wK=typeof fbUserRef==="function"?fbUserRef("kredi_kartlar"):null;if(!wH||!wK)return;try{var obj={};_h.forEach(function(x){obj[x.id]=x;});await wH.set(obj);await wK.set(_k);}catch(e){}}
 function taksitler(h){var r=[];for(var i=0;i<h.taksit;i++){r.push({ay:ayEkle(h.basTarih,i),tutar:h.tutar/h.taksit,no:i+1});}return r;}
 function kartlar(){var s={};_h.forEach(function(h){s[h.kart]=1;});_k.forEach(function(k){s[k]=1;});return Object.keys(s).sort();}
 function ayToplam(ay,kart){var t=0;_h.forEach(function(h){if(kart&&h.kart!==kart)return;taksitler(h).forEach(function(x){if(x.ay===ay)t+=x.tutar;});});return t;}
@@ -259,35 +259,40 @@ async function guncelAltinCek(){
 }
 
 async function afbYukle(){
-  if(typeof window._fbDb==="undefined"||!window._fbDb){_aRtdbOk=false;return;}
+  var rK=typeof fbUserRef==="function"?fbUserRef("altin_kayitlar"):null;
+  var rF=typeof fbUserRef==="function"?fbUserRef("altin_guncel_fiyat"):null;
+  var rT=typeof fbUserRef==="function"?fbUserRef("altin_guncel_fiyat_tarih"):null;
+  if(!rK||!rF||!rT){_aRtdbOk=false;return;}
   _aRtdbOk=false;
   try{
-    var s=await window._fbDb.ref("altin_kayitlar").once("value");
+    var s=await rK.once("value");
     var v=s.val();
     _kayitlar=rtdbToArray(v);
     _kayitlar.sort(function(a,b){return (a.tarih||"").localeCompare(b.tarih||"");});
-    /* Kayıtlı güncel fiyat */
-    var sf=await window._fbDb.ref("altin_guncel_fiyat").once("value");
+    var sf=await rF.once("value");
     _guncelGramFiyat=sf.val()||0;
-    var st=await window._fbDb.ref("altin_guncel_fiyat_tarih").once("value");
+    var st=await rT.once("value");
     _guncelFiyatTarih=st.val()||0;
     _aRtdbOk=true;
   }catch(e){_kayitlar=[]; console.warn("[Altin] yukle", e);}
 }
 async function afbKaydet(){
   if(!_aRtdbOk)return;
-  if(typeof window._fbDb==="undefined"||!window._fbDb)return;
+  var wK=typeof fbUserRef==="function"?fbUserRef("altin_kayitlar"):null;
+  if(!wK)return;
   try{
     var obj={};_kayitlar.forEach(function(x){obj[x.id]=x;});
-    await window._fbDb.ref("altin_kayitlar").set(obj);
+    await wK.set(obj);
   }catch(e){}
 }
 async function afbFiyatKaydet(f){
-  if(typeof window._fbDb==="undefined"||!window._fbDb)return;
+  var wF=typeof fbUserRef==="function"?fbUserRef("altin_guncel_fiyat"):null;
+  var wT=typeof fbUserRef==="function"?fbUserRef("altin_guncel_fiyat_tarih"):null;
+  if(!wF||!wT)return;
   try{
     _guncelFiyatTarih=Date.now();
-    await window._fbDb.ref("altin_guncel_fiyat").set(f);
-    await window._fbDb.ref("altin_guncel_fiyat_tarih").set(_guncelFiyatTarih);
+    await wF.set(f);
+    await wT.set(_guncelFiyatTarih);
   }catch(e){}
 }
 function _fiyatYasi(){
@@ -694,16 +699,18 @@ function tDeger(){return tumY().reduce(function(s,y){return s+yDeger(y);},0);}
 function tGram(){return tumY().reduce(function(s,y){return s+yGram(y);},0);}
 
 async function fbYukle(){
-  if(!window._fbDb){_vRtdbOk=false;return;}
+  var rV=typeof fbUserRef==="function"?fbUserRef("vefa2"):null;
+  var rG=typeof fbUserRef==="function"?fbUserRef("altin_guncel_fiyat"):null;
+  if(!rV||!rG){_vRtdbOk=false;return;}
   var defU=[{id:"u1",ad:"Zafer EROĞLU",rol:"Başkan"},{id:"u2",ad:"Fatma İNCE",rol:"Üye"},{id:"u3",ad:"Güler UÇAR",rol:"Üye"},{id:"u4",ad:"Salim EROĞLU",rol:"Üye"}];
   _vRtdbOk=false;
   try{
-    var s=await window._fbDb.ref("vefa2").once("value");
+    var s=await rV.once("value");
     var d=s.val()||{};
     _uyeler=rtdbToArray(d.uyeler);
     if(!_uyeler.length)_uyeler=defU.slice();
     _aylar=rtdbToArray(d.aylar).filter(function(a){return a&&typeof a.key==="string";});
-    var gf=await window._fbDb.ref("altin_guncel_fiyat").once("value");
+    var gf=await rG.once("value");
     _gramFiyat=gf.val()||0;
     _vRtdbOk=true;
   }catch(e){
@@ -714,9 +721,10 @@ async function fbYukle(){
   }
 }
 async function fbKaydet(){
-  if(!window._fbDb)return;
   if(!_vRtdbOk)return;
-  try{await window._fbDb.ref("vefa2").set({uyeler:_uyeler,aylar:_aylar});}catch(e){}
+  var wV=typeof fbUserRef==="function"?fbUserRef("vefa2"):null;
+  if(!wV)return;
+  try{await wV.set({uyeler:_uyeler,aylar:_aylar});}catch(e){}
 }
 
 function render(){
@@ -1260,13 +1268,15 @@ function mhAylikOzetDizi(){
 }
 
 async function fbYukle(){
-  if(!window._fbDb){_mRtdbOk=false;return;}
+  var rM=typeof fbUserRef==="function"?fbUserRef("muhtac"):null;
+  if(!rM){_mRtdbOk=false;return;}
   _mRtdbOk=false;
-  try{var s=await window._fbDb.ref("muhtac").once("value");_kisiler=Object.values(s.val()||{});_mRtdbOk=true;}catch(e){_kisiler=[];console.warn("[Muhtac] yukle",e);}}
+  try{var s=await rM.once("value");_kisiler=Object.values(s.val()||{});_mRtdbOk=true;}catch(e){_kisiler=[];console.warn("[Muhtac] yukle",e);}}
 async function fbKaydet(){
-  if(!window._fbDb)return;
   if(!_mRtdbOk)return;
-  try{var obj={};_kisiler.forEach(function(k){obj[k.id]=k;});await window._fbDb.ref("muhtac").set(obj);}catch(e){}
+  var wM=typeof fbUserRef==="function"?fbUserRef("muhtac"):null;
+  if(!wM)return;
+  try{var obj={};_kisiler.forEach(function(k){obj[k.id]=k;});await wM.set(obj);}catch(e){}
 }
 
 function render(){

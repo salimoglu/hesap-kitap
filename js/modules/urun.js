@@ -45,10 +45,11 @@ function gunlukMaliyet(tarihStr,fiyat,sonTarihStr){
 }
 
 async function fbYukle(){
-  if(typeof window._fbDb==="undefined"||!window._fbDb){_urRtdbOk=false;return;}
+  var r=typeof fbUserRef==="function"?fbUserRef("urunler"):null;
+  if(!r){_urRtdbOk=false;return;}
   _urRtdbOk=false;
   try{
-    var s=await window._fbDb.ref("urunler").once("value");
+    var s=await r.once("value");
     var v=s.val();
     _urunler=Array.isArray(v)?v:(v&&typeof v==="object"?Object.values(v):[]);
     _urRtdbOk=true;
@@ -57,7 +58,8 @@ async function fbYukle(){
 
 async function fbKaydet(){
   if(!_urRtdbOk)return;
-  if(typeof window._fbDb==="undefined"||!window._fbDb)return;
+  var w=typeof fbUserRef==="function"?fbUserRef("urunler"):null;
+  if(!w)return;
   try{
     var obj={};
     _urunler.forEach(function(x){
@@ -65,7 +67,7 @@ async function fbKaydet(){
       if(x.sonTarih&&String(x.sonTarih).trim())o.sonTarih=String(x.sonTarih).trim();
       obj[x.id]=o;
     });
-    await window._fbDb.ref("urunler").set(obj);
+    await w.set(obj);
   }catch(e){}
 }
 
