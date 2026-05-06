@@ -698,8 +698,17 @@ async function fbYukle(){
   var defU=[{id:"u1",ad:"Zafer EROĞLU",rol:"Başkan"},{id:"u2",ad:"Fatma İNCE",rol:"Üye"},{id:"u3",ad:"Güler UÇAR",rol:"Üye"},{id:"u4",ad:"Salim EROĞLU",rol:"Üye"}];
   _vRtdbOk=false;
   try{
-    var s=await window._fbDb.ref("vefa2").once("value");
-    var d=s.val()||{};
+    function vfSkor(dat){
+      if(!dat||typeof dat!=="object")return 0;
+      var uy=rtdbToArray(dat.uyeler).length;
+      var ay=rtdbToArray(dat.aylar).filter(function(a){return a&&typeof a.key==="string";}).length;
+      return ay*1e6+uy;
+    }
+    var s2=await window._fbDb.ref("vefa2").once("value");
+    var s1=await window._fbDb.ref("vefa").once("value");
+    var v2=s2.val()||{};
+    var v1=s1.val()||{};
+    var d=vfSkor(v1)>vfSkor(v2)?v1:v2;
     _uyeler=rtdbToArray(d.uyeler);
     if(!_uyeler.length)_uyeler=defU.slice();
     _aylar=rtdbToArray(d.aylar).filter(function(a){return a&&typeof a.key==="string";});
@@ -707,7 +716,7 @@ async function fbYukle(){
     _gramFiyat=gf.val()||0;
     _vRtdbOk=true;
   }catch(e){
-    console.warn("[Vefa2] fbYukle",e);
+    console.warn("[Vefa] fbYukle",e);
     _uyeler=defU.slice();
     _aylar=[];
     _gramFiyat=0;
@@ -716,7 +725,11 @@ async function fbYukle(){
 async function fbKaydet(){
   if(!window._fbDb)return;
   if(!_vRtdbOk)return;
-  try{await window._fbDb.ref("vefa2").set({uyeler:_uyeler,aylar:_aylar});}catch(e){}
+  var p={uyeler:_uyeler,aylar:_aylar};
+  try{
+    await window._fbDb.ref("vefa").set(p);
+    await window._fbDb.ref("vefa2").set(p);
+  }catch(e){}
 }
 
 function render(){

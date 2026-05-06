@@ -174,7 +174,7 @@ async function fbUsersAltindaVarsaKokeTasi() {
   }
 
   var anahtarlar = [
-    "kategoriler", "vefa2", "urunler", "alacaklar", "arabam", "muhtac",
+    "kategoriler", "vefa", "vefa2", "urunler", "alacaklar", "arabam", "muhtac",
     "kredi_harcamalar", "kredi_kartlar", "altin_kayitlar", "altin_guncel_fiyat",
     "altin_guncel_fiyat_tarih", "birikim_manuel"
   ];
