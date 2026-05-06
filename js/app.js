@@ -5,9 +5,95 @@
 
   const lockScreen = document.getElementById("lock-screen");
   const appEl = document.getElementById("app");
+  const pinBlok = document.getElementById("lock-pin-blok");
+  let _kilitKayitModu = false;
+
+  function pinPanelAcik() {
+    return pinBlok && !pinBlok.classList.contains("hidden");
+  }
+
+  function kilitKayitArayuz() {
+    const btnG = document.getElementById("lock-btn-giris");
+    const btnK = document.getElementById("lock-btn-kayit");
+    const tKayit = document.getElementById("lock-toggle-kayit");
+    const tGiris = document.getElementById("lock-toggle-giris");
+    if (_kilitKayitModu) {
+      if (btnG) btnG.classList.add("hidden");
+      if (btnK) btnK.classList.remove("hidden");
+      if (tKayit) tKayit.classList.add("hidden");
+      if (tGiris) tGiris.classList.remove("hidden");
+    } else {
+      if (btnG) btnG.classList.remove("hidden");
+      if (btnK) btnK.classList.add("hidden");
+      if (tKayit) tKayit.classList.remove("hidden");
+      if (tGiris) tGiris.classList.add("hidden");
+    }
+  }
+
+  function kilitEkraniGuncelle() {
+    const authPanel = document.getElementById("lock-auth-panel");
+    const baslik = document.getElementById("lock-auth-baslik");
+    const aciklama = document.getElementById("lock-auth-aciklama");
+    const btnGiris = document.getElementById("lock-btn-giris");
+    const btnBagla = document.getElementById("lock-btn-bagla");
+    const btnKayit = document.getElementById("lock-btn-kayit");
+    const toggleKayit = document.getElementById("lock-toggle-kayit");
+    const toggleGiris = document.getElementById("lock-toggle-giris");
+    const fbErr = document.getElementById("fb-auth-error");
+    if (fbErr) fbErr.textContent = "";
+    let u = null;
+    try {
+      u = typeof fbMevcutKullanici === "function" ? fbMevcutKullanici() : null;
+    } catch (e2) { u = null; }
+
+    if (!authPanel || !pinBlok) return;
+
+    if (!u) {
+      _kilitKayitModu = false;
+      authPanel.classList.remove("hidden");
+      pinBlok.classList.add("hidden");
+      if (btnBagla) btnBagla.classList.add("hidden");
+      if (baslik) baslik.textContent = "Bulut hesabiniz";
+      if (aciklama) aciklama.textContent = "E-posta ve sifre ile giris yapin. Yeni hesap icin asagidan kayit olun.";
+      if (toggleKayit) toggleKayit.classList.remove("hidden");
+      if (toggleGiris) toggleGiris.classList.add("hidden");
+      kilitKayitArayuz();
+      return;
+    }
+
+    if (u.isAnonymous) {
+      authPanel.classList.remove("hidden");
+      pinBlok.classList.add("hidden");
+      if (btnBagla) btnBagla.classList.remove("hidden");
+      if (btnGiris) btnGiris.classList.add("hidden");
+      if (btnKayit) btnKayit.classList.add("hidden");
+      if (toggleKayit) toggleKayit.classList.add("hidden");
+      if (toggleGiris) toggleGiris.classList.add("hidden");
+      if (baslik) baslik.textContent = "E-posta ekle";
+      if (aciklama) aciklama.textContent = "Verileriniz ayni hesapta kalir. E-posta ve sifre belirleyin.";
+      return;
+    }
+
+    authPanel.classList.add("hidden");
+    pinBlok.classList.remove("hidden");
+    pinTemizle();
+  }
 
   // Uygulamayi ac — Firebase'den taze veri cek, modulleri baslat
   async function uygulamaAc() {
+    let u = null;
+    try {
+      u = typeof fbMevcutKullanici === "function" ? fbMevcutKullanici() : null;
+    } catch (e) { u = null; }
+    if (!u || u.isAnonymous) {
+      sessionStorage.removeItem("girisYapildi");
+      appEl.classList.add("hidden");
+      lockScreen.classList.remove("hidden");
+      lockScreen.style.animation = "";
+      kilitEkraniGuncelle();
+      return;
+    }
+
     lockScreen.classList.add("hidden");
     appEl.classList.remove("hidden");
     sessionStorage.setItem("girisYapildi", "1");
@@ -56,12 +142,21 @@
     if (typeof MuhtacModule !== "undefined") MuhtacModule.init();
   };
 
-  // Session varsa sifre sorma
   if (sessionStorage.getItem("girisYapildi") === "1") {
-    await uygulamaAc();
+    let u0 = null;
+    try {
+      u0 = typeof fbMevcutKullanici === "function" ? fbMevcutKullanici() : null;
+    } catch (e) { u0 = null; }
+    if (u0 && !u0.isAnonymous) await uygulamaAc();
+    else sessionStorage.removeItem("girisYapildi");
   }
+  kilitEkraniGuncelle();
 
-  // PIN kilidi
+  if (typeof firebase !== "undefined" && firebase.auth) {
+    firebase.auth().onAuthStateChanged(function() {
+      kilitEkraniGuncelle();
+    });
+  }
   let pinGiris = "";
   const MAX_PIN = 4;
 
@@ -79,6 +174,11 @@
   }
 
   async function pinKontrol() {
+    let u = null;
+    try {
+      u = typeof fbMevcutKullanici === "function" ? fbMevcutKullanici() : null;
+    } catch (e) { u = null; }
+    if (!u || u.isAnonymous || !pinPanelAcik()) return;
     const kayitliSifre = await AyarlarDB.get("sifre");
     if (pinGiris === kayitliSifre) {
       lockScreen.style.animation = "fade-out 0.3s ease forwards";
@@ -96,6 +196,7 @@
 
   document.querySelectorAll(".num-btn[data-n]").forEach(btn => {
     btn.addEventListener("click", async () => {
+      if (!pinPanelAcik()) return;
       if (pinGiris.length >= MAX_PIN) return;
       pinGiris += btn.dataset.n;
       pinGoster();
@@ -105,6 +206,7 @@
 
   const delBtn = document.getElementById("pin-del");
   if (delBtn) delBtn.addEventListener("click", () => {
+    if (!pinPanelAcik()) return;
     if (pinGiris.length > 0) {
       pinGiris = pinGiris.slice(0, -1);
       pinGoster();
@@ -114,7 +216,7 @@
   });
 
   document.addEventListener("keydown", async (e) => {
-    if (!lockScreen.classList.contains("hidden")) {
+    if (!lockScreen.classList.contains("hidden") && pinPanelAcik()) {
       if (e.key >= "0" && e.key <= "9" && pinGiris.length < MAX_PIN) {
         pinGiris += e.key; pinGoster();
         if (pinGiris.length === MAX_PIN) setTimeout(pinKontrol, 100);
@@ -158,7 +260,72 @@
     lockScreen.classList.remove("hidden");
     lockScreen.style.animation = "";
     pinTemizle();
+    kilitEkraniGuncelle();
   });
+
+  const lockToggleKayit = document.getElementById("lock-toggle-kayit");
+  const lockToggleGiris = document.getElementById("lock-toggle-giris");
+  if (lockToggleKayit) lockToggleKayit.addEventListener("click", () => { _kilitKayitModu = true; kilitKayitArayuz(); });
+  if (lockToggleGiris) lockToggleGiris.addEventListener("click", () => { _kilitKayitModu = false; kilitKayitArayuz(); });
+
+  async function fbAuthCalistir(fonk) {
+    const errEl = document.getElementById("fb-auth-error");
+    if (errEl) errEl.textContent = "";
+    const emEl = document.getElementById("lock-email");
+    const pwEl = document.getElementById("lock-sifre");
+    const em = emEl ? emEl.value : "";
+    const pw = pwEl ? pwEl.value : "";
+    try {
+      await fonk(em, pw);
+      if (pwEl) pwEl.value = "";
+    } catch (e) {
+      if (errEl) errEl.textContent = typeof fbAuthHataMetni === "function" ? fbAuthHataMetni(e) : "Hata";
+    }
+  }
+
+  const lockBtnGiris = document.getElementById("lock-btn-giris");
+  const lockBtnKayit = document.getElementById("lock-btn-kayit");
+  const lockBtnBagla = document.getElementById("lock-btn-bagla");
+  const lockBtnFbCikis = document.getElementById("lock-btn-fb-cikis");
+  if (lockBtnGiris) lockBtnGiris.addEventListener("click", () => fbAuthCalistir(fbGirisEmail));
+  if (lockBtnKayit) lockBtnKayit.addEventListener("click", () => fbAuthCalistir(fbKayitEmail));
+  if (lockBtnBagla) lockBtnBagla.addEventListener("click", () => fbAuthCalistir(fbAnonimiPostayaBagla));
+  if (lockBtnFbCikis) {
+    lockBtnFbCikis.addEventListener("click", async () => {
+      try {
+        if (typeof fbCikisBulut === "function") await fbCikisBulut();
+      } catch (e) {}
+      sessionStorage.removeItem("girisYapildi");
+      pinTemizle();
+      kilitEkraniGuncelle();
+    });
+  }
+  const lockPinBaska = document.getElementById("lock-pin-baska-hesap");
+  if (lockPinBaska) {
+    lockPinBaska.addEventListener("click", async () => {
+      try {
+        if (typeof fbCikisBulut === "function") await fbCikisBulut();
+      } catch (e) {}
+      sessionStorage.removeItem("girisYapildi");
+      pinTemizle();
+      _kilitKayitModu = false;
+      kilitEkraniGuncelle();
+    });
+  }
+
+  const lockSifreEl = document.getElementById("lock-sifre");
+  if (lockSifreEl) {
+    lockSifreEl.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter") return;
+      const baglaBtn = document.getElementById("lock-btn-bagla");
+      if (baglaBtn && !baglaBtn.classList.contains("hidden")) {
+        fbAuthCalistir(fbAnonimiPostayaBagla);
+        return;
+      }
+      if (_kilitKayitModu) fbAuthCalistir(fbKayitEmail);
+      else fbAuthCalistir(fbGirisEmail);
+    });
+  }
 
   // Sekme yonetimi
   const TAB_SIRA = ["islemler", "butce", "birikim", "arabam", "kredi", "alacaklar", "urun", "altin", "vefa", "muhtac"];

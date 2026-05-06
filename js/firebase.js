@@ -21,25 +21,16 @@ async function fbInit() {
 
     /* Persistence ilk snapshot'ini bekle; 8sn timeout yok — zaman asiminda erken false verip
        yetkisiz okuma / bos senkron tetiklenmesin */
-    window._fbReady = (async function() {
-      try {
-        await new Promise(function(resolve) {
-          var unsub = firebase.auth().onAuthStateChanged(function() {
-            unsub();
-            resolve();
-          });
-        });
-        if (!firebase.auth().currentUser) {
-          await firebase.auth().signInAnonymously();
+    window._fbReady = new Promise(function(resolve) {
+      var ilk = true;
+      firebase.auth().onAuthStateChanged(function(user) {
+        window._fbAuthOk = !!user;
+        if (ilk) {
+          ilk = false;
+          resolve(!!user);
         }
-        window._fbAuthOk = !!firebase.auth().currentUser;
-        return window._fbAuthOk;
-      } catch (e) {
-        console.warn("Auth:", e);
-        window._fbAuthOk = false;
-        return false;
-      }
-    })();
+      });
+    });
 
     await window._fbReady;
   } catch (e) {
@@ -49,10 +40,52 @@ async function fbInit() {
   }
 }
 
+function fbMevcutKullanici() {
+  try {
+    return firebase.auth().currentUser || null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function fbAuthHataMetni(err) {
+  var c = err && err.code ? err.code : "";
+  if (c === "auth/invalid-email") return "Gecersiz e-posta adresi.";
+  if (c === "auth/user-disabled") return "Bu hesap kullanima kapatilmis.";
+  if (c === "auth/user-not-found") return "Bu e-posta ile kayit bulunamadi.";
+  if (c === "auth/wrong-password") return "Sifre hatali.";
+  if (c === "auth/invalid-credential") return "E-posta veya sifre hatali.";
+  if (c === "auth/email-already-in-use") return "Bu e-posta adresi zaten kullaniliyor.";
+  if (c === "auth/weak-password") return "Sifre en az 6 karakter olmali.";
+  if (c === "auth/operation-not-allowed") return "E-posta ile giris Firebase'de acik degil. Console → Authentication → Sign-in method.";
+  if (c === "auth/requires-recent-login") return "Guvenlik icin cikis yapip tekrar girin.";
+  if (c === "auth/credential-already-in-use") return "Bu e-posta baska hesaba bagli.";
+  return err && err.message ? err.message : "Giris yapilamadi.";
+}
+
+async function fbGirisEmail(email, sifre) {
+  await firebase.auth().signInWithEmailAndPassword(String(email).trim(), sifre);
+}
+
+async function fbKayitEmail(email, sifre) {
+  await firebase.auth().createUserWithEmailAndPassword(String(email).trim(), sifre);
+}
+
+async function fbAnonimiPostayaBagla(email, sifre) {
+  var u = firebase.auth().currentUser;
+  if (!u || !u.isAnonymous)
+    throw { code: "auth/operation-not-allowed", message: "Baglama uygun degil" };
+  await u.linkWithEmailAndPassword(String(email).trim(), sifre);
+}
+
+async function fbCikisBulut() {
+  await firebase.auth().signOut();
+}
+
 async function fbVerileriYukle() {
   if (!_fbDb) return;
   try { await window._fbReady; } catch (e) {}
-  if (!window._fbAuthOk) {
+  if (!fbMevcutKullanici()) {
     console.warn("fbVerileriYukle: oturum yok; islemler yerel IndexedDB'de birakiliyor.");
     return;
   }

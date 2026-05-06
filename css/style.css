@@ -40,6 +40,32 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .num-empty { background: transparent !important; border-color: transparent !important; cursor: default; }
 .num-del { color: var(--text-secondary); font-size: 20px; }
 .lock-hint { font-size: 12px; color: var(--text-muted); text-align: center; }
+.lock-auth-panel { width: 100%; display: flex; flex-direction: column; gap: 12px; align-items: stretch; }
+.lock-auth-baslik { font-size: 16px; font-weight: 800; color: var(--gold); text-align: center; }
+.lock-auth-aciklama { font-size: 12px; color: var(--text-secondary); text-align: center; line-height: 1.4; }
+.lock-auth-fields { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+.lock-input {
+  width: 100%; padding: 12px 14px; border-radius: var(--radius-md);
+  border: 1px solid var(--border); background: var(--bg-input); color: var(--text-primary);
+  font-family: var(--font-body); font-size: 15px;
+}
+.lock-input::placeholder { color: var(--text-muted); }
+.lock-auth-btn {
+  width: 100%; padding: 14px; border-radius: var(--radius-md); font-family: var(--font-body);
+  font-size: 15px; font-weight: 700; cursor: pointer; border: 1px solid var(--border); transition: background 0.12s;
+}
+.lock-auth-btn.primary { background: var(--gold-dim); border-color: var(--gold); color: #1a1205; }
+.lock-auth-btn.primary:active { filter: brightness(1.08); }
+.lock-auth-btn.secondary { background: var(--bg-card); color: var(--text-primary); }
+.lock-auth-toggle { text-align: center; margin: 0; }
+.lock-auth-out { text-align: center; margin: 0; }
+.lock-auth-link {
+  background: none; border: none; color: var(--text-secondary); font-size: 13px; font-weight: 600;
+  cursor: pointer; text-decoration: underline; padding: 4px;
+}
+.lock-auth-link:active { color: var(--gold); }
+.lock-fb-error { color: var(--red); font-size: 13px; text-align: center; min-height: 18px; font-weight: 600; margin: 0; }
+.lock-pin-blok { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 20px; }
 
 /* ── APP SHELL ── */
 .app { display: flex; flex-direction: column; height: 100dvh; overflow: hidden; }
@@ -1566,6 +1592,32 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .num-empty { background: transparent !important; border-color: transparent !important; cursor: default; }
 .num-del { color: var(--text-secondary); font-size: 20px; }
 .lock-hint { font-size: 12px; color: var(--text-muted); text-align: center; }
+.lock-auth-panel { width: 100%; display: flex; flex-direction: column; gap: 12px; align-items: stretch; }
+.lock-auth-baslik { font-size: 16px; font-weight: 800; color: var(--gold); text-align: center; }
+.lock-auth-aciklama { font-size: 12px; color: var(--text-secondary); text-align: center; line-height: 1.4; }
+.lock-auth-fields { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+.lock-input {
+  width: 100%; padding: 12px 14px; border-radius: var(--radius-md);
+  border: 1px solid var(--border); background: var(--bg-input); color: var(--text-primary);
+  font-family: var(--font-body); font-size: 15px;
+}
+.lock-input::placeholder { color: var(--text-muted); }
+.lock-auth-btn {
+  width: 100%; padding: 14px; border-radius: var(--radius-md); font-family: var(--font-body);
+  font-size: 15px; font-weight: 700; cursor: pointer; border: 1px solid var(--border); transition: background 0.12s;
+}
+.lock-auth-btn.primary { background: var(--gold-dim); border-color: var(--gold); color: #1a1205; }
+.lock-auth-btn.primary:active { filter: brightness(1.08); }
+.lock-auth-btn.secondary { background: var(--bg-card); color: var(--text-primary); }
+.lock-auth-toggle { text-align: center; margin: 0; }
+.lock-auth-out { text-align: center; margin: 0; }
+.lock-auth-link {
+  background: none; border: none; color: var(--text-secondary); font-size: 13px; font-weight: 600;
+  cursor: pointer; text-decoration: underline; padding: 4px;
+}
+.lock-auth-link:active { color: var(--gold); }
+.lock-fb-error { color: var(--red); font-size: 13px; text-align: center; min-height: 18px; font-weight: 600; margin: 0; }
+.lock-pin-blok { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 20px; }
 
 /* ── APP SHELL ── */
 .app { display: flex; flex-direction: column; height: 100dvh; overflow: hidden; }

@@ -15,7 +15,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png?v=20260209desk" />
   <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png?v=20260209desk" />
   <link rel="manifest" href="manifest.json?v=20260209desk" />
-  <link rel="stylesheet" href="/hesap-kitap/css/style.css?v=20260505islemoz" />
+  <link rel="stylesheet" href="/hesap-kitap/css/style.css?v=20260505emailauth" />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <script>
     /* Tema yonetimi: flash onleme + toggle */
@@ -71,26 +71,46 @@
         <h1 class="lock-title">HESAP K&#304;TAP</h1>
         <p class="lock-sub">Ki&#351;isel Finans Takibi</p>
       </div>
-      <div class="pin-display">
-        <span class="pin-dot" id="d1"></span><span class="pin-dot" id="d2"></span>
-        <span class="pin-dot" id="d3"></span><span class="pin-dot" id="d4"></span>
+      <div id="lock-auth-panel" class="lock-auth-panel">
+        <p class="lock-auth-baslik" id="lock-auth-baslik">Bulut hesabiniz</p>
+        <p class="lock-auth-aciklama" id="lock-auth-aciklama">E-posta ve sifre ile giris yapin. Hesabiniz yoksa olusturun.</p>
+        <div class="lock-auth-fields">
+          <input type="email" id="lock-email" class="lock-input" placeholder="E-posta" autocomplete="email" inputmode="email" />
+          <input type="password" id="lock-sifre" class="lock-input" placeholder="Sifre (en az 6 karakter)" autocomplete="current-password" />
+        </div>
+        <button type="button" class="lock-auth-btn primary" id="lock-btn-giris">Giris yap</button>
+        <button type="button" class="lock-auth-btn primary hidden" id="lock-btn-bagla">E-postayi bagla</button>
+        <button type="button" class="lock-auth-btn secondary hidden" id="lock-btn-kayit">Hesap olustur</button>
+        <p class="lock-auth-toggle" id="lock-auth-toggle-wrap">
+          <button type="button" class="lock-auth-link" id="lock-toggle-kayit">Hesabim yok, kayit ol</button>
+          <button type="button" class="lock-auth-link hidden" id="lock-toggle-giris">Zaten hesabim var</button>
+        </p>
+        <p class="lock-auth-out"><button type="button" class="lock-auth-link" id="lock-btn-fb-cikis">Buluttan cikis</button></p>
+        <p class="lock-fb-error" id="fb-auth-error"></p>
       </div>
-      <p class="pin-error" id="pin-error"></p>
-      <div class="numpad">
-        <button class="num-btn" data-n="1">1</button>
-        <button class="num-btn" data-n="2">2</button>
-        <button class="num-btn" data-n="3">3</button>
-        <button class="num-btn" data-n="4">4</button>
-        <button class="num-btn" data-n="5">5</button>
-        <button class="num-btn" data-n="6">6</button>
-        <button class="num-btn" data-n="7">7</button>
-        <button class="num-btn" data-n="8">8</button>
-        <button class="num-btn" data-n="9">9</button>
-        <button class="num-btn num-empty"></button>
-        <button class="num-btn" data-n="0">0</button>
-        <button class="num-btn num-del" id="pin-del">&#9003;</button>
+      <div id="lock-pin-blok" class="lock-pin-blok hidden">
+        <div class="pin-display">
+          <span class="pin-dot" id="d1"></span><span class="pin-dot" id="d2"></span>
+          <span class="pin-dot" id="d3"></span><span class="pin-dot" id="d4"></span>
+        </div>
+        <p class="pin-error" id="pin-error"></p>
+        <div class="numpad">
+          <button class="num-btn" data-n="1">1</button>
+          <button class="num-btn" data-n="2">2</button>
+          <button class="num-btn" data-n="3">3</button>
+          <button class="num-btn" data-n="4">4</button>
+          <button class="num-btn" data-n="5">5</button>
+          <button class="num-btn" data-n="6">6</button>
+          <button class="num-btn" data-n="7">7</button>
+          <button class="num-btn" data-n="8">8</button>
+          <button class="num-btn" data-n="9">9</button>
+          <button class="num-btn num-empty"></button>
+          <button class="num-btn" data-n="0">0</button>
+          <button class="num-btn num-del" id="pin-del">&#9003;</button>
+        </div>
+        <p class="lock-hint">PIN: hizli acilma (bulut hesabi ayrica)</p>
+        <p class="lock-auth-out"><button type="button" class="lock-auth-link" id="lock-pin-baska-hesap">Baska hesap</button></p>
       </div>
-      <p class="lock-hint">Klavyeden de girebilirsiniz</p>
     </div>
   </div>
 
@@ -329,7 +349,7 @@
     </div>
   </div>
 
-  <script src="js/firebase.js?v=20260505authfix"></script>
+  <script src="js/firebase.js?v=20260505emailauth"></script>
   <script src="js/db.js"></script>
   <script src="js/modules/islemler.js?v=20260505islemoz"></script>
   <script src="js/modules/yukle.js?v=20260505vefadatfix"></script>
@@ -337,7 +357,7 @@
   <script src="js/modules/urun.js?v=20260505rtdbfix"></script>
   <script src="js/modules/arabam.js?v=20260504"></script>
   <script src="js/modules/birikim.js"></script>
-  <script src="js/app.js?v=20260505authfix"></script>
+  <script src="js/app.js?v=20260505emailauth"></script>
 </body>
 </html>
 
