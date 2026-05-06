@@ -71,14 +71,6 @@ async function fbKayitEmail(email, sifre) {
   await firebase.auth().createUserWithEmailAndPassword(String(email).trim(), sifre);
 }
 
-async function fbAnonimiPostayaBagla(email, sifre) {
-  var u = firebase.auth().currentUser;
-  if (!u || !u.isAnonymous)
-    throw { code: "auth/operation-not-allowed", message: "Baglama uygun degil" };
-  await u.linkWithEmailAndPassword(String(email).trim(), sifre);
-}
-
-async function fbCikisBulut() {
   await firebase.auth().signOut();
 }
 

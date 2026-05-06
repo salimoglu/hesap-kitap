@@ -125,8 +125,6 @@ var AyarlarDB = {
 
 async function initApp() {
   await openDB();
-  var sifre = await AyarlarDB.get("sifre");
-  if (!sifre) await AyarlarDB.set("sifre", "1234");
   await KategorilerDB.seedDefaults();
 }
 
