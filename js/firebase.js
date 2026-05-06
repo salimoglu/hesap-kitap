@@ -71,6 +71,7 @@ async function fbKayitEmail(email, sifre) {
   await firebase.auth().createUserWithEmailAndPassword(String(email).trim(), sifre);
 }
 
+async function fbCikisBulut() {
   await firebase.auth().signOut();
 }
 
