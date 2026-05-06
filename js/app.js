@@ -160,8 +160,20 @@
 
   const lockBtnGiris = document.getElementById("lock-btn-giris");
   const lockBtnKayit = document.getElementById("lock-btn-kayit");
+  const lockBtnGoogle = document.getElementById("lock-btn-google");
   if (lockBtnGiris) lockBtnGiris.addEventListener("click", () => fbAuthCalistir(fbGirisEmail));
   if (lockBtnKayit) lockBtnKayit.addEventListener("click", () => fbAuthCalistir(fbKayitEmail));
+  if (lockBtnGoogle && typeof fbGirisGoogle === "function") {
+    lockBtnGoogle.addEventListener("click", async () => {
+      const errEl = document.getElementById("fb-auth-error");
+      if (errEl) errEl.textContent = "";
+      try {
+        await fbGirisGoogle();
+      } catch (e) {
+        if (errEl) errEl.textContent = typeof fbAuthHataMetni === "function" ? fbAuthHataMetni(e) : "Hata";
+      }
+    });
+  }
 
   const lockSifreEl = document.getElementById("lock-sifre");
   if (lockSifreEl) {

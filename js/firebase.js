@@ -19,6 +19,12 @@ async function fbInit() {
     _fbDb = firebase.database();
     window._fbDb = _fbDb;
 
+    try {
+      await firebase.auth().getRedirectResult();
+    } catch (e) {
+      console.warn("getRedirectResult:", e);
+    }
+
     /* Persistence ilk snapshot'ini bekle; 8sn timeout yok — zaman asiminda erken false verip
        yetkisiz okuma / bos senkron tetiklenmesin */
     window._fbReady = new Promise(function(resolve) {
@@ -57,7 +63,12 @@ function fbAuthHataMetni(err) {
   if (c === "auth/invalid-credential") return "E-posta veya sifre hatali.";
   if (c === "auth/email-already-in-use") return "Bu e-posta adresi zaten kullaniliyor.";
   if (c === "auth/weak-password") return "Sifre en az 6 karakter olmali.";
-  if (c === "auth/operation-not-allowed") return "E-posta ile giris Firebase'de acik degil. Console → Authentication → Sign-in method.";
+  if (c === "auth/operation-not-allowed")
+    return "Bu oturum acma yontemi kapali. Firebase Console → Authentication → Sign-in method: E-posta/Şifre veya Google'ı etkinlestirin.";
+  if (c === "auth/popup-closed-by-user") return "";
+  if (c === "auth/cancelled-popup-request") return "";
+  if (c === "auth/account-exists-with-different-credential")
+    return "Bu e-posta baska bir oturum yontemiyle kayitli. Once o yontemle giris yapin.";
   if (c === "auth/requires-recent-login") return "Guvenlik icin cikis yapip tekrar girin.";
   if (c === "auth/credential-already-in-use") return "Bu e-posta baska hesaba bagli.";
   return err && err.message ? err.message : "Giris yapilamadi.";
@@ -69,6 +80,21 @@ async function fbGirisEmail(email, sifre) {
 
 async function fbKayitEmail(email, sifre) {
   await firebase.auth().createUserWithEmailAndPassword(String(email).trim(), sifre);
+}
+
+async function fbGirisGoogle() {
+  var provider = new firebase.auth.GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: "select_account" });
+  try {
+    await firebase.auth().signInWithPopup(provider);
+  } catch (e) {
+    var c = e && e.code ? e.code : "";
+    if (c === "auth/popup-blocked" || c === "auth/operation-not-supported-in-this-environment") {
+      await firebase.auth().signInWithRedirect(provider);
+      return;
+    }
+    throw e;
+  }
 }
 
 async function fbCikisBulut() {
