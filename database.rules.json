@@ -1,27 +1,6 @@
 {
   "rules": {
-    "users": {
-      "$uid": {
-        ".read": "auth != null && auth.uid === $uid",
-        ".write": "auth != null && auth.uid === $uid"
-      }
-    },
-    "islemler": { ".read": "auth != null", ".write": false },
-    "kategoriler": { ".read": "auth != null", ".write": false },
-    "vefa2": { ".read": "auth != null", ".write": false },
-    "urunler": { ".read": "auth != null", ".write": false },
-    "alacaklar": { ".read": "auth != null", ".write": false },
-    "arabam": { ".read": "auth != null", ".write": false },
-    "muhtac": { ".read": "auth != null", ".write": false },
-    "kredi_harcamalar": { ".read": "auth != null", ".write": false },
-    "kredi_kartlar": { ".read": "auth != null", ".write": false },
-    "altin_kayitlar": { ".read": "auth != null", ".write": false },
-    "altin_guncel_fiyat": { ".read": "auth != null", ".write": false },
-    "altin_guncel_fiyat_tarih": { ".read": "auth != null", ".write": false },
-    "birikim_manuel": { ".read": "auth != null", ".write": false },
-    "$legacyButce": {
-      ".read": "auth != null && $legacyButce.matches(/^butce_[0-9]+_[0-9]+$/)",
-      ".write": false
-    }
+    ".read": "auth != null",
+    ".write": "auth != null"
   }
 }

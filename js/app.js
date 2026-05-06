@@ -46,22 +46,8 @@
     if (syncEl) syncEl.textContent = "\u2601";
 
     try {
-      var prevUid = null;
-      try {
-        prevUid = localStorage.getItem("hk_last_cloud_uid");
-      } catch (e0) {}
-      if (prevUid && prevUid !== u.uid && typeof yerelCachedVeriyiSil === "function") {
-        await yerelCachedVeriyiSil();
-      }
-      try {
-        localStorage.setItem("hk_last_cloud_uid", u.uid);
-      } catch (e1) {}
-    } catch (eH) {}
-
-    try {
       if (typeof fbKimlikTokenAl === "function") await fbKimlikTokenAl();
       if (typeof fbVerileriYukle !== "undefined") await fbVerileriYukle();
-      if (typeof fbKategorileriYerelCek === "function") await fbKategorileriYerelCek();
       if (syncEl) syncEl.textContent = "\u2713";
     } catch(e) {
       if (syncEl) syncEl.textContent = "";
@@ -88,7 +74,6 @@
     try {
       if (typeof fbKimlikTokenAl === "function") await fbKimlikTokenAl();
       if (typeof fbVerileriYukle !== "undefined") await fbVerileriYukle();
-      if (typeof fbKategorileriYerelCek === "function") await fbKategorileriYerelCek();
       if (syncEl) syncEl.textContent = "\u2713";
     } catch(e) {
       if (syncEl) syncEl.textContent = "";

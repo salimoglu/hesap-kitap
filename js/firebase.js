@@ -9,15 +9,6 @@ const _fbConfig = {
   appId: "1:444640499049:web:327244db97f698a69799f8"
 };
 
-/**
- * Tek seferlik: RTDB kokundaki (eski) veriyi bu UID ile users/{uid}/ altina kopyalar.
- * Bos birakirsaniz tasima calismaz. UID: Firebase Console → Authentication → kullanici → User UID.
- * Tasima tamamlaninca (konsolda [Tasima] logu) bu sabiti tekrar "" yapip yayinlayin;
- * sonra database.rules.strict.json icerigini database.rules.json yapip kurallari yeniden deploy edin
- * ve kokteki ESKI dugumleri Console'dan silin.
- */
-const _fbEskiKokTasimaUid = "";
-
 let _fbDb = null;
 window._fbAuthOk = false;
 window._fbReady = Promise.resolve(false);
@@ -60,73 +51,6 @@ function fbMevcutKullanici() {
     return firebase.auth().currentUser || null;
   } catch (e) {
     return null;
-  }
-}
-
-/** Oturum acmis kullanicinin RTDB alt yolu: users/{uid}/... */
-function fbUserRef(relPath) {
-  if (!_fbDb) return null;
-  try {
-    var u = firebase.auth().currentUser;
-    if (!u || u.isAnonymous) return null;
-    var p = String(relPath || "").replace(/^\/+/, "");
-    return _fbDb.ref("users/" + u.uid + "/" + p);
-  } catch (e) {
-    return null;
-  }
-}
-window.fbUserRef = fbUserRef;
-
-/** Kokte kalan eski veriyi (sadece _fbEskiKokTasimaUid) bir kez users altina tasir. */
-async function fbEskiKoktenTasimaDene() {
-  if (!_fbDb || !_fbEskiKokTasimaUid) return;
-  var u = fbMevcutKullanici();
-  if (!u || u.uid !== _fbEskiKokTasimaUid) return;
-  var isaret = fbUserRef("_kok_tasima_tamam");
-  if (!isaret) return;
-  try {
-    var z = await isaret.once("value");
-    if (z.val()) return;
-  } catch (e1) {
-    return;
-  }
-  var anahtarlar = [
-    "islemler", "kategoriler", "vefa2", "urunler", "alacaklar", "arabam", "muhtac",
-    "kredi_harcamalar", "kredi_kartlar", "altin_kayitlar", "altin_guncel_fiyat",
-    "altin_guncel_fiyat_tarih", "birikim_manuel"
-  ];
-  for (var i = 0; i < anahtarlar.length; i++) {
-    var k = anahtarlar[i];
-    try {
-      var snap = await _fbDb.ref(k).once("value");
-      var val = snap.val();
-      if (val != null) {
-        var hedef = fbUserRef(k);
-        if (hedef) await hedef.set(val);
-      }
-    } catch (e2) {
-      console.warn("[Tasima] " + k, e2);
-    }
-  }
-  var yBas = 2018, yBit = 2035;
-  for (var y = yBas; y <= yBit; y++) {
-    for (var ay = 1; ay <= 12; ay++) {
-      var bk = "butce_" + y + "_" + ay;
-      try {
-        var bs = await _fbDb.ref(bk).once("value");
-        var bv = bs.val();
-        if (bv != null) {
-          var bh = fbUserRef(bk);
-          if (bh) await bh.set(bv);
-        }
-      } catch (e3) {}
-    }
-  }
-  try {
-    await isaret.set(true);
-    console.log("[Tasima] Eski kok verisi users/" + u.uid + "/ altina kopyalandi.");
-  } catch (e4) {
-    console.warn("[Tasima] tamam isareti yazilamadi", e4);
   }
 }
 
@@ -184,12 +108,6 @@ async function fbGirisGoogle() {
 }
 
 async function fbCikisBulut() {
-  try {
-    try {
-      localStorage.removeItem("hk_last_cloud_uid");
-    } catch (e0) {}
-    if (typeof yerelCachedVeriyiSil === "function") await yerelCachedVeriyiSil();
-  } catch (e) {}
   await firebase.auth().signOut();
 }
 
@@ -201,13 +119,7 @@ async function fbVerileriYukle() {
     return;
   }
   try {
-    await fbEskiKoktenTasimaDene();
-    var islemRef = typeof fbUserRef === "function" ? fbUserRef("islemler") : null;
-    if (!islemRef) {
-      console.warn("fbVerileriYukle: fbUserRef yok veya oturum yok.");
-      return;
-    }
-    const snap = await islemRef.once("value");
+    const snap = await _fbDb.ref("islemler").once("value");
     const fbData = snap.val();
     await openDB();
     if (!fbData || Object.keys(fbData).length === 0) {
@@ -215,7 +127,7 @@ async function fbVerileriYukle() {
       if (mevcut.length > 0) {
         const obj = {};
         mevcut.forEach(function(item) { obj[String(item.id)] = Object.assign({}, item); });
-        await islemRef.set(obj);
+        await _fbDb.ref("islemler").set(obj);
       }
       return;
     }
@@ -263,26 +175,18 @@ async function fbVerileriYukle() {
 }
 
 function fbIslemEkle(islem) {
-  if (!islem || !islem.id) return;
-  var r = typeof fbUserRef === "function" ? fbUserRef("islemler/" + String(islem.id)) : null;
-  if (!r) return;
-  r.set(Object.assign({}, islem)).catch(function(e){ console.warn("fbIslemEkle:", e); });
+  if (!_fbDb || !islem || !islem.id) return;
+  _fbDb.ref("islemler/" + String(islem.id)).set(Object.assign({}, islem)).catch(function(e){ console.warn("fbIslemEkle:", e); });
 }
 function fbIslemGuncelle(islem) {
-  if (!islem || !islem.id) return;
-  var r = typeof fbUserRef === "function" ? fbUserRef("islemler/" + String(islem.id)) : null;
-  if (!r) return;
-  r.set(Object.assign({}, islem)).catch(function(e){ console.warn("fbIslemGuncelle:", e); });
+  if (!_fbDb || !islem || !islem.id) return;
+  _fbDb.ref("islemler/" + String(islem.id)).set(Object.assign({}, islem)).catch(function(e){ console.warn("fbIslemGuncelle:", e); });
 }
 function fbIslemSil(id) {
-  if (id === undefined || id === null) return;
-  var r = typeof fbUserRef === "function" ? fbUserRef("islemler/" + String(id)) : null;
-  if (!r) return;
-  r.remove().catch(function(e){ console.warn("fbIslemSil:", e); });
+  if (!_fbDb || id === undefined || id === null) return;
+  _fbDb.ref("islemler/" + String(id)).remove().catch(function(e){ console.warn("fbIslemSil:", e); });
 }
 function fbSyncKategoriler(kategoriler) {
-  if (!kategoriler) return;
-  var r = typeof fbUserRef === "function" ? fbUserRef("kategoriler") : null;
-  if (!r) return;
-  r.set(kategoriler).catch(function(e){ console.warn("fbSyncKategoriler:", e); });
+  if (!_fbDb || !kategoriler) return;
+  _fbDb.ref("kategoriler").set(kategoriler).catch(function(e){ console.warn("fbSyncKategoriler:", e); });
 }

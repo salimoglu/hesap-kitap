@@ -14,17 +14,15 @@ var BirikimModule = (function() {
   /* Firebase */
   async function fbYukle(){
     _bkRtdbOk = false;
-    var r = typeof fbUserRef === "function" ? fbUserRef("birikim_manuel") : null;
-    if (typeof window._fbDb!=="undefined" && window._fbDb && r){
-      try{var s=await r.once("value");_manuelIslemler=s.val()||{};_bkRtdbOk=true;}
+    if(typeof window._fbDb!=="undefined"&&window._fbDb){
+      try{var s=await window._fbDb.ref("birikim_manuel").once("value");_manuelIslemler=s.val()||{};_bkRtdbOk=true;}
       catch(e){_manuelIslemler={};console.warn("[Birikim] yukle",e);}
     }
   }
   async function fbKaydet(){
     if(!_bkRtdbOk)return;
-    var w = typeof fbUserRef === "function" ? fbUserRef("birikim_manuel") : null;
-    if(typeof window._fbDb!=="undefined"&&window._fbDb&&w){
-      try{await w.set(_manuelIslemler);}catch(e){}
+    if(typeof window._fbDb!=="undefined"&&window._fbDb){
+      try{await window._fbDb.ref("birikim_manuel").set(_manuelIslemler);}catch(e){}
     }
   }
 

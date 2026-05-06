@@ -35,13 +35,13 @@ var ArabamModule = (function () {
   }
 
   async function fbYukle() {
-    _arRtdbOk = false;
-    var r = typeof fbUserRef === "function" ? fbUserRef("arabam") : null;
-    if (!r) {
+    if (typeof window._fbDb === "undefined" || !window._fbDb) {
+      _arRtdbOk = false;
       return;
     }
+    _arRtdbOk = false;
     try {
-      var s = await r.once("value");
+      var s = await window._fbDb.ref("arabam").once("value");
       var v = s.val();
       _araclar = v ? Object.values(v) : [];
       _arRtdbOk = true;
@@ -53,12 +53,11 @@ var ArabamModule = (function () {
 
   async function fbKaydet() {
     if (!_arRtdbOk) return;
-    var w = typeof fbUserRef === "function" ? fbUserRef("arabam") : null;
-    if (!w) return;
+    if (typeof window._fbDb === "undefined" || !window._fbDb) return;
     try {
       var obj = {};
       _araclar.forEach(function (a) { obj[a.id] = a; });
-      await w.set(obj);
+      await window._fbDb.ref("arabam").set(obj);
     } catch (e) {}
   }
 

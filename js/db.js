@@ -121,58 +121,6 @@ var AyarlarDB = {
   set: async function(key, value) { await openDB(); return promisify(tx(STORES.AYARLAR, "readwrite").put({ key: key, value: value })); },
 };
 
-/** Coklu hesap: islem / kategori / ayar onbellegini temizler. */
-async function yerelCachedVeriyiSil() {
-  try {
-    await openDB();
-  } catch (e) {
-    return;
-  }
-  return new Promise(function(resolve) {
-    try {
-      var t = _db.transaction([STORES.ISLEMLER, STORES.KATEGORILER, STORES.AYARLAR], "readwrite");
-      t.objectStore(STORES.ISLEMLER).clear();
-      t.objectStore(STORES.KATEGORILER).clear();
-      t.objectStore(STORES.AYARLAR).clear();
-      t.oncomplete = resolve;
-      t.onerror = resolve;
-    } catch (e2) {
-      resolve();
-    }
-  });
-}
-window.yerelCachedVeriyiSil = yerelCachedVeriyiSil;
-
-async function fbKategorileriYerelCek() {
-  if (typeof fbUserRef !== "function" || typeof fbMevcutKullanici !== "function") return;
-  if (!fbMevcutKullanici()) return;
-  var r = fbUserRef("kategoriler");
-  if (!r) return;
-  try {
-    var snap = await r.once("value");
-    var val = snap.val();
-    await openDB();
-    await new Promise(function(resolve) {
-      var t = _db.transaction([STORES.KATEGORILER], "readwrite");
-      t.objectStore(STORES.KATEGORILER).clear();
-      t.oncomplete = resolve;
-      t.onerror = resolve;
-    });
-    if (val && typeof val === "object") {
-      var arr = Array.isArray(val) ? val : Object.values(val);
-      for (var ki = 0; ki < arr.length; ki++) {
-        var row = arr[ki];
-        if (!row) continue;
-        await promisify(tx(STORES.KATEGORILER, "readwrite").put(row));
-      }
-    }
-    await KategorilerDB.seedDefaults();
-  } catch (e) {
-    console.warn("fbKategorileriYerelCek:", e);
-  }
-}
-window.fbKategorileriYerelCek = fbKategorileriYerelCek;
-
 } // end guard
 
 async function initApp() {
