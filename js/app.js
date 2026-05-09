@@ -3,6 +3,15 @@
   try { if (typeof fbInit !== "undefined") await fbInit(); } catch (e) {}
   await initApp();
 
+  try {
+    var redErr = sessionStorage.getItem("hk-auth-redirect-err");
+    if (redErr) {
+      sessionStorage.removeItem("hk-auth-redirect-err");
+      var elRed = document.getElementById("fb-auth-error");
+      if (elRed) elRed.textContent = redErr;
+    }
+  } catch (e) {}
+
   const lockScreen = document.getElementById("lock-screen");
   const appEl = document.getElementById("app");
   let _kilitKayitModu = false;

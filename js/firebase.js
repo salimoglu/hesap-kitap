@@ -23,6 +23,10 @@ async function fbInit() {
       await firebase.auth().getRedirectResult();
     } catch (e) {
       console.warn("getRedirectResult:", e);
+      try {
+        var rmsg = typeof fbAuthHataMetni === "function" ? fbAuthHataMetni(e) : (e && e.message) || "";
+        if (rmsg) sessionStorage.setItem("hk-auth-redirect-err", rmsg);
+      } catch (x) {}
     }
 
     /* Kalici oturum tam oturana kadar bekle (ilk bos snapshot ile RTDB okunmasin). */
@@ -69,6 +73,9 @@ async function fbKimlikTokenAl() {
 
 function fbAuthHataMetni(err) {
   var c = err && err.code ? err.code : "";
+  if (c === "auth/unauthorized-domain")
+    return "Bu site adresi Firebase'de yetkili degil. Firebase Console → Authentication → Settings (Ayarlar) → Authorized domains (Yetkili alan adlari) bolumune tam alan adinizi ekleyin (orn. salimoglu.github.io veya kendi domain'iniz). Kaydettikten sonra 1-2 dk bekleyip tekrar deneyin.";
+  if (c === "auth/web-storage-unsupported") return "Tarayici depolama / cerezleri kapali veya kisitli. Site icin cerezlere izin verin veya baska tarayici deneyin.";
   if (c === "auth/invalid-email") return "Gecersiz e-posta adresi.";
   if (c === "auth/user-disabled") return "Bu hesap kullanima kapatilmis.";
   if (c === "auth/user-not-found") return "Bu e-posta ile kayit bulunamadi.";
@@ -98,11 +105,24 @@ async function fbKayitEmail(email, sifre) {
 async function fbGirisGoogle() {
   var provider = new firebase.auth.GoogleAuthProvider();
   provider.setCustomParameters({ prompt: "select_account" });
+  var ua = typeof navigator !== "undefined" ? navigator.userAgent || "" : "";
+  var isStandalone =
+    (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
+    window.navigator.standalone === true;
+  var isMobileUa = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+  if (isStandalone || isMobileUa) {
+    await firebase.auth().signInWithRedirect(provider);
+    return;
+  }
   try {
     await firebase.auth().signInWithPopup(provider);
   } catch (e) {
     var c = e && e.code ? e.code : "";
-    if (c === "auth/popup-blocked" || c === "auth/operation-not-supported-in-this-environment") {
+    if (
+      c === "auth/popup-blocked" ||
+      c === "auth/operation-not-supported-in-this-environment" ||
+      c === "auth/cancelled-popup-request"
+    ) {
       await firebase.auth().signInWithRedirect(provider);
       return;
     }
