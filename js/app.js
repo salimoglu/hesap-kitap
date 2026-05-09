@@ -319,7 +319,7 @@
   // Service Worker — her zaman en yeni versiyonu al
   if ("serviceWorker" in navigator) {
     try {
-      const reg = await navigator.serviceWorker.register("/hesap-kitap/sw.js", { updateViaCache: "none" });
+      const reg = await navigator.serviceWorker.register("sw.js", { updateViaCache: "none" });
       // Yeni SW gelince hemen aktive et
       reg.addEventListener("updatefound", () => {
         const newWorker = reg.installing;

@@ -1,28 +1,29 @@
 // sw.js — Network First: her zaman gunceli al, cache sadece fallback
-const CACHE = "hesap-kitap-v69";
+const CACHE = "hesap-kitap-v70";
+const BASE = self.location.pathname.replace(/\/?sw\.js$/i, "");
 const ASSETS = [
-  "/hesap-kitap/",
-  "/hesap-kitap/index.html",
-  "/hesap-kitap/css/style.css?v=20260506datafix",
-  "/hesap-kitap/js/app.js?v=20260506datafix",
-  "/hesap-kitap/js/db.js",
-  "/hesap-kitap/js/firebase.js?v=20260506datafix",
-  "/hesap-kitap/js/modules/islemler.js?v=20260505islemoz",
-  "/hesap-kitap/js/modules/birikim.js?v=20260506datafix",
-  "/hesap-kitap/js/modules/yukle.js?v=20260506datafix",
-  "/hesap-kitap/js/modules/alacaklar.js?v=20260506datafix",
-  "/hesap-kitap/js/modules/urun.js?v=20260506datafix",
-  "/hesap-kitap/js/modules/arabam.js?v=20260506datafix",
-  "/hesap-kitap/manifest.json?v=20260209desk",
-  "/hesap-kitap/icons/favicon.ico?v=20260209desk",
-  "/hesap-kitap/icons/icon-180.png?v=20260209desk",
-  "/hesap-kitap/icons/icon-192.png?v=20260209desk",
-  "/hesap-kitap/icons/icon-256.png?v=20260209desk",
-  "/hesap-kitap/icons/icon-512.png?v=20260209desk",
-  "/hesap-kitap/icons/pwa-win-180.png?v=20260209desk",
-  "/hesap-kitap/icons/pwa-win-192.png?v=20260209desk",
-  "/hesap-kitap/icons/pwa-win-256.png?v=20260209desk",
-  "/hesap-kitap/icons/pwa-win-512.png?v=20260209desk"
+  BASE + "/",
+  BASE + "/index.html",
+  BASE + "/css/style.css?v=20260506datafix",
+  BASE + "/js/app.js?v=20260506datafix",
+  BASE + "/js/db.js",
+  BASE + "/js/firebase.js?v=20260506datafix",
+  BASE + "/js/modules/islemler.js?v=20260505islemoz",
+  BASE + "/js/modules/birikim.js?v=20260506datafix",
+  BASE + "/js/modules/yukle.js?v=20260506datafix",
+  BASE + "/js/modules/alacaklar.js?v=20260506datafix",
+  BASE + "/js/modules/urun.js?v=20260506datafix",
+  BASE + "/js/modules/arabam.js?v=20260506datafix",
+  BASE + "/manifest.json?v=20260209desk",
+  BASE + "/icons/favicon.ico?v=20260209desk",
+  BASE + "/icons/icon-180.png?v=20260209desk",
+  BASE + "/icons/icon-192.png?v=20260209desk",
+  BASE + "/icons/icon-256.png?v=20260209desk",
+  BASE + "/icons/icon-512.png?v=20260209desk",
+  BASE + "/icons/pwa-win-180.png?v=20260209desk",
+  BASE + "/icons/pwa-win-192.png?v=20260209desk",
+  BASE + "/icons/pwa-win-256.png?v=20260209desk",
+  BASE + "/icons/pwa-win-512.png?v=20260209desk"
 ];
 
 self.addEventListener("install", (e) => {

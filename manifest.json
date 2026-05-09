@@ -1,10 +1,10 @@
 {
-  "id": "/hesap-kitap/",
+  "id": "./",
   "name": "Hesap Kitap",
   "short_name": "Hesap Kitap",
   "description": "Kisisel finans takip uygulamasi",
-  "start_url": "/hesap-kitap/",
-  "scope": "/hesap-kitap/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
   "orientation": "portrait",
