@@ -100,16 +100,10 @@ async function fbDetectRtdbScope() {
     }
   }
   var keys = ["urunler", "vefa2", "vefa", "kredi_harcamalar", "kredi_kartlar", "birikim_manuel", "arabam", "alacaklar", "islemler", "kategoriler", "muhtac", "altin_kayitlar"];
-  var hasRoot = false;
-  for (var i = 0; i < keys.length; i++) {
-    var r = await snap(keys[i]);
-    if (r.ok && nonempty(r.val)) { hasRoot = true; break; }
-  }
-  var hasUser = false;
-  for (var j = 0; j < keys.length; j++) {
-    var r2 = await snap("users/" + uid + "/" + keys[j]);
-    if (r2.ok && nonempty(r2.val)) { hasUser = true; break; }
-  }
+  var rootResults = await Promise.all(keys.map(function(k) { return snap(k); }));
+  var hasRoot = rootResults.some(function(r) { return r.ok && nonempty(r.val); });
+  var userResults = await Promise.all(keys.map(function(k) { return snap("users/" + uid + "/" + k); }));
+  var hasUser = userResults.some(function(r) { return r.ok && nonempty(r.val); });
   try {
     if (hasUser && !hasRoot) localStorage.setItem("hk-rtdb-use-user-prefix", "1");
     else localStorage.removeItem("hk-rtdb-use-user-prefix");
@@ -245,41 +239,29 @@ async function fbVerileriYukle() {
           resolve();
           return;
         }
-        var t = db.transaction("islemler", "readwrite");
-        t.objectStore("islemler").clear();
-        t.oncomplete = resolve; t.onerror = resolve;
+        try {
+          var t = db.transaction("islemler", "readwrite");
+          var store = t.objectStore("islemler");
+          store.clear();
+          for (var i = 0; i < entries.length; i++) {
+            var item = entries[i][1];
+            if (!item) continue;
+            var numId = parseInt(entries[i][0]);
+            var kayit = Object.assign({}, item, { id: isNaN(numId) ? undefined : numId });
+            if (kayit.id === undefined) delete kayit.id;
+            try {
+              if (kayit.id !== undefined) store.put(kayit);
+              else store.add(kayit);
+            } catch (ex) {}
+          }
+          t.oncomplete = resolve;
+          t.onerror = function() { resolve(); };
+        } catch (ex) {
+          resolve();
+        }
       };
       req.onerror = resolve;
     });
-    var idb = await new Promise(function(resolve) {
-      var req2 = indexedDB.open("hesap-kitap-db");
-      req2.onsuccess = function(e) {
-        var d = e.target.result;
-        if (!d.objectStoreNames.contains("islemler")) {
-          d.close();
-          resolve(null);
-          return;
-        }
-        resolve(d);
-      };
-      req2.onerror = function() { resolve(null); };
-    });
-    if (!idb) return;
-    for (var i = 0; i < entries.length; i++) {
-      var item = entries[i][1];
-      if (!item) continue;
-      var numId = parseInt(entries[i][0]);
-      var kayit = Object.assign({}, item, { id: isNaN(numId) ? undefined : numId });
-      if (kayit.id === undefined) delete kayit.id;
-      await new Promise(function(resolve) {
-        try {
-          var t2 = idb.transaction("islemler", "readwrite");
-          var store = t2.objectStore("islemler");
-          kayit.id !== undefined ? store.put(kayit) : store.add(kayit);
-          t2.oncomplete = resolve; t2.onerror = resolve;
-        } catch(ex) { resolve(); }
-      });
-    }
   } catch(e) { console.warn("fbVerileriYukle:", e); }
 }
 
