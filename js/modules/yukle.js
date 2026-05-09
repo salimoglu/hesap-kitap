@@ -155,7 +155,7 @@ async function afbYukle(){
     var s=await fbRtdbRef("altin_kayitlar").once("value");
     var v=s.val();
     _kayitlar=v?Object.values(v):[];
-    _kayitlar.sort(function(a,b){return (a.tarih||"").localeCompare(b.tarih||"");});
+    _kayitlar.sort(function(a,b){return (b.tarih||"").localeCompare(a.tarih||"");});
     /* Kayıtlı güncel fiyat */
     var sf=await fbRtdbRef("altin_guncel_fiyat").once("value");
     _guncelGramFiyat=sf.val()||0;
@@ -395,7 +395,7 @@ async function akaydet(){
     if(idx>=0){kayit.id=_aktif;_kayitlar[idx]=kayit;}
   } else {
     kayit.id=auid();_kayitlar.push(kayit);
-    _kayitlar.sort(function(a,b){return (a.tarih||"").localeCompare(b.tarih||"");});
+    _kayitlar.sort(function(a,b){return (b.tarih||"").localeCompare(a.tarih||"");});
   }
   await afbKaydet();amodalKapat();arender();
 }
