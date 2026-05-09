@@ -38,7 +38,7 @@ var ArabamModule = (function () {
       return;
     }
     try {
-      var s = await window._fbDb.ref("arabam").once("value");
+      var s = await fbRtdbRef("arabam").once("value");
       var v = s.val();
       _araclar = v ? Object.values(v) : [];
     } catch (e) {
@@ -52,7 +52,7 @@ var ArabamModule = (function () {
     try {
       var obj = {};
       _araclar.forEach(function (a) { obj[a.id] = a; });
-      await window._fbDb.ref("arabam").set(obj);
+      await fbRtdbRef("arabam").set(obj);
     } catch (e) {
       console.error("[Arabam] kaydet", e);
     }

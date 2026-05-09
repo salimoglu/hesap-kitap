@@ -39,8 +39,8 @@ function uid(){return "o"+Date.now()+"_"+Math.random().toString(36).substr(2,5);
 function hesapla(){YAPI.forEach(function(b){b.s.forEach(function(s){if(s.h)_veri[s.id]=s.fn(_veri);});});}
 function gelir(){return(_veri.salim_maas||0)+(_veri.bugra_maas||0)+(_veri.gelecek_borc||0);}
 function harcanan(){return(_veri.z_top||0)+(_veri.i_top||0)+(_veri.y_top||0);}
-async function byukle(){var key="butce_"+_yil+"_"+(_ay+1);_veri={};_ozel={};if(typeof window._fbDb==="undefined"||!window._fbDb)return;try{var s=await window._fbDb.ref(key).once("value");var d=s.val()||{};_veri=d.veri||{};_ozel=d.ozel||{};}catch(e){}}
-async function bkaydet(){var key="butce_"+_yil+"_"+(_ay+1);if(typeof window._fbDb==="undefined"||!window._fbDb)return;try{await window._fbDb.ref(key).set({veri:_veri,ozel:_ozel});}catch(e){}}
+async function byukle(){var key="butce_"+_yil+"_"+(_ay+1);_veri={};_ozel={};if(typeof window._fbDb==="undefined"||!window._fbDb)return;try{var s=await fbRtdbRef(key).once("value");var d=s.val()||{};_veri=d.veri||{};_ozel=d.ozel||{};}catch(e){}}
+async function bkaydet(){var key="butce_"+_yil+"_"+(_ay+1);if(typeof window._fbDb==="undefined"||!window._fbDb)return;try{await fbRtdbRef(key).set({veri:_veri,ozel:_ozel});}catch(e){}}
 function satirEkle(bolum){var label=prompt("Yeni satır adı:");if(!label||!label.trim())return;if(!_ozel[bolum])_ozel[bolum]=[];var id=uid();_ozel[bolum].push({id:id,label:label.trim().toUpperCase()});_veri[id]=0;bkaydet();brender();}
 function satirSil(bolum,id){if(!confirm("Silmek?"))return;if(_ozel[bolum])_ozel[bolum]=_ozel[bolum].filter(function(s){return s.id!==id;});delete _veri[id];bkaydet();brender();}
 function brender(){
@@ -78,8 +78,8 @@ function uid(){return "k"+Date.now()+"_"+Math.random().toString(36).substr(2,5);
 function buAy(){return _yil+"-"+String(_ay+1).padStart(2,"0");}
 function ayEkle(bas,n){var d=new Date(bas+"-01");d.setMonth(d.getMonth()+n);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");}
 function ayInput(){return _yil+"-"+String(_ay+1).padStart(2,"0");}
-async function kfbYukle(){if(typeof window._fbDb==="undefined"||!window._fbDb)return;try{var s=await window._fbDb.ref("kredi_harcamalar").once("value");var v=s.val();_h=v?Object.values(v):[];var sk=await window._fbDb.ref("kredi_kartlar").once("value");_k=sk.val()||[];}catch(e){_h=[];_k=[];}}
-async function kfbKaydet(){if(typeof window._fbDb==="undefined"||!window._fbDb)return;try{var obj={};_h.forEach(function(x){obj[x.id]=x;});await window._fbDb.ref("kredi_harcamalar").set(obj);await window._fbDb.ref("kredi_kartlar").set(_k);}catch(e){}}
+async function kfbYukle(){if(typeof window._fbDb==="undefined"||!window._fbDb)return;try{var s=await fbRtdbRef("kredi_harcamalar").once("value");var v=s.val();_h=v?Object.values(v):[];var sk=await fbRtdbRef("kredi_kartlar").once("value");_k=sk.val()||[];}catch(e){_h=[];_k=[];}}
+async function kfbKaydet(){if(typeof window._fbDb==="undefined"||!window._fbDb)return;try{var obj={};_h.forEach(function(x){obj[x.id]=x;});await fbRtdbRef("kredi_harcamalar").set(obj);await fbRtdbRef("kredi_kartlar").set(_k);}catch(e){}}
 function taksitler(h){var r=[];for(var i=0;i<h.taksit;i++){r.push({ay:ayEkle(h.basTarih,i),tutar:h.tutar/h.taksit,no:i+1});}return r;}
 function kartlar(){var s={};_h.forEach(function(h){s[h.kart]=1;});_k.forEach(function(k){s[k]=1;});return Object.keys(s).sort();}
 function ayToplam(ay,kart){var t=0;_h.forEach(function(h){if(kart&&h.kart!==kart)return;taksitler(h).forEach(function(x){if(x.ay===ay)t+=x.tutar;});});return t;}
@@ -152,12 +152,12 @@ async function guncelAltinCek(){
 async function afbYukle(){
   if(typeof window._fbDb==="undefined"||!window._fbDb)return;
   try{
-    var s=await window._fbDb.ref("altin_kayitlar").once("value");
+    var s=await fbRtdbRef("altin_kayitlar").once("value");
     var v=s.val();
     _kayitlar=v?Object.values(v):[];
     _kayitlar.sort(function(a,b){return (a.tarih||"").localeCompare(b.tarih||"");});
     /* Kayıtlı güncel fiyat */
-    var sf=await window._fbDb.ref("altin_guncel_fiyat").once("value");
+    var sf=await fbRtdbRef("altin_guncel_fiyat").once("value");
     _guncelGramFiyat=sf.val()||0;
   }catch(e){_kayitlar=[];}
 }
@@ -165,12 +165,12 @@ async function afbKaydet(){
   if(typeof window._fbDb==="undefined"||!window._fbDb)return;
   try{
     var obj={};_kayitlar.forEach(function(x){obj[x.id]=x;});
-    await window._fbDb.ref("altin_kayitlar").set(obj);
+    await fbRtdbRef("altin_kayitlar").set(obj);
   }catch(e){}
 }
 async function afbFiyatKaydet(f){
   if(typeof window._fbDb==="undefined"||!window._fbDb)return;
-  try{await window._fbDb.ref("altin_guncel_fiyat").set(f);}catch(e){}
+  try{await fbRtdbRef("altin_guncel_fiyat").set(f);}catch(e){}
 }
 
 function filtreliListe(){
@@ -500,17 +500,17 @@ function tGram(){return tumY().reduce(function(s,y){return s+yGram(y);},0);}
 async function fbYukle(){
   if(!window._fbDb)return;
   try{
-    var s=await window._fbDb.ref("vefa2").once("value");
+    var s=await fbRtdbRef("vefa2").once("value");
     var d=s.val()||{};
     _uyeler=d.uyeler||[{id:"u1",ad:"Zafer EROĞLU",rol:"Başkan"},{id:"u2",ad:"Fatma İNCE",rol:"Üye"},{id:"u3",ad:"Güler UÇAR",rol:"Üye"},{id:"u4",ad:"Salim EROĞLU",rol:"Üye"}];
     _aylar=d.aylar||[];
-    var gf=await window._fbDb.ref("altin_guncel_fiyat").once("value");
+    var gf=await fbRtdbRef("altin_guncel_fiyat").once("value");
     _gramFiyat=gf.val()||0;
   }catch(e){}
 }
 async function fbKaydet(){
   if(!window._fbDb)return;
-  try{await window._fbDb.ref("vefa2").set({uyeler:_uyeler,aylar:_aylar});}catch(e){}
+  try{await fbRtdbRef("vefa2").set({uyeler:_uyeler,aylar:_aylar});}catch(e){}
 }
 
 function render(){
@@ -847,11 +847,11 @@ function kisiToplam(k){return (k.zekatlar||[]).reduce(function(s,z){return s+(z.
 
 async function fbYukle(){
   if(!window._fbDb)return;
-  try{var s=await window._fbDb.ref("muhtac").once("value");_kisiler=Object.values(s.val()||{});}catch(e){}
+  try{var s=await fbRtdbRef("muhtac").once("value");_kisiler=Object.values(s.val()||{});}catch(e){}
 }
 async function fbKaydet(){
   if(!window._fbDb)return;
-  try{var obj={};_kisiler.forEach(function(k){obj[k.id]=k;});await window._fbDb.ref("muhtac").set(obj);}catch(e){}
+  try{var obj={};_kisiler.forEach(function(k){obj[k.id]=k;});await fbRtdbRef("muhtac").set(obj);}catch(e){}
 }
 
 function render(){

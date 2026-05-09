@@ -1,19 +1,19 @@
 // sw.js — Network First: her zaman gunceli al, cache sadece fallback
-const CACHE = "hesap-kitap-v72";
+const CACHE = "hesap-kitap-v73";
 const BASE = self.location.pathname.replace(/\/?sw\.js$/i, "");
 const ASSETS = [
   BASE + "/",
   BASE + "/index.html",
   BASE + "/css/style.css?v=20260506datafix",
-  BASE + "/js/app.js?v=20260509google",
+  BASE + "/js/app.js?v=20260509rtdb",
   BASE + "/js/db.js?v=20260509idb",
-  BASE + "/js/firebase.js?v=20260509idb",
+  BASE + "/js/firebase.js?v=20260509rtdb",
   BASE + "/js/modules/islemler.js?v=20260505islemoz",
-  BASE + "/js/modules/birikim.js?v=20260506datafix",
-  BASE + "/js/modules/yukle.js?v=20260506datafix",
-  BASE + "/js/modules/alacaklar.js?v=20260506datafix",
-  BASE + "/js/modules/urun.js?v=20260506datafix",
-  BASE + "/js/modules/arabam.js?v=20260506datafix",
+  BASE + "/js/modules/birikim.js?v=20260509rtdb",
+  BASE + "/js/modules/yukle.js?v=20260509rtdb",
+  BASE + "/js/modules/alacaklar.js?v=20260509rtdb",
+  BASE + "/js/modules/urun.js?v=20260509rtdb",
+  BASE + "/js/modules/arabam.js?v=20260509rtdb",
   BASE + "/manifest.json?v=20260209desk",
   BASE + "/icons/favicon.ico?v=20260209desk",
   BASE + "/icons/icon-180.png?v=20260209desk",

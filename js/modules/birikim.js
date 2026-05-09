@@ -13,13 +13,13 @@ var BirikimModule = (function() {
   /* Firebase */
   async function fbYukle(){
     if(typeof window._fbDb!=="undefined"&&window._fbDb){
-      try{var s=await window._fbDb.ref("birikim_manuel").once("value");_manuelIslemler=s.val()||{};}
+      try{var s=await fbRtdbRef("birikim_manuel").once("value");_manuelIslemler=s.val()||{};}
       catch(e){_manuelIslemler={};console.error("[Birikim] yukle",(e&&e.code)||e.message||e);}
     }
   }
   async function fbKaydet(){
     if(typeof window._fbDb!=="undefined"&&window._fbDb){
-      try{await window._fbDb.ref("birikim_manuel").set(_manuelIslemler);}catch(e){console.error("[Birikim] kaydet",e);}
+      try{await fbRtdbRef("birikim_manuel").set(_manuelIslemler);}catch(e){console.error("[Birikim] kaydet",e);}
     }
   }
 

@@ -57,6 +57,7 @@
     try {
       if (typeof fbRtdbOturumHazir === "function") await fbRtdbOturumHazir();
       if (typeof fbKimlikTokenAl === "function") await fbKimlikTokenAl();
+      if (typeof fbDetectRtdbScope === "function") await fbDetectRtdbScope();
       if (typeof fbVerileriYukle !== "undefined") await fbVerileriYukle();
       if (syncEl) syncEl.textContent = "\u2713";
     } catch(e) {
@@ -84,6 +85,7 @@
     try {
       if (typeof fbRtdbOturumHazir === "function") await fbRtdbOturumHazir();
       if (typeof fbKimlikTokenAl === "function") await fbKimlikTokenAl();
+      if (typeof fbDetectRtdbScope === "function") await fbDetectRtdbScope();
       if (typeof fbVerileriYukle !== "undefined") await fbVerileriYukle();
       if (syncEl) syncEl.textContent = "\u2713";
     } catch(e) {

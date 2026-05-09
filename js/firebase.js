@@ -61,6 +61,61 @@ function fbMevcutKullanici() {
   }
 }
 
+/**
+ * RTDB yolu: kok (varsayilan) veya users/{uid}/ altinda (eski tasima / katı kurallar).
+ * fbDetectRtdbScope() oturum acildiktan sonra calisir.
+ */
+function fbRtdbRef(path) {
+  if (!_fbDb) return null;
+  var p = String(path || "").replace(/^\/+/, "");
+  try {
+    if (typeof localStorage !== "undefined" && localStorage.getItem("hk-rtdb-use-user-prefix") === "1") {
+      var u = fbMevcutKullanici();
+      if (u && !u.isAnonymous) return _fbDb.ref("users/" + u.uid + "/" + p);
+    }
+  } catch (e) {}
+  return _fbDb.ref(p);
+}
+
+async function fbDetectRtdbScope() {
+  if (!_fbDb || typeof firebase === "undefined" || !firebase.auth) return;
+  var u = fbMevcutKullanici();
+  if (!u || u.isAnonymous) {
+    try { localStorage.removeItem("hk-rtdb-use-user-prefix"); } catch (e) {}
+    return;
+  }
+  var uid = u.uid;
+  function nonempty(val) {
+    if (val == null) return false;
+    if (Array.isArray(val)) return val.length > 0;
+    if (typeof val === "object") return Object.keys(val).length > 0;
+    return true;
+  }
+  async function snap(path) {
+    try {
+      var s = await _fbDb.ref(path).once("value");
+      return { ok: true, val: s.val() };
+    } catch (e) {
+      return { ok: false };
+    }
+  }
+  var keys = ["urunler", "vefa2", "kredi_harcamalar", "kredi_kartlar", "birikim_manuel", "arabam", "alacaklar", "islemler", "kategoriler", "muhtac", "altin_kayitlar"];
+  var hasRoot = false;
+  for (var i = 0; i < keys.length; i++) {
+    var r = await snap(keys[i]);
+    if (r.ok && nonempty(r.val)) { hasRoot = true; break; }
+  }
+  var hasUser = false;
+  for (var j = 0; j < keys.length; j++) {
+    var r2 = await snap("users/" + uid + "/" + keys[j]);
+    if (r2.ok && nonempty(r2.val)) { hasUser = true; break; }
+  }
+  try {
+    if (hasUser && !hasRoot) localStorage.setItem("hk-rtdb-use-user-prefix", "1");
+    else localStorage.removeItem("hk-rtdb-use-user-prefix");
+  } catch (e) {}
+}
+
 /** RTDB isteklerinden once cagirin; yeni oturumda tokenin yazilmamasini onler. */
 async function fbKimlikTokenAl() {
   try {
@@ -131,6 +186,7 @@ async function fbGirisGoogle() {
 }
 
 async function fbCikisBulut() {
+  try { localStorage.removeItem("hk-rtdb-use-user-prefix"); } catch (e) {}
   await firebase.auth().signOut();
 }
 
@@ -157,7 +213,9 @@ async function fbVerileriYukle() {
     return;
   }
   try {
-    const snap = await _fbDb.ref("islemler").once("value");
+    var refIs = fbRtdbRef("islemler");
+    if (!refIs) return;
+    const snap = await refIs.once("value");
     const fbData = snap.val();
     await openDB();
     if (!fbData || Object.keys(fbData).length === 0) {
@@ -165,7 +223,7 @@ async function fbVerileriYukle() {
       if (mevcut.length > 0) {
         const obj = {};
         mevcut.forEach(function(item) { obj[String(item.id)] = Object.assign({}, item); });
-        await _fbDb.ref("islemler").set(obj);
+        await refIs.set(obj);
       }
       return;
     }
@@ -226,18 +284,26 @@ async function fbVerileriYukle() {
 }
 
 function fbIslemEkle(islem) {
-  if (!_fbDb || !islem || !islem.id) return;
-  _fbDb.ref("islemler/" + String(islem.id)).set(Object.assign({}, islem)).catch(function(e){ console.warn("fbIslemEkle:", e); });
+  if (!islem || !islem.id) return;
+  var r = fbRtdbRef("islemler/" + String(islem.id));
+  if (!r) return;
+  r.set(Object.assign({}, islem)).catch(function(e){ console.warn("fbIslemEkle:", e); });
 }
 function fbIslemGuncelle(islem) {
-  if (!_fbDb || !islem || !islem.id) return;
-  _fbDb.ref("islemler/" + String(islem.id)).set(Object.assign({}, islem)).catch(function(e){ console.warn("fbIslemGuncelle:", e); });
+  if (!islem || !islem.id) return;
+  var r = fbRtdbRef("islemler/" + String(islem.id));
+  if (!r) return;
+  r.set(Object.assign({}, islem)).catch(function(e){ console.warn("fbIslemGuncelle:", e); });
 }
 function fbIslemSil(id) {
-  if (!_fbDb || id === undefined || id === null) return;
-  _fbDb.ref("islemler/" + String(id)).remove().catch(function(e){ console.warn("fbIslemSil:", e); });
+  if (id === undefined || id === null) return;
+  var r = fbRtdbRef("islemler/" + String(id));
+  if (!r) return;
+  r.remove().catch(function(e){ console.warn("fbIslemSil:", e); });
 }
 function fbSyncKategoriler(kategoriler) {
-  if (!_fbDb || !kategoriler) return;
-  _fbDb.ref("kategoriler").set(kategoriler).catch(function(e){ console.warn("fbSyncKategoriler:", e); });
+  if (!kategoriler) return;
+  var r = fbRtdbRef("kategoriler");
+  if (!r) return;
+  r.set(kategoriler).catch(function(e){ console.warn("fbSyncKategoriler:", e); });
 }
