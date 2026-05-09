@@ -3,7 +3,8 @@ if (typeof window._dbLoaded === "undefined") {
 window._dbLoaded = true;
 
 var DB_NAME = "hesap-kitap-db";
-var DB_VERSION = 1;
+/** Eski bozuk / eksik object store kurulumlarini duzeltmek icin artirildi (onupgradeneeded tekrar calir). */
+var DB_VERSION = 2;
 var STORES = { ISLEMLER: "islemler", KATEGORILER: "kategoriler", AYARLAR: "ayarlar" };
 var _db = null;
 

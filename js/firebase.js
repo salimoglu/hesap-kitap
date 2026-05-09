@@ -179,9 +179,14 @@ async function fbVerileriYukle() {
       return;
     }
     await new Promise(function(resolve) {
-      var req = indexedDB.open("hesap-kitap-db", 1);
+      var req = indexedDB.open("hesap-kitap-db");
       req.onsuccess = function(e) {
         var db = e.target.result;
+        if (!db.objectStoreNames.contains("islemler")) {
+          db.close();
+          resolve();
+          return;
+        }
         var t = db.transaction("islemler", "readwrite");
         t.objectStore("islemler").clear();
         t.oncomplete = resolve; t.onerror = resolve;
@@ -189,8 +194,16 @@ async function fbVerileriYukle() {
       req.onerror = resolve;
     });
     var idb = await new Promise(function(resolve) {
-      var req2 = indexedDB.open("hesap-kitap-db", 1);
-      req2.onsuccess = function(e) { resolve(e.target.result); };
+      var req2 = indexedDB.open("hesap-kitap-db");
+      req2.onsuccess = function(e) {
+        var d = e.target.result;
+        if (!d.objectStoreNames.contains("islemler")) {
+          d.close();
+          resolve(null);
+          return;
+        }
+        resolve(d);
+      };
       req2.onerror = function() { resolve(null); };
     });
     if (!idb) return;
