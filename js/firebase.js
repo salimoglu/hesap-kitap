@@ -99,7 +99,7 @@ async function fbDetectRtdbScope() {
       return { ok: false };
     }
   }
-  var keys = ["urunler", "vefa2", "kredi_harcamalar", "kredi_kartlar", "birikim_manuel", "arabam", "alacaklar", "islemler", "kategoriler", "muhtac", "altin_kayitlar"];
+  var keys = ["urunler", "vefa2", "vefa", "kredi_harcamalar", "kredi_kartlar", "birikim_manuel", "arabam", "alacaklar", "islemler", "kategoriler", "muhtac", "altin_kayitlar"];
   var hasRoot = false;
   for (var i = 0; i < keys.length; i++) {
     var r = await snap(keys[i]);

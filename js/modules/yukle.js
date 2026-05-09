@@ -500,8 +500,17 @@ function tGram(){return tumY().reduce(function(s,y){return s+yGram(y);},0);}
 async function fbYukle(){
   if(!window._fbDb)return;
   try{
+    var d={};
     var s=await fbRtdbRef("vefa2").once("value");
-    var d=s.val()||{};
+    var v=s.val();
+    if(v!=null&&typeof v==="object"&&Object.keys(v).length>0){d=v;}
+    if(Object.keys(d).length===0){
+      try{
+        var sL=await fbRtdbRef("vefa").once("value");
+        var v2=sL.val();
+        if(v2!=null&&typeof v2==="object"){d=v2;}
+      }catch(e2){}
+    }
     _uyeler=d.uyeler||[{id:"u1",ad:"Zafer EROĞLU",rol:"Başkan"},{id:"u2",ad:"Fatma İNCE",rol:"Üye"},{id:"u3",ad:"Güler UÇAR",rol:"Üye"},{id:"u4",ad:"Salim EROĞLU",rol:"Üye"}];
     _aylar=d.aylar||[];
     var gf=await fbRtdbRef("altin_guncel_fiyat").once("value");

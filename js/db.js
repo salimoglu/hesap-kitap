@@ -122,10 +122,10 @@ var AyarlarDB = {
   set: async function(key, value) { await openDB(); return promisify(tx(STORES.AYARLAR, "readwrite").put({ key: key, value: value })); },
 };
 
-} // end guard
-
-async function initApp() {
+window.initApp = async function() {
   await openDB();
   await KategorilerDB.seedDefaults();
-}
+};
+
+} // end guard
 
