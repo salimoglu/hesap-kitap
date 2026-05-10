@@ -3251,28 +3251,58 @@ html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 42, 0.12); border-
   .vf2-ozet-grup-baslik { font-size: 11px; }
   .vf2-ozet-grup-ic { gap: 12px !important; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%; }
   .vf2-altin-tipler { gap: 6px; flex-shrink: 0; }
+  /* Uye kutulari: yatay scroll yerine 2 sutun, isimler satir kirilir */
   .vf2-card-uyeler {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    gap: 8px;
-    padding-bottom: 6px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    overflow-x: visible;
+    padding-bottom: 0;
+    -webkit-overflow-scrolling: auto;
+  }
+  .vf2-card-uye-btn {
+    flex: none;
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 7px 8px;
+    align-items: stretch;
+  }
+  .vf2-card-uye-ad {
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    line-height: 1.25;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    font-size: 11px;
+    font-weight: 700;
     max-width: 100%;
   }
-  .vf2-card-uye-btn { flex: 0 0 auto; min-width: 118px; }
+  .vf2-card-uye-deg { align-self: flex-start; margin-top: 2px; }
   .vf2-card-uyeler-tot {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    gap: 8px;
-    padding-bottom: 6px;
-    max-width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    overflow-x: visible;
+    padding-bottom: 0;
+    -webkit-overflow-scrolling: auto;
   }
-  .vf2-card-uyeler-tot .vf2-card-uye-tot { flex: 0 0 auto; min-width: 104px; }
+  .vf2-card-uyeler-tot .vf2-card-uye-tot {
+    flex: none;
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .vf2-card-uyeler-tot .vf2-card-uye-ad {
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    line-height: 1.25;
+    text-transform: none;
+    font-size: 10px;
+    font-weight: 700;
+  }
   #vefa-container.module-host {
     overflow-x: hidden;
     overflow-y: auto;
