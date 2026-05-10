@@ -13,8 +13,19 @@ let _fbDb = null;
 window._fbAuthOk = false;
 window._fbReady = Promise.resolve(false);
 
-function fbAndroidMi() {
-  return /Android/i.test(typeof navigator !== "undefined" ? navigator.userAgent || "" : "");
+function fbMobilMi() {
+  var ua = typeof navigator !== "undefined" ? navigator.userAgent || "" : "";
+  if (/Android/i.test(ua)) return true;
+  if (/iPhone|iPad|iPod/i.test(ua)) return true;
+  if (
+    typeof navigator !== "undefined" &&
+    navigator.platform === "MacIntel" &&
+    typeof navigator.maxTouchPoints === "number" &&
+    navigator.maxTouchPoints > 1
+  )
+    return true;
+  if (/webOS|BlackBerry|IEMobile|Opera Mini/i.test(ua)) return true;
+  return false;
 }
 
 /** Google/Firebase OAuth geri donusinda URL'de gorunen parametreler (SDK islemeden once bakilir). */
@@ -60,7 +71,9 @@ async function fbInit() {
         yakindaGoogleYon = !isNaN(tp0) && Date.now() - tp0 < 20 * 60 * 1000;
       }
     } catch (e0) {}
-    if (fbOAuthDonusUrlMu() || (fbAndroidMi() && yakindaGoogleYon)) {
+    if (fbMobilMi()) {
+      await fbTumSwKaldir();
+    } else if (fbOAuthDonusUrlMu() || yakindaGoogleYon) {
       await fbTumSwKaldir();
     }
 
@@ -267,8 +280,6 @@ async function fbGirisGoogle() {
   var provider = new firebase.auth.GoogleAuthProvider();
   provider.setCustomParameters({ prompt: "select_account" });
 
-  var uaG = typeof navigator !== "undefined" ? navigator.userAgent || "" : "";
-  var isAnd = /Android/i.test(uaG);
   try {
     await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
   } catch (pe) {
@@ -276,19 +287,8 @@ async function fbGirisGoogle() {
   }
 
   /**
-   * Android: popup pek cogu cihazda tam ekran / Custom Tab ile kopuk biter; dogrudan redirect kullan.
-   * SW'yi burada silmeyin; OAuth donusunde fbInit kaldirilir.
-   */
-  if (isAnd) {
-    try {
-      sessionStorage.setItem("hk-google-redirect-pending", String(Date.now()));
-    } catch (y) {}
-    await firebase.auth().signInWithRedirect(provider);
-    return;
-  }
-
-  /**
-   * Masaustu / iOS: once popup; olmazsa redirect.
+   * Telefonda redirectUser=hayir: yonlendirme depo baglamini yitiriyor. Masaustunde calisan
+   * popup akisini mobilde de kullan; yalnizca popup acilmazsa redirect'e dus.
    */
   try {
     await firebase.auth().signInWithPopup(provider);

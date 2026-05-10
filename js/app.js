@@ -43,6 +43,16 @@
   let _hkSwRegisterDenendi = false;
   async function hkServiceWorkerKaydet() {
     if (_hkSwRegisterDenendi || !("serviceWorker" in navigator)) return;
+    try {
+      var ua = navigator.userAgent || "";
+      var mobil =
+        /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(ua) ||
+        (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+      if (mobil) {
+        _hkSwRegisterDenendi = true;
+        return;
+      }
+    } catch (e) {}
     _hkSwRegisterDenendi = true;
     try {
       const reg = await navigator.serviceWorker.register("sw.js", { updateViaCache: "none" });
