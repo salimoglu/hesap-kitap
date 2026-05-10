@@ -33,6 +33,55 @@ var ArabamModule = (function () {
     return f ? f.label : key || "—";
   }
 
+  /** Gider tarihinden takvim yılı (YYYY-MM-DD); yoksa "_" */
+  function giderYilStr(tarih) {
+    if (!tarih || typeof tarih !== "string") return "_";
+    var m = tarih.match(/^(\d{4})/);
+    return m ? m[1] : "_";
+  }
+
+  function aracYillikOzet(arac) {
+    var by = {};
+    if (!arac || !arac.giderler || !arac.giderler.length) return [];
+    arac.giderler.forEach(function (g) {
+      var y = giderYilStr(g.tarih);
+      if (!by[y]) by[y] = { yil: y, toplam: 0, adet: 0 };
+      by[y].toplam += Number(g.tutar) || 0;
+      by[y].adet += 1;
+    });
+    return Object.values(by).sort(function (x, y) {
+      if (x.yil === "_") return 1;
+      if (y.yil === "_") return -1;
+      return String(y.yil).localeCompare(String(x.yil));
+    });
+  }
+
+  function yillikOzetHtml(arac) {
+    var yilSimdi = String(new Date().getFullYear());
+    var satirlar = aracYillikOzet(arac);
+    if (!satirlar.length) {
+      return (
+        '<div class="ar-yil-baslik">Yıllık özet <span class="ar-yil-aciklama">(gider tarihine göre)</span></div>' +
+        '<div class="ar-yil-bos">Bu araç için gider eklediğinizde, her kaydın <strong>tarih</strong> alanına göre yıllık toplamlar burada listelenir.</div>'
+      );
+    }
+    var h =
+      '<div class="ar-yil-baslik">Yıllık özet <span class="ar-yil-aciklama">(gider tarihine göre)</span></div>' +
+      '<div class="ar-yil-grid">';
+    satirlar.forEach(function (r) {
+      var yEtiket = r.yil === "_" ? "Tarih eksik" : r.yil;
+      var buYil = r.yil !== "_" && r.yil === yilSimdi;
+      h += '<div class="ar-yil-kart' + (buYil ? " ar-yil-kart--bu-yil" : "") + '">';
+      if (buYil) h += '<span class="ar-yil-etiket">Bu yıl</span>';
+      h += '<div class="ar-yil-y">' + yEtiket + "</div>";
+      h += '<div class="ar-yil-t">' + mp(r.toplam) + " TL</div>";
+      h += '<div class="ar-yil-n">' + r.adet + " kayıt</div>";
+      h += "</div>";
+    });
+    h += "</div>";
+    return h;
+  }
+
   async function fbYukle() {
     if (typeof window._fbDb === "undefined" || !window._fbDb) {
       return;
@@ -147,6 +196,8 @@ var ArabamModule = (function () {
     h += '<button type="button" class="modal-close" id="ar-detay-kapat" aria-label="Kapat">&#10005;</button>';
     h += "</div></div>";
 
+    h += '<div class="ar-yil-ozet" id="ar-d-yil-ozet"></div>';
+
     h += '<div class="ar-gider-form">';
     h += '<div class="ar-gider-form-baslik">Gider ekle</div>';
     h += '<div class="ar-gider-grid">';
@@ -188,40 +239,42 @@ var ArabamModule = (function () {
     var tt = aracToplam(a);
     $("ar-d-toplam").textContent = mp(tt) + " TL";
 
+    var ozYil = $("ar-d-yil-ozet");
+    if (ozYil) ozYil.innerHTML = yillikOzetHtml(a);
+
     var liste = $("ar-d-liste");
     if (!liste) return;
     if (!a.giderler || !a.giderler.length) {
       liste.innerHTML = '<div class="ar-bos-kucuk">Henüz bu araç için gider yok</div>';
-      return;
-    }
-    var satirlar = a.giderler.slice().sort(function (x, y) { return (y.tarih || "").localeCompare(x.tarih || ""); });
-    var t = '<table class="ar-tablo"><thead><tr><th>Tarih</th><th>Kalem</th><th>Tutar</th><th>Not</th><th></th></tr></thead><tbody>';
-    satirlar.forEach(function (g) {
-      t += "<tr>";
-      t += "<td>" + mTarih(g.tarih) + "</td>";
-      t += "<td>" + kalemLabel(g.kalem) + "</td>";
-      t += "<td class=\"ar-td-tutar\">" + mp(g.tutar) + " TL</td>";
-      t += "<td>" + (g.aciklama ? String(g.aciklama).slice(0, 80) : "—") + "</td>";
-      t += "<td><button type=\"button\" class=\"ar-sil-gider-btn row-action-btn sil\" data-gid=\"" + g.id + "\" data-aid=\"" + aid + "\">&#10005;</button></td>";
-      t += "</tr>";
-    });
-    t += "</tbody></table>";
-    liste.innerHTML = t;
-
-    liste.querySelectorAll(".ar-sil-gider-btn").forEach(function (btn) {
-      btn.addEventListener("click", async function () {
-        var gida = btn.dataset.gid;
-        var arid = btn.dataset.aid;
-        var ar = aracBul(arid);
-        if (!ar || !ar.giderler) return;
-        ar.giderler = ar.giderler.filter(function (g) { return g.id !== gida; });
-        await fbKaydet();
-        render();
-        _aktifAracId = arid;
-        $("ar-detay-modal").classList.remove("hidden");
-        detayGuncelle(arid);
+    } else {
+      var satirlar = a.giderler.slice().sort(function (x, y) { return (y.tarih || "").localeCompare(x.tarih || ""); });
+      var t = '<table class="ar-tablo"><thead><tr><th>Tarih</th><th>Kalem</th><th>Tutar</th><th>Not</th><th></th></tr></thead><tbody>';
+      satirlar.forEach(function (g) {
+        t += "<tr>";
+        t += "<td>" + mTarih(g.tarih) + "</td>";
+        t += "<td>" + kalemLabel(g.kalem) + "</td>";
+        t += "<td class=\"ar-td-tutar\">" + mp(g.tutar) + " TL</td>";
+        t += "<td>" + (g.aciklama ? String(g.aciklama).slice(0, 80) : "—") + "</td>";
+        t += "<td><button type=\"button\" class=\"ar-sil-gider-btn row-action-btn sil\" data-gid=\"" + g.id + "\" data-aid=\"" + aid + "\">&#10005;</button></td>";
+        t += "</tr>";
       });
-    });
+      t += "</tbody></table>";
+      liste.innerHTML = t;
+      liste.querySelectorAll(".ar-sil-gider-btn").forEach(function (btn) {
+        btn.addEventListener("click", async function () {
+          var gida = btn.dataset.gid;
+          var arid = btn.dataset.aid;
+          var ar = aracBul(arid);
+          if (!ar || !ar.giderler) return;
+          ar.giderler = ar.giderler.filter(function (g) { return g.id !== gida; });
+          await fbKaydet();
+          render();
+          _aktifAracId = arid;
+          $("ar-detay-modal").classList.remove("hidden");
+          detayGuncelle(arid);
+        });
+      });
+    }
   }
 
   function aracModalAc(id) {

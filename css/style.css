@@ -1499,6 +1499,17 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .ar-detay-ak{display:flex;align-items:flex-start;gap:8px;flex-shrink:0;margin-left:auto;}
 .ar-btn-duzenle{background:transparent;border:1px solid var(--border);color:var(--text-secondary);border-radius:var(--radius-sm);padding:7px 12px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
 .ar-btn-duzenle:hover{border-color:var(--gold);color:var(--gold);}
+.ar-yil-ozet{padding:12px 16px;border-bottom:1px solid var(--border);background:var(--bg-card);flex-shrink:0;}
+.ar-yil-baslik{font-size:10px;font-weight:700;letter-spacing:0.14em;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;}
+.ar-yil-aciklama{font-weight:600;text-transform:none;letter-spacing:0.02em;opacity:0.85;}
+.ar-yil-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:8px;}
+.ar-yil-kart{background:var(--bg-elevated);border:1px solid var(--border);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:3px;min-width:0;}
+.ar-yil-kart--bu-yil{border-color:rgba(240,184,64,0.4);background:rgba(240,184,64,0.07);}
+.ar-yil-etiket{font-size:8px;font-weight:800;letter-spacing:0.12em;color:var(--gold);text-transform:uppercase;}
+.ar-yil-y{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--text-primary);font-family:var(--font-brand);line-height:1.2;}
+.ar-yil-t{font-size:14px;font-weight:600;color:var(--green);font-variant-numeric:tabular-nums;line-height:1.2;}
+.ar-yil-n{font-size:11px;color:var(--text-muted);}
+.ar-yil-bos{font-size:12px;color:var(--text-muted);line-height:1.45;}
 .ar-gider-form{padding:14px 16px;border-bottom:1px solid var(--border);background:var(--bg-elevated);flex-shrink:0;}
 .ar-gider-form-baslik{font-size:10px;font-weight:700;letter-spacing:0.14em;color:var(--text-muted);text-transform:uppercase;margin-bottom:10px;}
 .ar-gider-grid{display:grid;grid-template-columns:1fr 1fr auto;gap:10px 12px;align-items:end;}
