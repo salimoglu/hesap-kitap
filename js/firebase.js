@@ -20,6 +20,12 @@ async function fbInit() {
     window._fbDb = _fbDb;
 
     try {
+      await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+    } catch (pe) {
+      console.warn("Auth persistence:", pe);
+    }
+
+    try {
       await firebase.auth().getRedirectResult();
     } catch (e) {
       console.warn("getRedirectResult:", e);
@@ -160,6 +166,11 @@ async function fbGirisGoogle() {
     window.navigator.standalone === true;
   var isMobileUa = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
   if (isStandalone || isMobileUa) {
+    try {
+      await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+    } catch (pe) {
+      console.warn("setPersistence (redirect):", pe);
+    }
     await firebase.auth().signInWithRedirect(provider);
     return;
   }
@@ -172,6 +183,11 @@ async function fbGirisGoogle() {
       c === "auth/operation-not-supported-in-this-environment" ||
       c === "auth/cancelled-popup-request"
     ) {
+      try {
+        await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+      } catch (pe) {
+        console.warn("setPersistence (popup fallback):", pe);
+      }
       await firebase.auth().signInWithRedirect(provider);
       return;
     }
