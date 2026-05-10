@@ -127,24 +127,36 @@ async function fbInit() {
         if (rawP) {
           var tsP = parseInt(rawP, 10);
           var taze = !isNaN(tsP) && Date.now() - tsP < 15 * 60 * 1000;
-          if (taze && !sessionStorage.getItem("hk-auth-redirect-err")) {
+          if (taze) {
             var tek = "";
             try {
               if (redirectResult) {
                 tek =
-                  " Teknik bilgi: redirectUser=" +
+                  " [Teşhis: redirectUser=" +
                   (redirectResult.user ? "evet" : "hayir") +
-                  " credential=" +
+                  ", credential=" +
                   (redirectResult.credential ? "evet" : "hayir") +
-                  ".";
+                  "]";
+              } else {
+                tek = " [Teşhis: redirectResult bos]";
               }
-            } catch (td) {}
-            sessionStorage.setItem(
-              "hk-auth-redirect-err",
-              "Google ile geri donuldu ama oturum acilamadi." +
-                tek +
-                " Firebase → Authentication → Authorized domains: salimoglu.github.io olmali. Google Cloud Console → APIs and Services → Credentials → ilgili API anahtari → Application restrictions: 'None' veya HTTP referrers ile https://salimoglu.github.io/* ve https://*.github.io/* ekleyin. Site: https://salimoglu.github.io/hesap-kitap/ — E-posta ile giris calisiyorsa sorun Google tarafinda demektir."
-            );
+            } catch (td) {
+              tek = "";
+            }
+            var onceki = "";
+            try {
+              onceki = sessionStorage.getItem("hk-auth-redirect-err") || "";
+            } catch (e1) {}
+            var ana =
+              "Google dondu ama oturum acilmadi." +
+              tek +
+                " 1) Firebase Console → Authentication → Settings → Authorized domains: salimoglu.github.io 2) Google Cloud (proje hesap-kitap-234d1) → APIs & Services → Credentials → OAuth 2.0 Client IDs → Web client (auto created by Google Service) → Authorized JavaScript origins: https://salimoglu.github.io ve https://hesap-kitap-234d1.firebaseapp.com 3) Ayni ekranda Authorized redirect URIs: https://hesap-kitap-234d1.firebaseapp.com/__/auth/handler 4) API Keys → tarayici anahtari kisitlamasi: None veya referrer https://salimoglu.github.io/*";
+            try {
+              sessionStorage.setItem(
+                "hk-auth-redirect-err",
+                onceki ? onceki + " " + ana : ana
+              );
+            } catch (e2) {}
           }
         }
       }
