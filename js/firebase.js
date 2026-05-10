@@ -91,18 +91,10 @@ async function fbInit() {
       } catch (x) {}
     }
 
-    var persistAuth = fbAndroidMi()
-      ? firebase.auth.Auth.Persistence.SESSION
-      : firebase.auth.Auth.Persistence.LOCAL;
     try {
-      await firebase.auth().setPersistence(persistAuth);
+      await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
     } catch (pe) {
       console.warn("Auth persistence:", pe);
-      try {
-        await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-      } catch (pe2) {
-        console.warn("Auth persistence fallback:", pe2);
-      }
     }
 
     /* Kalici oturum tam oturana kadar bekle (ilk bos snapshot ile RTDB okunmasin). */
@@ -150,7 +142,7 @@ async function fbInit() {
             var ana =
               "Google dondu ama oturum acilmadi." +
               tek +
-                " 1) Firebase Console → Authentication → Settings → Authorized domains: salimoglu.github.io 2) Google Cloud (proje hesap-kitap-234d1) → APIs & Services → Credentials → OAuth 2.0 Client IDs → Web client (auto created by Google Service) → Authorized JavaScript origins: https://salimoglu.github.io ve https://hesap-kitap-234d1.firebaseapp.com 3) Ayni ekranda Authorized redirect URIs: https://hesap-kitap-234d1.firebaseapp.com/__/auth/handler 4) API Keys → tarayici anahtari kisitlamasi: None veya referrer https://salimoglu.github.io/*";
+                " Ayni adresi kullanin: https://salimoglu.github.io/hesap-kitap/ (sonda / onemli). 1) Firebase → Authentication → Authorized domains: salimoglu.github.io 2) Google Cloud → OAuth Web client → Authorized JavaScript origins: https://salimoglu.github.io , https://hesap-kitap-234d1.firebaseapp.com 3) Redirect URIs: https://hesap-kitap-234d1.firebaseapp.com/__/auth/handler 4) API key kisitlamasi: None veya https://salimoglu.github.io/*";
             try {
               sessionStorage.setItem(
                 "hk-auth-redirect-err",
@@ -277,24 +269,15 @@ async function fbGirisGoogle() {
 
   var uaG = typeof navigator !== "undefined" ? navigator.userAgent || "" : "";
   var isAnd = /Android/i.test(uaG);
-  var persistOnce = isAnd
-    ? firebase.auth.Auth.Persistence.SESSION
-    : firebase.auth.Auth.Persistence.LOCAL;
   try {
-    await firebase.auth().setPersistence(persistOnce);
+    await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
   } catch (pe) {
     console.warn("setPersistence (google):", pe);
-    try {
-      await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-    } catch (pe2) {
-      console.warn("setPersistence (google) fallback:", pe2);
-    }
   }
 
   /**
    * Android: popup pek cogu cihazda tam ekran / Custom Tab ile kopuk biter; dogrudan redirect kullan.
-   * Android'de SESSION: bazi ROM'larda IndexedDB ile LOCAL kalicilik OAuth ile uyusmuyor.
-   * SW'yi burada silmeyin — bekleyen yonlendirme durumu kaybolabiliyor; silme isi OAuth donusunde.
+   * SW'yi burada silmeyin; OAuth donusunde fbInit kaldirilir.
    */
   if (isAnd) {
     try {
