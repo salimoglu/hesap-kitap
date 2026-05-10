@@ -40,6 +40,14 @@ var ArabamModule = (function () {
     return m ? m[1] : "_";
   }
 
+  function aracToplamYil(arac, yil) {
+    if (!arac || !arac.giderler || !arac.giderler.length) return 0;
+    var y = String(yil);
+    return arac.giderler.reduce(function (s, g) {
+      return giderYilStr(g.tarih) === y ? s + (Number(g.tutar) || 0) : s;
+    }, 0);
+  }
+
   function aracYillikOzet(arac) {
     var by = {};
     if (!arac || !arac.giderler || !arac.giderler.length) return [];
@@ -126,6 +134,8 @@ var ArabamModule = (function () {
 
     var topGenel = ozetToplamTumu();
     var bugun = new Date().toISOString().split("T")[0];
+    var yBu = String(new Date().getFullYear());
+    var yGecen = String(Number(yBu) - 1);
 
     var h = '<div class="ar-wrap">';
     h += '<div class="ar-header">';
@@ -142,11 +152,18 @@ var ArabamModule = (function () {
       h += '<div class="ar-liste">';
       _araclar.slice().sort(function (a, b) { return (a.plaka || "").localeCompare(b.plaka || "", "tr"); }).forEach(function (a) {
         var t = aracToplam(a);
+        var tb = aracToplamYil(a, yBu);
+        var tg = aracToplamYil(a, yGecen);
         h += '<div class="ar-kart" data-id="' + a.id + '" role="button" tabindex="0">';
         h += '<div class="ar-kart-sol">';
         h += '<div class="ar-plaka">' + (a.plaka || "—") + "</div>";
         h += '<div class="ar-marka-model">' + (a.marka || "") + " " + (a.model || "") + "</div>";
-        h += '<div class="ar-kart-meta"><span class="ar-pill">' + (a.giderler ? a.giderler.length : 0) + " gider</span></div>";
+        h += '<div class="ar-kart-meta">';
+        h += '<span class="ar-pill">' + (a.giderler ? a.giderler.length : 0) + " gider</span>";
+        h += '<span class="ar-kart-mini-yil">';
+        h += '<span class="ar-mini-yil ar-mini-yil--bu"><span class="ar-mini-yil-l">Bu yıl</span><span class="ar-mini-yil-v">' + mp(tb) + " TL</span></span>";
+        h += '<span class="ar-mini-yil"><span class="ar-mini-yil-l">Geçen yıl</span><span class="ar-mini-yil-v">' + mp(tg) + " TL</span></span>";
+        h += "</span></div>";
         h += "</div>";
         h += '<div class="ar-kart-sag">';
         h += '<div class="ar-kart-tutar">' + mp(t) + "</div>";
