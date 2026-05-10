@@ -13,11 +13,56 @@ let _fbDb = null;
 window._fbAuthOk = false;
 window._fbReady = Promise.resolve(false);
 
+function fbAndroidMi() {
+  return /Android/i.test(typeof navigator !== "undefined" ? navigator.userAgent || "" : "");
+}
+
+/** Google/Firebase OAuth geri donusinda URL'de gorunen parametreler (SDK islemeden once bakilir). */
+function fbOAuthDonusUrlMu() {
+  try {
+    var s = window.location.search || "";
+    var h = window.location.hash || "";
+    if (s.indexOf("apiKey=") !== -1) return true;
+    if (s.indexOf("authType=") !== -1 || s.indexOf("signInViaRedirect") !== -1) return true;
+    if (h.indexOf("__/auth/") !== -1) return true;
+    if (/access_token=|id_token=|oauth/.test(h)) return true;
+    return false;
+  } catch (e) {
+    return false;
+  }
+}
+
+async function fbTumSwKaldir() {
+  if (typeof navigator === "undefined" || !navigator.serviceWorker || !navigator.serviceWorker.getRegistrations) return;
+  try {
+    var regs = await navigator.serviceWorker.getRegistrations();
+    for (var ri = 0; ri < regs.length; ri++) await regs[ri].unregister();
+  } catch (e) {
+    console.warn("fbTumSwKaldir:", e);
+  }
+}
+
 async function fbInit() {
   try {
     if (!firebase.apps.length) firebase.initializeApp(_fbConfig);
     _fbDb = firebase.database();
     window._fbDb = _fbDb;
+
+    /**
+     * OAuth donus sayfasinda Service Worker bazen yanitlari/depoyu bozar; getRedirectResult ONCESI kaldir.
+     * Giris baslatmadan SW silmek de bazi cihazlarda bekleyen yonlendirmeyi kaybettirdi — o adim kaldirildi.
+     */
+    var yakindaGoogleYon = false;
+    try {
+      var rp0 = sessionStorage.getItem("hk-google-redirect-pending");
+      if (rp0) {
+        var tp0 = parseInt(rp0, 10);
+        yakindaGoogleYon = !isNaN(tp0) && Date.now() - tp0 < 20 * 60 * 1000;
+      }
+    } catch (e0) {}
+    if (fbOAuthDonusUrlMu() || (fbAndroidMi() && yakindaGoogleYon)) {
+      await fbTumSwKaldir();
+    }
 
     /**
      * OAuth redirect: once getRedirectResult tamamlanmali; bazi Android/PWA kurulumlarinda
@@ -46,10 +91,18 @@ async function fbInit() {
       } catch (x) {}
     }
 
+    var persistAuth = fbAndroidMi()
+      ? firebase.auth.Auth.Persistence.SESSION
+      : firebase.auth.Auth.Persistence.LOCAL;
     try {
-      await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+      await firebase.auth().setPersistence(persistAuth);
     } catch (pe) {
       console.warn("Auth persistence:", pe);
+      try {
+        await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+      } catch (pe2) {
+        console.warn("Auth persistence fallback:", pe2);
+      }
     }
 
     /* Kalici oturum tam oturana kadar bekle (ilk bos snapshot ile RTDB okunmasin). */
@@ -75,9 +128,22 @@ async function fbInit() {
           var tsP = parseInt(rawP, 10);
           var taze = !isNaN(tsP) && Date.now() - tsP < 15 * 60 * 1000;
           if (taze && !sessionStorage.getItem("hk-auth-redirect-err")) {
+            var tek = "";
+            try {
+              if (redirectResult) {
+                tek =
+                  " Teknik bilgi: redirectUser=" +
+                  (redirectResult.user ? "evet" : "hayir") +
+                  " credential=" +
+                  (redirectResult.credential ? "evet" : "hayir") +
+                  ".";
+              }
+            } catch (td) {}
             sessionStorage.setItem(
               "hk-auth-redirect-err",
-              "Google ile geri donuldu ama oturum acilmadi. Firebase Console → Authentication → Settings → Authorized domains: salimoglu.github.io ekli mi kontrol edin. Adres cubugunda tam sekilde acin: https://salimoglu.github.io/hesap-kitap/ — WhatsApp/Instagram icinden degil, Chrome ile deneyin."
+              "Google ile geri donuldu ama oturum acilamadi." +
+                tek +
+                " Firebase → Authentication → Authorized domains: salimoglu.github.io olmali. Google Cloud Console → APIs and Services → Credentials → ilgili API anahtari → Application restrictions: 'None' veya HTTP referrers ile https://salimoglu.github.io/* ve https://*.github.io/* ekleyin. Site: https://salimoglu.github.io/hesap-kitap/ — E-posta ile giris calisiyorsa sorun Google tarafinda demektir."
             );
           }
         }
@@ -197,30 +263,28 @@ async function fbGirisGoogle() {
   var provider = new firebase.auth.GoogleAuthProvider();
   provider.setCustomParameters({ prompt: "select_account" });
 
+  var uaG = typeof navigator !== "undefined" ? navigator.userAgent || "" : "";
+  var isAnd = /Android/i.test(uaG);
+  var persistOnce = isAnd
+    ? firebase.auth.Auth.Persistence.SESSION
+    : firebase.auth.Auth.Persistence.LOCAL;
   try {
-    await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+    await firebase.auth().setPersistence(persistOnce);
   } catch (pe) {
     console.warn("setPersistence (google):", pe);
-  }
-
-  /**
-   * Android'de bazi cihazlarda PWA + Service Worker OAuth donusunu bozabiliyor;
-   * giris baslamadan SW kaldirilir; sayfa donunce app.js tekrar kaydeder.
-   */
-  var uaG = typeof navigator !== "undefined" ? navigator.userAgent || "" : "";
-  if (/Android/i.test(uaG) && typeof navigator !== "undefined" && navigator.serviceWorker) {
     try {
-      var regs = await navigator.serviceWorker.getRegistrations();
-      for (var si = 0; si < regs.length; si++) await regs[si].unregister();
-    } catch (swx) {
-      console.warn("SW unregister (Android Google):", swx);
+      await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+    } catch (pe2) {
+      console.warn("setPersistence (google) fallback:", pe2);
     }
   }
 
   /**
    * Android: popup pek cogu cihazda tam ekran / Custom Tab ile kopuk biter; dogrudan redirect kullan.
+   * Android'de SESSION: bazi ROM'larda IndexedDB ile LOCAL kalicilik OAuth ile uyusmuyor.
+   * SW'yi burada silmeyin — bekleyen yonlendirme durumu kaybolabiliyor; silme isi OAuth donusunde.
    */
-  if (/Android/i.test(uaG)) {
+  if (isAnd) {
     try {
       sessionStorage.setItem("hk-google-redirect-pending", String(Date.now()));
     } catch (y) {}
