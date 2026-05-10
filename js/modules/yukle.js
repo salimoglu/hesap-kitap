@@ -720,17 +720,6 @@ function render(){
   }
   h+='</div>';
 
-  /* ── DURUM ÖZETİ ── */
-  var kzS=deg-tah;
-  h+='<div class="vf2-durum-ozet"><div class="vf2-kolon-baslik">📋 DURUM ÖZETİ</div>';
-  h+='<table class="vf2-oz-tablo"><thead><tr><th>AÇIKLAMA</th><th>TUTAR</th></tr></thead><tbody>';
-  h+='<tr><td>Toplam Ödeme</td><td>'+p(tah)+' TL</td></tr>';
-  h+='<tr><td>Altın Güncel Değer</td><td style="color:var(--gold)">'+(_gramFiyat>0?p(altin.guncel_deger)+' TL':'—')+'</td></tr>';
-  h+='<tr><td>Nakit</td><td style="color:var(--green)">'+p(nakit.toplam)+' TL</td></tr>';
-  h+='<tr><td>Toplam Değerleme</td><td style="color:var(--gold)">'+(_gramFiyat>0||nakit.toplam>0?p(deg)+' TL':'—')+'</td></tr>';
-  h+='<tr class="vf2-tot-row"><td>Kar / Zarar</td><td style="color:'+(kzS>=0?"var(--green)":"var(--red)")+'">'+(kzS>=0?"+":"")+p(kzS)+' TL</td></tr>';
-  h+='</tbody></table></div>';
-
   /* MODALLER */
   h+='<div class="bk-modal-overlay hidden" id="vf2-modal"><div class="modal-box" style="max-width:540px">';
   h+='<div class="modal-header"><h2 class="modal-title" id="vf2-modal-baslik">Yatırım Ekle</h2><button class="modal-close" id="vf2-modal-kapat">&#10005;</button></div>';
