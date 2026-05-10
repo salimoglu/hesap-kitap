@@ -161,19 +161,54 @@ async function fbGirisGoogle() {
   var provider = new firebase.auth.GoogleAuthProvider();
   provider.setCustomParameters({ prompt: "select_account" });
   var ua = typeof navigator !== "undefined" ? navigator.userAgent || "" : "";
+  var isIOS =
+    /iPad|iPhone|iPod/.test(ua) ||
+    (typeof navigator !== "undefined" &&
+      navigator.platform === "MacIntel" &&
+      typeof navigator.maxTouchPoints === "number" &&
+      navigator.maxTouchPoints > 1);
+  var isAndroid = /Android/i.test(ua);
   var isStandalone =
     (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
     window.navigator.standalone === true;
-  var isMobileUa = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
-  if (isStandalone || isMobileUa) {
+  var digerMobil =
+    !isIOS &&
+    !isAndroid &&
+    /webOS|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+
+  try {
+    await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+  } catch (pe) {
+    console.warn("setPersistence (google):", pe);
+  }
+
+  /**
+   * iOS (Safari, Chrome, PWA): redirect cogu zaman dis Safari / farkli depolama ile biter,
+   * uygulama acildiginda oturum gelmez. Popup ayni WebView icinde kalir.
+   */
+  if (isIOS) {
     try {
-      await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-    } catch (pe) {
-      console.warn("setPersistence (redirect):", pe);
+      await firebase.auth().signInWithPopup(provider);
+      return;
+    } catch (e) {
+      var ci = e && e.code ? e.code : "";
+      if (
+        ci === "auth/popup-blocked" ||
+        ci === "auth/operation-not-supported-in-this-environment" ||
+        ci === "auth/cancelled-popup-request"
+      ) {
+        await firebase.auth().signInWithRedirect(provider);
+        return;
+      }
+      throw e;
     }
+  }
+
+  if (isAndroid || isStandalone || digerMobil) {
     await firebase.auth().signInWithRedirect(provider);
     return;
   }
+
   try {
     await firebase.auth().signInWithPopup(provider);
   } catch (e) {
@@ -183,11 +218,6 @@ async function fbGirisGoogle() {
       c === "auth/operation-not-supported-in-this-environment" ||
       c === "auth/cancelled-popup-request"
     ) {
-      try {
-        await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-      } catch (pe) {
-        console.warn("setPersistence (popup fallback):", pe);
-      }
       await firebase.auth().signInWithRedirect(provider);
       return;
     }
