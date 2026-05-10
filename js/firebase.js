@@ -19,20 +19,37 @@ async function fbInit() {
     _fbDb = firebase.database();
     window._fbDb = _fbDb;
 
+    /**
+     * OAuth redirect: once getRedirectResult tamamlanmali; bazi Android/PWA kurulumlarinda
+     * setPersistence bundan once cagrildiginda yonlendirme sonucu islenmeyebiliyor.
+     */
+    var redirectResult = null;
+    try {
+      redirectResult = await firebase.auth().getRedirectResult();
+    } catch (e) {
+      console.warn("getRedirectResult:", e);
+      try {
+        var rmsg0 = typeof fbAuthHataMetni === "function" ? fbAuthHataMetni(e) : (e && e.message) || "";
+        if (rmsg0) sessionStorage.setItem("hk-auth-redirect-err", rmsg0);
+      } catch (x) {}
+    }
+
+    try {
+      if (redirectResult && redirectResult.credential && !firebase.auth().currentUser) {
+        await firebase.auth().signInWithCredential(redirectResult.credential);
+      }
+    } catch (ce) {
+      console.warn("signInWithCredential (redirect):", ce);
+      try {
+        var rmsg1 = typeof fbAuthHataMetni === "function" ? fbAuthHataMetni(ce) : (ce && ce.message) || "";
+        if (rmsg1) sessionStorage.setItem("hk-auth-redirect-err", rmsg1);
+      } catch (x) {}
+    }
+
     try {
       await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
     } catch (pe) {
       console.warn("Auth persistence:", pe);
-    }
-
-    try {
-      await firebase.auth().getRedirectResult();
-    } catch (e) {
-      console.warn("getRedirectResult:", e);
-      try {
-        var rmsg = typeof fbAuthHataMetni === "function" ? fbAuthHataMetni(e) : (e && e.message) || "";
-        if (rmsg) sessionStorage.setItem("hk-auth-redirect-err", rmsg);
-      } catch (x) {}
     }
 
     /* Kalici oturum tam oturana kadar bekle (ilk bos snapshot ile RTDB okunmasin). */
@@ -47,6 +64,25 @@ async function fbInit() {
         });
       });
     }
+    /* Google redirect dondu ama oturum yok: genelde Authorized domains veya depolama. */
+    try {
+      if (firebase.auth().currentUser) {
+        sessionStorage.removeItem("hk-google-redirect-pending");
+      } else {
+        var rawP = sessionStorage.getItem("hk-google-redirect-pending");
+        sessionStorage.removeItem("hk-google-redirect-pending");
+        if (rawP) {
+          var tsP = parseInt(rawP, 10);
+          var taze = !isNaN(tsP) && Date.now() - tsP < 15 * 60 * 1000;
+          if (taze && !sessionStorage.getItem("hk-auth-redirect-err")) {
+            sessionStorage.setItem(
+              "hk-auth-redirect-err",
+              "Google ile geri donuldu ama oturum acilmadi. Firebase Console → Authentication → Settings → Authorized domains: salimoglu.github.io ekli mi kontrol edin. Adres cubugunda tam sekilde acin: https://salimoglu.github.io/hesap-kitap/ — WhatsApp/Instagram icinden degil, Chrome ile deneyin."
+            );
+          }
+        }
+      }
+    } catch (pendEx) {}
     window._fbAuthOk = !!firebase.auth().currentUser;
     window._fbReady = Promise.resolve(window._fbAuthOk);
     firebase.auth().onAuthStateChanged(function(user) {
@@ -160,21 +196,6 @@ async function fbKayitEmail(email, sifre) {
 async function fbGirisGoogle() {
   var provider = new firebase.auth.GoogleAuthProvider();
   provider.setCustomParameters({ prompt: "select_account" });
-  var ua = typeof navigator !== "undefined" ? navigator.userAgent || "" : "";
-  var isIOS =
-    /iPad|iPhone|iPod/.test(ua) ||
-    (typeof navigator !== "undefined" &&
-      navigator.platform === "MacIntel" &&
-      typeof navigator.maxTouchPoints === "number" &&
-      navigator.maxTouchPoints > 1);
-  var isAndroid = /Android/i.test(ua);
-  var isStandalone =
-    (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
-    window.navigator.standalone === true;
-  var digerMobil =
-    !isIOS &&
-    !isAndroid &&
-    /webOS|BlackBerry|IEMobile|Opera Mini/i.test(ua);
 
   try {
     await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
@@ -183,32 +204,33 @@ async function fbGirisGoogle() {
   }
 
   /**
-   * iOS (Safari, Chrome, PWA): redirect cogu zaman dis Safari / farkli depolama ile biter,
-   * uygulama acildiginda oturum gelmez. Popup ayni WebView icinde kalir.
+   * Android'de bazi cihazlarda PWA + Service Worker OAuth donusunu bozabiliyor;
+   * giris baslamadan SW kaldirilir; sayfa donunce app.js tekrar kaydeder.
    */
-  if (isIOS) {
+  var uaG = typeof navigator !== "undefined" ? navigator.userAgent || "" : "";
+  if (/Android/i.test(uaG) && typeof navigator !== "undefined" && navigator.serviceWorker) {
     try {
-      await firebase.auth().signInWithPopup(provider);
-      return;
-    } catch (e) {
-      var ci = e && e.code ? e.code : "";
-      if (
-        ci === "auth/popup-blocked" ||
-        ci === "auth/operation-not-supported-in-this-environment" ||
-        ci === "auth/cancelled-popup-request"
-      ) {
-        await firebase.auth().signInWithRedirect(provider);
-        return;
-      }
-      throw e;
+      var regs = await navigator.serviceWorker.getRegistrations();
+      for (var si = 0; si < regs.length; si++) await regs[si].unregister();
+    } catch (swx) {
+      console.warn("SW unregister (Android Google):", swx);
     }
   }
 
-  if (isAndroid || isStandalone || digerMobil) {
+  /**
+   * Android: popup pek cogu cihazda tam ekran / Custom Tab ile kopuk biter; dogrudan redirect kullan.
+   */
+  if (/Android/i.test(uaG)) {
+    try {
+      sessionStorage.setItem("hk-google-redirect-pending", String(Date.now()));
+    } catch (y) {}
     await firebase.auth().signInWithRedirect(provider);
     return;
   }
 
+  /**
+   * Masaustu / iOS: once popup; olmazsa redirect.
+   */
   try {
     await firebase.auth().signInWithPopup(provider);
   } catch (e) {
@@ -218,6 +240,9 @@ async function fbGirisGoogle() {
       c === "auth/operation-not-supported-in-this-environment" ||
       c === "auth/cancelled-popup-request"
     ) {
+      try {
+        sessionStorage.setItem("hk-google-redirect-pending", String(Date.now()));
+      } catch (y2) {}
       await firebase.auth().signInWithRedirect(provider);
       return;
     }

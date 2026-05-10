@@ -35,10 +35,30 @@
   }
 
   function girisFormuSifirla() {
-    const fbErr = document.getElementById("fb-auth-error");
-    if (fbErr) fbErr.textContent = "";
+    /* fb-auth-error burada silinmez: onAuthStateChanged her tetiklendiginde Firebase yonlendirme hatalarini yok ediyordu. */
     _kilitKayitModu = false;
     kilitKayitArayuz();
+  }
+
+  let _hkSwRegisterDenendi = false;
+  async function hkServiceWorkerKaydet() {
+    if (_hkSwRegisterDenendi || !("serviceWorker" in navigator)) return;
+    _hkSwRegisterDenendi = true;
+    try {
+      const reg = await navigator.serviceWorker.register("sw.js", { updateViaCache: "none" });
+      reg.addEventListener("updatefound", () => {
+        const newWorker = reg.installing;
+        if (newWorker) {
+          newWorker.addEventListener("statechange", () => {
+            if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+              newWorker.postMessage({ type: "SKIP_WAITING" });
+            }
+          });
+        }
+      });
+    } catch (err) {
+      console.warn("SW hatasi:", err);
+    }
   }
 
   async function uygulamaAc() {
@@ -47,6 +67,11 @@
       u = typeof fbMevcutKullanici === "function" ? fbMevcutKullanici() : null;
     } catch (e) { u = null; }
     if (!u || u.isAnonymous) return;
+
+    try { await hkServiceWorkerKaydet(); } catch (eSw) {}
+
+    const fbErrOk = document.getElementById("fb-auth-error");
+    if (fbErrOk) fbErrOk.textContent = "";
 
     lockScreen.classList.add("hidden");
     appEl.classList.remove("hidden");
@@ -110,6 +135,19 @@
 
   if (typeof firebase !== "undefined" && firebase.auth) {
     firebase.auth().onAuthStateChanged(async function(user) {
+      /**
+       * OAuth redirect donusunde: ilk callback bazen null geliyor; getRedirectResult
+       * cogu cihazda currentUser'i hemen dolduruyor. Kisa gecikme ile tekrar oku.
+       */
+      if (!user || user.isAnonymous) {
+        var uaCb = typeof navigator !== "undefined" ? navigator.userAgent || "" : "";
+        var dly = /Android/i.test(uaCb) ? 900 : 400;
+        await new Promise(function(r) { setTimeout(r, dly); });
+        try {
+          var u2 = firebase.auth().currentUser;
+          if (u2 && !u2.isAnonymous) user = u2;
+        } catch (e) {}
+      }
       girisFormuSifirla();
       if (user && !user.isAnonymous) {
         await uygulamaAc();
@@ -326,22 +364,4 @@
     .sync-durum { font-size: 13px; color: var(--text-muted); padding: 0 6px; }
   `;
   document.head.appendChild(style);
-
-  // Service Worker — her zaman en yeni versiyonu al
-  if ("serviceWorker" in navigator) {
-    try {
-      const reg = await navigator.serviceWorker.register("sw.js", { updateViaCache: "none" });
-      // Yeni SW gelince hemen aktive et
-      reg.addEventListener("updatefound", () => {
-        const newWorker = reg.installing;
-        if (newWorker) {
-          newWorker.addEventListener("statechange", () => {
-            if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
-              newWorker.postMessage({ type: "SKIP_WAITING" });
-            }
-          });
-        }
-      });
-    } catch(err) { console.warn("SW hatasi:", err); }
-  }
 })();
