@@ -14,6 +14,30 @@ var ArabamModule = (function () {
     { key: "diger", label: "Diğer" }
   ];
 
+  var ARAC_TIPLER = [
+    { key: "otomobil", label: "Otomobil", emoji: "🚗" },
+    { key: "suv", label: "SUV / crossover", emoji: "🚙" },
+    { key: "kamyonet", label: "Kamyonet / pick-up", emoji: "🛻" },
+    { key: "kamyon", label: "Kamyon", emoji: "🚛" },
+    { key: "motosiklet", label: "Motosiklet", emoji: "🏍️" },
+    { key: "minibus", label: "Minibüs", emoji: "🚐" },
+    { key: "otobus", label: "Otobüs", emoji: "🚌" },
+    { key: "elektrikli", label: "Elektrikli", emoji: "⚡" },
+    { key: "diger", label: "Diğer", emoji: "🚗" }
+  ];
+
+  var EMOJI_LIST = (function () {
+    var u = [];
+    var ek = ["🚕", "🏎️", "🛵", "🚜", "🚲", "⛽", "⭐"];
+    ARAC_TIPLER.forEach(function (t) {
+      if (u.indexOf(t.emoji) < 0) u.push(t.emoji);
+    });
+    ek.forEach(function (e) {
+      if (u.indexOf(e) < 0) u.push(e);
+    });
+    return u;
+  })();
+
   var _araclar = [];
   var _aktifAracId = null;
 
@@ -31,6 +55,32 @@ var ArabamModule = (function () {
   function kalemLabel(key) {
     var f = GIDER_KALEMLER.find(function (x) { return x.key === key; });
     return f ? f.label : key || "—";
+  }
+
+  function tipLabel(key) {
+    var f = ARAC_TIPLER.find(function (x) { return x.key === key; });
+    return f ? f.label : "Otomobil";
+  }
+
+  function tipVarsayilanEmoji(key) {
+    var f = ARAC_TIPLER.find(function (x) { return x.key === key; });
+    return f ? f.emoji : "🚗";
+  }
+
+  function aracEmojiGoster(a) {
+    if (!a) return "🚗";
+    var e = a.aracEmoji;
+    if (e && String(e).trim()) return String(e).trim().slice(0, 12);
+    return tipVarsayilanEmoji(a.aracTip || "otomobil");
+  }
+
+  function syncAracEmojiUI() {
+    var hid = $("ar-inp-emoji");
+    if (!hid) return;
+    var cur = hid.value.trim();
+    document.querySelectorAll(".ar-emoji-btn").forEach(function (b) {
+      b.classList.toggle("selected", b.textContent.trim() === cur);
+    });
   }
 
   /** Gider tarihinden takvim yılı (YYYY-MM-DD); yoksa "_" */
@@ -78,12 +128,16 @@ var ArabamModule = (function () {
     var satirlar = aracYillikOzet(arac);
     if (!satirlar.length) {
       return (
-        '<div class="ar-yil-baslik">Yıllık özet <span class="ar-yil-aciklama">(gider tarihine göre)</span></div>' +
+        '<div class="ar-yil-baslik"><span class="ar-yil-emoji">' +
+        aracEmojiGoster(arac) +
+        '</span> Yıllık özet <span class="ar-yil-aciklama">(gider tarihine göre)</span></div>' +
         '<div class="ar-yil-bos">Bu araç için gider eklediğinizde, her kaydın <strong>tarih</strong> alanına göre yıllık toplamlar burada listelenir.</div>'
       );
     }
     var h =
-      '<div class="ar-yil-baslik">Yıllık özet <span class="ar-yil-aciklama">(gider tarihine göre)</span></div>' +
+      '<div class="ar-yil-baslik"><span class="ar-yil-emoji">' +
+      aracEmojiGoster(arac) +
+      '</span> Yıllık özet <span class="ar-yil-aciklama">(gider tarihine göre)</span></div>' +
       '<div class="ar-yil-grid">';
     satirlar.forEach(function (r) {
       var yEtiket = r.yil === "_" ? "Tarih eksik" : r.yil;
@@ -180,8 +234,13 @@ var ArabamModule = (function () {
         var ortGun = gunYil > 0 ? tb / gunYil : 0;
         h += '<div class="ar-kart" data-id="' + a.id + '" role="button" tabindex="0">';
         h += '<div class="ar-kart-sol">';
+        h += '<div class="ar-kart-ust">';
+        h += '<span class="ar-kart-emoji" aria-hidden="true">' + aracEmojiGoster(a) + "</span>";
+        h += '<div class="ar-kart-metin">';
         h += '<div class="ar-plaka">' + (a.plaka || "—") + "</div>";
+        h += '<div class="ar-arac-tip">' + tipLabel(a.aracTip || "otomobil") + "</div>";
         h += '<div class="ar-marka-model">' + (a.marka || "") + " " + (a.model || "") + "</div>";
+        h += "</div></div>";
         h += '<div class="ar-kart-meta">';
         h += '<span class="ar-pill">' + (a.giderler ? a.giderler.length : 0) + " gider</span>";
         h += '<span class="ar-kart-mini-yil">';
@@ -210,12 +269,24 @@ var ArabamModule = (function () {
     h += '<button type="button" class="modal-close" id="ar-arac-modal-kapat" aria-label="Kapat">&#10005;</button></div>';
     h += '<div class="modal-body">';
     h += '<input type="hidden" id="ar-arac-id" value=""/>';
+    h += '<input type="hidden" id="ar-inp-emoji" value="🚗"/>';
     h += '<div class="field-group"><label class="field-label" for="ar-inp-plaka">Plaka</label>';
     h += '<input type="text" id="ar-inp-plaka" class="field-input" placeholder="34 ABC 123" maxlength="20" autocomplete="off"/></div>';
     h += '<div class="field-group"><label class="field-label" for="ar-inp-marka">Marka</label>';
     h += '<input type="text" id="ar-inp-marka" class="field-input" placeholder="Örn. Toyota" maxlength="40"/></div>';
     h += '<div class="field-group"><label class="field-label" for="ar-inp-model">Model</label>';
     h += '<input type="text" id="ar-inp-model" class="field-input" placeholder="Örn. Corolla" maxlength="40"/></div>';
+    h += '<div class="field-group"><label class="field-label" for="ar-inp-tipi">Araç tipi</label>';
+    h += '<select id="ar-inp-tipi" class="field-select">';
+    ARAC_TIPLER.forEach(function (t) {
+      h += '<option value="' + t.key + '">' + t.label + "</option>";
+    });
+    h += "</select></div>";
+    h += '<div class="field-group ar-emoji-field"><label class="field-label">Emoji</label><div class="ar-emoji-grid" id="ar-emoji-grid">';
+    EMOJI_LIST.forEach(function (em) {
+      h += '<button type="button" class="ar-emoji-btn">' + em + "</button>";
+    });
+    h += "</div></div>";
     h += '<div class="field-group"><label class="field-label" for="ar-inp-sigorta">Sigorta yenileme / bitiş</label>';
     h += '<input type="date" id="ar-inp-sigorta" class="field-input"/></div>';
     h += '<div class="field-group"><label class="field-label" for="ar-inp-muayene">Muayene bitiş <span class="ar-label-hint">isteğe bağlı</span></label>';
@@ -230,8 +301,10 @@ var ArabamModule = (function () {
     h += '<div class="modal-box ar-detay-kutu">';
     h += '<div class="modal-header ar-detay-head">';
     h += '<div class="ar-detay-ust">';
+    h += '<span id="ar-d-emoji" class="ar-detay-emoji" aria-hidden="true"></span>';
     h += '<div class="ar-detay-baslik-blok">';
     h += '<div class="ar-detay-plaka" id="ar-d-plaka"></div>';
+    h += '<div id="ar-d-tipi" class="ar-d-tipi"></div>';
     h += '<div class="ar-detay-marka" id="ar-d-marka"></div>';
     h += '<div class="ar-detay-tarihler"><div id="ar-d-sigorta"></div><div id="ar-d-muayene"></div></div>';
     h += "</div>";
@@ -277,6 +350,10 @@ var ArabamModule = (function () {
     var a = aracBul(aid);
     if (!a) return;
     $("ar-d-plaka").textContent = a.plaka || "—";
+    var dem = $("ar-d-emoji");
+    if (dem) dem.textContent = aracEmojiGoster(a);
+    var dti = $("ar-d-tipi");
+    if (dti) dti.textContent = tipLabel(a.aracTip || "otomobil");
     $("ar-d-marka").textContent = ((a.marka || "") + " " + (a.model || "")).trim() || "—";
     var sg = a.sigortaTarih ? "Sigorta bitiş: " + mTarih(a.sigortaTarih) : "";
     var my = a.muayeneTarih ? "Muayene bitiş: " + mTarih(a.muayeneTarih) : "";
@@ -333,6 +410,8 @@ var ArabamModule = (function () {
         $("ar-inp-model").value = a.model || "";
         $("ar-inp-sigorta").value = a.sigortaTarih || "";
         $("ar-inp-muayene").value = a.muayeneTarih || "";
+        if ($("ar-inp-tipi")) $("ar-inp-tipi").value = a.aracTip || "otomobil";
+        if ($("ar-inp-emoji")) $("ar-inp-emoji").value = aracEmojiGoster(a);
       }
       $("ar-arac-modal-baslik").textContent = "Aracı düzenle";
     } else {
@@ -341,8 +420,11 @@ var ArabamModule = (function () {
       $("ar-inp-model").value = "";
       $("ar-inp-sigorta").value = "";
       $("ar-inp-muayene").value = "";
+      if ($("ar-inp-tipi")) $("ar-inp-tipi").value = "otomobil";
+      if ($("ar-inp-emoji")) $("ar-inp-emoji").value = tipVarsayilanEmoji("otomobil");
       $("ar-arac-modal-baslik").textContent = "Araç ekle";
     }
+    syncAracEmojiUI();
     $("ar-arac-modal").classList.remove("hidden");
     setTimeout(function () { $("ar-inp-plaka").focus(); }, 80);
   }
@@ -359,6 +441,9 @@ var ArabamModule = (function () {
       var model = ($("ar-inp-model").value || "").trim();
       var sigorta = $("ar-inp-sigorta").value || "";
       var muayene = $("ar-inp-muayene").value || "";
+      var tip = ($("ar-inp-tipi") && $("ar-inp-tipi").value) || "otomobil";
+      var emRaw = ($("ar-inp-emoji") && $("ar-inp-emoji").value) || "";
+      var emojiStr = (emRaw.trim() || tipVarsayilanEmoji(tip)).slice(0, 16);
       if (!plaka) {
         $("ar-inp-plaka").focus();
         return;
@@ -370,6 +455,8 @@ var ArabamModule = (function () {
           ex.plaka = plaka;
           ex.marka = marka;
           ex.model = model;
+          ex.aracTip = tip;
+          ex.aracEmoji = emojiStr;
           ex.sigortaTarih = sigorta;
           ex.muayeneTarih = muayene || "";
           geriDetay = kId;
@@ -380,6 +467,8 @@ var ArabamModule = (function () {
           plaka: plaka,
           marka: marka,
           model: model,
+          aracTip: tip,
+          aracEmoji: emojiStr,
           sigortaTarih: sigorta,
           muayeneTarih: muayene || "",
           giderler: []
@@ -394,6 +483,29 @@ var ArabamModule = (function () {
         $("ar-detay-modal").classList.remove("hidden");
       }
     });
+
+    var tipEl = $("ar-inp-tipi");
+    if (tipEl) {
+      tipEl.addEventListener("change", function () {
+        var h = $("ar-inp-emoji");
+        if (h) {
+          h.value = tipVarsayilanEmoji(tipEl.value);
+          syncAracEmojiUI();
+        }
+      });
+    }
+    var eg = $("ar-emoji-grid");
+    if (eg) {
+      eg.addEventListener("click", function (e) {
+        var btn = e.target.closest(".ar-emoji-btn");
+        if (!btn) return;
+        var h = $("ar-inp-emoji");
+        if (h) {
+          h.value = btn.textContent.trim();
+          syncAracEmojiUI();
+        }
+      });
+    }
 
     document.querySelectorAll(".ar-kart").forEach(function (el) {
       el.addEventListener("click", function (e) {
