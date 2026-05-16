@@ -15,7 +15,7 @@ const IslemlerModule = (() => {
     _islemler=await IslemlerDB.getAll();
     _kategoriler=await KategorilerDB.getAll();
     _islemler.sort((a,b)=>a.tarih.localeCompare(b.tarih)||(a.olusturma||0)-(b.olusturma||0));
-    renderList();renderSummary();doldurAyFilter();renderHgList("");const _ht=$("hg-tarih");if(_ht&&!_ht.value)_ht.value=bugun();setTimeout(()=>{const l=$("islem-list");if(l)l.scrollTop=l.scrollHeight;},100);
+    renderList();renderSummary();doldurAyFilter();doldurGrupFilter();renderHgList("");const _ht=$("hg-tarih");if(_ht&&!_ht.value)_ht.value=bugun();setTimeout(()=>{const l=$("islem-list");if(l)l.scrollTop=l.scrollHeight;},100);
   }
 
   function renderSummary(){
@@ -28,9 +28,29 @@ const IslemlerModule = (() => {
     el.style.color=net>=0?"var(--green)":"var(--red)";
   }
 
+  function islemGrupAdi(islem){
+    const kat=(islem&&islem.kategori||"").trim();
+    if(!kat)return"";
+    const d=kat.indexOf(" - ");
+    if(d>=0)return kat.slice(0,d).trim();
+    const tam=_kategoriler.find(k=>(k.grup+" - "+k.ad)===kat);
+    if(tam)return tam.grup;
+    const sadeAd=_kategoriler.find(k=>k.ad===kat);
+    if(sadeAd)return sadeAd.grup;
+    return"";
+  }
+
   function filtreliIslemler(){
-    const tip=$("filter-type").value,ay=$("filter-ay").value;
-    return _islemler.filter(i=>(tip==="hepsi"||i.tip===tip)&&(ay==="hepsi"||i.tarih.startsWith(ay)));
+    const tip=$("filter-type").value,ay=$("filter-ay").value,grup=$("filter-grup").value;
+    return _islemler.filter(i=>{
+      if(tip!=="hepsi"&&i.tip!==tip)return false;
+      if(ay!=="hepsi"&&!i.tarih.startsWith(ay))return false;
+      if(grup!=="hepsi"){
+        const g=islemGrupAdi(i);
+        if(g!==grup)return false;
+      }
+      return true;
+    });
   }
 
   function renderList(){
@@ -89,6 +109,16 @@ const IslemlerModule = (() => {
       o.value=key;o.textContent=AYLAR[parseInt(m)-1]+" "+y;sel.appendChild(o);
     });
     if([...sel.options].some(o=>o.value===prev))sel.value=prev;
+  }
+
+  function doldurGrupFilter(){
+    const sel=$("filter-grup");if(!sel)return;
+    const prev=sel.value;
+    sel.innerHTML="";
+    const o0=document.createElement("option");o0.value="hepsi";o0.textContent="Tüm Gruplar";sel.appendChild(o0);
+    const grups=[...new Set(_kategoriler.map(k=>k.grup).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"tr"));
+    grups.forEach(g=>{const o=document.createElement("option");o.value=g;o.textContent=g;sel.appendChild(o);});
+    if([...sel.options].some(x=>x.value===prev))sel.value=prev;
   }
 
   function renderHgList(arama){
@@ -327,6 +357,7 @@ const IslemlerModule = (() => {
     document.addEventListener("click",()=>closeHgDropdown());
     $("filter-type").addEventListener("change",renderList);
     $("filter-ay").addEventListener("change",renderList);
+    $("filter-grup").addEventListener("change",renderList);
     $("btn-yeni-kat-bar").addEventListener("click",katYonetimAc);
     $("kat-close").addEventListener("click",katYonetimKapat);
     $("modal-kategori").addEventListener("click",e=>{if(e.target===$("modal-kategori"))katYonetimKapat();});
