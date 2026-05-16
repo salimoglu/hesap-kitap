@@ -1514,6 +1514,10 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .ar-yil-y{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--text-primary);font-family:var(--font-brand);line-height:1.2;}
 .ar-yil-t{font-size:14px;font-weight:600;color:var(--green);font-variant-numeric:tabular-nums;line-height:1.2;}
 .ar-yil-n{font-size:11px;color:var(--text-muted);}
+.ar-yil-gun-ort{margin-top:4px;padding-top:8px;border-top:1px dashed var(--border);font-size:11px;line-height:1.35;color:var(--text-secondary);}
+.ar-yil-gun-ort-v{font-weight:700;font-variant-numeric:tabular-nums;color:var(--green);}
+.ar-yil-gun-ort-l{font-weight:700;font-size:9px;letter-spacing:0.06em;color:var(--text-muted);text-transform:uppercase;}
+.ar-yil-gun-ort-hint{font-size:10px;color:var(--text-muted);display:block;margin-top:2px;}
 .ar-yil-bos{font-size:12px;color:var(--text-muted);line-height:1.45;}
 .ar-gider-form{padding:14px 16px;border-bottom:1px solid var(--border);background:var(--bg-elevated);flex-shrink:0;}
 .ar-gider-form-baslik{font-size:10px;font-weight:700;letter-spacing:0.14em;color:var(--text-muted);text-transform:uppercase;margin-bottom:10px;}

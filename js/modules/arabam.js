@@ -48,6 +48,15 @@ var ArabamModule = (function () {
     }, 0);
   }
 
+  function buguneKadarYilGunSayisi(yilStr) {
+    var n = new Date();
+    var y = n.getFullYear();
+    if (String(yilStr) !== String(y)) return 0;
+    var ilk = new Date(y, 0, 1);
+    var bugun = new Date(y, n.getMonth(), n.getDate());
+    return Math.max(1, Math.round((bugun - ilk) / 86400000) + 1);
+  }
+
   function aracYillikOzet(arac) {
     var by = {};
     if (!arac || !arac.giderler || !arac.giderler.length) return [];
@@ -84,6 +93,19 @@ var ArabamModule = (function () {
       h += '<div class="ar-yil-y">' + yEtiket + "</div>";
       h += '<div class="ar-yil-t">' + mp(r.toplam) + " TL</div>";
       h += '<div class="ar-yil-n">' + r.adet + " kayıt</div>";
+      if (buYil) {
+        var gun = buguneKadarYilGunSayisi(r.yil);
+        var ort = gun > 0 ? r.toplam / gun : 0;
+        h +=
+          '<div class="ar-yil-gun-ort">' +
+          '<span class="ar-yil-gun-ort-l">Günlük ort.</span> ' +
+          '<span class="ar-yil-gun-ort-v">' +
+          mp(ort) +
+          " TL</span>" +
+          '<span class="ar-yil-gun-ort-hint"> (1 Ocak – bugün, " +
+          gun +
+          " gün)</span></div>";
+      }
       h += "</div>";
     });
     h += "</div>";
