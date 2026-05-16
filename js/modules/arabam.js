@@ -97,14 +97,14 @@ var ArabamModule = (function () {
         var gun = buguneKadarYilGunSayisi(r.yil);
         var ort = gun > 0 ? r.toplam / gun : 0;
         h +=
-          '<div class="ar-yil-gun-ort">' +
-          '<span class="ar-yil-gun-ort-l">Günlük ort.</span> ' +
-          '<span class="ar-yil-gun-ort-v">' +
+          "<div class=\"ar-yil-gun-ort\">" +
+          "<span class=\"ar-yil-gun-ort-l\">Günlük ort.</span> " +
+          "<span class=\"ar-yil-gun-ort-v\">" +
           mp(ort) +
           " TL</span>" +
-          '<span class="ar-yil-gun-ort-hint"> (1 Ocak – bugün, " +
+          "<span class=\"ar-yil-gun-ort-hint\"> (yılın " +
           gun +
-          " gün)</span></div>";
+          ". gününe kadar)</span></div>";
       }
       h += "</div>";
     });
