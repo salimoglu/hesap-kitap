@@ -176,6 +176,8 @@ var ArabamModule = (function () {
         var t = aracToplam(a);
         var tb = aracToplamYil(a, yBu);
         var tg = aracToplamYil(a, yGecen);
+        var gunYil = buguneKadarYilGunSayisi(yBu);
+        var ortGun = gunYil > 0 ? tb / gunYil : 0;
         h += '<div class="ar-kart" data-id="' + a.id + '" role="button" tabindex="0">';
         h += '<div class="ar-kart-sol">';
         h += '<div class="ar-plaka">' + (a.plaka || "—") + "</div>";
@@ -185,7 +187,12 @@ var ArabamModule = (function () {
         h += '<span class="ar-kart-mini-yil">';
         h += '<span class="ar-mini-yil ar-mini-yil--bu"><span class="ar-mini-yil-l">Bu yıl</span><span class="ar-mini-yil-v">' + mp(tb) + " TL</span></span>";
         h += '<span class="ar-mini-yil"><span class="ar-mini-yil-l">Geçen yıl</span><span class="ar-mini-yil-v">' + mp(tg) + " TL</span></span>";
-        h += "</span></div>";
+        h +=
+          '</span><div class="ar-kart-mini-ort"><span class="ar-kart-mini-ort-l">G\u00fcnl\u00fck ort.</span><span class="ar-kart-mini-ort-v">' +
+          mp(ortGun) +
+          ' TL</span> <span class="ar-mini-hint">(y\u0131l\u0131n ' +
+          gunYil +
+          ". g\u00fcn\u00fc)</span></div></div>";
         h += "</div>";
         h += '<div class="ar-kart-sag">';
         h += '<div class="ar-kart-tutar">' + mp(t) + "</div>";
