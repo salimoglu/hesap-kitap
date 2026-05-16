@@ -56,12 +56,21 @@ async function altinGuncelFiyatYukle(){
     }catch(e){}
   }
   if(_gramAltinFiyatTL<=0){
-    try{
-      var r=await fetch("https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/xau.json");
-      var d=await r.json();
-      var tryPerOz=d&&d.xau&&d.xau.try;
-      if(tryPerOz&&tryPerOz>100)_gramAltinFiyatTL=tryPerOz/31.1035;
-    }catch(e){}
+    var URLs=[
+      "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/xau.json",
+      "https://latest.currency-api.pages.dev/v1/currencies/xau.json"
+    ];
+    var j, r2, d2, x2, oz;
+    for(j=0;j<URLs.length;j++){
+      try{
+        r2=await fetch(URLs[j],{cache:"no-store"});
+        if(!r2.ok)continue;
+        d2=await r2.json();
+        x2=d2&&d2.xau;
+        oz=x2&&parseFloat(x2.try);
+        if(isFinite(oz)&&oz>100){_gramAltinFiyatTL=oz/31.1034768;break;}
+      }catch(e){}
+    }
   }
 }
 function taksitPlan(k){

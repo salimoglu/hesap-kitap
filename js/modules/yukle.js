@@ -135,18 +135,31 @@ function agr(n){return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigit
 function auid(){return "alt"+Date.now()+"_"+Math.random().toString(36).substr(2,5);}
 function atarihFmt(t){if(!t)return"";var p=t.split("-");return p[2]+"."+p[1]+"."+p[0];}
 
-/* Guncel gram altin fiyati cek */
+/* 1 ons (troy) altin = 31,1034768 g; API: 1 XAU = fiyat, TRY karsiligi d.xau.try */
+var TROY_ONS_GRAM = 31.1034768;
+var ALTIN_FIYAT_URLS = [
+  "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/xau.json",
+  "https://latest.currency-api.pages.dev/v1/currencies/xau.json"
+];
+
 async function guncelAltinCek(){
-  try{
-    var r=await fetch("https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/xau.json");
-    var d=await r.json();
-    var tryPerOz=d&&d.xau&&d.xau.try;
-    if(tryPerOz&&tryPerOz>100){
-      _guncelGramFiyat=tryPerOz/31.1035;
-      return _guncelGramFiyat;
-    }
-  }catch(e){}
-  return _guncelGramFiyat||0;
+  var i, r, d, x, tryPerOz, gram;
+  for (i = 0; i < ALTIN_FIYAT_URLS.length; i++) {
+    try {
+      r = await fetch(ALTIN_FIYAT_URLS[i], { cache: "no-store" });
+      if (!r.ok) continue;
+      d = await r.json();
+      x = d && d.xau;
+      if (!x || typeof x !== "object") continue;
+      tryPerOz = parseFloat(x.try);
+      if (isFinite(tryPerOz) && tryPerOz > 100) {
+        gram = tryPerOz / TROY_ONS_GRAM;
+        _guncelGramFiyat = gram;
+        return gram;
+      }
+    } catch (e) {}
+  }
+  return _guncelGramFiyat || 0;
 }
 
 async function afbYukle(){
@@ -158,7 +171,7 @@ async function afbYukle(){
     _kayitlar.sort(function(a,b){return (b.tarih||"").localeCompare(a.tarih||"");});
     /* Kayıtlı güncel fiyat */
     var sf=await fbRtdbRef("altin_guncel_fiyat").once("value");
-    _guncelGramFiyat=sf.val()||0;
+    _guncelGramFiyat=parseFloat(sf.val())||0;
   }catch(e){_kayitlar=[];}
 }
 async function afbKaydet(){
@@ -403,17 +416,15 @@ async function akaydet(){
 async function ainit(){
   await afbYukle();
   arender();
-  /* Arka planda güncel fiyatı çek */
-  guncelAltinCek().then(function(f){
-    if(f>0&&Math.abs(f-(_guncelGramFiyat||0))>50){
-      _guncelGramFiyat=f;
+  guncelAltinCek().then(function (f) {
+    if (!(f > 0)) return;
+    var onceki = _guncelGramFiyat || 0;
+    _guncelGramFiyat = f;
+    var el = $("alt-fiyat-val");
+    if (el) el.textContent = apara(f) + " TL";
+    arender();
+    if (!onceki || Math.abs(f - onceki) > 50) {
       afbFiyatKaydet(f);
-      var el=$("alt-fiyat-val");
-      if(el)el.textContent=apara(f)+" TL";
-      arender();
-    } else if(f>0&&!_guncelGramFiyat){
-      _guncelGramFiyat=f;
-      arender();
     }
   });
 }
