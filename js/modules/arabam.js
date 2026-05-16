@@ -17,18 +17,23 @@ var ArabamModule = (function () {
   var ARAC_TIPLER = [
     { key: "otomobil", label: "Otomobil", emoji: "🚗" },
     { key: "suv", label: "SUV / crossover", emoji: "🚙" },
+    { key: "panelvan", label: "Kompakt panelvan (Berlingo, Kangoo, Partner…)", emoji: "🚐" },
     { key: "kamyonet", label: "Kamyonet / pick-up", emoji: "🛻" },
-    { key: "kamyon", label: "Kamyon", emoji: "🚛" },
-    { key: "motosiklet", label: "Motosiklet", emoji: "🏍️" },
+    { key: "kamyon", label: "Çekici / kamyon", emoji: "🚛" },
     { key: "minibus", label: "Minibüs", emoji: "🚐" },
     { key: "otobus", label: "Otobüs", emoji: "🚌" },
-    { key: "elektrikli", label: "Elektrikli", emoji: "⚡" },
+    { key: "motosiklet", label: "Motosiklet", emoji: "🏍️" },
+    { key: "elektrikli", label: "Elektrikli", emoji: "🔋" },
     { key: "diger", label: "Diğer", emoji: "🚗" }
   ];
 
   var EMOJI_LIST = (function () {
     var u = [];
-    var ek = ["🚕", "🏎️", "🛵", "🚜", "🚲", "⛽", "⭐"];
+    var ek = [
+      "🚕", "🚓", "🚔", "🚒", "🚑", "🏎️", "🚎", "🚍", "🚌", "🚙",
+      "🚚", "🚛", "🚜", "🛻", "🛺", "🏍️", "🛵", "🛴", "🚲", "⛽",
+      "🔋", "⚡", "🅿️", "🛣️", "✨"
+    ];
     ARAC_TIPLER.forEach(function (t) {
       if (u.indexOf(t.emoji) < 0) u.push(t.emoji);
     });
