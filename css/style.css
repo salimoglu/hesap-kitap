@@ -3275,16 +3275,56 @@ html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 42, 0.12); border-
   .vf2-tablo-dis { display: none !important; }
   .vf2-cards { display: flex; flex-direction: column; gap: 10px; }
 
-  .vf2-wrap { padding: 8px 8px 14px; gap: 8px; }
-  .vf2-ozet-bar { padding: 10px 12px !important; gap: 8px; border-radius: 10px; }
+  .vf2-wrap { padding: 6px 6px 12px; gap: 8px; }
+  /* ustteki ozet kutusu dar ekranda dikey ust uste uzadiyordu; satir-wrap + yarim-genislik bloklar */
+  .vf2-ozet-bar {
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    padding: 8px 8px !important;
+    gap: 5px 4px !important;
+    border-radius: 10px;
+  }
+  /* Ust uclu: ilk 3 kutu (sirada her zaman ust satir rakamlari) */
+  .vf2-ozet-bar > .vf2-oz:nth-child(1),
+  .vf2-ozet-bar > .vf2-oz:nth-child(2),
+  .vf2-ozet-bar > .vf2-oz:nth-child(3) {
+    flex: 1 1 calc(33.333% - 6px);
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
   .vf2-oz { gap: 1px; }
-  .vf2-oz-l { font-size: 9px !important; letter-spacing: 0.4px; }
-  .vf2-oz-v { font-size: 15px !important; line-height: 1.1; }
-  .vf2-oz-v small { font-size: 11px !important; }
-  .vf2-ozet-grup { width: 100%; }
-  .vf2-ozet-grup-baslik { font-size: 11px; }
-  .vf2-ozet-grup-ic { gap: 12px !important; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%; }
-  .vf2-altin-tipler { gap: 6px; flex-shrink: 0; }
+  .vf2-oz-l { font-size: 8px !important; letter-spacing: 0.25px; line-height: 1.05; }
+  .vf2-oz-v { font-size: 13px !important; line-height: 1.08; letter-spacing: 0.02em !important; }
+  .vf2-oz-v small { font-size: 9px !important; }
+  .vf2-ozet-grup {
+    width: auto;
+    flex: 1 1 calc(50% - 6px);
+    min-width: min(146px, 100%);
+    max-width: 100%;
+    box-sizing: border-box;
+    gap: 4px !important;
+  }
+  .vf2-ozet-grup-baslik { font-size: 10px !important; line-height: 1.1; letter-spacing: 0.06em !important; }
+  .vf2-ozet-grup .vf2-oz-v {
+    font-size: 12px !important;
+    letter-spacing: 0.02em !important;
+    line-height: 1.1 !important;
+  }
+  .vf2-ozet-grup-ic {
+    gap: 4px 8px !important;
+    flex-wrap: wrap !important;
+    overflow-x: visible !important;
+    -webkit-overflow-scrolling: auto !important;
+  }
+  .vf2-altin-tipler {
+    gap: 4px !important;
+    flex-wrap: wrap !important;
+    overflow-x: visible !important;
+    padding: 2px 0 !important;
+  }
   /* Uye kutulari: yatay scroll yerine 2 sutun, isimler satir kirilir */
   .vf2-card-uyeler {
     display: grid;
@@ -3359,13 +3399,38 @@ html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 42, 0.12); border-
     -webkit-overflow-scrolling: touch;
   }
   .vf2-tip-tag { font-size: 13px !important; padding: 4px 9px !important; }
+  .vf2-ozet-bar .vf2-tip-tag { font-size: 10px !important; padding: 2px 6px !important; }
   .vf2-card-total .vf2-tip-tag { font-size: 14px !important; }
   .vf2-card-total .vf2-card-uye-tot b,
   .vf2-card-total .vf2-card-info .vf2-card-row > b { font-size: 14px !important; }
-  .vf2-oz-sep { width: 100% !important; height: 1px !important; background: var(--border); margin: 4px 0; }
-  .vf2-fiyat-badge { font-size: 11px !important; padding: 4px 9px !important; }
-  .vf2-oz-btns { width: 100%; gap: 6px; flex-wrap: wrap; }
-  .vf2-oz-btns button { flex: 1 1 calc(33% - 6px); min-width: 0; padding: 8px 6px !important; font-size: 11px !important; }
+  .vf2-oz-sep {
+    flex-basis: 100%;
+    width: 100% !important;
+    height: 1px !important;
+    min-height: 1px;
+    background: var(--border);
+    margin: 2px 0;
+  }
+  .vf2-fiyat-badge {
+    font-size: 10px !important;
+    padding: 3px 8px !important;
+    align-self: center;
+    flex: 1 1 auto;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .vf2-oz-btns {
+    width: 100%;
+    flex-basis: 100%;
+    gap: 4px !important;
+    flex-wrap: nowrap !important;
+  }
+  .vf2-oz-btns button {
+    flex: 1;
+    min-width: 0;
+    padding: 6px 4px !important;
+    font-size: 10px !important;
+  }
 
   .ur-tablo .ur-th-desktop { display: none !important; }
   .ur-tablo .ur-th-mob { display: inline !important; }

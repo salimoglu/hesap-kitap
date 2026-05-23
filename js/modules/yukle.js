@@ -561,9 +561,9 @@ function render(){
   h+='<div class="vf2-ozet-grup">';
   h+='<div class="vf2-ozet-grup-baslik">🥇 ALTIN</div>';
   h+='<div class="vf2-ozet-grup-ic">';
-  h+='<div class="vf2-oz"><span class="vf2-oz-l">TOPLAM GRAM</span><span class="vf2-oz-v" style="color:var(--gold);font-size:18px">'+p(altin.toplam_gram)+' gr</span></div>';
+  h+='<div class="vf2-oz"><span class="vf2-oz-l">TOPLAM GRAM</span><span class="vf2-oz-v" style="color:var(--gold)">'+p(altin.toplam_gram)+' gr</span></div>';
   if(_gramFiyat>0){
-    h+='<div class="vf2-oz"><span class="vf2-oz-l">GÜNCEL DEĞER</span><span class="vf2-oz-v" style="color:var(--gold);font-size:18px">'+p(altin.guncel_deger)+' TL</span></div>';
+    h+='<div class="vf2-oz"><span class="vf2-oz-l">GÜNCEL DEĞER</span><span class="vf2-oz-v" style="color:var(--gold)">'+p(altin.guncel_deger)+' TL</span></div>';
   }
   h+='</div>';
   /* Tip bazlı altın detayı */
@@ -582,8 +582,8 @@ function render(){
   h+='<div class="vf2-ozet-grup">';
   h+='<div class="vf2-ozet-grup-baslik">💵 NAKİT</div>';
   h+='<div class="vf2-ozet-grup-ic">';
-  h+='<div class="vf2-oz"><span class="vf2-oz-l">TOPLAM</span><span class="vf2-oz-v" style="color:var(--green);font-size:18px">'+p(nakit.toplam)+' TL</span></div>';
-  h+='<div class="vf2-oz"><span class="vf2-oz-l">KAYIT</span><span class="vf2-oz-v" style="font-size:18px">'+nakit.adet+' adet</span></div>';
+  h+='<div class="vf2-oz"><span class="vf2-oz-l">TOPLAM</span><span class="vf2-oz-v" style="color:var(--green)">'+p(nakit.toplam)+' TL</span></div>';
+  h+='<div class="vf2-oz"><span class="vf2-oz-l">KAYIT</span><span class="vf2-oz-v">'+nakit.adet+' adet</span></div>';
   h+='</div></div>';
 
   if(_gramFiyat>0)h+='<span class="vf2-fiyat-badge">🥇 '+p(_gramFiyat)+' TL/gr</span>';
