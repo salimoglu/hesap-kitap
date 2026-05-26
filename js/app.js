@@ -258,6 +258,7 @@
   }
 
   function modulAc(tabId) {
+    if (tabId === "islemler" && typeof IslemlerModule !== "undefined") IslemlerModule.init();
     if (tabId === "butce" && typeof ButceModule !== "undefined") ButceModule.init();
     if (tabId === "birikim" && typeof BirikimModule !== "undefined") BirikimModule.init();
     if (tabId === "kredi" && typeof KrediModule !== "undefined") KrediModule.init();
@@ -374,4 +375,44 @@
     .sync-durum { font-size: 13px; color: var(--text-muted); padding: 0 6px; }
   `;
   document.head.appendChild(style);
+
+  /** Mobil Safari / BFCache ve uygulamaya donuste veri tazele (sik gecislerde gereksiz yuk yok). */
+  (function hkMobilBulutYenileBagla() {
+    var ua = "";
+    try { ua = typeof navigator !== "undefined" ? navigator.userAgent || "" : ""; } catch (eUa) {}
+    var mobil =
+      /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(ua) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    if (!mobil) return;
+    var bek = null;
+    var sonYenile = 0;
+    var minAralikMs = 45 * 1000;
+    function istekCevir() {
+      clearTimeout(bek);
+      bek = setTimeout(function() {
+        try {
+          var now = Date.now();
+          if (now - sonYenile < minAralikMs) return;
+          var u = typeof fbMevcutKullanici === "function" ? fbMevcutKullanici() : null;
+          if (!u || u.isAnonymous) return;
+          sonYenile = now;
+          if (typeof window.sayfaYenile === "function") window.sayfaYenile();
+        } catch (eSy) {}
+      }, 400);
+    }
+    window.addEventListener(
+      "pageshow",
+      function(ev) {
+        try {
+          if (ev && ev.persisted) istekCevir();
+        } catch (ePs) {}
+      },
+      false
+    );
+    document.addEventListener("visibilitychange", function() {
+      try {
+        if (document.visibilityState === "visible") istekCevir();
+      } catch (eVc) {}
+    }, false);
+  })();
 })();

@@ -330,9 +330,9 @@ async function fbRtdbOturumHazir() {
 }
 
 function fbSyncKategoriler(kategoriler) {
-  if (!Array.isArray(kategoriler)) return;
+  if (!Array.isArray(kategoriler)) return Promise.resolve();
   var r = fbRtdbRef("kategoriler");
-  if (!r) return;
+  if (!r) return Promise.resolve();
   var obj = {};
   for (var i = 0; i < kategoriler.length; i++) {
     var k = kategoriler[i];
@@ -341,8 +341,8 @@ function fbSyncKategoriler(kategoriler) {
     if (isNaN(idNum)) continue;
     obj[String(idNum)] = Object.assign({}, k, { id: idNum });
   }
-  if (Object.keys(obj).length === 0) return;
-  r.set(obj).catch(function(e) { console.warn("fbSyncKategoriler:", e); });
+  if (Object.keys(obj).length === 0) return Promise.resolve();
+  return r.set(obj).catch(function(e) { console.warn("fbSyncKategoriler:", e); });
 }
 
 /** RTDB'deki kategoriler nesnesini / eski dizi formatini dizi kayitlarina cevirir */

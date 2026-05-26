@@ -8,6 +8,23 @@ const IslemlerModule = (() => {
 
   function normKatStr(s){return String(s||"").replace(/\s+/g," ").trim();}
 
+  /** Yerel _kategoriler tablosundan guncellenmis tam etiketi uretir (islem kaydindaki yazim ile farkliyse bile). */
+  function gorunumKategori(catStr){
+    var raw = normKatStr(catStr);
+    if (!raw) return String(catStr || "").trim();
+    var exact = _kategoriler.find(function(k) { return normKatStr(k.grup + " - " + k.ad) === raw; });
+    if (exact) return exact.grup + " - " + exact.ad;
+    var d2 = raw.indexOf(" - ");
+    if (d2 < 0) {
+      var sonly = _kategoriler.find(function(k) { return normKatStr(k.ad) === raw; });
+      return sonly ? sonly.grup + " - " + sonly.ad : String(catStr).trim();
+    }
+    var g = normKatStr(raw.slice(0, d2));
+    var tail = normKatStr(raw.slice(d2 + 3));
+    var m = _kategoriler.find(function(k) { return normKatStr(k.grup) === g && normKatStr(k.ad) === tail; });
+    return m ? m.grup + " - " + m.ad : String(catStr).trim();
+  }
+
   function para(s){return Number(s).toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2});}
   function tarihSaat(t){if(!t)return"";const[y,m,d]=t.split("-");return d+"."+m+"."+y;}
   function bugun(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
@@ -31,15 +48,12 @@ const IslemlerModule = (() => {
   }
 
   function islemGrupAdi(islem){
-    const kat=(islem&&islem.kategori||"").trim();
-    if(!kat)return"";
-    const d=kat.indexOf(" - ");
-    if(d>=0)return kat.slice(0,d).trim();
-    const tam=_kategoriler.find(k=>(k.grup+" - "+k.ad)===kat);
-    if(tam)return tam.grup;
-    const sadeAd=_kategoriler.find(k=>k.ad===kat);
-    if(sadeAd)return sadeAd.grup;
-    return"";
+    var katFull = gorunumKategori((islem && islem.kategori) || "");
+    if(!katFull)return"";
+    const d=katFull.indexOf(" - ");
+    if(d>=0)return katFull.slice(0,d).trim();
+    var sadeAd=_kategoriler.find(function(k){ return normKatStr(k.ad)===normKatStr(katFull); });
+    return sadeAd?sadeAd.grup:"";
   }
 
   function filtreliIslemler(){
@@ -93,7 +107,8 @@ const IslemlerModule = (() => {
 
   function rowOlustur(islem,bakiye){
     const div=document.createElement("div");div.className="islem-row "+islem.tip;
-    const katAdi=esc(islem.kategori)+(islem.aciklama?" <span class='islem-aciklama-inline'>* "+esc(islem.aciklama)+"</span>":"");
+    const katTam=gorunumKategori(islem.kategori);
+    const katAdi=esc(katTam)+(islem.aciklama?" <span class='islem-aciklama-inline'>* "+esc(islem.aciklama)+"</span>":"");
     div.innerHTML="<div class='sol-bar'></div><div class='islem-row-left'><div class='islem-kat-adi'>"+katAdi+"</div></div><div class='islem-row-right'><span class='islem-tarih-col'>"+tarihSaat(islem.tarih)+"</span><span class='islem-tutar-col'>"+(islem.tip==="gider"?"-":"+")+para(islem.tutar)+"</span><span class='islem-bakiye-col'>"+para(bakiye||0)+"</span><div class='islem-row-actions'><button class='row-action-btn duzenle'>&#9998;</button><button class='row-action-btn sil'>&#10005;</button></div></div>";
     div.querySelector(".duzenle").addEventListener("click",e=>{e.stopPropagation();modalAc(islem.id);});
     div.querySelector(".sil").addEventListener("click",e=>{e.stopPropagation();silModalAc(islem.id);});
@@ -315,7 +330,7 @@ const IslemlerModule = (() => {
     _duzenleId=id;
     const islem=_islemler.find(x=>x.id===id);if(!islem)return;
     tipSec(islem.tip);doldurKategoriSelect(islem.tip);
-    $("sel-kategori").value=islem.kategori;
+    $("sel-kategori").value=gorunumKategori(islem.kategori);
     $("inp-tutar").value=islem.tutar;$("inp-aciklama").value=islem.aciklama||"";$("inp-tarih").value=islem.tarih;
     $("modal-islem").classList.remove("hidden");
   }

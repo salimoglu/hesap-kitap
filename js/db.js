@@ -44,12 +44,13 @@ function getAll(store) {
   return new Promise(function(res, rej) { var req = store.getAll(); req.onsuccess = function() { res(req.result); }; req.onerror = function() { rej(req.error); }; });
 }
 
-/** Tum kategorileri RTDB'ye yazar (varsayilan + ozel); id anahtarli nesne olarak. */
-function kategorileriBulutaYaz() {
+/** Tum kategorileri RTDB'ye yazar (tamamlanana kadar bekler; sekme kapama / mobil geçişlerinde daha guvenilir). */
+async function kategorileriBulutaYaz() {
   if (typeof fbSyncKategoriler === "undefined") return;
-  KategorilerDB.getAll().then(function(kats) {
-    fbSyncKategoriler(kats);
-  });
+  try {
+    var kats = await KategorilerDB.getAll();
+    await fbSyncKategoriler(kats);
+  } catch (e) {}
 }
 
 var IslemlerDB = {
@@ -143,19 +144,19 @@ var KategorilerDB = {
   add: async function(kat) {
     await openDB();
     var id = await promisify(tx(STORES.KATEGORILER, "readwrite").add(kat));
-    kategorileriBulutaYaz();
+    await kategorileriBulutaYaz();
     return id;
   },
   update: async function(kat) {
     await openDB();
     var result = await promisify(tx(STORES.KATEGORILER, "readwrite").put(kat));
-    kategorileriBulutaYaz();
+    await kategorileriBulutaYaz();
     return result;
   },
   delete: async function(id) {
     await openDB();
     var result = await promisify(tx(STORES.KATEGORILER, "readwrite").delete(id));
-    kategorileriBulutaYaz();
+    await kategorileriBulutaYaz();
     return result;
   },
   seedDefaults: async function() {
