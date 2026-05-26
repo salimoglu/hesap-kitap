@@ -44,6 +44,14 @@ function getAll(store) {
   return new Promise(function(res, rej) { var req = store.getAll(); req.onsuccess = function() { res(req.result); }; req.onerror = function() { rej(req.error); }; });
 }
 
+/** Tum kategorileri RTDB'ye yazar (varsayilan + ozel); id anahtarli nesne olarak. */
+function kategorileriBulutaYaz() {
+  if (typeof fbSyncKategoriler === "undefined") return;
+  KategorilerDB.getAll().then(function(kats) {
+    fbSyncKategoriler(kats);
+  });
+}
+
 var IslemlerDB = {
   getAll: async function() { await openDB(); return getAll(tx(STORES.ISLEMLER, "readonly")); },
   add: async function(islem) {
@@ -70,23 +78,86 @@ var IslemlerDB = {
 
 var KategorilerDB = {
   getAll: async function() { await openDB(); return getAll(tx(STORES.KATEGORILER, "readonly")); },
+  /** Yereli silmeden RTDB kayitlarini id uzerinden yerel olarak yazar veya gunceller. */
+  mergeUpsertFromRemote: async function(liste) {
+    await openDB();
+    return new Promise(function(resolve, reject) {
+      try {
+        var t = _db.transaction([STORES.KATEGORILER], "readwrite");
+        var store = t.objectStore(STORES.KATEGORILER);
+        t.oncomplete = function() { resolve(); };
+        t.onerror = function() { reject(t.error); };
+        var idx = 0;
+        function next() {
+          while (idx < liste.length) {
+            var raw = liste[idx++];
+            if (!raw || raw.id == null) continue;
+            var item = Object.assign({}, raw);
+            if (typeof item.id === "string") item.id = parseInt(item.id, 10);
+            if (isNaN(item.id)) continue;
+            var req = store.put(item);
+            req.onerror = function() { reject(req.error); };
+            req.onsuccess = next;
+            return;
+          }
+        }
+        next();
+      } catch (ex) {
+        reject(ex);
+      }
+    });
+  },
+  /** Yerel kayitlari temizleyip sunucudan gelen liste ile degistirir (id ile put). */
+  replaceAll: async function(liste) {
+    await openDB();
+    return new Promise(function(resolve, reject) {
+      try {
+        var t = _db.transaction([STORES.KATEGORILER], "readwrite");
+        var store = t.objectStore(STORES.KATEGORILER);
+        t.oncomplete = function() { resolve(); };
+        t.onerror = function() { reject(t.error); };
+        var clr = store.clear();
+        clr.onerror = function() { reject(clr.error); };
+        clr.onsuccess = function() {
+          var i = 0;
+          function next() {
+            while (i < liste.length) {
+              var raw = liste[i++];
+              if (!raw || raw.id == null) continue;
+              var item = Object.assign({}, raw);
+              if (typeof item.id === "string") item.id = parseInt(item.id, 10);
+              if (isNaN(item.id)) continue;
+              var req = store.put(item);
+              req.onerror = function() { reject(req.error); };
+              req.onsuccess = next;
+              return;
+            }
+          }
+          next();
+        };
+      } catch (ex) {
+        reject(ex);
+      }
+    });
+  },
   add: async function(kat) {
     await openDB();
     var id = await promisify(tx(STORES.KATEGORILER, "readwrite").add(kat));
-    if (!kat.varsayilan && typeof fbSyncKategoriler !== "undefined") {
-      KategorilerDB.getAll().then(function(kats) { fbSyncKategoriler(kats.filter(function(k){ return !k.varsayilan; })); });
-    }
+    kategorileriBulutaYaz();
     return id;
   },
   update: async function(kat) {
     await openDB();
     var result = await promisify(tx(STORES.KATEGORILER, "readwrite").put(kat));
-    if (typeof fbSyncKategoriler !== "undefined") {
-      KategorilerDB.getAll().then(function(kats) { fbSyncKategoriler(kats.filter(function(k){ return !k.varsayilan; })); });
-    }
+    kategorileriBulutaYaz();
     return result;
   },
-  delete: async function(id) { await openDB(); return promisify(tx(STORES.KATEGORILER, "readwrite").delete(id)); },
+  delete: async function(id) {
+    await openDB();
+    var result = await promisify(tx(STORES.KATEGORILER, "readwrite").delete(id));
+    kategorileriBulutaYaz();
+    return result;
+  },
   seedDefaults: async function() {
     await openDB();
     var mevcut = await getAll(tx(STORES.KATEGORILER, "readonly"));

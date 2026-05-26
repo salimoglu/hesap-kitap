@@ -329,6 +329,80 @@ async function fbRtdbOturumHazir() {
   }
 }
 
+function fbSyncKategoriler(kategoriler) {
+  if (!Array.isArray(kategoriler)) return;
+  var r = fbRtdbRef("kategoriler");
+  if (!r) return;
+  var obj = {};
+  for (var i = 0; i < kategoriler.length; i++) {
+    var k = kategoriler[i];
+    if (!k || k.id === undefined || k.id === null) continue;
+    var idNum = typeof k.id === "string" ? parseInt(k.id, 10) : Number(k.id);
+    if (isNaN(idNum)) continue;
+    obj[String(idNum)] = Object.assign({}, k, { id: idNum });
+  }
+  if (Object.keys(obj).length === 0) return;
+  r.set(obj).catch(function(e) { console.warn("fbSyncKategoriler:", e); });
+}
+
+/** RTDB'deki kategoriler nesnesini / eski dizi formatini dizi kayitlarina cevirir */
+function fbKategorilerRemoteToArray(val) {
+  if (!val) return [];
+  var out = [];
+  if (Array.isArray(val)) {
+    for (var i = 0; i < val.length; i++) {
+      var k = val[i];
+      if (!k || typeof k !== "object") continue;
+      var copy = Object.assign({}, k);
+      if (copy.id == null) copy.id = i;
+      if (typeof copy.id === "string") copy.id = parseInt(copy.id, 10);
+      if (!isNaN(copy.id)) out.push(copy);
+    }
+    return out;
+  }
+  var keys = Object.keys(val);
+  for (var j = 0; j < keys.length; j++) {
+    var key = keys[j];
+    var row = val[key];
+    if (!row || typeof row !== "object") continue;
+    var copy = Object.assign({}, row);
+    if (copy.id == null) {
+      var nk = parseInt(key, 10);
+      if (!isNaN(nk)) copy.id = nk;
+    }
+    if (typeof copy.id === "string") copy.id = parseInt(copy.id, 10);
+    if (copy.id != null && !isNaN(copy.id)) out.push(copy);
+  }
+  return out;
+}
+
+async function fbKategorileriYukle() {
+  if (!_fbDb) return;
+  try {
+    await window._fbReady;
+  } catch (e) {}
+  if (!fbMevcutKullanici()) return;
+  if (typeof KategorilerDB === "undefined" || typeof openDB === "undefined") return;
+  var refKat = fbRtdbRef("kategoriler");
+  if (!refKat) return;
+  try {
+    var snap = await refKat.once("value");
+    var val = snap.val();
+    await openDB();
+    var yerel = await KategorilerDB.getAll();
+    var uzak = fbKategorilerRemoteToArray(val);
+    if (uzak.length === 0) {
+      if (yerel.length > 0) {
+        fbSyncKategoriler(yerel);
+      }
+      return;
+    }
+    await KategorilerDB.mergeUpsertFromRemote(uzak);
+  } catch (e) {
+    console.warn("fbKategorileriYukle:", e);
+  }
+}
+
 async function fbVerileriYukle() {
   if (!_fbDb) return;
   try { await window._fbReady; } catch (e) {}
@@ -393,6 +467,9 @@ async function fbVerileriYukle() {
       req.onerror = resolve;
     });
   } catch(e) { console.warn("fbVerileriYukle:", e); }
+  finally {
+    try { await fbKategorileriYukle(); } catch (e2) { console.warn("fbKategorileriYukle:", e2); }
+  }
 }
 
 function fbIslemEkle(islem) {
@@ -412,10 +489,4 @@ function fbIslemSil(id) {
   var r = fbRtdbRef("islemler/" + String(id));
   if (!r) return;
   r.remove().catch(function(e){ console.warn("fbIslemSil:", e); });
-}
-function fbSyncKategoriler(kategoriler) {
-  if (!kategoriler) return;
-  var r = fbRtdbRef("kategoriler");
-  if (!r) return;
-  r.set(kategoriler).catch(function(e){ console.warn("fbSyncKategoriler:", e); });
 }

@@ -6,6 +6,8 @@ const IslemlerModule = (() => {
   let _baglandi=false;
   const $=id=>document.getElementById(id);
 
+  function normKatStr(s){return String(s||"").replace(/\s+/g," ").trim();}
+
   function para(s){return Number(s).toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2});}
   function tarihSaat(t){if(!t)return"";const[y,m,d]=t.split("-");return d+"."+m+"."+y;}
   function bugun(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
@@ -241,8 +243,9 @@ const IslemlerModule = (() => {
       for(const gk of gks){
         await KategorilerDB.update(Object.assign({},gk,{grup:yg}));
         const ed=eg+" - "+gk.ad,yd=yg+" - "+gk.ad;
-        for(const i of _islemler.filter(x=>x.kategori===ed))await IslemlerDB.update(Object.assign({},i,{kategori:yd}));
-        if(_seciliKat.value===ed){_seciliKat={value:yd,label:gk.ad,tip:gk.tip};$("hg-kat-trigger").textContent=gk.ad;}
+        const edN=normKatStr(ed);
+        for(const i of _islemler.filter(x=>normKatStr(x.kategori)===edN))await IslemlerDB.update(Object.assign({},i,{kategori:yd}));
+        if(normKatStr(_seciliKat.value)===normKatStr(ed)){_seciliKat={value:yd,label:gk.ad,tip:gk.tip};$("hg-kat-trigger").textContent=gk.ad;}
       }
     } else {
       const yg=($("inp-duz-grup").value||"").trim().toUpperCase();
@@ -252,8 +255,9 @@ const IslemlerModule = (() => {
       if(!k){alert("Bulunamadi.");return;}
       const ed=k.grup+" - "+k.ad,yd=yg+" - "+ya;
       await KategorilerDB.update(Object.assign({},k,{grup:yg,ad:ya}));
-      for(const i of _islemler.filter(x=>x.kategori===ed))await IslemlerDB.update(Object.assign({},i,{kategori:yd}));
-      if(_seciliKat.value===ed){_seciliKat={value:yd,label:ya,tip:k.tip};$("hg-kat-trigger").textContent=ya;}
+      const edN=normKatStr(ed);
+      for(const i of _islemler.filter(x=>normKatStr(x.kategori)===edN))await IslemlerDB.update(Object.assign({},i,{kategori:yd}));
+      if(normKatStr(_seciliKat.value)===normKatStr(ed)){_seciliKat={value:yd,label:ya,tip:k.tip};$("hg-kat-trigger").textContent=ya;}
     }
     _kategoriler=await KategorilerDB.getAll();_islemler=await IslemlerDB.getAll();
     katDuzenleKapatGenel();renderKatListe();doldurGrupSelect(_katTip);renderHgList("");renderList();renderSummary();
