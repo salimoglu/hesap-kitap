@@ -179,10 +179,10 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .ozet-bar { display: flex; align-items: center; justify-content: space-between; padding: 6px 16px; background: var(--bg-card); border-bottom: 1px solid var(--border); flex-shrink: 0; }
 .ozet-item { display: flex; flex-direction: column; align-items: center; gap: 1px; }
 .ozet-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-muted); }
-.ozet-val { font-family: var(--font-brand); font-size: 15px; letter-spacing: 0.02em; font-variant-numeric: tabular-nums; }
+.ozet-val { font-family: var(--font-body); font-size: 14px; font-weight: 600; letter-spacing: 0.01em; font-variant-numeric: tabular-nums; }
 .ozet-val.gelir { color: var(--green); }
 .ozet-val.gider { color: var(--red); }
-.ozet-val.net { color: var(--gold); font-size: 16px; }
+.ozet-val.net { color: var(--gold); font-size: 15px; font-weight: 700; }
 .ozet-sep { width: 1px; height: 28px; background: var(--border); }
 .filtre-bar { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: var(--bg-base); border-bottom: 1px solid var(--border); flex-shrink: 0; }
 .filter-select { flex: 1; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-primary); font-family: var(--font-body); font-size: 12px; padding: 5px 8px; outline: none; color-scheme: dark; }
@@ -201,10 +201,10 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .islem-kat-adi .islem-aciklama-inline { font-weight: 400; color: var(--text-secondary); font-size: 12px; text-transform: none; letter-spacing: 0; }
 .islem-row-right { display: flex; align-items: center; flex-shrink: 0; }
 .islem-tarih-col { font-size: 11px; color: var(--text-muted); padding: 0 10px; white-space: nowrap; }
-.islem-tutar-col { font-family: var(--font-brand); font-size: 15px; text-align: right; min-width: 80px; padding: 0 10px; white-space: nowrap; }
+.islem-tutar-col { font-family: var(--font-body); font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; text-align: right; min-width: 80px; padding: 0 10px; white-space: nowrap; }
 .islem-row.gelir .islem-tutar-col { color: var(--green); }
 .islem-row.gider .islem-tutar-col { color: var(--red); }
-.islem-bakiye-col { font-family: var(--font-brand); font-size: 13px; color: var(--text-secondary); text-align: right; min-width: 80px; padding: 0 8px 0 4px; white-space: nowrap; }
+.islem-bakiye-col { font-family: var(--font-body); font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--text-secondary); text-align: right; min-width: 80px; padding: 0 8px 0 4px; white-space: nowrap; }
 .islem-row-actions { display: flex; gap: 2px; opacity: 0; transition: opacity 0.15s; }
 .islem-row:hover .islem-row-actions { opacity: 1; }
 .row-action-btn { background: transparent; border: none; font-size: 13px; cursor: pointer; padding: 3px 4px; border-radius: 4px; color: var(--text-muted); }
@@ -230,7 +230,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .hizli-giris { display: flex; align-items: stretch; background: var(--bg-card); border-top: 2px solid var(--border); flex-shrink: 0; min-height: 44px; position: relative; z-index: 100; }
 .hg-aciklama { flex: 2; background: transparent; border: none; border-right: 1px solid var(--border); color: var(--text-primary); font-family: var(--font-body); font-size: 13px; padding: 0 12px; outline: none; min-width: 0; }
 .hg-aciklama::placeholder { color: var(--text-muted); }
-.hg-tutar { width: 90px; flex-shrink: 0; background: transparent; border: none; border-right: 1px solid var(--border); color: var(--text-primary); font-family: var(--font-brand); font-size: 16px; padding: 0 8px; outline: none; text-align: right; }
+.hg-tutar { width: 90px; flex-shrink: 0; background: transparent; border: none; border-right: 1px solid var(--border); color: var(--text-primary); font-family: var(--font-body); font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; padding: 0 8px; outline: none; text-align: right; }
 .hg-tarih { background: transparent; border: none; border-right: 1px solid var(--border); color: var(--text-primary); font-size: 13px; padding: 0 8px; height: 100%; min-width: 120px; flex-shrink: 0; outline: none; }
 
 /* ══ KATEGORİ DROPDOWN — ARAMA KUTULU ══ */
@@ -1780,10 +1780,10 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .ozet-bar { display: flex; align-items: center; justify-content: space-between; padding: 6px 16px; background: var(--bg-card); border-bottom: 1px solid var(--border); flex-shrink: 0; }
 .ozet-item { display: flex; flex-direction: column; align-items: center; gap: 1px; }
 .ozet-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-muted); }
-.ozet-val { font-family: var(--font-brand); font-size: 15px; letter-spacing: 0.02em; font-variant-numeric: tabular-nums; }
+.ozet-val { font-family: var(--font-body); font-size: 14px; font-weight: 600; letter-spacing: 0.01em; font-variant-numeric: tabular-nums; }
 .ozet-val.gelir { color: var(--green); }
 .ozet-val.gider { color: var(--red); }
-.ozet-val.net { color: var(--gold); font-size: 16px; }
+.ozet-val.net { color: var(--gold); font-size: 15px; font-weight: 700; }
 .ozet-sep { width: 1px; height: 28px; background: var(--border); }
 .filtre-bar { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: var(--bg-base); border-bottom: 1px solid var(--border); flex-shrink: 0; }
 .filter-select { flex: 1; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-primary); font-family: var(--font-body); font-size: 12px; padding: 5px 8px; outline: none; color-scheme: dark; }
@@ -1802,10 +1802,10 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .islem-kat-adi .islem-aciklama-inline { font-weight: 400; color: var(--text-secondary); font-size: 12px; text-transform: none; letter-spacing: 0; }
 .islem-row-right { display: flex; align-items: center; flex-shrink: 0; }
 .islem-tarih-col { font-size: 11px; color: var(--text-muted); padding: 0 10px; white-space: nowrap; }
-.islem-tutar-col { font-family: var(--font-brand); font-size: 15px; text-align: right; min-width: 80px; padding: 0 10px; white-space: nowrap; }
+.islem-tutar-col { font-family: var(--font-body); font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; text-align: right; min-width: 80px; padding: 0 10px; white-space: nowrap; }
 .islem-row.gelir .islem-tutar-col { color: var(--green); }
 .islem-row.gider .islem-tutar-col { color: var(--red); }
-.islem-bakiye-col { font-family: var(--font-brand); font-size: 13px; color: var(--text-secondary); text-align: right; min-width: 80px; padding: 0 8px 0 4px; white-space: nowrap; }
+.islem-bakiye-col { font-family: var(--font-body); font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--text-secondary); text-align: right; min-width: 80px; padding: 0 8px 0 4px; white-space: nowrap; }
 .islem-row-actions { display: flex; gap: 2px; opacity: 0; transition: opacity 0.15s; }
 .islem-row:hover .islem-row-actions { opacity: 1; }
 .row-action-btn { background: transparent; border: none; font-size: 13px; cursor: pointer; padding: 3px 4px; border-radius: 4px; color: var(--text-muted); }
@@ -1831,7 +1831,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .hizli-giris { display: flex; align-items: stretch; background: var(--bg-card); border-top: 2px solid var(--border); flex-shrink: 0; min-height: 44px; position: relative; z-index: 100; }
 .hg-aciklama { flex: 2; background: transparent; border: none; border-right: 1px solid var(--border); color: var(--text-primary); font-family: var(--font-body); font-size: 13px; padding: 0 12px; outline: none; min-width: 0; }
 .hg-aciklama::placeholder { color: var(--text-muted); }
-.hg-tutar { width: 90px; flex-shrink: 0; background: transparent; border: none; border-right: 1px solid var(--border); color: var(--text-primary); font-family: var(--font-brand); font-size: 16px; padding: 0 8px; outline: none; text-align: right; }
+.hg-tutar { width: 90px; flex-shrink: 0; background: transparent; border: none; border-right: 1px solid var(--border); color: var(--text-primary); font-family: var(--font-body); font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; padding: 0 8px; outline: none; text-align: right; }
 .hg-tarih { background: transparent; border: none; border-right: 1px solid var(--border); color: var(--text-primary); font-size: 13px; padding: 0 8px; height: 100%; min-width: 120px; flex-shrink: 0; outline: none; }
 
 /* ══ KATEGORİ DROPDOWN — ARAMA KUTULU ══ */
@@ -3921,9 +3921,11 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   color: var(--text-muted);
 }
 .ioz-ay-kutu-val {
-  font-family: var(--font-brand);
+  font-family: var(--font-body);
   font-size: 14px;
-  letter-spacing: 0.02em;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
 }
 .ioz-ay-kutu-val.gelir { color: var(--green); }
 .ioz-ay-kutu-val.gider { color: var(--red); }
@@ -3943,8 +3945,9 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
 }
 .ioz-grup-ad { flex: 1; min-width: 0; }
 .ioz-grup-toplam {
-  font-size: 12px;
-  font-weight: 800;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
   letter-spacing: 0;
   text-transform: none;
   font-variant-numeric: tabular-nums;
@@ -3981,8 +3984,9 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   flex-shrink: 0;
 }
 .ioz-kat-tutar {
-  font-size: 12px;
-  font-weight: 800;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -4025,13 +4029,35 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
 /* İşlemler 3 sütun — ortak tipografi (sol panel referans) */
 #tab-islemler {
   --islem-ui: var(--font-body);
-  --islem-rakam: var(--font-brand);
+  --islem-rakam: var(--font-body);
+  --islem-rakam-w: 600;
   --islem-lbl: 10px;
   --islem-metin: 13px;
-  --islem-rakam-size: 15px;
+  --islem-rakam-size: 14px;
+  --islem-rakam-size-ust: 15px;
   --islem-px: 12px;
   --islem-py: 6px;
   --islem-satir: 38px;
+}
+/* Para tutarlari: Nunito, orta kalinlik — Bebas kalin/sikisik degil */
+#tab-islemler .ozet-val,
+#tab-islemler .islem-tutar-col,
+#tab-islemler .islem-bakiye-col,
+#tab-islemler .hg-tutar,
+#tab-islemler .islem-ay-ozet .ao-gelir,
+#tab-islemler .islem-ay-ozet .ao-gider,
+#tab-islemler .islem-ay-ozet .ao-net,
+#tab-islemler .islem-genel-toplam .gt-gelir,
+#tab-islemler .islem-genel-toplam .gt-gider,
+#tab-islemler .islem-genel-toplam .gt-val {
+  font-family: var(--islem-rakam) !important;
+  font-weight: var(--islem-rakam-w) !important;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+#tab-islemler .ozet-val.net,
+#tab-islemler .islem-genel-toplam .gt-val {
+  font-weight: 700 !important;
 }
 #tab-islemler .filter-select,
 #tab-islemler .btn-yeni-kat-bar,
@@ -4078,8 +4104,9 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
 }
 #tab-islemler .ioz-ay-kutu-val {
   font-family: var(--islem-rakam);
-  font-size: var(--islem-rakam-size);
-  letter-spacing: 0.02em;
+  font-size: var(--islem-rakam-size-ust);
+  font-weight: var(--islem-rakam-w);
+  letter-spacing: 0.01em;
   font-variant-numeric: tabular-nums;
 }
 #tab-islemler .ioz-grup-baslik {
@@ -4094,7 +4121,7 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
 #tab-islemler .ioz-grup-toplam {
   font-family: var(--islem-rakam);
   font-size: var(--islem-metin);
-  font-weight: 700;
+  font-weight: var(--islem-rakam-w);
   font-variant-numeric: tabular-nums;
 }
 #tab-islemler .ioz-kat-satir {
@@ -4112,7 +4139,7 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
 #tab-islemler .ioz-kat-tutar {
   font-family: var(--islem-rakam);
   font-size: var(--islem-rakam-size);
-  font-weight: 700;
+  font-weight: var(--islem-rakam-w);
   font-variant-numeric: tabular-nums;
 }
 #tab-islemler .ioz-kat-adet {
@@ -4141,9 +4168,10 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
 #tab-islemler .ioz-yil-g,
 #tab-islemler .ioz-yil-d,
 #tab-islemler .ioz-yil-n {
-  font-family: var(--islem-ui);
+  font-family: var(--islem-rakam);
   font-size: var(--islem-metin);
-  font-weight: 600;
+  font-weight: var(--islem-rakam-w);
+  font-variant-numeric: tabular-nums;
 }
 #tab-islemler .ioz-bos {
   font-family: var(--islem-ui);
@@ -4218,8 +4246,8 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
 #tab-islemler .islemler-butce .bt-toplam-row .bt-col-tutar,
 #tab-islemler .islemler-butce .bt-hesap-row .bt-col-tutar {
   font-family: var(--islem-rakam);
-  font-size: var(--islem-rakam-size);
-  font-weight: 700;
+  font-size: var(--islem-metin);
+  font-weight: var(--islem-rakam-w);
   color: var(--gold);
   font-variant-numeric: tabular-nums;
 }
@@ -4233,14 +4261,14 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
 #tab-islemler .islemler-butce .bt-kalan .bt-col-tutar,
 #tab-islemler .islemler-butce .bt-kalan-negatif .bt-col-tutar {
   font-family: var(--islem-rakam);
-  font-size: var(--islem-rakam-size);
-  font-weight: 700;
+  font-size: var(--islem-metin);
+  font-weight: var(--islem-rakam-w);
   font-variant-numeric: tabular-nums;
 }
 #tab-islemler .islemler-butce .bt-input {
   font-family: var(--islem-rakam);
   font-size: var(--islem-metin);
-  font-weight: 700;
+  font-weight: var(--islem-rakam-w);
   font-variant-numeric: tabular-nums;
 }
 #tab-islemler .islemler-butce .bt-ekle-btn {
