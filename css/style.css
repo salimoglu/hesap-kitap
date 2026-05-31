@@ -144,13 +144,71 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
   .filtre-bar { flex-wrap: wrap; }
   .filter-select { min-width: 0; flex: 1 1 42%; }
   .btn-yeni-kat-bar { flex-shrink: 0; }
-  .hizli-giris { flex-wrap: wrap; align-items: stretch; }
-  .hg-aciklama { flex: 1 1 100%; border-right: none; border-bottom: 1px solid var(--border); padding: 10px 12px; min-height: 42px; }
-  .hg-tutar { flex: 1; min-width: 0; width: auto; border-bottom: 1px solid var(--border); }
-  .hg-kat-wrap { flex: 1 1 58%; min-width: 0; border-bottom: 1px solid var(--border); }
-  .hg-tarih { flex: 1 1 38%; min-width: 0; border-right: none; border-bottom: 1px solid var(--border); }
-  .hg-btn-group { flex: 1 1 100%; width: 100%; }
-  .hg-btn { flex: 1; justify-content: center; padding: 12px 8px; }
+  #tab-islemler .hizli-giris {
+    display: grid;
+    grid-template-columns: minmax(68px, 0.9fr) minmax(0, 1.65fr) minmax(7.1rem, 8.4rem);
+    grid-template-areas:
+      "acik acik acik"
+      "tutar kat tarih"
+      "btn btn btn";
+    align-items: stretch;
+  }
+  #tab-islemler .hg-aciklama {
+    grid-area: acik;
+    width: 100%;
+    flex: none;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: 10px 12px;
+    min-height: 42px;
+  }
+  #tab-islemler .hg-tutar {
+    grid-area: tutar;
+    width: 100%;
+    max-width: none;
+    flex: none;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 8px;
+    min-height: 42px;
+  }
+  #tab-islemler .hg-kat-wrap {
+    grid-area: kat;
+    width: 100%;
+    flex: none;
+    min-width: 0;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    min-height: 42px;
+  }
+  #tab-islemler .hg-tarih {
+    grid-area: tarih;
+    width: 100%;
+    max-width: 8.4rem;
+    min-width: 7.1rem;
+    flex: none;
+    justify-self: stretch;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: 8px 4px;
+    min-height: 42px;
+    font-size: 13px;
+    box-sizing: border-box;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  #tab-islemler .hg-btn-group {
+    grid-area: btn;
+    display: flex;
+    width: 100%;
+    flex: none;
+  }
+  #tab-islemler .hg-btn {
+    flex: 1;
+    justify-content: center;
+    padding: 12px 8px;
+    min-height: 42px;
+  }
   .islem-tarih-col { padding: 0 4px; font-size: 10px; }
   .islem-tutar-col, .islem-bakiye-col { min-width: 62px; padding: 0 4px; font-size: 13px; }
   .alt-tablo-dis,
@@ -1745,13 +1803,71 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
   .filtre-bar { flex-wrap: wrap; }
   .filter-select { min-width: 0; flex: 1 1 42%; }
   .btn-yeni-kat-bar { flex-shrink: 0; }
-  .hizli-giris { flex-wrap: wrap; align-items: stretch; }
-  .hg-aciklama { flex: 1 1 100%; border-right: none; border-bottom: 1px solid var(--border); padding: 10px 12px; min-height: 42px; }
-  .hg-tutar { flex: 1; min-width: 0; width: auto; border-bottom: 1px solid var(--border); }
-  .hg-kat-wrap { flex: 1 1 58%; min-width: 0; border-bottom: 1px solid var(--border); }
-  .hg-tarih { flex: 1 1 38%; min-width: 0; border-right: none; border-bottom: 1px solid var(--border); }
-  .hg-btn-group { flex: 1 1 100%; width: 100%; }
-  .hg-btn { flex: 1; justify-content: center; padding: 12px 8px; }
+  #tab-islemler .hizli-giris {
+    display: grid;
+    grid-template-columns: minmax(68px, 0.9fr) minmax(0, 1.65fr) minmax(7.1rem, 8.4rem);
+    grid-template-areas:
+      "acik acik acik"
+      "tutar kat tarih"
+      "btn btn btn";
+    align-items: stretch;
+  }
+  #tab-islemler .hg-aciklama {
+    grid-area: acik;
+    width: 100%;
+    flex: none;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: 10px 12px;
+    min-height: 42px;
+  }
+  #tab-islemler .hg-tutar {
+    grid-area: tutar;
+    width: 100%;
+    max-width: none;
+    flex: none;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 8px;
+    min-height: 42px;
+  }
+  #tab-islemler .hg-kat-wrap {
+    grid-area: kat;
+    width: 100%;
+    flex: none;
+    min-width: 0;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    min-height: 42px;
+  }
+  #tab-islemler .hg-tarih {
+    grid-area: tarih;
+    width: 100%;
+    max-width: 8.4rem;
+    min-width: 7.1rem;
+    flex: none;
+    justify-self: stretch;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: 8px 4px;
+    min-height: 42px;
+    font-size: 13px;
+    box-sizing: border-box;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  #tab-islemler .hg-btn-group {
+    grid-area: btn;
+    display: flex;
+    width: 100%;
+    flex: none;
+  }
+  #tab-islemler .hg-btn {
+    flex: 1;
+    justify-content: center;
+    padding: 12px 8px;
+    min-height: 42px;
+  }
   .islem-tarih-col { padding: 0 4px; font-size: 10px; }
   .islem-tutar-col, .islem-bakiye-col { min-width: 62px; padding: 0 4px; font-size: 13px; }
   .alt-tablo-dis,
