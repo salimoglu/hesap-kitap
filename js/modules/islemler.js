@@ -30,11 +30,152 @@ const IslemlerModule = (() => {
   function bugun(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
   function esc(s){const d=document.createElement("div");d.textContent=s||"";return d.innerHTML;}
 
+  const AYLAR_TR=["Ocak","Subat","Mart","Nisan","Mayis","Haziran","Temmuz","Agustos","Eylul","Ekim","Kasim","Aralik"];
+
+  function ayEtiket(ayKey){
+    if(!ayKey||ayKey==="hepsi")return"";
+    const p=ayKey.split("-");
+    if(p.length<2)return ayKey;
+    return AYLAR_TR[parseInt(p[1],10)-1]+" "+p[0];
+  }
+
+  function ozetAySecimi(){
+    const sel=$("filter-ay");
+    if(sel&&sel.value&&sel.value!=="hepsi")return sel.value;
+    const d=new Date();
+    return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+  }
+
+  function kategoriGrupAdi(katTam){
+    const d=katTam.indexOf(" - ");
+    return d>=0?katTam.slice(0,d).trim():katTam;
+  }
+
+  function kategoriOzetiVeri(){
+    const byAy={};
+    const byYil={};
+    for(const i of _islemler){
+      const ay=i.tarih.substring(0,7);
+      const yil=i.tarih.substring(0,4);
+      const kat=gorunumKategori(i.kategori);
+      const tut=parseFloat(i.tutar)||0;
+      if(!byAy[ay])byAy[ay]={gelir:0,gider:0,kat:{}};
+      if(!byYil[yil])byYil[yil]={gelir:0,gider:0,kat:{}};
+      const ayK=byAy[ay].kat;
+      const yK=byYil[yil].kat;
+      if(!ayK[kat])ayK[kat]={gelir:0,gider:0,adet:0,grup:kategoriGrupAdi(kat)};
+      if(!yK[kat])yK[kat]={gelir:0,gider:0,adet:0};
+      ayK[kat].adet++;
+      yK[kat].adet++;
+      if(i.tip==="gelir"){
+        byAy[ay].gelir+=tut;byYil[yil].gelir+=tut;
+        ayK[kat].gelir+=tut;yK[kat].gelir+=tut;
+      }else{
+        byAy[ay].gider+=tut;byYil[yil].gider+=tut;
+        ayK[kat].gider+=tut;yK[kat].gider+=tut;
+      }
+    }
+    return {byAy,byYil};
+  }
+
+  function renderKategoriOzeti(){
+    const wrap=$("islem-kat-ozet-scroll");
+    if(!wrap)return;
+    if(!_islemler.length){
+      wrap.innerHTML='<div class="ioz-bos">Henüz işlem yok.<br>Kategori özetleri burada görünecek.</div>';
+      return;
+    }
+    const {byAy,byYil}=kategoriOzetiVeri();
+    const ayKey=ozetAySecimi();
+    const ayVer=byAy[ayKey]||{gelir:0,gider:0,kat:{}};
+    const ayNet=ayVer.gelir-ayVer.gider;
+    const ayLbl=ayEtiket(ayKey);
+    const filtreAy=$("filter-ay");
+    const ayNot=(filtreAy&&filtreAy.value==="hepsi")?' <span class="ioz-bolum-alt">(bu ay)</span>':"";
+
+    let h='';
+
+    /* —— Aylık detay —— */
+    h+='<div class="ioz-bolum ioz-bolum-ay">';
+    h+='<div class="ioz-bolum-baslik">Aylık özet'+ayNot+'<span class="ioz-bolum-alt"> · '+esc(ayLbl)+'</span></div>';
+    h+='<div class="ioz-ay-ust">';
+    h+='<div class="ioz-ay-kutu"><span class="ioz-ay-kutu-lbl">Gelir</span><span class="ioz-ay-kutu-val gelir">'+para(ayVer.gelir)+'</span></div>';
+    h+='<div class="ioz-ay-kutu"><span class="ioz-ay-kutu-lbl">Gider</span><span class="ioz-ay-kutu-val gider">'+para(ayVer.gider)+'</span></div>';
+    h+='<div class="ioz-ay-kutu"><span class="ioz-ay-kutu-lbl">Net</span><span class="ioz-ay-kutu-val net">'+(ayNet>=0?"":"-")+para(Math.abs(ayNet))+'</span></div>';
+    h+='</div>';
+
+    const katListe=Object.entries(ayVer.kat).map(function(e){
+      const k=e[1];
+      const top=k.gelir+k.gider;
+      return {ad:e[0],grup:k.grup||kategoriGrupAdi(e[0]),gelir:k.gelir,gider:k.gider,adet:k.adet,top:top,net:k.gelir-k.gider};
+    }).filter(function(x){return x.top>0;}).sort(function(a,b){return b.top-a.top;});
+
+    const maxGider=Math.max.apply(null,[1].concat(katListe.map(function(x){return x.gider;})));
+
+    if(!katListe.length){
+      h+='<div class="ioz-bos">Bu ayda kategorili işlem yok.</div>';
+    }else{
+      const gruplar={};
+      katListe.forEach(function(k){
+        if(!gruplar[k.grup])gruplar[k.grup]=[];
+        gruplar[k.grup].push(k);
+      });
+      const grupSira=Object.keys(gruplar).sort(function(a,b){return a.localeCompare(b,"tr");});
+      grupSira.forEach(function(g){
+        h+='<div class="ioz-grup-baslik">'+esc(g)+'</div>';
+        gruplar[g].forEach(function(k){
+          const barPct=k.gider>0?Math.round((k.gider/maxGider)*100):0;
+          const gelirPct=k.gelir>0?Math.round((k.gelir/(ayVer.gelir||1))*100):0;
+          const adKisa=k.ad.indexOf(" - ")>=0?k.ad.slice(k.ad.indexOf(" - ")+3):k.ad;
+          h+='<div class="ioz-kat-satir">';
+          h+='<div class="ioz-kat-ust"><span class="ioz-kat-ad">'+esc(adKisa)+'</span><span class="ioz-kat-adet">'+k.adet+' işlem</span></div>';
+          h+='<div class="ioz-kat-rakam">';
+          if(k.gelir>0)h+='<span class="g">+'+para(k.gelir)+'</span>';
+          if(k.gider>0)h+='<span class="d">-'+para(k.gider)+'</span>';
+          h+='<span class="n">Net '+(k.net>=0?"+":"-")+para(Math.abs(k.net))+'</span>';
+          h+='</div>';
+          if(k.gider>0){
+            h+='<span class="ioz-kat-bar-track" title="Ay içi gider payı"><span class="ioz-kat-bar-fill" style="width:'+barPct+'%"></span></span>';
+          }else if(k.gelir>0){
+            h+='<span class="ioz-kat-bar-track"><span class="ioz-kat-bar-fill gelir-bar" style="width:'+Math.min(100,gelirPct)+'%"></span></span>';
+          }
+          h+='</div>';
+        });
+      });
+    }
+    h+='</div>';
+
+    /* —— Yıllık sade —— */
+    const yillar=Object.keys(byYil).sort(function(a,b){return b.localeCompare(a);});
+    h+='<div class="ioz-bolum ioz-bolum-yil">';
+    h+='<div class="ioz-bolum-baslik">Yıllık özet</div>';
+    h+='<div class="ioz-yil-liste">';
+    yillar.forEach(function(y){
+      const v=byYil[y];
+      const net=v.gelir-v.gider;
+      h+='<div class="ioz-yil-satir">';
+      h+='<span class="ioz-yil-yil">'+y+'</span>';
+      h+='<div class="ioz-yil-rakamlar">';
+      h+='<span class="ioz-yil-g">+'+para(v.gelir)+'</span>';
+      h+='<span class="ioz-yil-d">-'+para(v.gider)+'</span>';
+      h+='<span class="ioz-yil-n">'+(net>=0?"+":"-")+para(Math.abs(net))+'</span>';
+      h+='</div></div>';
+    });
+    h+='</div></div>';
+
+    wrap.innerHTML=h;
+  }
+
+  function listeVeOzetGuncelle(){
+    renderList();
+    renderKategoriOzeti();
+  }
+
   async function yukle(){
     _islemler=await IslemlerDB.getAll();
     _kategoriler=await KategorilerDB.getAll();
     _islemler.sort((a,b)=>a.tarih.localeCompare(b.tarih)||(a.olusturma||0)-(b.olusturma||0));
-    renderList();renderSummary();doldurAyFilter();doldurGrupFilter();renderHgList("");const _ht=$("hg-tarih");if(_ht&&!_ht.value)_ht.value=bugun();setTimeout(()=>{const l=$("islem-list");if(l)l.scrollTop=l.scrollHeight;},100);
+    renderList();renderSummary();renderKategoriOzeti();doldurAyFilter();doldurGrupFilter();renderHgList("");const _ht=$("hg-tarih");if(_ht&&!_ht.value)_ht.value=bugun();setTimeout(()=>{const l=$("islem-list");if(l)l.scrollTop=l.scrollHeight;},100);
   }
 
   function renderSummary(){
@@ -80,12 +221,11 @@ const IslemlerModule = (() => {
     for(const i of sirali){bak+=i.tip==="gelir"?parseFloat(i.tutar):-parseFloat(i.tutar);bakMap[i.id]=bak;}
     const gruplar={};
     for(const i of items){const k=i.tarih.substring(0,7);if(!gruplar[k])gruplar[k]=[];gruplar[k].push(i);}
-    const AYLAR=["Ocak","Subat","Mart","Nisan","Mayis","Haziran","Temmuz","Agustos","Eylul","Ekim","Kasim","Aralik"];
     let genG=0,genGi=0;
     for(const[key,grup]of Object.entries(gruplar)){
       const[y,m]=key.split("-");
       const bas=document.createElement("div");bas.className="islem-grup-baslik";
-      bas.textContent=AYLAR[parseInt(m)-1]+" "+y;liste.appendChild(bas);
+      bas.textContent=AYLAR_TR[parseInt(m)-1]+" "+y;liste.appendChild(bas);
       let ayG=0,ayGi=0;
       for(const i of grup){
         liste.appendChild(rowOlustur(i,bakMap[i.id]));
@@ -94,7 +234,7 @@ const IslemlerModule = (() => {
       genG+=ayG;genGi+=ayGi;
       const oz=document.createElement("div");oz.className="islem-ay-ozet";
       const ayNet=ayG-ayGi;
-      oz.innerHTML="<span>"+AYLAR[parseInt(m)-1]+":</span><span class='ao-gelir'>"+para(ayG)+"</span><span class='ao-sep'>&#8722;</span><span class='ao-gider'>"+para(ayGi)+"</span><span class='ao-sep'>=</span><span class='ao-net'>"+(ayNet>=0?"":"-")+para(Math.abs(ayNet))+"</span>";
+      oz.innerHTML="<span>"+AYLAR_TR[parseInt(m)-1]+":</span><span class='ao-gelir'>"+para(ayG)+"</span><span class='ao-sep'>&#8722;</span><span class='ao-gider'>"+para(ayGi)+"</span><span class='ao-sep'>=</span><span class='ao-net'>"+(ayNet>=0?"":"-")+para(Math.abs(ayNet))+"</span>";
       liste.appendChild(oz);
     }
     if(Object.keys(gruplar).length){
@@ -118,12 +258,11 @@ const IslemlerModule = (() => {
   function doldurAyFilter(){
     const sel=$("filter-ay"),prev=sel.value;
     while(sel.options.length>1)sel.remove(1);
-    const AYLAR=["Ocak","Subat","Mart","Nisan","Mayis","Haziran","Temmuz","Agustos","Eylul","Ekim","Kasim","Aralik"];
     const aySet=new Set(_islemler.map(i=>i.tarih.substring(0,7)));
     [...aySet].sort((a,b)=>b.localeCompare(a)).forEach(key=>{
       const[y,m]=key.split("-");
       const o=document.createElement("option");
-      o.value=key;o.textContent=AYLAR[parseInt(m)-1]+" "+y;sel.appendChild(o);
+      o.value=key;o.textContent=AYLAR_TR[parseInt(m)-1]+" "+y;sel.appendChild(o);
     });
     if([...sel.options].some(o=>o.value===prev))sel.value=prev;
   }
@@ -275,7 +414,7 @@ const IslemlerModule = (() => {
       if(normKatStr(_seciliKat.value)===normKatStr(ed)){_seciliKat={value:yd,label:ya,tip:k.tip};$("hg-kat-trigger").textContent=ya;}
     }
     _kategoriler=await KategorilerDB.getAll();_islemler=await IslemlerDB.getAll();
-    katDuzenleKapatGenel();renderKatListe();doldurGrupSelect(_katTip);renderHgList("");renderList();renderSummary();
+    katDuzenleKapatGenel();renderKatListe();doldurGrupSelect(_katTip);renderHgList("");renderList();renderSummary();renderKategoriOzeti();
   }
 
   function katSilAc(k){_katSilId=k.id;$("kat-sil-text").textContent=k.grup+" - "+k.ad+" silinsin mi?";$("modal-kat-sil").classList.remove("hidden");}
@@ -374,9 +513,9 @@ const IslemlerModule = (() => {
     });
     $("hg-kat-dropdown").addEventListener("click",e=>e.stopPropagation());
     document.addEventListener("click",()=>closeHgDropdown());
-    $("filter-type").addEventListener("change",renderList);
-    $("filter-ay").addEventListener("change",renderList);
-    $("filter-grup").addEventListener("change",renderList);
+    $("filter-type").addEventListener("change",listeVeOzetGuncelle);
+    $("filter-ay").addEventListener("change",listeVeOzetGuncelle);
+    $("filter-grup").addEventListener("change",listeVeOzetGuncelle);
     $("btn-yeni-kat-bar").addEventListener("click",katYonetimAc);
     $("kat-close").addEventListener("click",katYonetimKapat);
     $("modal-kategori").addEventListener("click",e=>{if(e.target===$("modal-kategori"))katYonetimKapat();});

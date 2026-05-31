@@ -15,7 +15,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png?v=20260209desk" />
   <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png?v=20260209desk" />
   <link rel="manifest" href="manifest.json?v=20260209desk" />
-  <link rel="stylesheet" href="css/style.css?v=20260224birikim-yil" />
+  <link rel="stylesheet" href="css/style.css?v=20260227islemler-ozet" />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <script>
     /* Tema yonetimi: flash onleme + toggle */
@@ -138,54 +138,62 @@
     <main class="content">
       <section id="tab-islemler" class="tab-panel active">
         <div class="islemler-wrap">
-          <div class="ozet-bar">
-            <div class="ozet-item"><span class="ozet-label">Gelir</span><span class="ozet-val gelir" id="total-gelir">0,00</span></div>
-            <div class="ozet-sep"></div>
-            <div class="ozet-item"><span class="ozet-label">Gider</span><span class="ozet-val gider" id="total-gider">0,00</span></div>
-            <div class="ozet-sep"></div>
-            <div class="ozet-item"><span class="ozet-label">Net Bakiye</span><span class="ozet-val net" id="total-net">0,00</span></div>
-          </div>
-          <div class="filtre-bar">
-            <select id="filter-type" class="filter-select" title="T&#252;r">
-              <option value="hepsi">T&#252;m&#252;</option>
-              <option value="gelir">Gelir</option>
-              <option value="gider">Gider</option>
-            </select>
-            <select id="filter-grup" class="filter-select" title="Grup">
-              <option value="hepsi">T&#252;m Gruplar</option>
-            </select>
-            <div class="ay-nav">
-              <button class="ay-nav-btn" id="ay-nav-prev" type="button" title="&#214;nceki ay">&#9664;</button>
-              <select id="filter-ay" class="filter-select ay-nav-select" title="Ay se&#231;"><option value="hepsi">T&#252;m Aylar</option></select>
-              <button class="ay-nav-btn" id="ay-nav-next" type="button" title="Sonraki ay">&#9654;</button>
-            </div>
-            <button class="btn-yeni-kat-bar" id="btn-yeni-kat-bar">&#9776; Kategoriler</button>
-          </div>
-          <div class="islem-scroll" id="islem-list">
-            <div class="empty-state" id="empty-state">
-              <span class="empty-icon">&#128221;</span>
-              <p>Hen&#252;z i&#351;lem yok</p>
-              <span>A&#351;a&#287;&#305;dan h&#305;zl&#305; giri&#351; yap&#305;n</span>
-            </div>
-          </div>
-          <div class="hizli-giris">
-            <input type="text" class="hg-aciklama" id="hg-aciklama" placeholder="A&#231;&#305;klama..." maxlength="100" />
-            <input type="number" class="hg-tutar" id="hg-tutar" placeholder="0,00" min="0" step="0.01" inputmode="decimal" />
-            <div class="hg-kat-wrap" id="hg-kat-wrap">
-              <button class="hg-kat-trigger" id="hg-kat-trigger" type="button">Kategori...</button>
-              <div class="hg-kat-dropdown" id="hg-kat-dropdown">
-                <div class="hg-kat-search">
-                  <span class="hg-kat-search-icon">&#128269;</span>
-                  <input type="text" class="hg-kat-search-inp" id="hg-kat-search-inp" placeholder="Ara..." autocomplete="off" spellcheck="false" />
-                  <button class="hg-kat-search-clear" id="hg-kat-search-clear" type="button">&#10005;</button>
+          <div class="islemler-split">
+            <div class="islemler-sol">
+              <div class="ozet-bar">
+                <div class="ozet-item"><span class="ozet-label">Gelir</span><span class="ozet-val gelir" id="total-gelir">0,00</span></div>
+                <div class="ozet-sep"></div>
+                <div class="ozet-item"><span class="ozet-label">Gider</span><span class="ozet-val gider" id="total-gider">0,00</span></div>
+                <div class="ozet-sep"></div>
+                <div class="ozet-item"><span class="ozet-label">Net Bakiye</span><span class="ozet-val net" id="total-net">0,00</span></div>
+              </div>
+              <div class="filtre-bar">
+                <select id="filter-type" class="filter-select" title="T&#252;r">
+                  <option value="hepsi">T&#252;m&#252;</option>
+                  <option value="gelir">Gelir</option>
+                  <option value="gider">Gider</option>
+                </select>
+                <select id="filter-grup" class="filter-select" title="Grup">
+                  <option value="hepsi">T&#252;m Gruplar</option>
+                </select>
+                <div class="ay-nav">
+                  <button class="ay-nav-btn" id="ay-nav-prev" type="button" title="&#214;nceki ay">&#9664;</button>
+                  <select id="filter-ay" class="filter-select ay-nav-select" title="Ay se&#231;"><option value="hepsi">T&#252;m Aylar</option></select>
+                  <button class="ay-nav-btn" id="ay-nav-next" type="button" title="Sonraki ay">&#9654;</button>
                 </div>
-                <div class="hg-kat-list" id="hg-kat-list"></div>
+                <button class="btn-yeni-kat-bar" id="btn-yeni-kat-bar">&#9776; Kategoriler</button>
+              </div>
+              <div class="islem-scroll" id="islem-list">
+                <div class="empty-state" id="empty-state">
+                  <span class="empty-icon">&#128221;</span>
+                  <p>Hen&#252;z i&#351;lem yok</p>
+                  <span>A&#351;a&#287;&#305;dan h&#305;zl&#305; giri&#351; yap&#305;n</span>
+                </div>
+              </div>
+              <div class="hizli-giris">
+                <input type="text" class="hg-aciklama" id="hg-aciklama" placeholder="A&#231;&#305;klama..." maxlength="100" />
+                <input type="number" class="hg-tutar" id="hg-tutar" placeholder="0,00" min="0" step="0.01" inputmode="decimal" />
+                <div class="hg-kat-wrap" id="hg-kat-wrap">
+                  <button class="hg-kat-trigger" id="hg-kat-trigger" type="button">Kategori...</button>
+                  <div class="hg-kat-dropdown" id="hg-kat-dropdown">
+                    <div class="hg-kat-search">
+                      <span class="hg-kat-search-icon">&#128269;</span>
+                      <input type="text" class="hg-kat-search-inp" id="hg-kat-search-inp" placeholder="Ara..." autocomplete="off" spellcheck="false" />
+                      <button class="hg-kat-search-clear" id="hg-kat-search-clear" type="button">&#10005;</button>
+                    </div>
+                    <div class="hg-kat-list" id="hg-kat-list"></div>
+                  </div>
+                </div>
+                <input type="date" class="hg-tarih" id="hg-tarih" />
+                <div class="hg-btn-group">
+                  <button class="hg-btn gelir" id="hg-btn-gelir">+ Gelir</button>
+                  <button class="hg-btn gider" id="hg-btn-gider">&#8722; Gider</button>
+                </div>
               </div>
             </div>
-            <input type="date" class="hg-tarih" id="hg-tarih" /><div class="hg-btn-group">
-              <button class="hg-btn gelir" id="hg-btn-gelir">+ Gelir</button>
-              <button class="hg-btn gider" id="hg-btn-gider">&#8722; Gider</button>
-            </div>
+            <aside class="islemler-ozet" id="islem-kat-ozet-panel" aria-label="Kategori ozetleri">
+              <div class="ioz-scroll" id="islem-kat-ozet-scroll"></div>
+            </aside>
           </div>
         </div>
       </section>
@@ -342,13 +350,13 @@
 
   <script src="js/firebase.js?v=20260226kategori-mobil"></script>
   <script src="js/db.js?v=20260226kategori-mobil"></script>
-  <script src="js/modules/islemler.js?v=20260226kategori-mobil"></script>
+  <script src="js/modules/islemler.js?v=20260227islemler-ozet"></script>
   <script src="js/modules/yukle.js?v=20260223vefa-compact"></script>
   <script src="js/modules/alacaklar.js?v=20260210altinfiyat"></script>
   <script src="js/modules/urun.js?v=20260509rtdb"></script>
   <script src="js/modules/arabam.js?v=20260211ar-kamyon-pickup"></script>
   <script src="js/modules/birikim.js?v=20260224birikim-yil"></script>
-  <script src="js/app.js?v=20260226kategori-mobil"></script>
+  <script src="js/app.js?v=20260227islemler-ozet"></script>
 </body>
 </html>
 
