@@ -1279,8 +1279,8 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .vf2-ozet-grup-ic{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;}
 .vf2-altin-tipler{display:flex;flex-wrap:nowrap;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%;padding:2px 0 8px;scrollbar-width:thin;}
 
-/* Ana tablo — tek geniş tablo */
-.vf2-tablo-dis{border:1px solid var(--border);border-radius:var(--radius-md);overflow:auto;width:100%;max-height:min(60dvh,560px);-webkit-overflow-scrolling:touch;}
+/* Ana tablo — kaydirma #vefa-container icinde flex ile (asagida) */
+.vf2-tablo-dis{border:1px solid var(--border);border-radius:var(--radius-md);overflow:auto;width:100%;-webkit-overflow-scrolling:touch;}
 .vf2-tablo{width:100%;border-collapse:collapse;min-width:900px;font-family:var(--font-body);}
 .vf2-tablo thead{position:sticky;top:0;z-index:2;}
 .vf2-tablo thead tr{background:var(--bg-elevated);border-bottom:2px solid var(--border);}
@@ -2880,8 +2880,8 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .vf2-ozet-grup-ic{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;}
 .vf2-altin-tipler{display:flex;flex-wrap:nowrap;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%;padding:2px 0 8px;scrollbar-width:thin;}
 
-/* Ana tablo — tek geniş tablo */
-.vf2-tablo-dis{border:1px solid var(--border);border-radius:var(--radius-md);overflow:auto;width:100%;max-height:min(60dvh,560px);-webkit-overflow-scrolling:touch;}
+/* Ana tablo — kaydirma #vefa-container icinde flex ile (asagida) */
+.vf2-tablo-dis{border:1px solid var(--border);border-radius:var(--radius-md);overflow:auto;width:100%;-webkit-overflow-scrolling:touch;}
 .vf2-tablo{width:100%;border-collapse:collapse;min-width:900px;font-family:var(--font-body);}
 .vf2-tablo thead{position:sticky;top:0;z-index:2;}
 .vf2-tablo thead tr{background:var(--bg-elevated);border-bottom:2px solid var(--border);}
@@ -3270,6 +3270,29 @@ html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 42, 0.12); border-
 .vf2-card-total .vf2-card-info .vf2-card-row > b { font-size: 14px; }
 .vf2-card-total .vf2-tip-tag { font-size: 14px; padding: 5px 11px; }
 
+/* Vefa: ekran once dolsun; gereksiz dis kaydirma yok — kaydirma tablo / kart listesinde */
+#vefa-container.module-host {
+  overflow: hidden;
+}
+#vefa-container > .vf2-wrap {
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding-bottom: 12px;
+}
+#vefa-container > .vf2-wrap > .vf2-ozet-bar {
+  flex-shrink: 0;
+}
+#vefa-container > .vf2-wrap > .vf2-tablo-dis {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
+  overflow: auto;
+}
+
 /* Mobil: tabloyu gizle, kart listesini goster, ozeti kompaktlastir */
 @media (max-width: 600px) {
   .vf2-tablo-dis { display: none !important; }
@@ -3394,8 +3417,13 @@ html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 42, 0.12); border-
     width: 100%;
   }
   #vefa-container.module-host {
-    overflow-x: hidden;
+    overflow: hidden;
+  }
+  #vefa-container > .vf2-wrap > .vf2-cards {
+    flex: 1 1 auto;
+    min-height: 0;
     overflow-y: auto;
+    overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
   }
   .vf2-tip-tag { font-size: 13px !important; padding: 4px 9px !important; }
