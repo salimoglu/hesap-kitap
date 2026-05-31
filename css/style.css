@@ -3692,6 +3692,7 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   flex: 1;
   min-height: 0;
   height: 100%;
+  align-items: stretch;
   overflow: hidden;
 }
 .islemler-sol {
@@ -3711,13 +3712,18 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   display: flex;
   flex-direction: column;
   min-height: 0;
+  height: 100%;
+  align-self: stretch;
   background: linear-gradient(180deg, rgba(240, 184, 64, 0.04), transparent 120px);
   overflow: hidden;
 }
 .ioz-scroll {
-  flex: 1;
+  flex: 1 1 0;
+  min-height: 0;
+  height: 0;
   overflow-y: auto;
   overflow-x: hidden;
+  overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   padding: 10px 12px 16px;
   display: flex;
@@ -3906,6 +3912,9 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
     min-height: 280px;
   }
   .ioz-scroll {
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 200px;
     max-height: none;
   }
 }
