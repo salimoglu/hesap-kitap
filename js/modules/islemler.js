@@ -526,9 +526,53 @@ const IslemlerModule = (() => {
   function silModalKapat(){$("modal-sil").classList.add("hidden");_silId=null;}
   async function silOnayla(){if(_silId){await IslemlerDB.delete(_silId);silModalKapat();await yukle();}}
 
+  function mobilPanelAktifMi(){
+    try{return window.matchMedia("(max-width: 900px)").matches;}catch(e){return false;}
+  }
+
+  function mobilPanelSec(panel){
+    const split=$("islemler-split");
+    const nav=$("islemler-mobil-nav");
+    if(!split||!nav)return;
+    const p=["liste","ozet","butce"].includes(panel)?panel:"liste";
+    split.setAttribute("data-mobil-panel",p);
+    nav.querySelectorAll(".islemler-mnav-btn").forEach(function(btn){
+      btn.classList.toggle("active",btn.dataset.islemPanel===p);
+    });
+    if(p==="butce"&&typeof ButceModule!=="undefined")ButceModule.init();
+    try{localStorage.setItem("hk-islem-mobil-panel",p);}catch(e){}
+  }
+
+  function baglaMobilNav(){
+    const nav=$("islemler-mobil-nav");
+    if(!nav||nav._bound)return;
+    nav._bound=true;
+    nav.querySelectorAll(".islemler-mnav-btn").forEach(function(btn){
+      btn.addEventListener("click",function(){
+        mobilPanelSec(btn.dataset.islemPanel||"liste");
+      });
+    });
+    let saved="liste";
+    try{saved=localStorage.getItem("hk-islem-mobil-panel")||"liste";}catch(e){}
+    if(!["liste","ozet","butce"].includes(saved))saved="liste";
+    mobilPanelSec(mobilPanelAktifMi()?saved:"liste");
+    let mq;
+    try{mq=window.matchMedia("(max-width: 900px)");}catch(e){return;}
+    const onMq=function(){
+      if(mq.matches){
+        let s="liste";
+        try{s=localStorage.getItem("hk-islem-mobil-panel")||"liste";}catch(e){}
+        mobilPanelSec(s);
+      }else if($("islemler-split"))$("islemler-split").setAttribute("data-mobil-panel","liste");
+    };
+    if(mq.addEventListener)mq.addEventListener("change",onMq);
+    else if(mq.addListener)mq.addListener(onMq);
+  }
+
   function baglaEventler(){
     if(_baglandi)return;
     _baglandi=true;
+    baglaMobilNav();
     $("hg-btn-gelir").addEventListener("click",()=>hgKaydet("gelir"));
     $("hg-btn-gider").addEventListener("click",()=>hgKaydet("gider"));
     $("hg-tutar").addEventListener("keydown",e=>{if(e.key==="Enter")hgKaydet("gider");});
