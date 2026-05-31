@@ -478,14 +478,25 @@ const IslemlerModule = (() => {
     }
   }
 
+  function hgOdakTutar(){
+    var el=$("hg-tutar");
+    if(!el)return;
+    setTimeout(function(){
+      try{ el.focus({ preventScroll: true }); }catch(e){ el.focus(); }
+      if(typeof el.select==="function")el.select();
+    }, 60);
+  }
+
   async function hgKaydet(tip){
     const aciklama=$("hg-aciklama").value.trim();
     const tutar=parseFloat($("hg-tutar").value);
     if(!tutar||tutar<=0){$("hg-tutar").focus();return;}
     if(!_seciliKat.value){openHgDropdown();return;}
     const _tarihVal=$("hg-tarih");const _yi={tip,kategori:gorunumKategori(_seciliKat.value),tutar,aciklama,tarih:(_tarihVal&&_tarihVal.value)?_tarihVal.value:bugun()};
-      const _yiId=await IslemlerDB.add(_yi);    $("hg-aciklama").value="";$("hg-tutar").value="";
+    await IslemlerDB.add(_yi);
+    $("hg-aciklama").value="";$("hg-tutar").value="";
     await yukle();
+    hgOdakTutar();
   }
 
   async function modalAc(id){
