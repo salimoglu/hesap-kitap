@@ -8,21 +8,12 @@ const IslemlerModule = (() => {
 
   function normKatStr(s){return String(s||"").replace(/\s+/g," ").trim();}
 
-  /** Yerel _kategoriler tablosundan guncellenmis tam etiketi uretir (islem kaydindaki yazim ile farkliyse bile). */
+  /** Tek canonical etiket (yazim / Turkce karakter / grup alias farklarini birlestirir). */
   function gorunumKategori(catStr){
-    var raw = normKatStr(catStr);
-    if (!raw) return String(catStr || "").trim();
-    var exact = _kategoriler.find(function(k) { return normKatStr(k.grup + " - " + k.ad) === raw; });
-    if (exact) return exact.grup + " - " + exact.ad;
-    var d2 = raw.indexOf(" - ");
-    if (d2 < 0) {
-      var sonly = _kategoriler.find(function(k) { return normKatStr(k.ad) === raw; });
-      return sonly ? sonly.grup + " - " + sonly.ad : String(catStr).trim();
+    if (typeof HKKategori !== "undefined" && HKKategori.resolve) {
+      return HKKategori.resolve(catStr, _kategoriler) || normKatStr(catStr);
     }
-    var g = normKatStr(raw.slice(0, d2));
-    var tail = normKatStr(raw.slice(d2 + 3));
-    var m = _kategoriler.find(function(k) { return normKatStr(k.grup) === g && normKatStr(k.ad) === tail; });
-    return m ? m.grup + " - " + m.ad : String(catStr).trim();
+    return normKatStr(catStr);
   }
 
   function para(s){return Number(s).toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2});}
@@ -172,6 +163,9 @@ const IslemlerModule = (() => {
   }
 
   async function yukle(){
+    if (typeof KategorilerDB !== "undefined" && KategorilerDB.dedupeNormalizeAll) {
+      await KategorilerDB.dedupeNormalizeAll();
+    }
     _islemler=await IslemlerDB.getAll();
     _kategoriler=await KategorilerDB.getAll();
     _islemler.sort((a,b)=>a.tarih.localeCompare(b.tarih)||(a.olusturma||0)-(b.olusturma||0));
@@ -460,7 +454,7 @@ const IslemlerModule = (() => {
     const tutar=parseFloat($("hg-tutar").value);
     if(!tutar||tutar<=0){$("hg-tutar").focus();return;}
     if(!_seciliKat.value){openHgDropdown();return;}
-    const _tarihVal=$("hg-tarih");const _yi={tip,kategori:_seciliKat.value,tutar,aciklama,tarih:(_tarihVal&&_tarihVal.value)?_tarihVal.value:bugun()};
+    const _tarihVal=$("hg-tarih");const _yi={tip,kategori:gorunumKategori(_seciliKat.value),tutar,aciklama,tarih:(_tarihVal&&_tarihVal.value)?_tarihVal.value:bugun()};
       const _yiId=await IslemlerDB.add(_yi);    $("hg-aciklama").value="";$("hg-tutar").value="";
     await yukle();
   }
@@ -477,7 +471,7 @@ const IslemlerModule = (() => {
   function tipSec(tip){_aktifTip=tip;$("btn-gider").classList.toggle("active",tip==="gider");$("btn-gelir").classList.toggle("active",tip==="gelir");doldurKategoriSelect(tip);}
   async function kaydet(){
     const tutar=parseFloat($("inp-tutar").value);
-    const kategori=$("sel-kategori").value;
+    const kategori=gorunumKategori($("sel-kategori").value);
     const aciklama=$("inp-aciklama").value.trim();
     const tarih=$("inp-tarih").value;
     if(!tutar||tutar<=0){alert("Gecerli tutar girin.");return;}

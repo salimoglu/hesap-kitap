@@ -44,6 +44,91 @@ function getAll(store) {
   return new Promise(function(res, rej) { var req = store.getAll(); req.onsuccess = function() { res(req.result); }; req.onerror = function() { rej(req.error); }; });
 }
 
+/* —— Kategori normalizasyonu: ayni kalem farkli yazimla bolunmesin (IASE/İAŞE, Karti/Kartı) —— */
+var HK_GRUP_ALIAS = {
+  "İAŞE": "IASE",
+  "IAŞE": "IASE",
+  "IASE": "IASE",
+  "KREDİ KARTI": "KREDI KARTI",
+  "KREDI KARTI": "KREDI KARTI"
+};
+
+function hkNormSpaces(s) {
+  return String(s || "").replace(/\s+/g, " ").trim();
+}
+
+function hkFoldTr(s) {
+  return hkNormSpaces(s)
+    .toLocaleLowerCase("tr")
+    .replace(/ğ/g, "g")
+    .replace(/ü/g, "u")
+    .replace(/ş/g, "s")
+    .replace(/ı/g, "i")
+    .replace(/ö/g, "o")
+    .replace(/ç/g, "c")
+    .replace(/â/g, "a")
+    .replace(/î/g, "i")
+    .replace(/û/g, "u");
+}
+
+function hkNormGrup(g) {
+  var u = hkNormSpaces(g).toLocaleUpperCase("tr");
+  return HK_GRUP_ALIAS[u] || u;
+}
+
+function hkNormAd(ad) {
+  return hkNormSpaces(ad);
+}
+
+function hkKatNormKey(grup, ad) {
+  return hkNormGrup(grup) + "\0" + hkFoldTr(ad);
+}
+
+function hkKatCanonicalEtiket(grup, ad) {
+  return hkNormGrup(grup) + " - " + hkNormAd(ad);
+}
+
+function hkKatNormKeyFromTam(tam) {
+  var raw = hkNormSpaces(tam);
+  if (!raw) return "";
+  var d = raw.indexOf(" - ");
+  if (d < 0) return "\0ad:" + hkFoldTr(raw);
+  return hkKatNormKey(raw.slice(0, d), raw.slice(d + 3));
+}
+
+function hkResolveCanonicalEtiket(katStr, kategoriler) {
+  var tam = hkNormSpaces(katStr);
+  if (!tam) return "";
+  var key = hkKatNormKeyFromTam(tam);
+  var i, k, canon = null;
+  for (i = 0; i < (kategoriler || []).length; i++) {
+    k = kategoriler[i];
+    if (hkKatNormKey(k.grup, k.ad) === key) {
+      canon = hkKatCanonicalEtiket(k.grup, k.ad);
+      break;
+    }
+  }
+  if (canon) return canon;
+  if (tam.indexOf(" - ") < 0 && kategoriler && kategoriler.length) {
+    var adFold = hkFoldTr(tam);
+    var matches = [];
+    for (i = 0; i < kategoriler.length; i++) {
+      k = kategoriler[i];
+      if (hkFoldTr(k.ad) === adFold) matches.push(k);
+    }
+    if (matches.length === 1) return hkKatCanonicalEtiket(matches[0].grup, matches[0].ad);
+  }
+  return tam;
+}
+
+window.HKKategori = {
+  normKey: hkKatNormKeyFromTam,
+  canonicalEtiket: hkKatCanonicalEtiket,
+  resolve: hkResolveCanonicalEtiket,
+  normGrup: hkNormGrup,
+  normAd: hkNormAd
+};
+
 /** Tum kategorileri RTDB'ye yazar (tamamlanana kadar bekler; sekme kapama / mobil geçişlerinde daha guvenilir). */
 async function kategorileriBulutaYaz() {
   if (typeof fbSyncKategoriler === "undefined") return;
@@ -143,15 +228,91 @@ var KategorilerDB = {
   },
   add: async function(kat) {
     await openDB();
-    var id = await promisify(tx(STORES.KATEGORILER, "readwrite").add(kat));
+    var g = hkNormGrup(kat.grup);
+    var a = hkNormAd(kat.ad);
+    var mevcut = await getAll(tx(STORES.KATEGORILER, "readonly"));
+    var key = hkKatNormKey(g, a);
+    var dup = null;
+    for (var i = 0; i < mevcut.length; i++) {
+      if (hkKatNormKey(mevcut[i].grup, mevcut[i].ad) === key) {
+        dup = mevcut[i];
+        break;
+      }
+    }
+    if (dup) return dup.id;
+    var kayit = Object.assign({}, kat, { grup: g, ad: a });
+    var id = await promisify(tx(STORES.KATEGORILER, "readwrite").add(kayit));
     await kategorileriBulutaYaz();
     return id;
   },
   update: async function(kat) {
     await openDB();
-    var result = await promisify(tx(STORES.KATEGORILER, "readwrite").put(kat));
+    var kayit = Object.assign({}, kat, { grup: hkNormGrup(kat.grup), ad: hkNormAd(kat.ad) });
+    var result = await promisify(tx(STORES.KATEGORILER, "readwrite").put(kayit));
     await kategorileriBulutaYaz();
     return result;
+  },
+  /** Ayni anlama gelen kategorileri birlestirir; islem etiketlerini tek canonical forma ceker. */
+  dedupeNormalizeAll: async function() {
+    await openDB();
+    var kats = await getAll(tx(STORES.KATEGORILER, "readonly"));
+    if (!kats.length) return { merged: 0, islemGuncelle: 0 };
+    var byKey = {};
+    var i, k, key, list, winner, canon, deleteIds = [], normToCanon = {}, merged = 0, islemGuncelle = 0;
+    for (i = 0; i < kats.length; i++) {
+      k = kats[i];
+      key = hkKatNormKey(k.grup, k.ad);
+      if (!byKey[key]) byKey[key] = [];
+      byKey[key].push(k);
+    }
+    for (key in byKey) {
+      if (!Object.prototype.hasOwnProperty.call(byKey, key)) continue;
+      list = byKey[key];
+      list.sort(function(a, b) {
+        if (a.varsayilan && !b.varsayilan) return -1;
+        if (!a.varsayilan && b.varsayilan) return 1;
+        return (a.id || 0) - (b.id || 0);
+      });
+      winner = list[0];
+      canon = hkKatCanonicalEtiket(winner.grup, winner.ad);
+      normToCanon[key] = canon;
+      if (winner.grup !== hkNormGrup(winner.grup) || winner.ad !== hkNormAd(winner.ad)) {
+        await promisify(tx(STORES.KATEGORILER, "readwrite").put(Object.assign({}, winner, {
+          grup: hkNormGrup(winner.grup),
+          ad: hkNormAd(winner.ad)
+        })));
+      }
+      for (i = 1; i < list.length; i++) {
+        deleteIds.push(list[i].id);
+        merged++;
+      }
+    }
+    var islemler = await getAll(tx(STORES.ISLEMLER, "readonly"));
+    var eskiToYeni = {};
+    for (i = 0; i < kats.length; i++) {
+      k = kats[i];
+      key = hkKatNormKey(k.grup, k.ad);
+      canon = normToCanon[key];
+      if (!canon) continue;
+      eskiToYeni[hkNormSpaces(k.grup + " - " + k.ad)] = canon;
+      eskiToYeni[hkNormSpaces(k.grup + " - " + k.ad).toLocaleUpperCase("tr")] = canon;
+      eskiToYeni[hkKatCanonicalEtiket(k.grup, k.ad)] = canon;
+    }
+    for (i = 0; i < islemler.length; i++) {
+      var islem = islemler[i];
+      var eski = hkNormSpaces(islem.kategori);
+      var yeni = eskiToYeni[eski] || normToCanon[hkKatNormKeyFromTam(eski)] || hkResolveCanonicalEtiket(eski, kats);
+      if (yeni && hkFoldTr(eski) !== hkFoldTr(yeni)) {
+        await promisify(tx(STORES.ISLEMLER, "readwrite").put(Object.assign({}, islem, { kategori: yeni })));
+        if (typeof fbIslemGuncelle !== "undefined") fbIslemGuncelle(Object.assign({}, islem, { kategori: yeni }));
+        islemGuncelle++;
+      }
+    }
+    for (i = 0; i < deleteIds.length; i++) {
+      await promisify(tx(STORES.KATEGORILER, "readwrite").delete(deleteIds[i]));
+    }
+    if (merged > 0 || islemGuncelle > 0) await kategorileriBulutaYaz();
+    return { merged: merged, islemGuncelle: islemGuncelle };
   },
   delete: async function(id) {
     await openDB();
@@ -197,6 +358,9 @@ var AyarlarDB = {
 window.initApp = async function() {
   await openDB();
   await KategorilerDB.seedDefaults();
+  if (typeof KategorilerDB.dedupeNormalizeAll === "function") {
+    await KategorilerDB.dedupeNormalizeAll();
+  }
 };
 
 } // end guard

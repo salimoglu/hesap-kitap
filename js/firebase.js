@@ -398,6 +398,9 @@ async function fbKategorileriYukle() {
       return;
     }
     await KategorilerDB.mergeUpsertFromRemote(uzak);
+    if (typeof KategorilerDB.dedupeNormalizeAll === "function") {
+      await KategorilerDB.dedupeNormalizeAll();
+    }
   } catch (e) {
     console.warn("fbKategorileriYukle:", e);
   }
