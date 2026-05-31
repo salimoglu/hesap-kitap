@@ -3769,6 +3769,7 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   min-height: 0;
   overflow: hidden;
   border-right: 1px solid var(--border);
+  background: var(--bg-base);
 }
 /* Kaydırma doğrudan aside üzerinde (iç içe flex scroll masaüstünde kırılıyordu) */
 .islemler-ozet {
@@ -3838,11 +3839,41 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   #tab-islemler .islemler-split {
     min-height: 0;
   }
+  #tab-islemler .islemler-wrap {
+    background: var(--bg-base);
+  }
   #tab-islemler .islemler-split {
     display: grid;
     grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.95fr) minmax(0, 1fr);
     grid-template-rows: minmax(0, 1fr);
     align-items: stretch;
+  }
+  /* 3 sutun: butce ile ayni kaydirma + tema arka plani */
+  #tab-islemler .islemler-sol,
+  #tab-islemler .islemler-ozet,
+  #tab-islemler .islemler-butce {
+    background: var(--bg-base);
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-light) transparent;
+  }
+  #tab-islemler .islemler-sol::-webkit-scrollbar,
+  #tab-islemler .islem-scroll::-webkit-scrollbar,
+  #tab-islemler .islemler-ozet::-webkit-scrollbar,
+  #tab-islemler .islemler-butce::-webkit-scrollbar {
+    width: 8px;
+  }
+  #tab-islemler .islemler-sol::-webkit-scrollbar-thumb,
+  #tab-islemler .islem-scroll::-webkit-scrollbar-thumb,
+  #tab-islemler .islemler-ozet::-webkit-scrollbar-thumb,
+  #tab-islemler .islemler-butce::-webkit-scrollbar-thumb {
+    background: var(--border-light);
+    border-radius: 4px;
+  }
+  #tab-islemler .islemler-sol::-webkit-scrollbar-track,
+  #tab-islemler .islem-scroll::-webkit-scrollbar-track,
+  #tab-islemler .islemler-ozet::-webkit-scrollbar-track,
+  #tab-islemler .islemler-butce::-webkit-scrollbar-track {
+    background: transparent;
   }
   #tab-islemler .islemler-sol {
     flex: none;
@@ -3852,6 +3883,20 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
     grid-row: 1;
     min-height: 0;
     max-height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  #tab-islemler .islem-scroll {
+    flex: 1;
+    min-height: 0;
+    background: var(--bg-base);
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-light) transparent;
   }
   #tab-islemler .islemler-ozet {
     flex: none;
@@ -3862,8 +3907,10 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
     min-height: 0;
     max-height: 100%;
     height: 100%;
-    overflow-y: scroll;
+    overflow-y: auto;
     overflow-x: hidden;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
   }
   #tab-islemler .islemler-butce {
     display: block;
@@ -3878,12 +3925,19 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
     overflow-y: auto;
     overflow-x: hidden;
     overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  #tab-islemler .islemler-butce .butce-wrap {
+    overflow: visible;
+    height: auto;
+    min-height: 100%;
+    align-items: stretch;
   }
 }
 .ioz-bolum {
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   overflow: hidden;
 }
 .ioz-bolum-baslik {
@@ -3891,10 +3945,10 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--gold);
+  color: var(--text-muted);
   padding: 10px 12px 8px;
   border-bottom: 1px solid var(--border);
-  background: var(--bg-elevated);
+  background: var(--bg-card);
 }
 .ioz-bolum-alt {
   font-size: 11px;
@@ -4111,10 +4165,14 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
 }
 #tab-islemler .ioz-scroll {
   padding: var(--islem-py) var(--islem-px) 12px;
+  background: var(--bg-base);
+  min-height: 100%;
+  box-sizing: border-box;
 }
 #tab-islemler .ioz-bolum {
   border-radius: var(--radius-sm);
   background: var(--bg-card);
+  border: 1px solid var(--border);
 }
 #tab-islemler .ioz-bolum-baslik {
   font-family: var(--islem-ui);
@@ -4123,8 +4181,45 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   letter-spacing: 0.6px;
   text-transform: uppercase;
   color: var(--text-muted);
-  background: var(--bg-base);
+  background: var(--bg-card);
   padding: 8px var(--islem-px) 6px;
+  border-bottom: 1px solid var(--border);
+}
+#tab-islemler .ioz-grup-baslik {
+  background: var(--bg-base);
+}
+#tab-islemler .ioz-kat-satir {
+  background: var(--bg-card);
+}
+#tab-islemler .ioz-yil-satir {
+  background: var(--bg-card);
+}
+#tab-islemler .ioz-yil-satir:nth-child(even) {
+  background: var(--bg-input);
+}
+#tab-islemler .islem-scroll {
+  background: var(--bg-base);
+}
+#tab-islemler .islem-row {
+  background: var(--bg-card);
+}
+#tab-islemler .islem-grup-baslik {
+  background: var(--bg-base);
+}
+#tab-islemler .islem-ay-ozet,
+#tab-islemler .islem-genel-toplam {
+  background: var(--bg-card);
+}
+#tab-islemler .ozet-bar,
+#tab-islemler .filtre-bar,
+#tab-islemler .hizli-giris {
+  background: var(--bg-card);
+  border-color: var(--border);
+}
+#tab-islemler .islemler-butce .butce-tablo-wrap {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
 }
 #tab-islemler .ioz-bolum-alt {
   font-size: 11px;
