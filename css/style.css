@@ -3855,6 +3855,10 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
 .ioz-ay-kutu-val.gider { color: var(--red); }
 .ioz-ay-kutu-val.net { color: var(--gold); }
 .ioz-grup-baslik {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
   font-size: 9px;
   font-weight: 800;
   letter-spacing: 0.1em;
@@ -3863,6 +3867,19 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   padding: 8px 12px 4px;
   background: var(--bg-base);
 }
+.ioz-grup-ad { flex: 1; min-width: 0; }
+.ioz-grup-toplam {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: none;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.ioz-grup-toplam.gider { color: var(--red); }
+.ioz-grup-toplam.gelir { color: var(--green); }
+.ioz-grup-toplam.net { color: var(--gold); }
 .ioz-kat-satir {
   padding: 8px 12px 10px;
   border-bottom: 1px solid var(--border);
@@ -3882,6 +3899,21 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   line-height: 1.25;
   word-break: break-word;
 }
+.ioz-kat-ust-sag {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  flex-shrink: 0;
+}
+.ioz-kat-tutar {
+  font-size: 12px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.ioz-kat-tutar.gider { color: var(--red); }
+.ioz-kat-tutar.gelir { color: var(--green); }
 .ioz-kat-adet {
   font-size: 10px;
   font-weight: 700;
@@ -3892,17 +3924,6 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   border-radius: 10px;
   padding: 2px 7px;
 }
-.ioz-kat-rakam {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 10px;
-  font-size: 11px;
-  font-variant-numeric: tabular-nums;
-  margin-bottom: 6px;
-}
-.ioz-kat-rakam .g { color: var(--green); font-weight: 700; }
-.ioz-kat-rakam .d { color: var(--red); font-weight: 700; }
-.ioz-kat-rakam .n { color: var(--text-secondary); font-weight: 600; }
 .ioz-kat-bar-track {
   height: 4px;
   border-radius: 2px;

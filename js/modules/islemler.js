@@ -42,6 +42,29 @@ const IslemlerModule = (() => {
     return d>=0?katTam.slice(0,d).trim():katTam;
   }
 
+  /** Tek satir tutar: gider veya gelir; ikisi varsa net (cift yazim yok). */
+  function katTekTutar(k){
+    if(k.gelir>0&&k.gider>0){
+      const net=k.gelir-k.gider;
+      return{cls:net>=0?"gelir":"gider",txt:(net>=0?"+":"-")+para(Math.abs(net))};
+    }
+    if(k.gider>0)return{cls:"gider",txt:"-"+para(k.gider)};
+    if(k.gelir>0)return{cls:"gelir",txt:"+"+para(k.gelir)};
+    return{cls:"",txt:""};
+  }
+
+  function grupToplamTutar(liste){
+    let gelir=0,gider=0;
+    for(const k of liste){gelir+=k.gelir;gider+=k.gider;}
+    if(gelir>0&&gider>0){
+      const net=gelir-gider;
+      return{cls:"net",txt:(net>=0?"+":"-")+para(Math.abs(net))};
+    }
+    if(gider>0)return{cls:"gider",txt:"-"+para(gider)};
+    if(gelir>0)return{cls:"gelir",txt:"+"+para(gelir)};
+    return{cls:"",txt:""};
+  }
+
   function kategoriOzetiVeri(){
     const byAy={};
     const byYil={};
@@ -113,18 +136,24 @@ const IslemlerModule = (() => {
       });
       const grupSira=Object.keys(gruplar).sort(function(a,b){return a.localeCompare(b,"tr");});
       grupSira.forEach(function(g){
-        h+='<div class="ioz-grup-baslik">'+esc(g)+'</div>';
-        gruplar[g].forEach(function(k){
+        const gListe=gruplar[g];
+        const gTop=grupToplamTutar(gListe);
+        h+='<div class="ioz-grup-baslik">';
+        h+='<span class="ioz-grup-ad">'+esc(g)+'</span>';
+        if(gTop.txt)h+='<span class="ioz-grup-toplam '+gTop.cls+'">'+gTop.txt+'</span>';
+        h+='</div>';
+        gListe.forEach(function(k){
           const barPct=k.gider>0?Math.round((k.gider/maxGider)*100):0;
           const gelirPct=k.gelir>0?Math.round((k.gelir/(ayVer.gelir||1))*100):0;
           const adKisa=k.ad.indexOf(" - ")>=0?k.ad.slice(k.ad.indexOf(" - ")+3):k.ad;
+          const tut=katTekTutar(k);
           h+='<div class="ioz-kat-satir">';
-          h+='<div class="ioz-kat-ust"><span class="ioz-kat-ad">'+esc(adKisa)+'</span><span class="ioz-kat-adet">'+k.adet+' işlem</span></div>';
-          h+='<div class="ioz-kat-rakam">';
-          if(k.gelir>0)h+='<span class="g">+'+para(k.gelir)+'</span>';
-          if(k.gider>0)h+='<span class="d">-'+para(k.gider)+'</span>';
-          h+='<span class="n">Net '+(k.net>=0?"+":"-")+para(Math.abs(k.net))+'</span>';
-          h+='</div>';
+          h+='<div class="ioz-kat-ust">';
+          h+='<span class="ioz-kat-ad">'+esc(adKisa)+'</span>';
+          h+='<span class="ioz-kat-ust-sag">';
+          if(tut.txt)h+='<span class="ioz-kat-tutar '+tut.cls+'">'+tut.txt+'</span>';
+          h+='<span class="ioz-kat-adet">'+k.adet+' işlem</span>';
+          h+='</span></div>';
           if(k.gider>0){
             h+='<span class="ioz-kat-bar-track" title="Ay içi gider payı"><span class="ioz-kat-bar-fill" style="width:'+barPct+'%"></span></span>';
           }else if(k.gelir>0){
