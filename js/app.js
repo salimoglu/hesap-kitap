@@ -248,7 +248,7 @@
   }
 
   // Sekme yonetimi
-  const TAB_SIRA = ["islemler", "butce", "birikim", "arabam", "kredi", "alacaklar", "urun", "altin", "vefa", "muhtac"];
+  const TAB_SIRA = ["islemler", "birikim", "arabam", "kredi", "alacaklar", "urun", "altin", "vefa", "muhtac"];
   const tabBtnler = document.querySelectorAll(".tab-btn");
   const tabPaneller = document.querySelectorAll(".tab-panel");
 
@@ -258,8 +258,10 @@
   }
 
   function modulAc(tabId) {
-    if (tabId === "islemler" && typeof IslemlerModule !== "undefined") IslemlerModule.init();
-    if (tabId === "butce" && typeof ButceModule !== "undefined") ButceModule.init();
+    if (tabId === "islemler") {
+      if (typeof IslemlerModule !== "undefined") IslemlerModule.init();
+      if (typeof ButceModule !== "undefined") ButceModule.init();
+    }
     if (tabId === "birikim" && typeof BirikimModule !== "undefined") BirikimModule.init();
     if (tabId === "kredi" && typeof KrediModule !== "undefined") KrediModule.init();
     if (tabId === "alacaklar" && typeof AlacaklarModule !== "undefined") AlacaklarModule.init();
