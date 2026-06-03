@@ -8,6 +8,27 @@ var VerilenAltinlarModule = (function () {
   var VA_GRAM = { gram: 1, ceyrek: 1.75, yarim: 3.5, tam: 7, ata: 7 };
   var VA_LABEL = { gram: "Gram", ceyrek: "Çeyrek", yarim: "Yarım", tam: "Tam", ata: "Ata" };
   var VA_TURLER = ["gram", "ceyrek", "yarim", "tam", "ata"];
+
+  /* İlk kurulum — tablodan aktarılan kayıtlar (liste boşken bir kez yüklenir) */
+  var VA_TOHUM = [
+    { id: "va-tohum-01", kisi: "FEYZİ", aciklama: "Düğün", tur: "yarim", adet: 1 },
+    { id: "va-tohum-02", kisi: "MUSTAFA SARKIR", aciklama: "Çocuğu için", tur: "ceyrek", adet: 1 },
+    { id: "va-tohum-03", kisi: "MESUT İNCE", aciklama: "Düğün", tur: "ceyrek", adet: 1 },
+    { id: "va-tohum-04", kisi: "İSMAİL ALTAN", aciklama: "Düğün", tur: "ata", adet: 1 },
+    { id: "va-tohum-05", kisi: "SÜMEYRA ABLAM", aciklama: "Çocuğu için", tur: "ceyrek", adet: 1 },
+    { id: "va-tohum-06", kisi: "YILMAZ KARABULUT", aciklama: "Düğün", tur: "ata", adet: 1, tarih: "2023-05-16", gunDegerTl: 9450 },
+    { id: "va-tohum-07", kisi: "FERHAT BOZOK", aciklama: "Çocuğu için", tur: "ceyrek", adet: 1 },
+    { id: "va-tohum-08", kisi: "GÜLŞAH", aciklama: "Düğün için (çocuğun altını verildi)", tur: "ceyrek", adet: 1 },
+    { id: "va-tohum-09", kisi: "İSMAİL ALTAN", aciklama: "Çocuğu için", tur: "ceyrek", adet: 1 },
+    { id: "va-tohum-10", kisi: "ZELİHA", aciklama: "Düğün için", tur: "yarim", adet: 1 },
+    { id: "va-tohum-11", kisi: "YILMAZ KARABULUT", aciklama: "Çocuğu için", tur: "ceyrek", adet: 1 },
+    { id: "va-tohum-12", kisi: "BEKİR EROĞLU", aciklama: "Düğün", tur: "ceyrek", adet: 1, tarih: "2025-05-20", gunDegerTl: 6600 },
+    { id: "va-tohum-13", kisi: "SÜHEYLA", aciklama: "Çocuğu için", tur: "ceyrek", adet: 1, tarih: "2025-05-20", gunDegerTl: 6600 },
+    { id: "va-tohum-14", kisi: "ZELİHA", aciklama: "Çocuğu için", tur: "ceyrek", adet: 1, tarih: "2025-08-20" },
+    { id: "va-tohum-15", kisi: "FEYZİ", aciklama: "Çocuğu için", tur: "ceyrek", adet: 1, tarih: "2025-10-02", gunDegerTl: 10000 },
+    { id: "va-tohum-16", kisi: "SÜMEYRA ABLAM", aciklama: "Çocuğu için", tur: "ceyrek", adet: 1, tarih: "2026-04-01", gunDegerTl: 11000 }
+  ];
+
   var ALTIN_FIYAT_URLS = [
     "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/xau.json",
     "https://latest.currency-api.pages.dev/v1/currencies/xau.json"
@@ -100,13 +121,39 @@ var VerilenAltinlarModule = (function () {
       var s = await fbRtdbRef("verilen_altinlar").once("value");
       var v = s.val();
       _kayitlar = v ? Object.values(v) : [];
-      _kayitlar.sort(function (a, b) {
-        return (b.tarih || "").localeCompare(a.tarih || "");
-      });
+      vaSirala();
     } catch (e) {
       _kayitlar = [];
       console.error("[VerilenAltin] yukle", e);
     }
+  }
+
+  function vaSirala() {
+    _kayitlar.sort(function (a, b) {
+      var ta = a.tarih || "";
+      var tb = b.tarih || "";
+      if (!ta && !tb) return (a.kisi || "").localeCompare(b.kisi || "", "tr");
+      if (!ta) return 1;
+      if (!tb) return -1;
+      return tb.localeCompare(ta);
+    });
+  }
+
+  async function tohumYukle() {
+    if (_kayitlar.length > 0) return;
+    VA_TOHUM.forEach(function (r) {
+      _kayitlar.push({
+        id: r.id,
+        kisi: r.kisi,
+        aciklama: r.aciklama || "",
+        tur: r.tur,
+        adet: r.adet || 1,
+        tarih: r.tarih || "",
+        gunDegerTl: r.gunDegerTl
+      });
+    });
+    vaSirala();
+    await fbKaydet();
   }
 
   async function fbKaydet() {
@@ -174,8 +221,9 @@ var VerilenAltinlarModule = (function () {
         h += '<div class="va-kart-ust">';
         h += '<div class="va-kart-sol">';
         h += '<div class="va-kisi">' + esc(k.kisi || "—") + "</div>";
+        if (k.aciklama) h += '<div class="va-aciklama">' + esc(k.aciklama) + "</div>";
         h += '<div class="va-tur">' + esc(turEtiket(k.tur)) + (adet !== 1 ? " × " + agr(adet) : "") + "</div>";
-        h += '<div class="va-meta"><span>' + tarihFmt(k.tarih) + "</span>";
+        h += '<div class="va-meta"><span>' + (k.tarih ? tarihFmt(k.tarih) : "Tarih yok") + "</span>";
         h += '<span class="va-meta-gr">' + agr(gr) + " gr</span></div>";
         h += "</div>";
         h += '<div class="va-kart-sag">';
@@ -201,8 +249,10 @@ var VerilenAltinlarModule = (function () {
     h += '<div class="modal-body">';
     h += '<div class="field-group"><label class="field-label">Kime verildi</label>';
     h += '<input type="text" id="va-kisi" class="field-input" placeholder="Ad soyad..." maxlength="80"/></div>';
-    h += '<div class="field-group"><label class="field-label">Veriliş tarihi</label>';
-    h += '<input type="date" id="va-tarih" class="field-input" value="' + bugun() + '"/></div>';
+    h += '<div class="field-group"><label class="field-label">Açıklama (düğün, çocuğu için…)</label>';
+    h += '<input type="text" id="va-aciklama" class="field-input" placeholder="İsteğe bağlı" maxlength="120"/></div>';
+    h += '<div class="field-group"><label class="field-label">Veriliş tarihi (isteğe bağlı)</label>';
+    h += '<input type="date" id="va-tarih" class="field-input"/></div>';
     h += '<div class="va-form-iki">';
     h += '<div class="field-group"><label class="field-label">Altın türü</label>';
     h += '<select id="va-tur" class="field-input">' + turSecenekHtml("ceyrek") + "</select></div>";
@@ -226,7 +276,8 @@ var VerilenAltinlarModule = (function () {
     _aktif = k || null;
     $("va-modal-baslik").textContent = k ? "Kaydı Düzenle" : "Verilen Altın Ekle";
     $("va-kisi").value = k ? k.kisi || "" : "";
-    $("va-tarih").value = k ? k.tarih || bugun() : bugun();
+    $("va-aciklama").value = k ? k.aciklama || "" : "";
+    $("va-tarih").value = k ? k.tarih || "" : "";
     $("va-tur").value = k && VA_TURLER.indexOf(k.tur) >= 0 ? k.tur : "ceyrek";
     $("va-adet").value = k ? String(k.adet || 1) : "1";
     $("va-gun-deger").value = k && k.gunDegerTl ? String(k.gunDegerTl) : "";
@@ -298,16 +349,13 @@ var VerilenAltinlarModule = (function () {
 
   async function kaydet() {
     var kisi = ($("va-kisi").value || "").trim();
-    var tarih = $("va-tarih").value;
+    var aciklama = ($("va-aciklama").value || "").trim();
+    var tarih = ($("va-tarih").value || "").trim();
     var tur = $("va-tur").value;
     var adet = parseFloat($("va-adet").value) || 0;
     var gunDeger = parseFloat($("va-gun-deger").value) || 0;
     if (!kisi) {
       $("va-kisi").focus();
-      return;
-    }
-    if (!tarih) {
-      alert("Tarih seçiniz.");
       return;
     }
     if (VA_TURLER.indexOf(tur) < 0) {
@@ -321,6 +369,7 @@ var VerilenAltinlarModule = (function () {
     var kayit = {
       id: _aktif ? _aktif.id : uid(),
       kisi: kisi,
+      aciklama: aciklama,
       tarih: tarih,
       tur: tur,
       adet: adet
@@ -334,9 +383,7 @@ var VerilenAltinlarModule = (function () {
     } else {
       _kayitlar.push(kayit);
     }
-    _kayitlar.sort(function (a, b) {
-      return (b.tarih || "").localeCompare(a.tarih || "");
-    });
+    vaSirala();
     await fbKaydet();
     $("va-modal").classList.add("hidden");
     render();
@@ -344,6 +391,7 @@ var VerilenAltinlarModule = (function () {
 
   async function init() {
     await fbYukle();
+    await tohumYukle();
     await gramFiyatYukle();
     render();
     gramFiyatCek().then(function (f) {
