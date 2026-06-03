@@ -908,11 +908,60 @@ return{init:vinit};
 var MuhtacModule=(function(){
 var $=function(id){return document.getElementById(id);};
 var _kisiler=[];
+var _islemler=[];
 
 function mp(n){return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2});}
 function muid(){return "mh"+Date.now()+"_"+Math.random().toString(36).substr(2,5);}
 function mTarih(t){if(!t)return"";var p=t.split("-");return p[2]+"."+p[1]+"."+p[0];}
-function kisiToplam(k){return (k.zekatlar||[]).reduce(function(s,z){return s+(z.miktar||0);},0);}
+function kisiToplam(k){return (k.zekatlar||[]).reduce(function(s,z){return s+(parseFloat(z.miktar)||0);},0);}
+
+function mhTarihtenYil(t){
+  if(!t)return null;
+  var s=String(t).trim();
+  if(s.length<4)return null;
+  var yy=s.substr(0,4);
+  if(!/^\d{4}$/.test(yy))return null;
+  var n=parseInt(yy,10);
+  if(n<1900||n>2200)return null;
+  return yy;
+}
+function mhYillaraGoreGelir(){
+  var yGelir={};
+  _islemler.forEach(function(i){
+    if(i.tip!=="gelir")return;
+    var y=mhTarihtenYil(i.tarih);
+    if(!y)return;
+    yGelir[y]=(yGelir[y]||0)+(parseFloat(i.tutar)||0);
+  });
+  return yGelir;
+}
+function mhYillaraGoreZekatVerilen(){
+  var yZekat={};
+  _kisiler.forEach(function(k){
+    (k.zekatlar||[]).forEach(function(z){
+      var y=mhTarihtenYil(z.tarih);
+      if(!y)return;
+      yZekat[y]=(yZekat[y]||0)+(parseFloat(z.miktar)||0);
+    });
+  });
+  return yZekat;
+}
+function mhZekatGerekli(gelir){return (parseFloat(gelir)||0)/40;}
+function mhToplamGelir(yGel){
+  return Object.keys(yGel).reduce(function(s,y){return s+(yGel[y]||0);},0);
+}
+function mhYilListesi(yGel,yZekat){
+  var set={},y;
+  Object.keys(yGel).forEach(function(yy){set[yy]=1;});
+  Object.keys(yZekat).forEach(function(yy){set[yy]=1;});
+  var yillar=Object.keys(set).sort(function(a,b){return b.localeCompare(a);});
+  var maxGerekli=0;
+  yillar.forEach(function(yy){
+    var g=mhZekatGerekli(yGel[yy]||0);
+    if(g>maxGerekli)maxGerekli=g;
+  });
+  return {yillar:yillar,maxGerekli:maxGerekli};
+}
 
 async function fbYukle(){
   if(!window._fbDb)return;
@@ -927,14 +976,48 @@ function render(){
   var c=$("muhtac-container");if(!c)return;
   var genelToplam=_kisiler.reduce(function(s,k){return s+kisiToplam(k);},0);
   var bugun=new Date().toISOString().split("T")[0];
+  var yGel=mhYillaraGoreGelir();
+  var yZekat=mhYillaraGoreZekatVerilen();
+  var topGelir=mhToplamGelir(yGel);
+  var topGerekli=mhZekatGerekli(topGelir);
+  var yOz=mhYilListesi(yGel,yZekat);
+  var buYil=String(new Date().getFullYear());
 
   var h='<div class="mh-wrap">';
 
-  /* Özet */
+  /* Özet — toplam + yıllık kartlar */
   h+='<div class="mh-header">';
-  h+='<div class="mh-ozet">';
-  h+='<div class="mh-oz-item"><span class="mh-oz-label">Toplam Kişi</span><span class="mh-oz-val">'+_kisiler.length+'</span></div>';
-  h+='<div class="mh-oz-item"><span class="mh-oz-label">Toplam Zekat</span><span class="mh-oz-val" style="color:var(--green)">'+mp(genelToplam)+' TL</span></div>';
+  h+='<div class="mh-h-icerik">';
+  h+='<div class="mh-h-total">';
+  h+='<div class="mh-h-total-title">Toplam özet</div>';
+  h+='<div class="mh-h-total-satir"><span class="mh-h-total-lbl">Gelir</span> '+mp(topGelir)+' TL</div>';
+  h+='<div class="mh-h-total-satir mh-h-gerekli"><span class="mh-h-total-lbl">Gerekli (1/40)</span> '+mp(topGerekli)+' TL</div>';
+  h+='<div class="mh-h-total-satir mh-h-verilen"><span class="mh-h-total-lbl">Verilen</span> '+mp(genelToplam)+' TL</div>';
+  h+='<div class="mh-h-total-meta">'+_kisiler.length+' kişi</div>';
+  h+='</div>';
+  if(yOz.yillar.length>0){
+    h+='<aside class="mh-h-yil" aria-label="Yıllık zekat özeti">';
+    h+='<div class="mh-h-yil-title">Yıllık özet</div>';
+    h+='<div class="mh-yil-list">';
+    yOz.yillar.forEach(function(yy){
+      var gel=yGel[yy]||0;
+      var gerekli=mhZekatGerekli(gel);
+      var verilen=yZekat[yy]||0;
+      var barPct=gerekli>0?Math.min(100,Math.round((verilen/gerekli)*100)):0;
+      var eksik=gerekli>0&&verilen<gerekli-0.005;
+      h+='<div class="mh-yil-kart'+(yy===buYil?" mh-yil-bu-yil":"")+(eksik?" mh-yil-eksik":"")+'" style="--mh-yil-bar:'+barPct+'%" title="Verilen / gerekli zekat">';
+      h+='<span class="mh-yil-eti">'+yy+'</span>';
+      h+='<span class="mh-yil-satir"><span class="mh-yil-satir-lbl">Gelir</span> '+mp(gel)+' TL</span>';
+      h+='<span class="mh-yil-satir mh-yil-gerekli"><span class="mh-yil-satir-lbl">Gerekli</span> '+mp(gerekli)+' TL</span>';
+      h+='<span class="mh-yil-satir mh-yil-verilen"><span class="mh-yil-satir-lbl">Verilen</span> '+mp(verilen)+' TL</span>';
+      if(gerekli>0){
+        h+='<span class="mh-yil-oran">%'+barPct+' karşılandı</span>';
+      }
+      h+='<span class="mh-yil-bar-track" aria-hidden="true"><span class="mh-yil-bar-fill"></span></span>';
+      h+='</div>';
+    });
+    h+='</div></aside>';
+  }
   h+='</div>';
   h+='<button class="mh-ekle-btn" id="mh-kisi-ekle-btn">+ Kişi Ekle</button>';
   h+='</div>';
@@ -1102,6 +1185,11 @@ function bagla(){
   });
 }
 
-async function minit(){await fbYukle();render();}
+async function minit(){
+  if(typeof IslemlerDB!=="undefined")_islemler=await IslemlerDB.getAll();
+  else _islemler=[];
+  await fbYukle();
+  render();
+}
 return{init:minit};
 })();
