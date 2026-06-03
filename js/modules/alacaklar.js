@@ -3,7 +3,7 @@ var AlacaklarModule=(function(){
 var $=function(id){return document.getElementById(id);};
 var _kayitlar=[],_aktif=null,_aktifTip="pesin",_araMetni="",_kisiAcikMap={},_gramAltinFiyatTL=0;
 var AYLAR=["Ocak","Subat","Mart","Nisan","Mayis","Haziran","Temmuz","Agustos","Eylul","Ekim","Kasim","Aralik"];
-var ALTIN_GRAM={gram:1,ceyrek:1.75,yarim:3.5,tam:7,ata:7};
+var ALTIN_GRAM={gram:1,ceyrek:1.75,yarim:3.5,tam:7,ata:7.2};
 var ALTIN_LABEL={gram:"Gram",ceyrek:"Çeyrek",yarim:"Yarım",tam:"Tam",ata:"Ata"};
 function para(n){return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2});}
 function uid(){return "a"+Date.now()+"_"+Math.random().toString(36).substr(2,5);}

@@ -5,7 +5,7 @@ var VerilenAltinlarModule = (function () {
   var _aktif = null;
   var _gramFiyat = 0;
 
-  var VA_GRAM = { gram: 1, ceyrek: 1.75, yarim: 3.5, tam: 7, ata: 7 };
+  var VA_GRAM = { gram: 1, ceyrek: 1.75, yarim: 3.5, tam: 7, ata: 7.2 };
   var VA_LABEL = { gram: "Gram", ceyrek: "Çeyrek", yarim: "Yarım", tam: "Tam", ata: "Ata" };
   var VA_TURLER = ["gram", "ceyrek", "yarim", "tam", "ata"];
 
