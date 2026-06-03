@@ -211,36 +211,30 @@ var VerilenAltinlarModule = (function () {
     if (!_kayitlar.length) {
       h += '<div class="va-bos"><div class="va-bos-ikon">&#129351;</div><div>Henüz verilen altın kaydı yok</div></div>';
     } else {
-      h += '<div class="va-liste">';
+      h += '<div class="va-tablo-dis"><table class="va-tablo"><thead><tr>';
+      h += "<th>KİŞİ</th><th>AÇIKLAMA</th><th>ALTIN</th><th>TARİH</th><th>GRAM</th><th>O GÜN</th><th>GÜNCEL</th><th></th>";
+      h += "</tr></thead><tbody>";
       _kayitlar.forEach(function (k) {
         var gr = kayitGram(k);
         var adet = parseFloat(k.adet) || 1;
         var satirGuncel = _gramFiyat > 0 ? gr * _gramFiyat : 0;
         var gunD = parseFloat(k.gunDegerTl) || 0;
-        h += '<div class="va-kart" data-id="' + k.id + '">';
-        h += '<div class="va-kart-ust">';
-        h += '<div class="va-kart-sol">';
-        h += '<div class="va-kisi">' + esc(k.kisi || "—") + "</div>";
-        if (k.aciklama) h += '<div class="va-aciklama">' + esc(k.aciklama) + "</div>";
-        h += '<div class="va-tur">' + esc(turEtiket(k.tur)) + (adet !== 1 ? " × " + agr(adet) : "") + "</div>";
-        h += '<div class="va-meta"><span>' + (k.tarih ? tarihFmt(k.tarih) : "Tarih yok") + "</span>";
-        h += '<span class="va-meta-gr">' + agr(gr) + " gr</span></div>";
-        h += "</div>";
-        h += '<div class="va-kart-sag">';
-        if (_gramFiyat > 0) {
-          h += '<div class="va-guncel">' + para(satirGuncel) + " TL</div>";
-          h += '<div class="va-guncel-lbl">güncel</div>';
-        }
-        if (gunD > 0) {
-          h += '<div class="va-gun-deger">' + para(gunD) + " TL</div>";
-          h += '<div class="va-gun-deger-lbl">o gün</div>';
-        }
-        h += '<div class="va-kart-actions">';
-        h += '<button type="button" class="va-duz-btn row-action-btn duzenle" data-id="' + k.id + '" title="Düzenle">&#9998;</button>';
+        h += '<tr class="va-satir" data-id="' + k.id + '">';
+        h += '<td class="va-td-kisi">' + esc(k.kisi || "—") + "</td>";
+        h += '<td class="va-td-aciklama">' + esc(k.aciklama || "—") + "</td>";
+        h += '<td class="va-td-tur">' + esc(turEtiket(k.tur));
+        if (adet !== 1) h += ' <span class="va-td-adet">×' + agr(adet) + "</span>";
+        h += "</td>";
+        h += '<td class="va-td-tarih">' + (k.tarih ? tarihFmt(k.tarih) : "—") + "</td>";
+        h += '<td class="va-td-gram">' + agr(gr) + " gr</td>";
+        h += '<td class="va-td-gun">' + (gunD > 0 ? para(gunD) + " TL" : "—") + "</td>";
+        h += '<td class="va-td-guncel">' + (_gramFiyat > 0 ? para(satirGuncel) + " TL" : "—") + "</td>";
+        h += '<td class="va-td-aks">';
+        h += '<button type="button" class="va-duz-btn row-action-btn duzenle" data-id="' + k.id + '" title="Düzenle">&#9998;</button> ';
         h += '<button type="button" class="va-sil-btn row-action-btn sil" data-id="' + k.id + '" title="Sil">&#10005;</button>';
-        h += "</div></div></div></div>";
+        h += "</td></tr>";
       });
-      h += "</div>";
+      h += "</tbody></table></div>";
     }
 
     h += '<div class="bk-modal-overlay hidden" id="va-modal"><div class="modal-box modal-sm">';

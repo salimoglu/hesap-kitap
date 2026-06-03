@@ -117,6 +117,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .module-host > .ur-wrap,
 .module-host > .ar-wrap,
 .module-host > .alt-wrap,
+.module-host > .va-wrap,
 .module-host > .vf-wrap,
 .module-host > .vf2-wrap,
 .module-host > .mh-wrap {
@@ -1397,47 +1398,49 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .vf2-bos{padding:32px;text-align:center;color:var(--text-muted);font-family:var(--font-body);font-size:12px;}
 
 
-/* ══ VERİLEN ALTINLAR MODÜLİ ══ */
-.va-wrap{display:flex;flex-direction:column;gap:12px;padding:12px 12px 24px;width:100%;box-sizing:border-box;}
-.va-header{display:flex;flex-wrap:wrap;align-items:stretch;justify-content:space-between;gap:12px 16px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:12px;padding:14px 18px;}
-.va-ozet{display:flex;flex-wrap:wrap;gap:16px 24px;align-items:flex-end;flex:1 1 200px;}
-.va-oz-item{display:flex;flex-direction:column;gap:3px;min-width:88px;}
-.va-oz-label{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);}
-.va-oz-val{font-size:18px;font-weight:600;line-height:1.2;font-variant-numeric:tabular-nums;color:var(--text-primary);}
+/* ══ VERİLEN ALTINLAR MODÜLİ (liste: altın modülü tablo stili) ══ */
+.va-wrap{display:flex;flex-direction:column;gap:10px;padding:14px 14px 28px;width:100%;box-sizing:border-box;}
+.va-header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 14px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:12px 16px;}
+.va-ozet{display:flex;flex-wrap:wrap;gap:14px 20px;align-items:flex-end;flex:1 1 200px;}
+.va-oz-item{display:flex;flex-direction:column;gap:2px;min-width:72px;}
+.va-oz-label{font-size:10px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);}
+.va-oz-val{font-family:var(--font-body);font-size:15px;font-weight:700;line-height:1.15;font-variant-numeric:tabular-nums;color:var(--text-primary);}
 .va-oz-val.va-oz-au{color:var(--gold);}
 .va-oz-val.va-oz-guncel{color:var(--green);}
-.va-oz-val.va-oz-sayi{font-size:22px;}
-.va-fiyat-satir{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:6px 10px;border-radius:8px;background:var(--bg-card);border:1px solid var(--border);align-self:center;}
-.va-fiyat-label{font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);}
+.va-oz-val.va-oz-sayi{font-size:17px;}
+.va-fiyat-satir{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:5px 10px;border-radius:var(--radius-sm);background:rgba(240,184,64,0.08);border:1px solid rgba(240,184,64,0.22);align-self:center;}
+.va-fiyat-label{font-size:10px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:var(--gold);}
 .va-fiyat-val{font-size:13px;font-weight:700;color:var(--gold);font-variant-numeric:tabular-nums;}
-.va-fiyat-btn{background:transparent;border:1px solid var(--border);color:var(--text-secondary);border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;line-height:1;transition:border-color 0.15s,color 0.15s;}
-.va-fiyat-btn:hover{border-color:var(--gold);color:var(--gold);}
-.va-ekle-btn{background:var(--green);color:#0f1923;border:none;border-radius:10px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;align-self:center;flex-shrink:0;transition:opacity 0.15s;}
-.va-ekle-btn:hover{opacity:0.92;}
+.va-fiyat-btn{background:transparent;border:none;color:var(--gold);font-size:17px;cursor:pointer;padding:0 2px;line-height:1;}
+.va-fiyat-btn:hover{opacity:0.7;}
+.va-ekle-btn{background:var(--gold);color:#0f1923;border:none;border-radius:var(--radius-sm);padding:8px 16px;font-size:13px;font-weight:800;cursor:pointer;align-self:center;flex-shrink:0;white-space:nowrap;}
+.va-ekle-btn:hover{opacity:0.88;}
 .va-bos{padding:40px 20px;text-align:center;color:var(--text-muted);font-size:13px;line-height:1.5;}
-.va-bos-ikon{font-size:40px;margin-bottom:12px;opacity:0.85;}
-.va-liste{display:flex;flex-direction:column;gap:8px;}
-.va-kart{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:12px 14px;transition:border-color 0.15s;}
-.va-kart:hover{border-color:rgba(240,184,64,0.35);}
-.va-kart-ust{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
-.va-kart-sol{flex:1;min-width:0;}
-.va-kisi{font-size:15px;font-weight:700;color:var(--text-primary);margin-bottom:2px;}
-.va-aciklama{font-size:11px;font-weight:600;color:var(--text-muted);margin-bottom:4px;line-height:1.35;}
-.va-tur{font-size:13px;font-weight:600;color:var(--gold);line-height:1.35;}
-.va-meta{display:flex;flex-wrap:wrap;gap:8px 12px;margin-top:6px;font-size:11px;color:var(--text-muted);font-weight:600;}
-.va-meta-gr{color:var(--text-secondary);font-variant-numeric:tabular-nums;}
-.va-kart-sag{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0;}
-.va-guncel{font-size:14px;font-weight:700;color:var(--green);font-variant-numeric:tabular-nums;}
-.va-guncel-lbl,.va-gun-deger-lbl{font-size:9px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);}
-.va-gun-deger{font-size:12px;font-weight:600;color:var(--text-secondary);font-variant-numeric:tabular-nums;margin-top:2px;}
-.va-kart-actions{display:flex;gap:4px;margin-top:6px;}
+.va-bos-ikon{font-size:36px;margin-bottom:10px;opacity:0.85;}
+.va-tablo-dis{border:1px solid var(--border);border-radius:var(--radius-md);overflow:auto;max-height:min(56dvh,520px);-webkit-overflow-scrolling:touch;}
+.va-tablo{width:100%;border-collapse:collapse;min-width:720px;}
+.va-tablo thead{position:sticky;top:0;z-index:2;}
+.va-tablo thead th{font-size:10px;font-weight:800;letter-spacing:0.06em;color:var(--text-muted);padding:8px 12px;text-align:left;background:var(--bg-card);border-bottom:1px solid var(--border);white-space:nowrap;text-transform:uppercase;}
+.va-tablo tbody tr{border-bottom:1px solid var(--border);transition:background 0.08s;}
+.va-tablo tbody tr:last-child{border-bottom:none;}
+.va-tablo tbody tr:hover{background:var(--bg-elevated);}
+.va-tablo td{padding:7px 12px;font-size:12px;vertical-align:middle;line-height:1.3;}
+.va-td-kisi{font-weight:700;color:var(--text-primary);white-space:nowrap;max-width:140px;overflow:hidden;text-overflow:ellipsis;}
+.va-td-aciklama{color:var(--text-muted);font-size:11px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.va-td-tur{color:var(--gold);font-weight:700;white-space:nowrap;font-size:12px;}
+.va-td-adet{color:var(--text-muted);font-weight:600;font-size:11px;}
+.va-td-tarih{color:var(--text-muted);white-space:nowrap;font-size:12px;}
+.va-td-gram{font-weight:800;color:var(--gold);white-space:nowrap;font-size:12px;font-variant-numeric:tabular-nums;}
+.va-td-gun{color:var(--text-secondary);white-space:nowrap;font-variant-numeric:tabular-nums;}
+.va-td-guncel{font-weight:600;color:var(--green);white-space:nowrap;font-variant-numeric:tabular-nums;}
+.va-td-aks{white-space:nowrap;text-align:right;}
 .va-form-iki{display:grid;grid-template-columns:1fr 0.7fr;gap:10px;}
 .va-gram-oniz-wrap{font-size:12px;color:var(--text-muted);padding:8px 12px;background:var(--bg-elevated);border-radius:8px;margin-bottom:4px;}
 .va-gram-oniz-wrap strong{color:var(--gold);font-variant-numeric:tabular-nums;}
 @media (max-width:520px){
   .va-form-iki{grid-template-columns:1fr;}
-  .va-header{flex-direction:column;}
-  .va-ekle-btn{width:100%;}
+  .va-header{flex-direction:column;align-items:stretch;}
+  .va-ekle-btn{width:100%;text-align:center;}
 }
 
 /* ══ MUHTAC & ZEKAT MODÜLİ ══ */
@@ -1846,6 +1849,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .module-host > .ur-wrap,
 .module-host > .ar-wrap,
 .module-host > .alt-wrap,
+.module-host > .va-wrap,
 .module-host > .vf-wrap,
 .module-host > .vf2-wrap,
 .module-host > .mh-wrap {
