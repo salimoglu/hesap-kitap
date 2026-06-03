@@ -4411,12 +4411,22 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
 }
 #tab-islemler .ioz-grup-baslik {
   font-family: var(--islem-ui);
-  font-size: var(--islem-lbl);
-  font-weight: 800;
-  letter-spacing: 1px;
-  color: var(--text-muted);
-  padding: 8px var(--islem-px) 4px;
+  font-size: var(--islem-metin);
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  padding: 8px var(--islem-px) 6px;
   background: var(--bg-base);
+  align-items: center;
+}
+#tab-islemler .ioz-grup-ad {
+  font-size: var(--islem-metin);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--text-primary);
+  line-height: 1.25;
 }
 #tab-islemler .ioz-grup-toplam {
   font-family: var(--islem-rakam);
@@ -4425,30 +4435,48 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   font-variant-numeric: tabular-nums;
 }
 #tab-islemler .ioz-kat-satir {
-  padding: 6px var(--islem-px) 8px;
-  min-height: 34px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 5px var(--islem-px);
+  min-height: 36px;
+}
+#tab-islemler .ioz-kat-ust {
+  align-items: center;
+  margin-bottom: 0;
+  min-height: 28px;
+}
+#tab-islemler .ioz-kat-satir:has(.ioz-kat-bar-track) .ioz-kat-ust {
+  margin-bottom: 4px;
 }
 #tab-islemler .ioz-kat-ad {
   font-family: var(--islem-ui);
-  font-size: var(--islem-metin);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  color: var(--text-primary);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0.01em;
+  color: var(--text-secondary);
+  line-height: 1.3;
 }
 #tab-islemler .ioz-kat-tutar {
   font-family: var(--islem-rakam);
-  font-size: var(--islem-rakam-size);
+  font-size: 12px;
   font-weight: var(--islem-rakam-w);
   font-variant-numeric: tabular-nums;
 }
 #tab-islemler .ioz-kat-adet {
   font-family: var(--islem-ui);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   color: var(--text-muted);
   background: var(--bg-base);
   border-radius: var(--radius-sm);
+  padding: 2px 6px;
+}
+#tab-islemler .ioz-kat-ust-sag {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
 }
 #tab-islemler .ioz-yil-satir {
   font-family: var(--islem-ui);
