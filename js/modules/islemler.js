@@ -132,7 +132,7 @@ const IslemlerModule = (() => {
       return {ad:e[0],grup:k.grup||kategoriGrupAdi(e[0]),gelir:k.gelir,gider:k.gider,adet:k.adet,top:top,net:k.gelir-k.gider};
     }).filter(function(x){return x.top>0;}).sort(function(a,b){return b.top-a.top;});
 
-    const maxGider=Math.max.apply(null,[1].concat(katListe.map(function(x){return x.gider;})));
+    const topGider=ayVer.gider||1;
 
     if(!katListe.length){
       h+='<div class="ioz-bos">Bu ayda kategorili işlem yok.</div>';
@@ -151,7 +151,7 @@ const IslemlerModule = (() => {
         if(gTop.txt)h+='<span class="ioz-grup-toplam '+gTop.cls+'">'+gTop.txt+'</span>';
         h+='</div>';
         gListe.forEach(function(k){
-          const barPct=k.gider>0?Math.round((k.gider/maxGider)*100):0;
+          const barPct=k.gider>0?Math.round((k.gider/topGider)*100):0;
           const gelirPct=k.gelir>0?Math.round((k.gelir/(ayVer.gelir||1))*100):0;
           const adKisa=k.ad.indexOf(" - ")>=0?k.ad.slice(k.ad.indexOf(" - ")+3):k.ad;
           const tut=katTekTutar(k);
@@ -163,7 +163,7 @@ const IslemlerModule = (() => {
           h+='<span class="ioz-kat-adet">'+k.adet+' işlem</span>';
           h+='</span></div>';
           if(k.gider>0){
-            h+='<span class="ioz-kat-bar-track" title="Ay içi gider payı"><span class="ioz-kat-bar-fill" style="width:'+barPct+'%"></span></span>';
+            h+='<span class="ioz-kat-bar-track" title="Toplam gidere göre %'+barPct+'"><span class="ioz-kat-bar-fill" style="width:'+barPct+'%"></span></span>';
           }else if(k.gelir>0){
             h+='<span class="ioz-kat-bar-track"><span class="ioz-kat-bar-fill gelir-bar" style="width:'+Math.min(100,gelirPct)+'%"></span></span>';
           }
