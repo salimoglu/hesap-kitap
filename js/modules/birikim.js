@@ -133,7 +133,8 @@ var BirikimModule = (function() {
         var gelirOran=gel>0?Math.round((amt/gel)*100):null;
         h+='<div class="bk-yil-kart'+(yy===buYil?" bk-yil-bu-yil":"")+'" style="--bk-yil-bar:'+pct+'%">';
         h+='<span class="bk-yil-eti">'+yy+'</span>';
-        h+='<span class="bk-yil-tut">'+para(amt)+' TL</span>';
+        h+='<span class="bk-yil-satir bk-yil-birikim"><span class="bk-yil-satir-lbl">Birikim</span> '+para(amt)+' TL</span>';
+        h+='<span class="bk-yil-satir bk-yil-gelir"><span class="bk-yil-satir-lbl">Gelir</span> '+para(gel)+' TL</span>';
         if(gelirOran!==null){
           h+='<span class="bk-yil-oran" title="Birikim / o yıl toplam gelir">Gelirin %'+gelirOran+'</span>';
         }else{

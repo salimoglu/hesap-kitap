@@ -3741,8 +3741,8 @@ html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 42, 0.12); border-
 #birikim-container .bk-yil-kart {
   flex: 0 0 auto;
   scroll-snap-align: start;
-  min-width: 108px;
-  max-width: 140px;
+  min-width: 118px;
+  max-width: 152px;
   padding: 10px 11px;
   border-radius: 11px;
   border: 1px solid var(--border);
@@ -3772,13 +3772,30 @@ html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 42, 0.12); border-
   color: var(--gold);
   line-height: 1;
 }
-#birikim-container .bk-yil-tut {
+#birikim-container .bk-yil-satir {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 2px 6px;
   font-family: var(--font-body);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-  color: var(--green);
   line-height: 1.25;
+}
+#birikim-container .bk-yil-satir-lbl {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+#birikim-container .bk-yil-birikim {
+  color: var(--green);
+}
+#birikim-container .bk-yil-gelir {
+  color: var(--text-secondary);
 }
 #birikim-container .bk-yil-oran {
   font-size: 10px;
