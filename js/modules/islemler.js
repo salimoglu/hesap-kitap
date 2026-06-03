@@ -163,7 +163,10 @@ const IslemlerModule = (() => {
           h+='<span class="ioz-kat-adet">'+k.adet+' işlem</span>';
           h+='</span></div>';
           if(k.gider>0){
-            h+='<span class="ioz-kat-bar-track" title="Toplam gidere göre %'+barPct+'"><span class="ioz-kat-bar-fill" style="width:'+barPct+'%"></span></span>';
+            h+='<div class="ioz-kat-bar-wrap" title="Toplam gidere göre %'+barPct+'">';
+            h+='<span class="ioz-kat-bar-track" aria-hidden="true"><span class="ioz-kat-bar-fill" style="width:'+barPct+'%"></span></span>';
+            h+='<span class="ioz-kat-pct">%'+barPct+'</span>';
+            h+='</div>';
           }else if(k.gelir>0){
             h+='<span class="ioz-kat-bar-track"><span class="ioz-kat-bar-fill gelir-bar" style="width:'+Math.min(100,gelirPct)+'%"></span></span>';
           }
