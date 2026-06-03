@@ -1397,6 +1397,48 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .vf2-bos{padding:32px;text-align:center;color:var(--text-muted);font-family:var(--font-body);font-size:12px;}
 
 
+/* ══ VERİLEN ALTINLAR MODÜLİ ══ */
+.va-wrap{display:flex;flex-direction:column;gap:12px;padding:12px 12px 24px;width:100%;box-sizing:border-box;}
+.va-header{display:flex;flex-wrap:wrap;align-items:stretch;justify-content:space-between;gap:12px 16px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:12px;padding:14px 18px;}
+.va-ozet{display:flex;flex-wrap:wrap;gap:16px 24px;align-items:flex-end;flex:1 1 200px;}
+.va-oz-item{display:flex;flex-direction:column;gap:3px;min-width:88px;}
+.va-oz-label{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);}
+.va-oz-val{font-size:18px;font-weight:600;line-height:1.2;font-variant-numeric:tabular-nums;color:var(--text-primary);}
+.va-oz-val.va-oz-au{color:var(--gold);}
+.va-oz-val.va-oz-guncel{color:var(--green);}
+.va-oz-val.va-oz-sayi{font-size:22px;}
+.va-fiyat-satir{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:6px 10px;border-radius:8px;background:var(--bg-card);border:1px solid var(--border);align-self:center;}
+.va-fiyat-label{font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);}
+.va-fiyat-val{font-size:13px;font-weight:700;color:var(--gold);font-variant-numeric:tabular-nums;}
+.va-fiyat-btn{background:transparent;border:1px solid var(--border);color:var(--text-secondary);border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;line-height:1;transition:border-color 0.15s,color 0.15s;}
+.va-fiyat-btn:hover{border-color:var(--gold);color:var(--gold);}
+.va-ekle-btn{background:var(--green);color:#0f1923;border:none;border-radius:10px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;align-self:center;flex-shrink:0;transition:opacity 0.15s;}
+.va-ekle-btn:hover{opacity:0.92;}
+.va-bos{padding:40px 20px;text-align:center;color:var(--text-muted);font-size:13px;line-height:1.5;}
+.va-bos-ikon{font-size:40px;margin-bottom:12px;opacity:0.85;}
+.va-liste{display:flex;flex-direction:column;gap:8px;}
+.va-kart{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:12px 14px;transition:border-color 0.15s;}
+.va-kart:hover{border-color:rgba(240,184,64,0.35);}
+.va-kart-ust{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+.va-kart-sol{flex:1;min-width:0;}
+.va-kisi{font-size:15px;font-weight:700;color:var(--text-primary);margin-bottom:4px;}
+.va-tur{font-size:13px;font-weight:600;color:var(--gold);line-height:1.35;}
+.va-meta{display:flex;flex-wrap:wrap;gap:8px 12px;margin-top:6px;font-size:11px;color:var(--text-muted);font-weight:600;}
+.va-meta-gr{color:var(--text-secondary);font-variant-numeric:tabular-nums;}
+.va-kart-sag{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0;}
+.va-guncel{font-size:14px;font-weight:700;color:var(--green);font-variant-numeric:tabular-nums;}
+.va-guncel-lbl,.va-gun-deger-lbl{font-size:9px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);}
+.va-gun-deger{font-size:12px;font-weight:600;color:var(--text-secondary);font-variant-numeric:tabular-nums;margin-top:2px;}
+.va-kart-actions{display:flex;gap:4px;margin-top:6px;}
+.va-form-iki{display:grid;grid-template-columns:1fr 0.7fr;gap:10px;}
+.va-gram-oniz-wrap{font-size:12px;color:var(--text-muted);padding:8px 12px;background:var(--bg-elevated);border-radius:8px;margin-bottom:4px;}
+.va-gram-oniz-wrap strong{color:var(--gold);font-variant-numeric:tabular-nums;}
+@media (max-width:520px){
+  .va-form-iki{grid-template-columns:1fr;}
+  .va-header{flex-direction:column;}
+  .va-ekle-btn{width:100%;}
+}
+
 /* ══ MUHTAC & ZEKAT MODÜLİ ══ */
 .mh-wrap{display:flex;flex-direction:column;gap:12px;padding:12px 12px 24px;width:100%;box-sizing:border-box;}
 

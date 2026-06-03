@@ -109,6 +109,7 @@
     if (typeof VefaModule !== "undefined") await VefaModule.init();
     if (typeof ArabamModule !== "undefined") await ArabamModule.init();
     if (typeof MuhtacModule !== "undefined") await MuhtacModule.init();
+    if (typeof VerilenAltinlarModule !== "undefined") await VerilenAltinlarModule.init();
   }
 
   window.sayfaYenile = async function() {
@@ -136,6 +137,7 @@
     if (typeof VefaModule !== "undefined") await VefaModule.init();
     if (typeof ArabamModule !== "undefined") await ArabamModule.init();
     if (typeof MuhtacModule !== "undefined") await MuhtacModule.init();
+    if (typeof VerilenAltinlarModule !== "undefined") await VerilenAltinlarModule.init();
   };
 
   try {
@@ -248,7 +250,7 @@
   }
 
   // Sekme yonetimi
-  const TAB_SIRA = ["islemler", "birikim", "arabam", "kredi", "alacaklar", "urun", "altin", "vefa", "muhtac"];
+  const TAB_SIRA = ["islemler", "birikim", "arabam", "kredi", "alacaklar", "urun", "altin", "verilen-altin", "vefa", "muhtac"];
   const tabBtnler = document.querySelectorAll(".tab-btn");
   const tabPaneller = document.querySelectorAll(".tab-panel");
 
@@ -307,6 +309,7 @@
     if (tabId === "vefa" && typeof VefaModule !== "undefined") VefaModule.init();
     if (tabId === "arabam" && typeof ArabamModule !== "undefined") ArabamModule.init();
     if (tabId === "muhtac" && typeof MuhtacModule !== "undefined") MuhtacModule.init();
+    if (tabId === "verilen-altin" && typeof VerilenAltinlarModule !== "undefined") VerilenAltinlarModule.init();
   }
 
   function aktifTabId() {

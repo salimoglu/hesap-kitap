@@ -224,7 +224,7 @@ async function fbDetectRtdbScope() {
       return { ok: false };
     }
   }
-  var keys = ["urunler", "vefa2", "vefa", "kredi_harcamalar", "kredi_kartlar", "birikim_manuel", "arabam", "alacaklar", "islemler", "kategoriler", "muhtac", "altin_kayitlar"];
+  var keys = ["urunler", "vefa2", "vefa", "kredi_harcamalar", "kredi_kartlar", "birikim_manuel", "arabam", "alacaklar", "islemler", "kategoriler", "muhtac", "altin_kayitlar", "verilen_altinlar"];
   var rootResults = await Promise.all(keys.map(function(k) { return snap(k); }));
   var hasRoot = rootResults.some(function(r) { return r.ok && nonempty(r.val); });
   var userResults = await Promise.all(keys.map(function(k) { return snap("users/" + uid + "/" + k); }));
