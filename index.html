@@ -15,7 +15,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png?v=20260209desk" />
   <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png?v=20260209desk" />
   <link rel="manifest" href="manifest.json?v=20260209desk" />
-  <link rel="stylesheet" href="css/style.css?v=20260531hg-tarih-mobil" />
+  <link rel="stylesheet" href="css/style.css?v=20260531islemler-panel-head" />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <script>
     /* Tema yonetimi: flash onleme + toggle */
@@ -195,12 +195,18 @@
                 </div>
               </div>
             </div>
-            <aside class="islemler-ozet" id="islem-kat-ozet-panel" aria-label="Kategori ozetleri">
-              <div class="ioz-scroll" id="islem-kat-ozet-scroll"></div>
+            <aside class="islemler-ozet islemler-panel" id="islem-kat-ozet-panel" aria-label="Kategori ozetleri">
+              <div class="islemler-panel-head ioz-panel-head" id="ioz-panel-head"></div>
+              <div class="islemler-panel-body ioz-panel-body">
+                <div class="ioz-scroll" id="islem-kat-ozet-scroll"></div>
+              </div>
             </aside>
-            <aside class="islemler-butce" id="islem-butce-panel" aria-label="Aylik butce">
-              <div class="butce-wrap islemler-butce-wrap">
-                <div id="butce-container"><!-- ButceModule — masaustu sag sutun --></div>
+            <aside class="islemler-butce islemler-panel" id="islem-butce-panel" aria-label="Aylik butce">
+              <div class="islemler-panel-head butce-panel-head" id="butce-panel-head"></div>
+              <div class="islemler-panel-body butce-panel-body">
+                <div class="butce-wrap islemler-butce-wrap">
+                  <div id="butce-container"><!-- ButceModule — masaustu sag sutun --></div>
+                </div>
               </div>
             </aside>
           </div>
@@ -358,8 +364,8 @@
 
   <script src="js/firebase.js?v=20260531kat-dedupe"></script>
   <script src="js/db.js?v=20260531kat-dedupe"></script>
-  <script src="js/modules/islemler.js?v=20260531islemler-mobil-3panel"></script>
-  <script src="js/modules/yukle.js?v=20260223vefa-compact"></script>
+  <script src="js/modules/islemler.js?v=20260531islemler-panel-head"></script>
+  <script src="js/modules/yukle.js?v=20260531islemler-panel-head"></script>
   <script src="js/modules/alacaklar.js?v=20260210altinfiyat"></script>
   <script src="js/modules/urun.js?v=20260509rtdb"></script>
   <script src="js/modules/arabam.js?v=20260211ar-kamyon-pickup"></script>

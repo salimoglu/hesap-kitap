@@ -93,9 +93,11 @@ const IslemlerModule = (() => {
   }
 
   function renderKategoriOzeti(){
+    const head=$("ioz-panel-head");
     const wrap=$("islem-kat-ozet-scroll");
     if(!wrap)return;
     if(!_islemler.length){
+      if(head)head.innerHTML="";
       wrap.innerHTML='<div class="ioz-bos">Henüz işlem yok.<br>Kategori özetleri burada görünecek.</div>';
       return;
     }
@@ -105,18 +107,24 @@ const IslemlerModule = (() => {
     const ayNet=ayVer.gelir-ayVer.gider;
     const ayLbl=ayEtiket(ayKey);
     const filtreAy=$("filter-ay");
-    const ayNot=(filtreAy&&filtreAy.value==="hepsi")?' <span class="ioz-bolum-alt">(bu ay)</span>':"";
+    const ayNot=(filtreAy&&filtreAy.value==="hepsi")?' <span class="ioz-panel-baslik-alt">(bu ay)</span>':"";
+
+    if(head){
+      head.innerHTML=
+        '<div class="ioz-panel-baslik">Kategori &#246;zeti'+ayNot+'<span class="ioz-panel-baslik-alt"> &middot; '+esc(ayLbl)+'</span></div>'+
+        '<div class="ozet-bar ioz-ust-ozet">'+
+        '<div class="ozet-item"><span class="ozet-label">Gelir</span><span class="ozet-val gelir">'+para(ayVer.gelir)+'</span></div>'+
+        '<div class="ozet-sep"></div>'+
+        '<div class="ozet-item"><span class="ozet-label">Gider</span><span class="ozet-val gider">'+para(ayVer.gider)+'</span></div>'+
+        '<div class="ozet-sep"></div>'+
+        '<div class="ozet-item"><span class="ozet-label">Net</span><span class="ozet-val net">'+(ayNet>=0?"":"-")+para(Math.abs(ayNet))+'</span></div>'+
+        '</div>';
+    }
 
     let h='';
 
-    /* —— Aylık detay —— */
+    /* —— Aylık detay (kaydiran icerik) —— */
     h+='<div class="ioz-bolum ioz-bolum-ay">';
-    h+='<div class="ioz-bolum-baslik">Aylık özet'+ayNot+'<span class="ioz-bolum-alt"> · '+esc(ayLbl)+'</span></div>';
-    h+='<div class="ioz-ay-ust">';
-    h+='<div class="ioz-ay-kutu"><span class="ioz-ay-kutu-lbl">Gelir</span><span class="ioz-ay-kutu-val gelir">'+para(ayVer.gelir)+'</span></div>';
-    h+='<div class="ioz-ay-kutu"><span class="ioz-ay-kutu-lbl">Gider</span><span class="ioz-ay-kutu-val gider">'+para(ayVer.gider)+'</span></div>';
-    h+='<div class="ioz-ay-kutu"><span class="ioz-ay-kutu-lbl">Net</span><span class="ioz-ay-kutu-val net">'+(ayNet>=0?"":"-")+para(Math.abs(ayNet))+'</span></div>';
-    h+='</div>';
 
     const katListe=Object.entries(ayVer.kat).map(function(e){
       const k=e[1];
