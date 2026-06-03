@@ -57,6 +57,18 @@ var BirikimModule = (function() {
     return yy;
   }
 
+  /* İşlemlerden yıla göre toplam gelir */
+  function yillaraGoreGelir(){
+    var yGelir={};
+    _islemler.forEach(function(i){
+      if(i.tip!=="gelir") return;
+      var y=tarihtenYil(i.tarih);
+      if(!y) return;
+      yGelir[y]=(yGelir[y]||0)+(parseFloat(i.tutar)||0);
+    });
+    return yGelir;
+  }
+
   /* Tüm kalemlerde yıla göre toplam TL (geçmiş yıllar özeti) */
   function yillaraGoreGenel(kmap){
     var yToplam={}, y;
@@ -101,6 +113,7 @@ var BirikimModule = (function() {
     });
 
     var yOz=yillaraGoreGenel(kalemler);
+    var yGel=yillaraGoreGelir();
     var buYil=String(new Date().getFullYear());
 
     var h='<div class="bk-wrap">';
@@ -116,9 +129,16 @@ var BirikimModule = (function() {
       yOz.yillar.forEach(function(yy){
         var amt=yOz.yToplam[yy]||0;
         var pct=yOz.maxYearAmt>0?Math.round((amt/yOz.maxYearAmt)*100):100;
+        var gel=yGel[yy]||0;
+        var gelirOran=gel>0?Math.round((amt/gel)*100):null;
         h+='<div class="bk-yil-kart'+(yy===buYil?" bk-yil-bu-yil":"")+'" style="--bk-yil-bar:'+pct+'%">';
         h+='<span class="bk-yil-eti">'+yy+'</span>';
         h+='<span class="bk-yil-tut">'+para(amt)+' TL</span>';
+        if(gelirOran!==null){
+          h+='<span class="bk-yil-oran" title="Birikim / o yıl toplam gelir">Gelirin %'+gelirOran+'</span>';
+        }else{
+          h+='<span class="bk-yil-oran bk-yil-oran-yok" title="Bu yıl gelir kaydı yok">Gelir yok</span>';
+        }
         h+='<span class="bk-yil-bar-track" aria-hidden="true"><span class="bk-yil-bar-fill"></span></span>';
         h+='</div>';
       });
