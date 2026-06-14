@@ -3551,23 +3551,6 @@ html.theme-light input,
 html.theme-light select,
 html.theme-light textarea { color-scheme: light; }
 
-/* Tema toggle butonu */
-.theme-toggle-btn {
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 50%;
-  width: 34px; height: 34px;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-  color: var(--gold);
-  padding: 0;
-  transition: all 0.18s ease;
-  flex-shrink: 0;
-}
-.theme-toggle-btn:hover { background: var(--bg-elevated); border-color: var(--gold); }
-.theme-toggle-btn:active { transform: scale(0.92); }
-.theme-toggle-btn svg { display: block; width: 18px; height: 18px; }
-
 /* === AYARLAR MENUSU (profil + acilir panel) === */
 .hk-ayar-wrap { position: relative; flex-shrink: 0; }
 .hk-ayar-trigger {
@@ -3602,16 +3585,15 @@ html.theme-light textarea { color-scheme: light; }
   to { opacity: 1; transform: translateY(0); }
 }
 .hk-ayar-user {
-  display: flex; align-items: center; gap: 10px;
   padding: 10px 14px;
 }
-.hk-ayar-menu-avatar {
-  width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex-shrink: 0;
-  border: 1px solid var(--border);
-}
 .hk-ayar-email {
-  font-size: 13px; color: var(--text-secondary);
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  display: block;
+  font-size: 13px;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .hk-ayar-divider { height: 1px; background: var(--border); margin: 4px 0; }
 .hk-ayar-item {
@@ -3633,6 +3615,53 @@ html.theme-light textarea { color-scheme: light; }
 .hk-ayar-item-ikon svg { width: 18px; height: 18px; display: block; }
 .hk-ayar-cikis { color: var(--red); }
 .hk-ayar-cikis .hk-ayar-item-ikon { color: var(--red); }
+
+/* === Mobil: asagi cekerek yenile === */
+.hk-ptr {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: calc(env(safe-area-inset-top, 0px) + 48px);
+  z-index: 400;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.hk-ptr.hidden { display: none; }
+.hk-ptr-inner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 7px 14px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.22);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  transform: translateY(var(--hk-ptr-offset, -48px));
+  transition: transform 0.18s ease;
+}
+.hk-ptr-spin {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--border);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.hk-ptr.hk-ptr-loading .hk-ptr-spin {
+  opacity: 1;
+  animation: hkPtrSpin 0.65s linear infinite;
+}
+.hk-ptr.hk-ptr-ready .hk-ptr-metin { color: var(--gold); }
+@keyframes hkPtrSpin { to { transform: rotate(360deg); } }
 
 /* Acik temada bazi sert rgba'lari yumusatma */
 html.theme-light .topbar { box-shadow: 0 1px 3px rgba(120, 90, 30, 0.08); }

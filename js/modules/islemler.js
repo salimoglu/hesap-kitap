@@ -148,7 +148,7 @@ const IslemlerModule = (() => {
       '<span class="islemler-kol-ay butce-kol-ay">'+esc(ayLbl)+'</span>'+
       '<button type="button" class="butce-ay-btn" id="ioz-ileri"'+(iozAyIleriKapali()?' disabled':'')+'>&#8250;</button>'+
       '</div></div>'+
-      '<div class="ozet-bar ioz-ust-ozet ioz-ust-ozet-yatay">'+
+      '<div class="ozet-bar ioz-ust-ozet-yatay">'+
       '<div class="ioz-ozet-hucre"><span class="ioz-ozet-lbl">Gelir</span><span class="ioz-ozet-val gelir">'+para(ayVer.gelir)+'</span></div>'+
       '<div class="ioz-ozet-hucre"><span class="ioz-ozet-lbl">Gider</span><span class="ioz-ozet-val gider">'+para(ayVer.gider)+'</span></div>'+
       '<div class="ioz-ozet-hucre"><span class="ioz-ozet-lbl">Net</span><span class="ioz-ozet-val net">'+(ayNet>=0?"":"-")+para(Math.abs(ayNet))+'</span></div>'+

@@ -1,15 +1,6 @@
 (function () {
   "use strict";
 
-  function avatarUrl(u) {
-    if (!u) return "icons/icon-256.png?v=20260209desk";
-    if (u.photoURL) return u.photoURL;
-    if (u.email) {
-      return "https://unavatar.io/" + encodeURIComponent(u.email.trim().toLowerCase()) + "?fallback=false";
-    }
-    return "icons/icon-256.png?v=20260209desk";
-  }
-
   function initialsAvatar(u) {
     var name = (u && (u.displayName || u.email)) || "?";
     var parts = name.split(/[@\s]+/);
@@ -28,17 +19,17 @@
 
   function setAvatarImg(img, u) {
     if (!img) return;
-    img.onerror = function () {
+    if (u && u.photoURL) {
+      img.onerror = function () {
+        img.onerror = null;
+        img.src = initialsAvatar(u);
+      };
+      img.src = u.photoURL;
+    } else {
       img.onerror = null;
       img.src = initialsAvatar(u);
-    };
-    img.src = avatarUrl(u);
+    }
     img.alt = (u && u.email) ? u.email : "Profil";
-  }
-
-  function menuAcikMi() {
-    var m = document.getElementById("hk-ayar-menu");
-    return m && !m.classList.contains("hidden");
   }
 
   function menuKapat() {
@@ -63,8 +54,7 @@
   function temaMetinGuncelle() {
     var el = document.getElementById("hk-ayar-tema-metin");
     if (!el) return;
-    var acik = document.documentElement.classList.contains("theme-light");
-    el.textContent = acik ? "Koyu tema" : "Acik tema";
+    el.textContent = document.documentElement.classList.contains("theme-light") ? "Koyu tema" : "Acik tema";
   }
 
   var HK_AYARLAR = {
@@ -73,7 +63,6 @@
       var wrap = document.getElementById("hk-ayar-wrap");
       if (wrap) wrap.classList.remove("hidden");
       setAvatarImg(document.getElementById("hk-ayar-avatar"), u);
-      setAvatarImg(document.getElementById("hk-ayar-menu-avatar"), u);
       var emailEl = document.getElementById("hk-ayar-email");
       if (emailEl) emailEl.textContent = u.email || u.displayName || "";
       temaMetinGuncelle();
@@ -90,7 +79,6 @@
     var trigger = document.getElementById("hk-ayar-trigger");
     var temaBtn = document.getElementById("hk-ayar-tema");
     var tanitimBtn = document.getElementById("hk-ayar-tanitim");
-    var oneriLink = document.getElementById("hk-ayar-oneri");
     var cikisBtn = document.getElementById("hk-ayar-cikis");
 
     if (trigger && !trigger._bound) {
@@ -102,7 +90,8 @@
     }
 
     document.addEventListener("click", function (e) {
-      if (!menuAcikMi()) return;
+      var m = document.getElementById("hk-ayar-menu");
+      if (!m || m.classList.contains("hidden")) return;
       var wrap = document.getElementById("hk-ayar-wrap");
       if (wrap && !wrap.contains(e.target)) menuKapat();
     });
@@ -115,7 +104,6 @@
       temaBtn._bound = true;
       temaBtn.addEventListener("click", function () {
         if (typeof window.hkTemaToggle === "function") window.hkTemaToggle();
-        else temaMetinGuncelle();
       });
     }
 
@@ -127,13 +115,6 @@
         try { u = typeof fbMevcutKullanici === "function" ? fbMevcutKullanici() : null; } catch (e) { u = null; }
         if (!u || u.isAnonymous) return;
         if (typeof HK_TANITIM !== "undefined") HK_TANITIM.goster(u, true);
-      });
-    }
-
-    if (oneriLink && !oneriLink._bound) {
-      oneriLink._bound = true;
-      oneriLink.addEventListener("click", function () {
-        menuKapat();
       });
     }
 

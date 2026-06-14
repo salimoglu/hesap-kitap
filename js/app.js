@@ -16,6 +16,14 @@
   const appEl = document.getElementById("app");
   let _kilitKayitModu = false;
 
+  function hkMobilMi() {
+    try {
+      var ua = navigator.userAgent || "";
+      return /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(ua) ||
+        (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    } catch (e) { return false; }
+  }
+
   function kilitKayitArayuz() {
     const btnG = document.getElementById("lock-btn-giris");
     const btnK = document.getElementById("lock-btn-kayit");
@@ -44,11 +52,7 @@
   async function hkServiceWorkerKaydet() {
     if (_hkSwRegisterDenendi || !("serviceWorker" in navigator)) return;
     try {
-      var ua = navigator.userAgent || "";
-      var mobil =
-        /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(ua) ||
-        (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-      if (mobil) {
+      if (hkMobilMi()) {
         _hkSwRegisterDenendi = true;
         return;
       }
@@ -439,6 +443,144 @@
     }, { passive: true });
   })();
 
+  /* Mobil: asagi cekince bulut senkronu / sayfa yenile */
+  (function hkPullRefreshBagla() {
+    if (!hkMobilMi()) return;
+
+    var ESik = 68;
+    var MAX_CEK = 110;
+    var MIN_ARALIK = 8000;
+    var ptr = document.getElementById("hk-ptr");
+    var ptrMetin = document.getElementById("hk-ptr-metin");
+    var sx, sy, cekiyor = false, cekMesafe = 0, yenileniyor = false, sonYenile = 0;
+
+    function engelliMi() {
+      if (yenileniyor) return true;
+      var ls = document.getElementById("lock-screen");
+      if (ls && !ls.classList.contains("hidden")) return true;
+      var app = document.getElementById("app");
+      if (!app || app.classList.contains("hidden")) return true;
+      if (document.querySelector(".modal-overlay:not(.hidden), .bk-modal-overlay:not(.hidden), .hk-tanitim-overlay:not(.hidden)")) return true;
+      var ayarMenu = document.getElementById("hk-ayar-menu");
+      if (ayarMenu && !ayarMenu.classList.contains("hidden")) return true;
+      return false;
+    }
+
+    function kaydirmaUstteMi(el) {
+      while (el && el !== document.body) {
+        var st = window.getComputedStyle(el);
+        var oy = st.overflowY;
+        if ((oy === "auto" || oy === "scroll" || oy === "overlay") && el.scrollHeight > el.clientHeight + 1) {
+          if (el.scrollTop > 1) return false;
+        }
+        el = el.parentElement;
+      }
+      var panel = document.querySelector(".tab-panel.active");
+      if (!panel) return true;
+      var list = panel.querySelectorAll(".islem-scroll, .islemler-panel-body, .ioz-scroll, .butce-panel-body, .module-host > *");
+      for (var i = 0; i < list.length; i++) {
+        var s = list[i];
+        if (!s.offsetParent) continue;
+        var st2 = window.getComputedStyle(s);
+        var oy2 = st2.overflowY;
+        if ((oy2 === "auto" || oy2 === "scroll" || oy2 === "overlay") && s.scrollHeight > s.clientHeight + 1) {
+          if (s.scrollTop > 1) return false;
+        }
+      }
+      return true;
+    }
+
+    function ptrGuncelle(mesafe, durum) {
+      if (!ptr) return;
+      ptr.classList.remove("hidden", "hk-ptr-loading", "hk-ptr-ready");
+      ptr.style.opacity = String(Math.min(1, Math.max(0.35, mesafe / ESik)));
+      ptr.style.setProperty("--hk-ptr-offset", Math.min(mesafe, MAX_CEK) + "px");
+      if (durum === "loading") {
+        ptr.classList.add("hk-ptr-loading");
+        if (ptrMetin) ptrMetin.textContent = "Yenileniyor\u2026";
+      } else if (durum === "ready") {
+        ptr.classList.add("hk-ptr-ready");
+        if (ptrMetin) ptrMetin.textContent = "Birak, yenilensin";
+      } else if (ptrMetin) {
+        ptrMetin.textContent = "Yenilemek icin cekin";
+      }
+    }
+
+    function ptrSifirla() {
+      if (!ptr) return;
+      ptr.classList.add("hidden");
+      ptr.classList.remove("hk-ptr-loading", "hk-ptr-ready");
+      ptr.style.opacity = "";
+      ptr.style.removeProperty("--hk-ptr-offset");
+    }
+
+    function dokunusBitir() {
+      sx = sy = undefined;
+      cekiyor = false;
+      cekMesafe = 0;
+    }
+
+    document.addEventListener("touchstart", function (e) {
+      if (engelliMi() || e.touches.length !== 1) return;
+      var hedef = e.target;
+      if (hedef && hedef.closest && hedef.closest("input, textarea, select, button, a, label, .bt-drag-handle, .hk-ayar-wrap")) return;
+      if (!kaydirmaUstteMi(hedef)) return;
+      sx = e.touches[0].clientX;
+      sy = e.touches[0].clientY;
+      cekiyor = false;
+      cekMesafe = 0;
+    }, { passive: true });
+
+    document.addEventListener("touchmove", function (e) {
+      if (sy === undefined || engelliMi()) return;
+      if (!kaydirmaUstteMi(e.target)) {
+        dokunusBitir();
+        ptrSifirla();
+        return;
+      }
+      var dx = e.touches[0].clientX - sx;
+      var dy = e.touches[0].clientY - sy;
+      if (dy <= 0 && !cekiyor) return;
+      if (!cekiyor && Math.abs(dx) > Math.abs(dy)) return;
+      if (dy > 6) {
+        cekiyor = true;
+        cekMesafe = Math.min(dy * 0.42, MAX_CEK);
+        ptrGuncelle(cekMesafe, cekMesafe >= ESik ? "ready" : "idle");
+        if (cekMesafe > 12 && e.cancelable) e.preventDefault();
+      }
+    }, { passive: false });
+
+    async function cekBitir() {
+      if (!cekiyor) {
+        dokunusBitir();
+        ptrSifirla();
+        return;
+      }
+      var tetik = cekMesafe >= ESik;
+      dokunusBitir();
+      if (!tetik) {
+        ptrSifirla();
+        return;
+      }
+      var now = Date.now();
+      if (now - sonYenile < MIN_ARALIK) {
+        ptrSifirla();
+        return;
+      }
+      sonYenile = now;
+      yenileniyor = true;
+      ptrGuncelle(ESik, "loading");
+      try {
+        if (typeof window.sayfaYenile === "function") await window.sayfaYenile();
+      } catch (ePtr) {}
+      yenileniyor = false;
+      ptrSifirla();
+    }
+
+    document.addEventListener("touchend", function () { cekBitir(); }, { passive: true });
+    document.addEventListener("touchcancel", function () { cekBitir(); }, { passive: true });
+  })();
+
   // Animasyonlar
   const style = document.createElement("style");
   style.textContent = `
@@ -456,12 +598,7 @@
 
   /** Mobil Safari / BFCache ve uygulamaya donuste veri tazele (sik gecislerde gereksiz yuk yok). */
   (function hkMobilBulutYenileBagla() {
-    var ua = "";
-    try { ua = typeof navigator !== "undefined" ? navigator.userAgent || "" : ""; } catch (eUa) {}
-    var mobil =
-      /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(ua) ||
-      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-    if (!mobil) return;
+    if (!hkMobilMi()) return;
     var bek = null;
     var sonYenile = 0;
     var minAralikMs = 45 * 1000;
