@@ -241,6 +241,44 @@ const IslemlerModule = (() => {
     return parts.join(", ");
   }
 
+  function iozDonutPolar(cx,cy,r,deg){
+    var rad=deg*Math.PI/180;
+    return {x:cx+r*Math.cos(rad),y:cy+r*Math.sin(rad)};
+  }
+
+  function iozDonutSegPath(cx,cy,R,Ri,startDeg,endDeg){
+    if(endDeg-startDeg>=359.99){
+      return "M "+(cx-R)+" "+cy+" A "+R+" "+R+" 0 1 1 "+(cx+R)+" "+cy+
+        " A "+R+" "+R+" 0 1 1 "+(cx-R)+" "+cy+
+        " M "+(cx-Ri)+" "+cy+" A "+Ri+" "+Ri+" 0 1 0 "+(cx+Ri)+" "+cy+
+        " A "+Ri+" "+Ri+" 0 1 0 "+(cx-Ri)+" "+cy+" Z";
+    }
+    var large=(endDeg-startDeg)>180?1:0;
+    var o1=iozDonutPolar(cx,cy,R,startDeg);
+    var o2=iozDonutPolar(cx,cy,R,endDeg);
+    var i2=iozDonutPolar(cx,cy,Ri,endDeg);
+    var i1=iozDonutPolar(cx,cy,Ri,startDeg);
+    return "M "+o1.x+" "+o1.y+
+      " A "+R+" "+R+" 0 "+large+" 1 "+o2.x+" "+o2.y+
+      " L "+i2.x+" "+i2.y+
+      " A "+Ri+" "+Ri+" 0 "+large+" 0 "+i1.x+" "+i1.y+" Z";
+  }
+
+  function iozDonutSvgHtml(parcaList, baslik){
+    var size=132,cx=size/2,cy=size/2,R=size/2-2,Ri=42,acc=0,segs="";
+    parcaList.forEach(function(p){
+      if(p.pct<=0)return;
+      var bas=acc;
+      acc+=p.pct;
+      var start=bas*3.6-90;
+      var end=acc*3.6-90;
+      var tipTxt=esc(p.ad)+": "+(baslik==="Gelir"?"+":"-")+para(p.val)+" (%"+p.pct.toLocaleString("tr-TR",{maximumFractionDigits:1})+")";
+      segs+='<path class="ioz-donut-seg" d="'+iozDonutSegPath(cx,cy,R,Ri,start,end)+'" fill="'+p.renk+'" data-ioz-tip="'+esc(p.ad)+'" tabindex="0">';
+      segs+='<title>'+tipTxt+'</title></path>';
+    });
+    return '<svg class="ioz-donut-svg" viewBox="0 0 '+size+' '+size+'" role="img" aria-label="'+esc(baslik)+' dagilim grafigi">'+segs+'</svg>';
+  }
+
   function iozGrupDagilim(katListe, tip, ayVer, maxParca){
     maxParca=maxParca||6;
     var topRef=tip==="gelir"?(ayVer.gelir||0):(ayVer.gider||0);
@@ -289,32 +327,71 @@ const IslemlerModule = (() => {
 
   function iozDonutGrafikHtml(tip, dagilim, baslik, seciliGrup){
     if(!dagilim.parca.length)return "";
-    var conic=iozConicOlustur(dagilim.parca);
     var h='<div class="ioz-grafik-kart ioz-grafik-'+tip+'">';
     h+='<div class="ioz-donut-wrap">';
-    h+='<div class="ioz-donut" style="--ioz-conic:'+conic+'" role="img" aria-label="'+esc(baslik)+' dagilim grafigi">';
+    h+=iozDonutSvgHtml(dagilim.parca, baslik);
     h+='<div class="ioz-donut-ic">';
     h+='<span class="ioz-donut-ic-lbl">'+baslik+'</span>';
     h+='<span class="ioz-donut-ic-val '+(tip==="gelir"?"gelir":"gider")+'">'+(tip==="gelir"?"+":"-")+para(dagilim.toplam)+'</span>';
-    h+='</div></div></div>';
-    h+='<ul class="ioz-donut-legend">';
+    h+='</div>';
+    h+='<div class="ioz-donut-hover-tip" aria-hidden="true"></div>';
+    h+='</div>';
     if(tip==="gider"){
+      h+='<ul class="ioz-donut-legend">';
       h+='<li class="ioz-legend-toplam">';
       h+='<span class="ioz-legend-toplam-lbl">Toplam Gider</span>';
       h+='<span class="ioz-legend-toplam-val gider">-'+para(dagilim.toplam)+'</span>';
       h+='</li>';
+      dagilim.parca.forEach(function(p){
+        var aktif=seciliGrup===p.ad;
+        h+='<li><button type="button" class="ioz-legend-btn'+(aktif?" active":"")+'" data-ioz-tip="'+tip+'" data-ioz-grup="'+esc(p.ad)+'" aria-pressed="'+(aktif?"true":"false")+'">';
+        h+='<span class="ioz-legend-satir">';
+        h+='<span class="ioz-legend-renk" style="background:'+p.renk+'"></span>';
+        h+='<span class="ioz-legend-ad">'+esc(p.ad)+'</span>';
+        h+='<span class="ioz-legend-rakam gider">-'+para(p.val)+'</span>';
+        h+='<span class="ioz-legend-pct">%'+p.pct.toLocaleString("tr-TR",{minimumFractionDigits:0,maximumFractionDigits:1})+'</span>';
+        h+='</span></button></li>';
+      });
+      h+='</ul>';
     }
-    dagilim.parca.forEach(function(p){
-      var aktif=seciliGrup===p.ad;
-      h+='<li><button type="button" class="ioz-legend-btn'+(aktif?" active":"")+'" data-ioz-tip="'+tip+'" data-ioz-grup="'+esc(p.ad)+'" aria-pressed="'+(aktif?"true":"false")+'">';
-      h+='<span class="ioz-legend-satir">';
-      h+='<span class="ioz-legend-renk" style="background:'+p.renk+'"></span>';
-      h+='<span class="ioz-legend-ad">'+esc(p.ad)+'</span>';
-      h+='<span class="ioz-legend-rakam '+(tip==="gelir"?"gelir":"gider")+'">'+(tip==="gelir"?"+":"-")+para(p.val)+'</span>';
-      h+='<span class="ioz-legend-pct">%'+p.pct.toLocaleString("tr-TR",{minimumFractionDigits:0,maximumFractionDigits:1})+'</span>';
-      h+='</span></button></li>';
+    h+='</div>';
+    return h;
+  }
+
+  function iozKatOzetListeHtml(katListe, tip, topRef, seciliGrup, topGrupAdlari){
+    var filtered=katListe.filter(function(k){
+      var val=tip==="gelir"?k.gelir:k.gider;
+      if(val<=0)return false;
+      if(!seciliGrup)return true;
+      var g=k.grup||"Diger";
+      if(topGrupAdlari&&topGrupAdlari.indexOf(g)<0)g="Diger";
+      return g===seciliGrup;
     });
-    h+='</ul></div>';
+    filtered.sort(function(a,b){return tip==="gelir"?b.gelir-a.gelir:b.gider-a.gider;});
+    if(!filtered.length)return "";
+    var baslikLc=tip==="gelir"?"gelir":"gider";
+    var h='<div class="ioz-kat-ozet-liste">';
+    if(seciliGrup){
+      h+='<div class="ioz-kat-ozet-baslik">'+esc(seciliGrup)+' — kategoriler</div>';
+    }else{
+      h+='<div class="ioz-kat-ozet-baslik">Kategori \u00f6zeti</div>';
+    }
+    filtered.forEach(function(k){
+      var tutVal=tip==="gelir"?k.gelir:k.gider;
+      var barPct=Math.round((tutVal/topRef)*100);
+      h+='<div class="ioz-kat-satir">';
+      h+='<div class="ioz-kat-ust">';
+      h+='<span class="ioz-kat-ad">'+esc(iozKatAdKisa(k.ad))+'</span>';
+      h+='<span class="ioz-kat-ust-sag">';
+      h+='<span class="ioz-kat-tutar '+(tip==="gelir"?"gelir":"gider")+'">'+(tip==="gelir"?"+":"-")+para(tutVal)+'</span>';
+      h+='<span class="ioz-kat-adet">'+k.adet+' islem</span>';
+      h+='</span></div>';
+      h+='<div class="ioz-kat-bar-wrap" title="Toplam '+baslikLc+'e gore %'+barPct+'">';
+      h+='<span class="ioz-kat-bar-track" aria-hidden="true"><span class="ioz-kat-bar-fill'+(tip==="gelir"?" gelir-bar":"")+'" style="width:'+barPct+'%"></span></span>';
+      h+='<span class="ioz-kat-pct">%'+barPct+'</span>';
+      h+='</div></div>';
+    });
+    h+='</div>';
     return h;
   }
 
@@ -359,6 +436,30 @@ const IslemlerModule = (() => {
       if(_iozSeciliGrup[tip]===grup)_iozSeciliGrup[tip]=null;
       else _iozSeciliGrup[tip]=grup;
       renderKategoriOzeti();
+    });
+    wrap.querySelectorAll(".ioz-donut-wrap").forEach(function(dw){
+      if(dw._iozDonutTipBound)return;
+      dw._iozDonutTipBound=true;
+      var tipEl=dw.querySelector(".ioz-donut-hover-tip");
+      if(!tipEl)return;
+      function goster(seg){
+        if(!seg)return;
+        var titleEl=seg.querySelector("title");
+        tipEl.textContent=titleEl?titleEl.textContent:"";
+        tipEl.classList.add("visible");
+        seg.classList.add("ioz-donut-seg-hover");
+      }
+      function gizle(){
+        tipEl.classList.remove("visible");
+        tipEl.textContent="";
+        dw.querySelectorAll(".ioz-donut-seg-hover").forEach(function(s){s.classList.remove("ioz-donut-seg-hover");});
+      }
+      dw.querySelectorAll(".ioz-donut-seg").forEach(function(seg){
+        seg.addEventListener("mouseenter",function(){goster(seg);});
+        seg.addEventListener("mouseleave",gizle);
+        seg.addEventListener("focus",function(){goster(seg);});
+        seg.addEventListener("blur",gizle);
+      });
     });
   }
 
@@ -426,10 +527,8 @@ const IslemlerModule = (() => {
     const seciliGrup=_iozSeciliGrup[tip];
     h+=iozDonutGrafikHtml(tip, dagilim, baslikTr, seciliGrup);
     const topRef=tip==="gelir"?(ayVer.gelir||1):(ayVer.gider||1);
-    if(seciliGrup){
-      var grupMap=iozGruplarMapForLegend(filtered, tip, dagilim.topGrupAdlari);
-      var gListe=grupMap[seciliGrup];
-      if(gListe&&gListe.length)h+=iozGrupDetayPanelHtml(seciliGrup, gListe, tip, topRef);
+    if(tip==="gider"){
+      h+=iozKatOzetListeHtml(filtered, tip, topRef, seciliGrup, dagilim.topGrupAdlari);
     }
     h+='</div>';
     return h;
@@ -452,7 +551,7 @@ const IslemlerModule = (() => {
 
     let h='';
 
-    /* —— Aylık detay: gelir ustte, gider altta —— */
+    /* —— Aylik detay: gelir ve gider yan yana —— */
     const katListe=Object.entries(ayVer.kat).map(function(e){
       const k=e[1];
       return {ad:e[0],grup:k.grup||kategoriGrupAdi(e[0]),gelir:k.gelir,gider:k.gider,adet:k.adet};
