@@ -5,6 +5,7 @@ const IslemlerModule = (() => {
   let _katDuzId=null, _katSilId=null;
   let _baglandi=false;
   let _iozAy=new Date().getMonth(), _iozYil=new Date().getFullYear();
+  let _iozSeciliGrup={gider:null,gelir:null};
   const $=id=>document.getElementById(id);
 
   function normKatStr(s){return String(s||"").replace(/\s+/g," ").trim();}
@@ -112,6 +113,7 @@ const IslemlerModule = (() => {
   function iozAyGeri(){
     _iozAy--;
     if(_iozAy<0){_iozAy=11;_iozYil--;}
+    _iozSeciliGrup={gider:null,gelir:null};
     renderKategoriOzeti();
   }
 
@@ -124,6 +126,7 @@ const IslemlerModule = (() => {
       _iozAy=d.getMonth();
       _iozYil=d.getFullYear();
     }
+    _iozSeciliGrup={gider:null,gelir:null};
     renderKategoriOzeti();
   }
 
@@ -267,10 +270,24 @@ const IslemlerModule = (() => {
         renk:renkler[i%renkler.length]
       };
     });
-    return {toplam:topRef,parca:parca};
+    var topGrupAdlari=parca.filter(function(p){return p.ad!=="Diger";}).map(function(p){return p.ad;});
+    return {toplam:topRef,parca:parca,topGrupAdlari:topGrupAdlari};
   }
 
-  function iozDonutGrafikHtml(tip, dagilim, baslik){
+  function iozGruplarMapForLegend(filtered, tip, topGrupAdlari){
+    var map={};
+    filtered.forEach(function(k){
+      var val=tip==="gelir"?k.gelir:k.gider;
+      if(val<=0)return;
+      var g=k.grup||"Diger";
+      if(topGrupAdlari.indexOf(g)<0)g="Diger";
+      if(!map[g])map[g]=[];
+      map[g].push(k);
+    });
+    return map;
+  }
+
+  function iozDonutGrafikHtml(tip, dagilim, baslik, seciliGrup){
     if(!dagilim.parca.length)return "";
     var conic=iozConicOlustur(dagilim.parca);
     var h='<div class="ioz-grafik-kart ioz-grafik-'+tip+'">';
@@ -281,16 +298,68 @@ const IslemlerModule = (() => {
     h+='<span class="ioz-donut-ic-val '+(tip==="gelir"?"gelir":"gider")+'">'+(tip==="gelir"?"+":"-")+para(dagilim.toplam)+'</span>';
     h+='</div></div></div>';
     h+='<ul class="ioz-donut-legend">';
+    if(tip==="gider"){
+      h+='<li class="ioz-legend-toplam">';
+      h+='<span class="ioz-legend-toplam-lbl">Toplam Gider</span>';
+      h+='<span class="ioz-legend-toplam-val gider">-'+para(dagilim.toplam)+'</span>';
+      h+='</li>';
+    }
     dagilim.parca.forEach(function(p){
-      h+='<li class="ioz-legend-satir">';
+      var aktif=seciliGrup===p.ad;
+      h+='<li><button type="button" class="ioz-legend-btn'+(aktif?" active":"")+'" data-ioz-tip="'+tip+'" data-ioz-grup="'+esc(p.ad)+'" aria-pressed="'+(aktif?"true":"false")+'">';
+      h+='<span class="ioz-legend-satir">';
       h+='<span class="ioz-legend-renk" style="background:'+p.renk+'"></span>';
       h+='<span class="ioz-legend-ad">'+esc(p.ad)+'</span>';
       h+='<span class="ioz-legend-rakam '+(tip==="gelir"?"gelir":"gider")+'">'+(tip==="gelir"?"+":"-")+para(p.val)+'</span>';
       h+='<span class="ioz-legend-pct">%'+p.pct.toLocaleString("tr-TR",{minimumFractionDigits:0,maximumFractionDigits:1})+'</span>';
-      h+='</li>';
+      h+='</span></button></li>';
     });
     h+='</ul></div>';
     return h;
+  }
+
+  function iozGrupDetayPanelHtml(grup, gListe, tip, topRef){
+    var baslikLc=tip==="gelir"?"gelir":"gider";
+    var sorted=gListe.slice().sort(function(a,b){
+      return tip==="gelir"?b.gelir-a.gelir:b.gider-a.gider;
+    });
+    var h='<div class="ioz-grup-detay-panel">';
+    h+='<div class="ioz-grup-detay-baslik">';
+    h+='<span class="ioz-grup-detay-ad">'+esc(grup)+'</span>';
+    h+='<span class="ioz-grup-detay-ipucu">Kapatmak i\u00e7in gruba tekrar dokunun</span>';
+    h+='</div>';
+    sorted.forEach(function(k){
+      var tutVal=tip==="gelir"?k.gelir:k.gider;
+      var barPct=Math.round((tutVal/topRef)*100);
+      h+='<div class="ioz-kat-satir">';
+      h+='<div class="ioz-kat-ust">';
+      h+='<span class="ioz-kat-ad">'+esc(iozKatAdKisa(k.ad))+'</span>';
+      h+='<span class="ioz-kat-ust-sag">';
+      h+='<span class="ioz-kat-tutar '+(tip==="gelir"?"gelir":"gider")+'">'+(tip==="gelir"?"+":"-")+para(tutVal)+'</span>';
+      h+='<span class="ioz-kat-adet">'+k.adet+' i\u015flem</span>';
+      h+='</span></div>';
+      h+='<div class="ioz-kat-bar-wrap" title="Toplam '+baslikLc+'e g\u00f6re %'+barPct+'">';
+      h+='<span class="ioz-kat-bar-track" aria-hidden="true"><span class="ioz-kat-bar-fill'+(tip==="gelir"?" gelir-bar":"")+'" style="width:'+barPct+'%"></span></span>';
+      h+='<span class="ioz-kat-pct">%'+barPct+'</span>';
+      h+='</div></div>';
+    });
+    h+='</div>';
+    return h;
+  }
+
+  function iozGrafikEtkilesimBagla(wrap){
+    if(!wrap||wrap._iozGrafikBound)return;
+    wrap._iozGrafikBound=true;
+    wrap.addEventListener("click",function(e){
+      var btn=e.target.closest(".ioz-legend-btn");
+      if(!btn)return;
+      var tip=btn.getAttribute("data-ioz-tip");
+      var grup=btn.getAttribute("data-ioz-grup");
+      if(!tip||!grup)return;
+      if(_iozSeciliGrup[tip]===grup)_iozSeciliGrup[tip]=null;
+      else _iozSeciliGrup[tip]=grup;
+      renderKategoriOzeti();
+    });
   }
 
   function iozOranCubukHtml(ayVer){
@@ -354,45 +423,14 @@ const IslemlerModule = (() => {
       return h;
     }
     const dagilim=iozGrupDagilim(filtered, tip, ayVer, 6);
-    h+=iozDonutGrafikHtml(tip, dagilim, baslikTr);
-    h+='<div class="ioz-detay-baslik">Kategori detay\u0131</div>';
+    const seciliGrup=_iozSeciliGrup[tip];
+    h+=iozDonutGrafikHtml(tip, dagilim, baslikTr, seciliGrup);
     const topRef=tip==="gelir"?(ayVer.gelir||1):(ayVer.gider||1);
-    const gruplar={};
-    filtered.forEach(function(k){
-      if(!gruplar[k.grup])gruplar[k.grup]=[];
-      gruplar[k.grup].push(k);
-    });
-    const grupSira=Object.keys(gruplar).sort(function(a,b){return a.localeCompare(b,"tr");});
-    grupSira.forEach(function(g){
-      const gListe=gruplar[g];
-      let gTopVal=0;
-      gListe.forEach(function(k){gTopVal+=tip==="gelir"?k.gelir:k.gider;});
-      const gBarPct=Math.round((gTopVal/topRef)*100);
-      h+='<div class="ioz-grup-wrap">';
-      h+='<div class="ioz-grup-baslik">';
-      h+='<span class="ioz-grup-ad">'+esc(g)+'</span>';
-      h+='<span class="ioz-grup-toplam '+(tip==="gelir"?"gelir":"gider")+'">'+(tip==="gelir"?"+":"-")+para(gTopVal)+'</span>';
-      h+='</div>';
-      h+='<div class="ioz-grup-bar-wrap" title="Grup '+baslikLc+' / ay toplam %'+gBarPct+'">';
-      h+='<span class="ioz-kat-bar-track" aria-hidden="true"><span class="ioz-kat-bar-fill'+(tip==="gelir"?" gelir-bar ioz-grup-bar-fill":"")+'" style="width:'+gBarPct+'%"></span></span>';
-      h+='<span class="ioz-grup-pct">%'+gBarPct+'</span>';
-      h+='</div></div>';
-      gListe.forEach(function(k){
-        const tutVal=tip==="gelir"?k.gelir:k.gider;
-        const barPct=Math.round((tutVal/topRef)*100);
-        h+='<div class="ioz-kat-satir">';
-        h+='<div class="ioz-kat-ust">';
-        h+='<span class="ioz-kat-ad">'+esc(iozKatAdKisa(k.ad))+'</span>';
-        h+='<span class="ioz-kat-ust-sag">';
-        h+='<span class="ioz-kat-tutar '+(tip==="gelir"?"gelir":"gider")+'">'+(tip==="gelir"?"+":"-")+para(tutVal)+'</span>';
-        h+='<span class="ioz-kat-adet">'+k.adet+' işlem</span>';
-        h+='</span></div>';
-        h+='<div class="ioz-kat-bar-wrap" title="Toplam '+baslikLc+'e g\u00f6re %'+barPct+'">';
-        h+='<span class="ioz-kat-bar-track" aria-hidden="true"><span class="ioz-kat-bar-fill'+(tip==="gelir"?" gelir-bar":"")+'" style="width:'+barPct+'%"></span></span>';
-        h+='<span class="ioz-kat-pct">%'+barPct+'</span>';
-        h+='</div></div>';
-      });
-    });
+    if(seciliGrup){
+      var grupMap=iozGruplarMapForLegend(filtered, tip, dagilim.topGrupAdlari);
+      var gListe=grupMap[seciliGrup];
+      if(gListe&&gListe.length)h+=iozGrupDetayPanelHtml(seciliGrup, gListe, tip, topRef);
+    }
     h+='</div>';
     return h;
   }
@@ -424,8 +462,10 @@ const IslemlerModule = (() => {
       h+='<div class="ioz-bos">Bu ayda kategorili i\u015flem yok.</div>';
     }else{
       h+=iozOranCubukHtml(ayVer);
-      h+=iozTipBolumRender("gider", katListe, ayVer);
+      h+='<div class="ioz-grafik-stack">';
       h+=iozTipBolumRender("gelir", katListe, ayVer);
+      h+=iozTipBolumRender("gider", katListe, ayVer);
+      h+='</div>';
     }
 
     h+=iozYillikGrafikHtml(byYil);
@@ -449,6 +489,7 @@ const IslemlerModule = (() => {
     h+='</div></div>';
 
     wrap.innerHTML=h;
+    iozGrafikEtkilesimBagla(wrap);
   }
 
   function listeVeOzetGuncelle(){

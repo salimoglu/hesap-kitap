@@ -5159,15 +5159,30 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
 #tab-islemler .ioz-oran-etiket .gelir { color: var(--green); }
 #tab-islemler .ioz-oran-etiket .gider { color: var(--red); }
 
+#tab-islemler .ioz-grafik-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+#tab-islemler .ioz-grafik-stack .ioz-tip-bolum {
+  margin-bottom: 0;
+}
+
 #tab-islemler .ioz-grafik-kart {
   display: flex;
-  align-items: center;
-  gap: 14px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
   padding: 14px var(--islem-px);
-  border-bottom: 1px solid var(--border);
+  border-bottom: none;
   background: var(--bg-elevated);
 }
-#tab-islemler .ioz-donut-wrap { flex-shrink: 0; }
+#tab-islemler .ioz-donut-wrap {
+  display: flex;
+  justify-content: center;
+  flex-shrink: 0;
+}
 #tab-islemler .ioz-donut {
   width: 132px;
   height: 132px;
@@ -5210,11 +5225,54 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   list-style: none;
   margin: 0;
   padding: 0;
-  flex: 1;
-  min-width: 0;
+  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
+}
+#tab-islemler .ioz-legend-toplam {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  margin-bottom: 4px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+}
+#tab-islemler .ioz-legend-toplam-lbl {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+#tab-islemler .ioz-legend-toplam-val {
+  font-size: 14px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+#tab-islemler .ioz-legend-btn {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+#tab-islemler .ioz-legend-btn:hover .ioz-legend-satir {
+  background: rgba(240, 184, 64, 0.08);
+}
+#tab-islemler .ioz-legend-btn.active .ioz-legend-satir {
+  background: rgba(240, 184, 64, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(240, 184, 64, 0.35);
 }
 #tab-islemler .ioz-legend-satir {
   display: grid;
@@ -5222,6 +5280,9 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   gap: 6px 8px;
   align-items: center;
   font-size: 12px;
+  padding: 7px 8px;
+  border-radius: var(--radius-sm);
+  transition: background 0.12s ease;
 }
 #tab-islemler .ioz-legend-renk {
   width: 10px;
@@ -5249,15 +5310,33 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   min-width: 36px;
   text-align: right;
 }
-#tab-islemler .ioz-detay-baslik {
-  padding: 8px var(--islem-px) 4px;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-  color: var(--text-muted);
+
+#tab-islemler .ioz-grup-detay-panel {
+  border-top: 1px solid var(--border);
   background: var(--bg-card);
+  padding: 0 0 8px;
+}
+#tab-islemler .ioz-grup-detay-baslik {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 10px var(--islem-px) 6px;
   border-bottom: 1px solid var(--border);
+  background: var(--bg-elevated);
+}
+#tab-islemler .ioz-grup-detay-ad {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  color: var(--gold);
+  text-transform: uppercase;
+}
+#tab-islemler .ioz-grup-detay-ipucu {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 600;
 }
 
 #tab-islemler .ioz-bolum-yil-graf {
@@ -5298,18 +5377,6 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   font-weight: 800;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
-}
-
-@media (max-width: 520px) {
-  #tab-islemler .ioz-grafik-kart {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  #tab-islemler .ioz-donut-wrap { display: flex; justify-content: center; }
-  #tab-islemler .ioz-legend-satir {
-    grid-template-columns: 10px 1fr auto;
-  }
-  #tab-islemler .ioz-legend-pct { grid-column: 2 / 4; text-align: left; font-size: 11px; }
 }
 
 #tab-islemler .islemler-butce .butce-wrap {
