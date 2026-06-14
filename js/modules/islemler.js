@@ -411,16 +411,20 @@ const IslemlerModule = (() => {
       const lbl=document.createElement("div");lbl.className=grpSinif;lbl.textContent=g;liste.appendChild(lbl);
       const mobilSec=listId==="hg-kat-sec-list";
       for(const k of ks){
-        const item=document.createElement("button");
-        item.type="button";
-        item.className=secSinif+(_seciliKat.value===g+" - "+k.ad?" selected":"");
         if(mobilSec){
+          const item=document.createElement("button");
+          item.type="button";
+          item.className=secSinif+(_seciliKat.value===g+" - "+k.ad?" selected":"");
           item.innerHTML='<span class="hg-kat-sec-ad">'+esc(k.ad)+'</span><span class="hg-kat-sec-tip '+k.tip+'">'+(k.tip==="gelir"?"Gelir":"Gider")+'</span>';
+          item.addEventListener("click",function(e){e.stopPropagation();hgKatUygula(g,k);});
+          liste.appendChild(item);
         }else{
+          const item=document.createElement("div");
+          item.className=secSinif+(_seciliKat.value===g+" - "+k.ad?" selected":"");
           item.textContent=k.ad;
+          item.addEventListener("click",function(e){e.stopPropagation();hgKatUygula(g,k);});
+          liste.appendChild(item);
         }
-        item.addEventListener("click",function(){hgKatUygula(g,k);});
-        liste.appendChild(item);
       }
     }
   }
@@ -720,7 +724,14 @@ const IslemlerModule = (() => {
       renderHgList("");$("hg-kat-search-inp").focus();
     });
     $("hg-kat-dropdown").addEventListener("click",e=>e.stopPropagation());
-    document.addEventListener("click",()=>closeHgDropdown());
+    document.addEventListener("click",function(e){
+      if(mobilPanelAktifMi())return;
+      const dd=$("hg-kat-dropdown");
+      const wrap=$("hg-kat-wrap");
+      if(!dd||!dd.classList.contains("open"))return;
+      if(wrap&&wrap.contains(e.target))return;
+      closeHgDropdown();
+    });
     $("filter-type").addEventListener("change",listeVeOzetGuncelle);
     $("filter-ay").addEventListener("change",listeVeOzetGuncelle);
     $("filter-grup").addEventListener("change",listeVeOzetGuncelle);
