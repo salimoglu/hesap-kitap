@@ -883,34 +883,30 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .bt-input::-webkit-outer-spin-button { -webkit-appearance: none; }
 
 /* Butce — satir tasima (uc nokta tutamac) */
-.bt-col-sira { width: 22px; padding: 0; text-align: center; vertical-align: middle; }
+.bt-col-sira { width: 22px; padding: 0 2px; text-align: center; vertical-align: middle; line-height: 1; }
 .bt-col-aksiyon { width: 40px; padding: 2px 4px; text-align: right; white-space: nowrap; }
 
 .bt-drag-handle {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 24px;
+  width: 18px;
+  height: 18px;
   padding: 0;
-  margin: 0 auto;
+  margin: 0;
   border: none;
   background: transparent;
+  color: var(--text-muted);
+  font-size: 15px;
+  line-height: 1;
   cursor: grab;
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
+  vertical-align: middle;
+  transform: translateY(-1px);
 }
-.bt-drag-handle:active { cursor: grabbing; }
-.bt-drag-dots {
-  display: block;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: var(--text-muted);
-  box-shadow: 0 5px 0 var(--text-muted), 0 10px 0 var(--text-muted);
-  pointer-events: none;
-}
+.bt-drag-handle:active { cursor: grabbing; color: var(--gold); }
 
 .bt-satir-modal-hint {
   font-size: 12px;
@@ -2806,34 +2802,30 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .bt-input::-webkit-outer-spin-button { -webkit-appearance: none; }
 
 /* Butce — satir tasima (uc nokta tutamac) */
-.bt-col-sira { width: 22px; padding: 0; text-align: center; vertical-align: middle; }
+.bt-col-sira { width: 22px; padding: 0 2px; text-align: center; vertical-align: middle; line-height: 1; }
 .bt-col-aksiyon { width: 40px; padding: 2px 4px; text-align: right; white-space: nowrap; }
 
 .bt-drag-handle {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 24px;
+  width: 18px;
+  height: 18px;
   padding: 0;
-  margin: 0 auto;
+  margin: 0;
   border: none;
   background: transparent;
+  color: var(--text-muted);
+  font-size: 15px;
+  line-height: 1;
   cursor: grab;
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
+  vertical-align: middle;
+  transform: translateY(-1px);
 }
-.bt-drag-handle:active { cursor: grabbing; }
-.bt-drag-dots {
-  display: block;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: var(--text-muted);
-  box-shadow: 0 5px 0 var(--text-muted), 0 10px 0 var(--text-muted);
-  pointer-events: none;
-}
+.bt-drag-handle:active { cursor: grabbing; color: var(--gold); }
 
 .bt-satir-modal-hint {
   font-size: 12px;
@@ -5609,12 +5601,22 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
 }
 #tab-islemler .islemler-butce .bt-col-sira {
   width: 22px;
-  padding: 0;
+  padding: 0 2px;
+  vertical-align: middle;
+}
+#tab-islemler .islemler-butce .bt-satir-tas .bt-col-label,
+#tab-islemler .islemler-butce .bt-satir-tas .bt-col-tutar,
+#tab-islemler .islemler-butce .bt-satir-tas .bt-col-pct,
+#tab-islemler .islemler-butce .bt-satir-tas .bt-col-aksiyon {
+  vertical-align: middle;
 }
 #tab-islemler .islemler-butce .bt-drag-handle {
   width: 18px;
-  height: 22px;
+  height: 18px;
+  font-size: 14px;
+  line-height: 1;
   touch-action: none;
+  transform: translateY(-1px);
 }
 #tab-islemler .islemler-butce .bt-drag-handle:active {
   color: var(--gold);

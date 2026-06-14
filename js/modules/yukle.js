@@ -106,7 +106,7 @@ function bolumSatirHtml(bolum,id,g){
   if(!meta)return "";
   var v=_veri[id]||0;
   var h='<tr class="bt-satir bt-satir-tas" data-id="'+id+'" data-bolum="'+bolum+'">';
-  h+='<td class="bt-col-sira"><button type="button" class="bt-drag-handle" title="Basılı tutup sürükleyin" aria-label="Satırı taşı"><span class="bt-drag-dots" aria-hidden="true"></span></button></td>';
+  h+='<td class="bt-col-sira"><button type="button" class="bt-drag-handle" title="Basılı tutup sürükleyin" aria-label="Satırı taşı">&#8942;</button></td>';
   h+='<td class="bt-col-label">'+meta.label+'</td>';
   h+='<td class="bt-col-tutar"><input type="number" class="bt-input" data-id="'+id+'" value="'+(v||"")+'" placeholder="0" min="0" step="0.01" inputmode="decimal"/></td>';
   h+='<td class="bt-col-pct" data-pct="'+id+'">'+bpct(v,g)+'</td>';
