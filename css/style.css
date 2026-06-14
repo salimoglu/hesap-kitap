@@ -901,6 +901,40 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .bt-col-sira .bt-yukari-btn:disabled,
 .bt-col-sira .bt-asagi-btn:disabled { opacity: 0.15; cursor: default; }
 
+.bt-sira-kontrol {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+.bt-tas-btn {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 8px;
+  line-height: 1;
+  width: 22px;
+  height: 16px;
+  padding: 0;
+  border-radius: 3px;
+  cursor: pointer;
+  opacity: 1;
+}
+.bt-tas-btn:hover:not(:disabled) {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+.bt-tas-btn:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+.bt-satir-modal-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 0 0 12px;
+  line-height: 1.45;
+}
+
 .bt-satir-ozel { transition: background 0.1s; }
 .bt-satir-ozel:hover { background: var(--bg-elevated); }
 .bt-drag-active { opacity: 0.4; }
@@ -2802,6 +2836,40 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .bt-satir-ozel:hover .bt-col-sira .bt-asagi-btn { opacity: 1; }
 .bt-col-sira .bt-yukari-btn:disabled,
 .bt-col-sira .bt-asagi-btn:disabled { opacity: 0.15; cursor: default; }
+
+.bt-sira-kontrol {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+.bt-tas-btn {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 8px;
+  line-height: 1;
+  width: 22px;
+  height: 16px;
+  padding: 0;
+  border-radius: 3px;
+  cursor: pointer;
+  opacity: 1;
+}
+.bt-tas-btn:hover:not(:disabled) {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+.bt-tas-btn:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+.bt-satir-modal-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 0 0 12px;
+  line-height: 1.45;
+}
 
 .bt-satir-ozel { transition: background 0.1s; }
 .bt-satir-ozel:hover { background: var(--bg-elevated); }
@@ -5571,6 +5639,18 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
 #tab-islemler .islemler-butce .bt-satir td {
   padding: 6px 8px;
   vertical-align: middle;
+}
+#tab-islemler .islemler-butce .bt-sira-kontrol .bt-drag-handle {
+  font-size: 10px;
+  letter-spacing: -2px;
+  line-height: 1;
+  cursor: grab;
+  padding: 1px 0;
+}
+#tab-islemler .islemler-butce .bt-tas-btn {
+  opacity: 1;
+  min-width: 22px;
+  touch-action: manipulation;
 }
 
 @media (max-width: 900px) {
