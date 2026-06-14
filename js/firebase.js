@@ -208,9 +208,12 @@ async function fbMigrateRootToUser(uid) {
   try {
     var userSnap = await _fbDb.ref("users/" + uid).once("value");
     var uv = userSnap.val();
-    if (uv && typeof uv === "object" && Object.keys(uv).length > 0) {
-      try { localStorage.setItem(migKey, "1"); } catch (e2) {}
-      return { ok: true, skipped: true, reason: "user-has-data" };
+    if (uv && typeof uv === "object") {
+      var veriAnahtarlari = Object.keys(uv).filter(function (k) { return k !== "meta"; });
+      if (veriAnahtarlari.length > 0) {
+        try { localStorage.setItem(migKey, "1"); } catch (e2) {}
+        return { ok: true, skipped: true, reason: "user-has-data" };
+      }
     }
   } catch (e3) {
     console.warn("fbMigrateRootToUser user check:", e3);
@@ -255,8 +258,24 @@ async function fbEnsureUserDataScope() {
   if (!_fbDb) return;
   var u = fbMevcutKullanici();
   if (!u || u.isAnonymous) return;
+  window._hkRtdbRole = "";
   try { localStorage.setItem("hk-rtdb-use-user-prefix", "1"); } catch (e) {}
-  if (typeof HK_ERISIM !== "undefined" && HK_ERISIM.yoneticiMi(u)) {
+
+  try {
+    var roleSnap = await _fbDb.ref("users/" + u.uid + "/meta/hkRole").once("value");
+    if (roleSnap.val() === "owner") window._hkRtdbRole = "owner";
+  } catch (eR) {
+    console.warn("fbEnsureUserDataScope role read:", eR);
+  }
+
+  var epostaYonetici = typeof HK_ERISIM !== "undefined" && HK_ERISIM.yoneticiEpostaMi(u);
+  if (epostaYonetici) {
+    try {
+      await _fbDb.ref("users/" + u.uid + "/meta/hkRole").set("owner");
+      window._hkRtdbRole = "owner";
+    } catch (eW) {
+      console.warn("fbEnsureUserDataScope role write:", eW);
+    }
     await fbMigrateRootToUser(u.uid);
   }
 }

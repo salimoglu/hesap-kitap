@@ -78,6 +78,11 @@
     } catch (e) { u = null; }
     if (!u || u.isAnonymous) return;
 
+    try {
+      if (u.reload) await u.reload();
+      u = typeof fbMevcutKullanici === "function" ? fbMevcutKullanici() : u;
+    } catch (eRel) {}
+
     try { await hkServiceWorkerKaydet(); } catch (eSw) {}
 
     const fbErrOk = document.getElementById("fb-auth-error");

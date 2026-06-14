@@ -33,17 +33,49 @@ var HK_ERISIM = (function () {
   ];
 
   function epostaNorm(em) {
-    return String(em || "").trim().toLowerCase();
+    var s = String(em || "").trim().toLowerCase();
+    var at = s.indexOf("@");
+    if (at <= 0) return s;
+    var local = s.slice(0, at);
+    var domain = s.slice(at + 1);
+    if (domain === "googlemail.com") domain = "gmail.com";
+    if (domain === "gmail.com") local = local.replace(/\./g, "");
+    return local + "@" + domain;
+  }
+
+  function kullaniciEpostalari(user) {
+    var list = [];
+    if (!user) return list;
+    if (user.email) list.push(epostaNorm(user.email));
+    if (user.providerData && user.providerData.length) {
+      user.providerData.forEach(function (p) {
+        if (p && p.email) list.push(epostaNorm(p.email));
+      });
+    }
+    var uniq = [];
+    list.forEach(function (e) {
+      if (e && uniq.indexOf(e) < 0) uniq.push(e);
+    });
+    return uniq;
+  }
+
+  function yoneticiEpostaMi(user) {
+    if (!user || user.isAnonymous) return false;
+    var emails = kullaniciEpostalari(user);
+    if (!emails.length) return false;
+    for (var i = 0; i < YONETICI_EPOSTALAR.length; i++) {
+      var hedef = epostaNorm(YONETICI_EPOSTALAR[i]);
+      for (var j = 0; j < emails.length; j++) {
+        if (emails[j] === hedef) return true;
+      }
+    }
+    return false;
   }
 
   function yoneticiMi(user) {
     if (!user || user.isAnonymous) return false;
-    var em = epostaNorm(user.email);
-    if (!em) return false;
-    for (var i = 0; i < YONETICI_EPOSTALAR.length; i++) {
-      if (epostaNorm(YONETICI_EPOSTALAR[i]) === em) return true;
-    }
-    return false;
+    if (typeof window !== "undefined" && window._hkRtdbRole === "owner") return true;
+    return yoneticiEpostaMi(user);
   }
 
   function izinliSekmeler(user) {
@@ -76,11 +108,16 @@ var HK_ERISIM = (function () {
         panel.classList.toggle("active", panel.id === "tab-" + ilkId);
       });
     }
+    if (yoneticiMi(user)) {
+      console.info("[HK] Yonetici erisimi aktif:", kullaniciEpostalari(user).join(", ") || user.uid);
+    }
     return izinli;
   }
 
   return {
     yoneticiMi: yoneticiMi,
+    yoneticiEpostaMi: yoneticiEpostaMi,
+    kullaniciEpostalari: kullaniciEpostalari,
     izinliSekmeler: izinliSekmeler,
     modulErisilebilir: modulErisilebilir,
     sekmeleriUygula: sekmeleriUygula,
