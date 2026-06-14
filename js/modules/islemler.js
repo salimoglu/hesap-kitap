@@ -447,23 +447,41 @@ const IslemlerModule = (() => {
       dw._iozDonutTipBound=true;
       var tipEl=dw.querySelector(".ioz-donut-hover-tip");
       if(!tipEl)return;
-      function goster(seg){
+      function konumla(e){
+        if(!e)return;
+        var pad=12;
+        var tw=tipEl.offsetWidth||120;
+        var th=tipEl.offsetHeight||28;
+        var x=e.clientX+pad;
+        var y=e.clientY+pad;
+        if(x+tw>window.innerWidth-8)x=e.clientX-tw-pad;
+        if(y+th>window.innerHeight-8)y=e.clientY-th-pad;
+        tipEl.style.left=x+"px";
+        tipEl.style.top=y+"px";
+      }
+      function goster(seg,e){
         if(!seg)return;
         var titleEl=seg.querySelector("title");
         var grupAd=seg.getAttribute("data-ioz-grup")||(titleEl?titleEl.textContent:"");
         tipEl.textContent=grupAd;
         tipEl.classList.add("visible");
+        konumla(e);
         seg.classList.add("ioz-donut-seg-hover");
       }
       function gizle(){
         tipEl.classList.remove("visible");
         tipEl.textContent="";
+        tipEl.style.left="";
+        tipEl.style.top="";
         dw.querySelectorAll(".ioz-donut-seg-hover").forEach(function(s){s.classList.remove("ioz-donut-seg-hover");});
       }
       dw.querySelectorAll(".ioz-donut-seg").forEach(function(seg){
-        seg.addEventListener("mouseenter",function(){goster(seg);});
+        seg.addEventListener("mouseenter",function(e){goster(seg,e);});
+        seg.addEventListener("mousemove",function(e){
+          if(tipEl.classList.contains("visible"))konumla(e);
+        });
         seg.addEventListener("mouseleave",gizle);
-        seg.addEventListener("focus",function(){goster(seg);});
+        seg.addEventListener("focus",function(e){goster(seg,e);});
         seg.addEventListener("blur",gizle);
       });
     });
