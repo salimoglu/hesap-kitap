@@ -46,7 +46,21 @@ function satirSil(bolum,id){if(!confirm("Silmek?"))return;if(_ozel[bolum])_ozel[
 function brender(){
   hesapla();var c=$("butce-container");if(!c)return;
   var g=gelir(),hr=harcanan(),kalan=g-hr;
-  var hHead='<div class="butce-ay-bar"><button class="butce-ay-btn" id="b-geri">&#8249;</button><span class="butce-ay-label">'+AYLAR[_ay]+" "+_yil+'</span><button class="butce-ay-btn" id="b-ileri">&#8250;</button><button class="butce-rapor-btn" id="b-csv">&#8595; CSV</button></div>';
+  var hHead='<div class="islemler-kol-baslik butce-kol-baslik">'+
+    '<span class="islemler-kol-ad">B&#252;t&#231;e</span>'+
+    '<div class="islemler-kol-nav">'+
+    '<button type="button" class="butce-ay-btn" id="b-geri">&#8249;</button>'+
+    '<span class="islemler-kol-ay butce-kol-ay">'+AYLAR[_ay]+" "+_yil+'</span>'+
+    '<button type="button" class="butce-ay-btn" id="b-ileri">&#8250;</button>'+
+    '<button type="button" class="butce-rapor-btn" id="b-csv">&#8595; CSV</button>'+
+    '</div></div>'+
+    '<div class="ozet-bar butce-ust-ozet">'+
+    '<div class="ozet-item"><span class="ozet-label">Gelir</span><span class="ozet-val gelir" id="bt-head-gelir">'+bpara(g)+'</span></div>'+
+    '<div class="ozet-sep"></div>'+
+    '<div class="ozet-item"><span class="ozet-label">Harcanan</span><span class="ozet-val gider" id="bt-head-harcanan">'+bpara(hr)+'</span></div>'+
+    '<div class="ozet-sep"></div>'+
+    '<div class="ozet-item"><span class="ozet-label">Kalan</span><span class="ozet-val net" id="bt-head-kalan">'+bpara(kalan)+'</span></div>'+
+    '</div>';
   var h='<div class="butce-tablo-wrap"><table class="butce-tablo"><thead><tr><th></th><th class="bt-col-label">KATEGORİ</th><th class="bt-col-tutar">TUTAR</th><th class="bt-col-pct">%</th><th></th></tr></thead><tbody>';
   YAPI.forEach(function(bolum){
     h+='<tr class="bt-bolum-baslik"><td colspan="5">'+bolum.t+'</td></tr>';
@@ -65,7 +79,7 @@ function brender(){
   else{c.innerHTML=hHead+h;}
   bbagla();
 }
-function bguncelle(){hesapla();var g=gelir(),hr=harcanan(),kalan=g-hr;document.querySelectorAll("[data-hesap]").forEach(function(el){el.textContent=bpara(_veri[el.dataset.hesap]||0);});document.querySelectorAll("[data-pct]").forEach(function(el){el.textContent=bpct(_veri[el.dataset.pct]||0,g);});var hEl=$("bt-harcanan");if(hEl)hEl.textContent=bpara(hr);var kEl=$("bt-kalan");if(kEl)kEl.textContent=bpara(kalan);var kPct=$("bt-kalan-pct");if(kPct)kPct.textContent=bpct(kalan,g);}
+function bguncelle(){hesapla();var g=gelir(),hr=harcanan(),kalan=g-hr;document.querySelectorAll("[data-hesap]").forEach(function(el){el.textContent=bpara(_veri[el.dataset.hesap]||0);});document.querySelectorAll("[data-pct]").forEach(function(el){el.textContent=bpct(_veri[el.dataset.pct]||0,g);});var hEl=$("bt-harcanan");if(hEl)hEl.textContent=bpara(hr);var kEl=$("bt-kalan");if(kEl)kEl.textContent=bpara(kalan);var kPct=$("bt-kalan-pct");if(kPct)kPct.textContent=bpct(kalan,g);var hg=$("bt-head-gelir");if(hg)hg.textContent=bpara(g);var hh=$("bt-head-harcanan");if(hh)hh.textContent=bpara(hr);var hk=$("bt-head-kalan");if(hk){hk.textContent=bpara(kalan);hk.className="ozet-val "+(kalan>=0?"net":"gider");}}
 function bbagla(){document.querySelectorAll(".bt-input").forEach(function(inp){inp.addEventListener("change",async function(){_veri[this.dataset.id]=parseFloat(this.value)||0;bguncelle();await bkaydet();});inp.addEventListener("keydown",function(e){if(e.key==="Enter"){var all=[...document.querySelectorAll(".bt-input")];var i=all.indexOf(this);if(all[i+1])all[i+1].focus();}});});document.querySelectorAll(".bt-ekle-btn").forEach(function(btn){btn.addEventListener("click",function(){satirEkle(btn.dataset.bolum);});});document.querySelectorAll(".bt-sil-btn").forEach(function(btn){btn.addEventListener("click",function(){satirSil(btn.dataset.bolum,btn.dataset.id);});});var bg=$("b-geri"),bi=$("b-ileri");if(bg)bg.addEventListener("click",async function(){_ay--;if(_ay<0){_ay=11;_yil--;}await byukle();brender();});if(bi)bi.addEventListener("click",async function(){_ay++;if(_ay>11){_ay=0;_yil++;}await byukle();brender();});}
 async function binit(){await byukle();brender();}
 return{init:binit};

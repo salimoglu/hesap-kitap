@@ -15,7 +15,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png?v=20260209desk" />
   <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png?v=20260209desk" />
   <link rel="manifest" href="manifest.json?v=20260209desk" />
-  <link rel="stylesheet" href="css/style.css?v=20260531ioz-grup-pct" />
+  <link rel="stylesheet" href="css/style.css?v=20260531ioz-kol-baslik" />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <script>
     /* Tema yonetimi: flash onleme + toggle */
@@ -145,12 +145,18 @@
           </nav>
           <div class="islemler-split" id="islemler-split" data-mobil-panel="liste">
             <div class="islemler-sol">
-              <div class="ozet-bar">
+              <div class="islemler-panel-head islem-sol-head">
+                <div class="islemler-kol-baslik">
+                  <span class="islemler-kol-ad">&#304;&#351;lemler</span>
+                  <span class="islemler-kol-ay" id="islem-sol-ay"></span>
+                </div>
+                <div class="ozet-bar islem-sol-ozet">
                 <div class="ozet-item"><span class="ozet-label">Gelir</span><span class="ozet-val gelir" id="total-gelir">0,00</span></div>
                 <div class="ozet-sep"></div>
                 <div class="ozet-item"><span class="ozet-label">Gider</span><span class="ozet-val gider" id="total-gider">0,00</span></div>
                 <div class="ozet-sep"></div>
                 <div class="ozet-item"><span class="ozet-label">Net Bakiye</span><span class="ozet-val net" id="total-net">0,00</span></div>
+                </div>
               </div>
               <div class="filtre-bar">
                 <select id="filter-type" class="filter-select" title="T&#252;r">
@@ -366,8 +372,8 @@
 
   <script src="js/firebase.js?v=20260531kat-dedupe"></script>
   <script src="js/db.js?v=20260531kat-dedupe"></script>
-  <script src="js/modules/islemler.js?v=20260531ioz-grup-pct"></script>
-  <script src="js/modules/yukle.js?v=20260531muhtac-yil-ozet"></script>
+  <script src="js/modules/islemler.js?v=20260531ioz-kol-baslik"></script>
+  <script src="js/modules/yukle.js?v=20260531ioz-kol-baslik"></script>
   <script src="js/modules/alacaklar.js?v=20260531ata-72gr"></script>
   <script src="js/modules/urun.js?v=20260509rtdb"></script>
   <script src="js/modules/arabam.js?v=20260211ar-kamyon-pickup"></script>
