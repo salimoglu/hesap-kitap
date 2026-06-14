@@ -272,8 +272,8 @@ const IslemlerModule = (() => {
       acc+=p.pct;
       var start=bas*3.6-90;
       var end=acc*3.6-90;
-      segs+='<path class="ioz-donut-seg" d="'+iozDonutSegPath(cx,cy,R,Ri,start,end)+'" fill="'+p.renk+'" data-ioz-chart-tip="'+(chartTip||"")+'" data-ioz-grup="'+esc(p.ad)+'" tabindex="0">';
-      segs+='<title>'+esc(p.ad)+'</title></path>';
+      segs+='<path class="ioz-donut-seg" d="'+iozDonutSegPath(cx,cy,R,Ri,start,end)+'" fill="'+p.renk+'" stroke="transparent" stroke-width="14" vector-effect="non-scaling-stroke" data-ioz-chart-tip="'+(chartTip||"")+'" data-ioz-grup="'+esc(p.ad)+'" tabindex="-1" aria-label="'+esc(p.ad)+'">';
+      segs+='</path>';
     });
     return '<svg class="ioz-donut-svg" viewBox="0 0 '+size+' '+size+'" role="img" aria-label="'+esc(baslik)+' dagilim grafigi">'+segs+'</svg>';
   }
@@ -332,9 +332,7 @@ const IslemlerModule = (() => {
     h+='<div class="ioz-donut-ic">';
     h+='<span class="ioz-donut-ic-lbl">'+baslik+'</span>';
     h+='<span class="ioz-donut-ic-val '+(tip==="gelir"?"gelir":"gider")+'">'+(tip==="gelir"?"+":"-")+para(dagilim.toplam)+'</span>';
-    h+='</div>';
-    h+='<div class="ioz-donut-hover-tip" aria-hidden="true"></div>';
-    h+='</div></div>';
+    h+='</div></div></div>';
     return h;
   }
 
@@ -425,65 +423,65 @@ const IslemlerModule = (() => {
   }
 
   function iozGrafikEtkilesimBagla(wrap){
-    if(!wrap||wrap._iozGrafikBound)return;
-    wrap._iozGrafikBound=true;
-    wrap.addEventListener("click",function(e){
-      var btn=e.target.closest(".ioz-legend-btn");
-      if(btn){
-        var tip=btn.getAttribute("data-ioz-tip");
-        var grup=btn.getAttribute("data-ioz-grup");
-        if(tip&&grup)iozGrupSec(tip,grup);
-        return;
-      }
-      var seg=e.target.closest(".ioz-donut-seg");
-      if(seg){
-        var st=seg.getAttribute("data-ioz-chart-tip");
-        var sg=seg.getAttribute("data-ioz-grup");
-        if(st==="gider"&&sg)iozGrupSec("gider",sg);
-      }
-    });
-    wrap.querySelectorAll(".ioz-donut-wrap").forEach(function(dw){
-      if(dw._iozDonutTipBound)return;
-      dw._iozDonutTipBound=true;
-      var tipEl=dw.querySelector(".ioz-donut-hover-tip");
-      if(!tipEl)return;
-      function konumla(e){
-        if(!e)return;
-        var pad=12;
-        var tw=tipEl.offsetWidth||120;
-        var th=tipEl.offsetHeight||28;
-        var x=e.clientX+pad;
-        var y=e.clientY+pad;
-        if(x+tw>window.innerWidth-8)x=e.clientX-tw-pad;
-        if(y+th>window.innerHeight-8)y=e.clientY-th-pad;
-        tipEl.style.left=x+"px";
-        tipEl.style.top=y+"px";
-      }
-      function goster(seg,e){
-        if(!seg)return;
-        var titleEl=seg.querySelector("title");
-        var grupAd=seg.getAttribute("data-ioz-grup")||(titleEl?titleEl.textContent:"");
-        tipEl.textContent=grupAd;
-        tipEl.classList.add("visible");
-        konumla(e);
+    if(!wrap)return;
+    if(!wrap._iozGrafikClickBound){
+      wrap._iozGrafikClickBound=true;
+      wrap.addEventListener("click",function(e){
+        var btn=e.target.closest(".ioz-legend-btn");
+        if(btn){
+          var tip=btn.getAttribute("data-ioz-tip");
+          var grup=btn.getAttribute("data-ioz-grup");
+          if(tip&&grup)iozGrupSec(tip,grup);
+          return;
+        }
+        var seg=e.target.closest(".ioz-donut-seg");
+        if(seg){
+          var st=seg.getAttribute("data-ioz-chart-tip");
+          var sg=seg.getAttribute("data-ioz-grup");
+          if(st==="gider"&&sg)iozGrupSec("gider",sg);
+        }
+      });
+    }
+    var tipEl=wrap.querySelector(".ioz-cursor-tip");
+    if(!tipEl){
+      tipEl=document.createElement("div");
+      tipEl.className="ioz-donut-hover-tip ioz-cursor-tip";
+      tipEl.setAttribute("aria-hidden","true");
+      wrap.appendChild(tipEl);
+    }
+    if(wrap._iozGrafikTipBound)return;
+    wrap._iozGrafikTipBound=true;
+    var activeSeg=null;
+    function konumla(e){
+      if(!e)return;
+      var pad=10;
+      tipEl.style.transform="translate3d("+(e.clientX+pad)+"px,"+(e.clientY+pad)+"px,0)";
+    }
+    function goster(seg,e){
+      if(!seg)return;
+      var grupAd=seg.getAttribute("data-ioz-grup")||"";
+      if(tipEl.textContent!==grupAd)tipEl.textContent=grupAd;
+      if(!tipEl.classList.contains("visible"))tipEl.classList.add("visible");
+      konumla(e);
+      if(activeSeg!==seg){
+        if(activeSeg)activeSeg.classList.remove("ioz-donut-seg-hover");
+        activeSeg=seg;
         seg.classList.add("ioz-donut-seg-hover");
       }
-      function gizle(){
-        tipEl.classList.remove("visible");
-        tipEl.textContent="";
-        tipEl.style.left="";
-        tipEl.style.top="";
-        dw.querySelectorAll(".ioz-donut-seg-hover").forEach(function(s){s.classList.remove("ioz-donut-seg-hover");});
-      }
-      dw.querySelectorAll(".ioz-donut-seg").forEach(function(seg){
-        seg.addEventListener("mouseenter",function(e){goster(seg,e);});
-        seg.addEventListener("mousemove",function(e){
-          if(tipEl.classList.contains("visible"))konumla(e);
-        });
-        seg.addEventListener("mouseleave",gizle);
-        seg.addEventListener("focus",function(e){goster(seg,e);});
-        seg.addEventListener("blur",gizle);
-      });
+    }
+    function gizle(){
+      tipEl.classList.remove("visible");
+      tipEl.textContent="";
+      tipEl.style.transform="";
+      if(activeSeg){activeSeg.classList.remove("ioz-donut-seg-hover");activeSeg=null;}
+    }
+    wrap.addEventListener("mousemove",function(e){
+      var seg=e.target.closest(".ioz-donut-seg");
+      if(seg){goster(seg,e);return;}
+      if(!e.target.closest(".ioz-donut-wrap"))gizle();
+    });
+    wrap.addEventListener("mouseleave",function(e){
+      if(!wrap.contains(e.relatedTarget))gizle();
     });
   }
 
