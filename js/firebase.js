@@ -187,52 +187,83 @@ function fbMevcutKullanici() {
 }
 
 /**
- * RTDB yolu: kok (varsayilan) veya users/{uid}/ altinda (eski tasima / katı kurallar).
- * fbDetectRtdbScope() oturum acildiktan sonra calisir.
+ * RTDB yolu: oturum acik kullanici icin users/{uid}/ altinda.
  */
 function fbRtdbRef(path) {
   if (!_fbDb) return null;
   var p = String(path || "").replace(/^\/+/, "");
-  try {
-    if (typeof localStorage !== "undefined" && localStorage.getItem("hk-rtdb-use-user-prefix") === "1") {
-      var u = fbMevcutKullanici();
-      if (u && !u.isAnonymous) return _fbDb.ref("users/" + u.uid + "/" + p);
-    }
-  } catch (e) {}
+  var u = fbMevcutKullanici();
+  if (u && !u.isAnonymous) return _fbDb.ref("users/" + u.uid + "/" + p);
   return _fbDb.ref(p);
 }
 
-async function fbDetectRtdbScope() {
-  if (!_fbDb || typeof firebase === "undefined" || !firebase.auth) return;
-  var u = fbMevcutKullanici();
-  if (!u || u.isAnonymous) {
-    try { localStorage.removeItem("hk-rtdb-use-user-prefix"); } catch (e) {}
-    return;
-  }
-  var uid = u.uid;
-  function nonempty(val) {
-    if (val == null) return false;
-    if (Array.isArray(val)) return val.length > 0;
-    if (typeof val === "object") return Object.keys(val).length > 0;
-    return true;
-  }
-  async function snap(path) {
-    try {
-      var s = await _fbDb.ref(path).once("value");
-      return { ok: true, val: s.val() };
-    } catch (e) {
-      return { ok: false };
-    }
-  }
-  var keys = ["urunler", "vefa2", "vefa", "kredi_harcamalar", "kredi_kartlar", "birikim_manuel", "arabam", "alacaklar", "islemler", "kategoriler", "muhtac", "altin_kayitlar", "verilen_altinlar"];
-  var rootResults = await Promise.all(keys.map(function(k) { return snap(k); }));
-  var hasRoot = rootResults.some(function(r) { return r.ok && nonempty(r.val); });
-  var userResults = await Promise.all(keys.map(function(k) { return snap("users/" + uid + "/" + k); }));
-  var hasUser = userResults.some(function(r) { return r.ok && nonempty(r.val); });
+/** Kok veritabanindan users/{uid}/ altina tek seferlik tasima (yalnizca yonetici). */
+async function fbMigrateRootToUser(uid) {
+  if (!_fbDb || !uid) return { ok: false };
+  var migKey = "hk-migrated-" + uid;
   try {
-    if (hasUser && !hasRoot) localStorage.setItem("hk-rtdb-use-user-prefix", "1");
-    else localStorage.removeItem("hk-rtdb-use-user-prefix");
+    if (localStorage.getItem(migKey) === "1") return { ok: true, skipped: true };
   } catch (e) {}
+
+  try {
+    var userSnap = await _fbDb.ref("users/" + uid).once("value");
+    var uv = userSnap.val();
+    if (uv && typeof uv === "object" && Object.keys(uv).length > 0) {
+      try { localStorage.setItem(migKey, "1"); } catch (e2) {}
+      return { ok: true, skipped: true, reason: "user-has-data" };
+    }
+  } catch (e3) {
+    console.warn("fbMigrateRootToUser user check:", e3);
+  }
+
+  var rootSnap;
+  try {
+    rootSnap = await _fbDb.ref("/").once("value");
+  } catch (e4) {
+    console.warn("fbMigrateRootToUser root read:", e4);
+    return { ok: false, error: e4 };
+  }
+
+  var root = rootSnap.val() || {};
+  var updates = {};
+  var count = 0;
+  Object.keys(root).forEach(function (k) {
+    if (k === "users") return;
+    if (root[k] == null) return;
+    updates["users/" + uid + "/" + k] = root[k];
+    count++;
+  });
+
+  if (count === 0) {
+    try { localStorage.setItem(migKey, "1"); } catch (e5) {}
+    return { ok: true, skipped: true, reason: "root-empty" };
+  }
+
+  try {
+    await _fbDb.ref().update(updates);
+    try { localStorage.setItem(migKey, "1"); } catch (e6) {}
+    console.info("[HK] Kok veriler users/" + uid + "/ altina tasindi (" + count + " anahtar).");
+    return { ok: true, migrated: count };
+  } catch (e7) {
+    console.error("fbMigrateRootToUser write:", e7);
+    return { ok: false, error: e7 };
+  }
+}
+
+/** Oturum acildiktan sonra kullanici kapsamini hazirla; yonetici icin tasima dene. */
+async function fbEnsureUserDataScope() {
+  if (!_fbDb) return;
+  var u = fbMevcutKullanici();
+  if (!u || u.isAnonymous) return;
+  try { localStorage.setItem("hk-rtdb-use-user-prefix", "1"); } catch (e) {}
+  if (typeof HK_ERISIM !== "undefined" && HK_ERISIM.yoneticiMi(u)) {
+    await fbMigrateRootToUser(u.uid);
+  }
+}
+
+/** @deprecated fbEnsureUserDataScope kullanin */
+async function fbDetectRtdbScope() {
+  return fbEnsureUserDataScope();
 }
 
 /** RTDB isteklerinden once cagirin; yeni oturumda tokenin yazilmamasini onler. */

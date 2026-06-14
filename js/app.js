@@ -92,24 +92,18 @@
     try {
       if (typeof fbRtdbOturumHazir === "function") await fbRtdbOturumHazir();
       if (typeof fbKimlikTokenAl === "function") await fbKimlikTokenAl();
-      if (typeof fbDetectRtdbScope === "function") await fbDetectRtdbScope();
+      if (typeof fbEnsureUserDataScope === "function") await fbEnsureUserDataScope();
+      else if (typeof fbDetectRtdbScope === "function") await fbDetectRtdbScope();
       if (typeof fbVerileriYukle !== "undefined") await fbVerileriYukle();
       if (syncEl) syncEl.textContent = "\u2713";
     } catch(e) {
       if (syncEl) syncEl.textContent = "";
     }
 
-    if (typeof IslemlerModule !== "undefined") await IslemlerModule.init();
-    if (typeof ButceModule !== "undefined") await ButceModule.init();
-    if (typeof KrediModule !== "undefined") await KrediModule.init();
-    if (typeof AlacaklarModule !== "undefined") await AlacaklarModule.init();
-    if (typeof UrunModule !== "undefined") await UrunModule.init();
-    if (typeof BirikimModule !== "undefined") await BirikimModule.init();
-    if (typeof AltinModule !== "undefined") await AltinModule.init();
-    if (typeof VefaModule !== "undefined") await VefaModule.init();
-    if (typeof ArabamModule !== "undefined") await ArabamModule.init();
-    if (typeof MuhtacModule !== "undefined") await MuhtacModule.init();
-    if (typeof VerilenAltinlarModule !== "undefined") await VerilenAltinlarModule.init();
+    if (typeof HK_ERISIM !== "undefined") HK_ERISIM.sekmeleriUygula(u);
+    await modulleriBaslat(u);
+    var izinli = getTabSira();
+    if (izinli.length) modulAc(izinli[0]);
   }
 
   window.sayfaYenile = async function() {
@@ -121,23 +115,15 @@
     try {
       if (typeof fbRtdbOturumHazir === "function") await fbRtdbOturumHazir();
       if (typeof fbKimlikTokenAl === "function") await fbKimlikTokenAl();
-      if (typeof fbDetectRtdbScope === "function") await fbDetectRtdbScope();
+      if (typeof fbEnsureUserDataScope === "function") await fbEnsureUserDataScope();
+      else if (typeof fbDetectRtdbScope === "function") await fbDetectRtdbScope();
       if (typeof fbVerileriYukle !== "undefined") await fbVerileriYukle();
       if (syncEl) syncEl.textContent = "\u2713";
     } catch(e) {
       if (syncEl) syncEl.textContent = "";
     }
-    if (typeof IslemlerModule !== "undefined") await IslemlerModule.init();
-    if (typeof ButceModule !== "undefined") await ButceModule.init();
-    if (typeof KrediModule !== "undefined") await KrediModule.init();
-    if (typeof AlacaklarModule !== "undefined") await AlacaklarModule.init();
-    if (typeof UrunModule !== "undefined") await UrunModule.init();
-    if (typeof BirikimModule !== "undefined") await BirikimModule.init();
-    if (typeof AltinModule !== "undefined") await AltinModule.init();
-    if (typeof VefaModule !== "undefined") await VefaModule.init();
-    if (typeof ArabamModule !== "undefined") await ArabamModule.init();
-    if (typeof MuhtacModule !== "undefined") await MuhtacModule.init();
-    if (typeof VerilenAltinlarModule !== "undefined") await VerilenAltinlarModule.init();
+    if (typeof HK_ERISIM !== "undefined") HK_ERISIM.sekmeleriUygula(u);
+    await modulleriBaslat(u);
   };
 
   try {
@@ -250,7 +236,38 @@
   }
 
   // Sekme yonetimi
-  const TAB_SIRA = ["islemler", "birikim", "arabam", "kredi", "alacaklar", "urun", "altin", "verilen-altin", "vefa", "muhtac"];
+  const TAB_SIRA_TUM = ["islemler", "birikim", "arabam", "kredi", "alacaklar", "urun", "altin", "verilen-altin", "vefa", "muhtac"];
+
+  function getTabSira() {
+    let u = null;
+    try { u = typeof fbMevcutKullanici === "function" ? fbMevcutKullanici() : null; } catch (e) { u = null; }
+    if (typeof HK_ERISIM !== "undefined" && u) return HK_ERISIM.izinliSekmeler(u);
+    return TAB_SIRA_TUM.slice();
+  }
+
+  function modulIzinli(tabId) {
+    let u = null;
+    try { u = typeof fbMevcutKullanici === "function" ? fbMevcutKullanici() : null; } catch (e) { u = null; }
+    if (typeof HK_ERISIM === "undefined" || !u) return true;
+    return HK_ERISIM.modulErisilebilir(tabId, u);
+  }
+
+  async function modulleriBaslat(u) {
+    if (modulIzinli("islemler")) {
+      if (typeof IslemlerModule !== "undefined") await IslemlerModule.init();
+      if (typeof ButceModule !== "undefined") await ButceModule.init();
+    }
+    if (modulIzinli("birikim") && typeof BirikimModule !== "undefined") await BirikimModule.init();
+    if (modulIzinli("kredi") && typeof KrediModule !== "undefined") await KrediModule.init();
+    if (modulIzinli("alacaklar") && typeof AlacaklarModule !== "undefined") await AlacaklarModule.init();
+    if (modulIzinli("urun") && typeof UrunModule !== "undefined") await UrunModule.init();
+    if (modulIzinli("altin") && typeof AltinModule !== "undefined") await AltinModule.init();
+    if (modulIzinli("vefa") && typeof VefaModule !== "undefined") await VefaModule.init();
+    if (modulIzinli("arabam") && typeof ArabamModule !== "undefined") await ArabamModule.init();
+    if (modulIzinli("muhtac") && typeof MuhtacModule !== "undefined") await MuhtacModule.init();
+    if (modulIzinli("verilen-altin") && typeof VerilenAltinlarModule !== "undefined") await VerilenAltinlarModule.init();
+  }
+
   const tabBtnler = document.querySelectorAll(".tab-btn");
   const tabPaneller = document.querySelectorAll(".tab-panel");
 
@@ -260,6 +277,7 @@
   }
 
   function modulAc(tabId) {
+    if (!modulIzinli(tabId)) return;
     if (tabId === "islemler") {
       if (typeof IslemlerModule !== "undefined") IslemlerModule.init();
       if (typeof ButceModule !== "undefined") ButceModule.init();
@@ -313,14 +331,15 @@
   }
 
   function aktifTabId() {
-    const a = document.querySelector(".tab-btn.active");
-    return a && a.dataset.tab ? a.dataset.tab : TAB_SIRA[0];
+    const a = document.querySelector(".tab-btn.active:not(.hidden)");
+    return a && a.dataset.tab ? a.dataset.tab : getTabSira()[0];
   }
 
   function tabKaydir(adim) {
-    const i = TAB_SIRA.indexOf(aktifTabId());
+    const sira = getTabSira();
+    const i = sira.indexOf(aktifTabId());
     if (i < 0) return;
-    const yeni = TAB_SIRA[(i + adim + TAB_SIRA.length) % TAB_SIRA.length];
+    const yeni = sira[(i + adim + sira.length) % sira.length];
     tabSec(yeni);
     modulAc(yeni);
     const b = document.querySelector('.tab-btn[data-tab="' + yeni + '"]');
@@ -328,6 +347,7 @@
   }
 
   tabBtnler.forEach(btn => btn.addEventListener("click", () => {
+    if (!modulIzinli(btn.dataset.tab)) return;
     tabSec(btn.dataset.tab);
     modulAc(btn.dataset.tab);
   }));
