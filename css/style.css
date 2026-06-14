@@ -897,7 +897,9 @@ body.hk-kat-alt-modal-acik #modal-kategori {
   opacity: 0.55;
 }
 .bt-satir-ozel:hover .bt-col-sira .bt-yukari-btn,
-.bt-satir-ozel:hover .bt-col-sira .bt-asagi-btn { opacity: 1; }
+.bt-satir-ozel:hover .bt-col-sira .bt-asagi-btn,
+.bt-satir-tas:hover .bt-col-sira .bt-yukari-btn,
+.bt-satir-tas:hover .bt-col-sira .bt-asagi-btn { opacity: 1; }
 .bt-col-sira .bt-yukari-btn:disabled,
 .bt-col-sira .bt-asagi-btn:disabled { opacity: 0.15; cursor: default; }
 
@@ -935,8 +937,10 @@ body.hk-kat-alt-modal-acik #modal-kategori {
   line-height: 1.45;
 }
 
-.bt-satir-ozel { transition: background 0.1s; }
-.bt-satir-ozel:hover { background: var(--bg-elevated); }
+.bt-satir-ozel,
+.bt-satir-tas { transition: background 0.1s; }
+.bt-satir-ozel:hover,
+.bt-satir-tas:hover { background: var(--bg-elevated); }
 .bt-drag-active { opacity: 0.4; }
 .bt-drag-over { border-top: 2px solid var(--gold) !important; background: rgba(240,184,64,0.07) !important; }
 
@@ -946,7 +950,8 @@ body.hk-kat-alt-modal-acik #modal-kategori {
   padding: 2px 4px; border-radius: 3px; opacity: 0;
   transition: opacity 0.15s, color 0.1s;
 }
-.bt-satir-ozel:hover .bt-satir-btn { opacity: 1; }
+.bt-satir-ozel:hover .bt-satir-btn,
+.bt-satir-tas:hover .bt-satir-btn { opacity: 1; }
 .bt-rename-btn:hover { color: var(--gold); }
 .bt-sil-btn:hover { color: var(--red); }
 
@@ -2833,7 +2838,9 @@ body.hk-kat-alt-modal-acik #modal-kategori {
   opacity: 0.55;
 }
 .bt-satir-ozel:hover .bt-col-sira .bt-yukari-btn,
-.bt-satir-ozel:hover .bt-col-sira .bt-asagi-btn { opacity: 1; }
+.bt-satir-ozel:hover .bt-col-sira .bt-asagi-btn,
+.bt-satir-tas:hover .bt-col-sira .bt-yukari-btn,
+.bt-satir-tas:hover .bt-col-sira .bt-asagi-btn { opacity: 1; }
 .bt-col-sira .bt-yukari-btn:disabled,
 .bt-col-sira .bt-asagi-btn:disabled { opacity: 0.15; cursor: default; }
 
@@ -2871,8 +2878,10 @@ body.hk-kat-alt-modal-acik #modal-kategori {
   line-height: 1.45;
 }
 
-.bt-satir-ozel { transition: background 0.1s; }
-.bt-satir-ozel:hover { background: var(--bg-elevated); }
+.bt-satir-ozel,
+.bt-satir-tas { transition: background 0.1s; }
+.bt-satir-ozel:hover,
+.bt-satir-tas:hover { background: var(--bg-elevated); }
 .bt-drag-active { opacity: 0.4; }
 .bt-drag-over { border-top: 2px solid var(--gold) !important; background: rgba(240,184,64,0.07) !important; }
 
@@ -2882,7 +2891,8 @@ body.hk-kat-alt-modal-acik #modal-kategori {
   padding: 2px 4px; border-radius: 3px; opacity: 0;
   transition: opacity 0.15s, color 0.1s;
 }
-.bt-satir-ozel:hover .bt-satir-btn { opacity: 1; }
+.bt-satir-ozel:hover .bt-satir-btn,
+.bt-satir-tas:hover .bt-satir-btn { opacity: 1; }
 .bt-rename-btn:hover { color: var(--gold); }
 .bt-sil-btn:hover { color: var(--red); }
 
@@ -5633,10 +5643,12 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   font-size: 12px;
   font-weight: 700;
 }
-#tab-islemler .islemler-butce .bt-satir {
+#tab-islemler .islemler-butce .bt-satir,
+#tab-islemler .islemler-butce .bt-satir-tas {
   min-height: 34px;
 }
-#tab-islemler .islemler-butce .bt-satir td {
+#tab-islemler .islemler-butce .bt-satir td,
+#tab-islemler .islemler-butce .bt-satir-tas td {
   padding: 6px 8px;
   vertical-align: middle;
 }
