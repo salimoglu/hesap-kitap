@@ -5,7 +5,7 @@
 var HK_ERISIM = (function () {
   /** Tam erişim — kendi e-postanızı buraya yazın (küçük/büyük harf fark etmez) */
   var YONETICI_EPOSTALAR = [
-    "salimoglu@gmail.com"
+    "salimoglu61@gmail.com"
   ];
 
   /**
