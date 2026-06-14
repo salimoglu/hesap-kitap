@@ -73,6 +73,24 @@ function uid(){return "o"+Date.now()+"_"+Math.random().toString(36).substr(2,5);
 function hesapla(){YAPI.forEach(function(b){b.s.forEach(function(s){if(s.h&&s.bolumToplam)_veri[s.id]=bolumToplam(_veri,s.bolumToplam);});});}
 function gelir(){return bolumToplam(_veri,"gelir");}
 function harcanan(){return(_veri.z_top||0)+(_veri.i_top||0)+(_veri.y_top||0);}
+function butceCacheKey(){return "hk-butce-"+_yil+"_"+(_ay+1);}
+function butceYerelden(){
+  sablonInit();
+  try{
+    var raw=localStorage.getItem(butceCacheKey());
+    if(!raw)return;
+    var c=JSON.parse(raw);
+    if(c.veri&&typeof c.veri==="object")_veri=c.veri;
+    if(c.gizli)_gizli=c.gizli;
+    if(c.ekstra)_ekstra=c.ekstra;
+    sablonInit();
+  }catch(e){}
+}
+function butceCacheYaz(){
+  try{
+    localStorage.setItem(butceCacheKey(),JSON.stringify({veri:_veri,gizli:_gizli,ekstra:_ekstra}));
+  }catch(e){}
+}
 async function bsablonYukle(){
   sablonInit();
   if(typeof window._fbDb==="undefined"||!window._fbDb)return;
@@ -81,11 +99,12 @@ async function bsablonYukle(){
     if(d.gizli)_gizli=d.gizli;
     if(d.ekstra)_ekstra=d.ekstra;
     sablonInit();
+    butceCacheYaz();
   }catch(e){}
 }
 async function bsablonKaydet(){
   if(typeof window._fbDb==="undefined"||!window._fbDb)return;
-  try{await fbRtdbRef("butce_sablon").set({gizli:_gizli,ekstra:_ekstra});}catch(e){}
+  try{await fbRtdbRef("butce_sablon").set({gizli:_gizli,ekstra:_ekstra});butceCacheYaz();}catch(e){}
 }
 function ozeldenEkstrayaTasi(ozel){
   var migrated=false;
@@ -103,18 +122,18 @@ function ozeldenEkstrayaTasi(ozel){
 }
 async function byukle(){
   var key="butce_"+_yil+"_"+(_ay+1);
-  _veri={};
   if(typeof window._fbDb==="undefined"||!window._fbDb)return;
   try{
     var d=(await fbRtdbOku(key))||{};
     _veri=d.veri||{};
     if(d.ozel&&ozeldenEkstrayaTasi(d.ozel))await bsablonKaydet();
+    butceCacheYaz();
   }catch(e){}
 }
 async function bkaydet(){
   var key="butce_"+_yil+"_"+(_ay+1);
   if(typeof window._fbDb==="undefined"||!window._fbDb)return;
-  try{await fbRtdbRef(key).set({veri:_veri});}catch(e){}
+  try{await fbRtdbRef(key).set({veri:_veri});butceCacheYaz();}catch(e){}
 }
 function satirEkle(bolum){
   var label=prompt("Yeni satır adı:");
@@ -187,8 +206,15 @@ function brender(){
 }
 function bguncelle(){hesapla();var g=gelir(),hr=harcanan(),kalan=g-hr;document.querySelectorAll("[data-hesap]").forEach(function(el){el.textContent=bpara(_veri[el.dataset.hesap]||0);});document.querySelectorAll("[data-pct]").forEach(function(el){el.textContent=bpct(_veri[el.dataset.pct]||0,g);});var hEl=$("bt-harcanan");if(hEl)hEl.textContent=bpara(hr);var kEl=$("bt-kalan");if(kEl)kEl.textContent=bpara(kalan);var kPct=$("bt-kalan-pct");if(kPct)kPct.textContent=bpct(kalan,g);var hg=$("bt-head-gelir");if(hg)hg.textContent=bpara(g);var hh=$("bt-head-harcanan");if(hh)hh.textContent=bpara(hr);var hk=$("bt-head-kalan");if(hk){hk.textContent=bpara(kalan);hk.className="ozet-val "+(kalan>=0?"net":"gider");}}
 function bbagla(){document.querySelectorAll(".bt-input").forEach(function(inp){inp.addEventListener("change",async function(){_veri[this.dataset.id]=parseFloat(this.value)||0;bguncelle();await bkaydet();});inp.addEventListener("keydown",function(e){if(e.key==="Enter"){var all=[...document.querySelectorAll(".bt-input")];var i=all.indexOf(this);if(all[i+1])all[i+1].focus();}});});document.querySelectorAll(".bt-ekle-btn").forEach(function(btn){btn.addEventListener("click",function(){satirEkle(btn.dataset.bolum);});});document.querySelectorAll(".bt-sil-btn").forEach(function(btn){btn.addEventListener("click",function(){satirSil(btn.dataset.bolum,btn.dataset.id);});});var bg=$("b-geri"),bi=$("b-ileri");if(bg)bg.addEventListener("click",async function(){_ay--;if(_ay<0){_ay=11;_yil--;}await byukle();brender();});if(bi)bi.addEventListener("click",async function(){_ay++;if(_ay>11){_ay=0;_yil++;}await byukle();brender();});}
-async function binit(){await bsablonYukle();await byukle();brender();}
-return{init:binit};
+function bgoster(){butceYerelden();brender();}
+async function byukleVeCiz(){
+  if(typeof window._fbDb!=="undefined"&&window._fbDb){
+    try{await Promise.all([bsablonYukle(),byukle()]);}catch(e){}
+  }
+  brender();
+}
+async function binit(){bgoster();await byukleVeCiz();}
+return{init:binit,goster:bgoster,yukle:byukleVeCiz};
 })();
 
 /* ===== KREDİ MODULE ===== */
