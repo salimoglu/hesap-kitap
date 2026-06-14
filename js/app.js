@@ -71,32 +71,12 @@
     }
   }
 
-  async function uygulamaAcIc() {
-    let u = null;
-    try {
-      u = typeof fbMevcutKullanici === "function" ? fbMevcutKullanici() : null;
-    } catch (e) { u = null; }
-    if (!u || u.isAnonymous) return;
-
-    try {
-      if (u.reload) await u.reload();
-      u = typeof fbMevcutKullanici === "function" ? fbMevcutKullanici() : u;
-    } catch (eRel) {}
-
-    try { await hkServiceWorkerKaydet(); } catch (eSw) {}
-
-    const fbErrOk = document.getElementById("fb-auth-error");
-    if (fbErrOk) fbErrOk.textContent = "";
-
-    lockScreen.classList.add("hidden");
-    appEl.classList.remove("hidden");
-
+  async function hkBulutSenkron(u) {
     const syncEl = document.getElementById("sync-durum");
     if (syncEl) syncEl.textContent = "\u2601";
-
     try {
       if (typeof fbRtdbOturumHazir === "function") await fbRtdbOturumHazir();
-      if (typeof fbKimlikTokenAl === "function") await fbKimlikTokenAl();
+      if (typeof fbKimlikTokenAl === "function") await fbKimlikTokenAl(false);
       if (typeof fbAuthEpostalariTopla === "function") await fbAuthEpostalariTopla(u);
       if (typeof fbEnsureUserDataScope === "function") await fbEnsureUserDataScope();
       else if (typeof fbDetectRtdbScope === "function") await fbDetectRtdbScope();
@@ -109,19 +89,50 @@
       }
       if (typeof fbVerileriYukle !== "undefined") await fbVerileriYukle();
       if (syncEl) syncEl.textContent = "\u2713";
-    } catch(e) {
+      return true;
+    } catch (e) {
       if (syncEl) syncEl.textContent = "";
+      return false;
     }
+  }
+
+  async function uygulamaAcIc() {
+    let u = null;
+    try {
+      u = typeof fbMevcutKullanici === "function" ? fbMevcutKullanici() : null;
+    } catch (e) { u = null; }
+    if (!u || u.isAnonymous) return;
+
+    try { await hkServiceWorkerKaydet(); } catch (eSw) {}
+
+    const fbErrOk = document.getElementById("fb-auth-error");
+    if (fbErrOk) fbErrOk.textContent = "";
+
+    lockScreen.classList.add("hidden");
+    appEl.classList.remove("hidden");
 
     u = typeof fbMevcutKullanici === "function" ? fbMevcutKullanici() : u;
     if (typeof HK_ERISIM !== "undefined") {
       HK_ERISIM.sekmeleriUygula(u);
     }
-    await modulleriBaslat(u);
+
+    /* Hizli acilis: yerel IndexedDB verisi ile islemler modulunu hemen goster */
+    if (modulIzinli("islemler") && typeof IslemlerModule !== "undefined") {
+      await IslemlerModule.init();
+    }
     var izinli = getTabSira();
     if (izinli.length) modulAc(izinli[0]);
     if (typeof HK_TANITIM !== "undefined") await HK_TANITIM.belkiGoster(u);
     if (typeof HK_ERISIM !== "undefined") HK_ERISIM.misafirBilgiGoster(u);
+
+    /* Bulut senkronu arka planda; bitince islemler + diger moduller guncellenir */
+    hkBulutSenkron(u).then(async function () {
+      u = typeof fbMevcutKullanici === "function" ? fbMevcutKullanici() : u;
+      if (modulIzinli("islemler") && typeof IslemlerModule !== "undefined" && typeof IslemlerModule.yukle === "function") {
+        await IslemlerModule.yukle();
+      }
+      await modulleriBaslat(u, { atlaIslemler: true });
+    });
   }
 
   var _uygulamaAcPromise = null;
@@ -137,26 +148,7 @@
     let u = null;
     try { u = typeof fbMevcutKullanici === "function" ? fbMevcutKullanici() : null; } catch (e) { u = null; }
     if (!u || u.isAnonymous) return;
-    const syncEl = document.getElementById("sync-durum");
-    if (syncEl) syncEl.textContent = "\u2601";
-    try {
-      if (typeof fbRtdbOturumHazir === "function") await fbRtdbOturumHazir();
-      if (typeof fbKimlikTokenAl === "function") await fbKimlikTokenAl();
-      if (typeof fbAuthEpostalariTopla === "function") await fbAuthEpostalariTopla(u);
-      if (typeof fbEnsureUserDataScope === "function") await fbEnsureUserDataScope();
-      else if (typeof fbDetectRtdbScope === "function") await fbDetectRtdbScope();
-      if (window._hkKokOkumaKapali) {
-        var kokUy = document.getElementById("fb-auth-error");
-        if (kokUy) {
-          kokUy.textContent =
-            "Eski veriler kokte ama uygulama okuyamiyor. Firebase kurallarini guncelleyin: PowerShell'de .\\tools\\deploy-database-rules.ps1 — sonra cikis yapip tekrar girin.";
-        }
-      }
-      if (typeof fbVerileriYukle !== "undefined") await fbVerileriYukle();
-      if (syncEl) syncEl.textContent = "\u2713";
-    } catch(e) {
-      if (syncEl) syncEl.textContent = "";
-    }
+    await hkBulutSenkron(u);
     u = typeof fbMevcutKullanici === "function" ? fbMevcutKullanici() : u;
     if (typeof HK_ERISIM !== "undefined") {
       HK_ERISIM.sekmeleriUygula(u);
@@ -310,9 +302,10 @@
     return HK_ERISIM.modulErisilebilir(tabId, u);
   }
 
-  async function modulleriBaslat(u) {
+  async function modulleriBaslat(u, opt) {
+    opt = opt || {};
     if (modulIzinli("islemler")) {
-      if (typeof IslemlerModule !== "undefined") await IslemlerModule.init();
+      if (!opt.atlaIslemler && typeof IslemlerModule !== "undefined") await IslemlerModule.init();
       if (typeof ButceModule !== "undefined") await ButceModule.init();
     }
     if (modulIzinli("birikim") && typeof BirikimModule !== "undefined") await BirikimModule.init();

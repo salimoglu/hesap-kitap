@@ -282,12 +282,19 @@ async function fbKokAnahtarTasi(uid, key) {
 
 async function fbKokModulleriTasi(uid) {
   if (!_fbDb || !uid) return { ok: false, migrated: 0 };
-  try { localStorage.removeItem("hk-root-cleaned-" + uid); } catch (eRm) {}
+  var cleanKey = "hk-root-cleaned-" + uid;
+  try {
+    if (localStorage.getItem(cleanKey) === "1") return { ok: true, skipped: true, migrated: 0, reason: "already-clean" };
+  } catch (eSkip) {}
 
   var keys = HK_KOK_MODUL_KEYS.slice();
   try {
     var rootSnap = await _fbDb.ref("/").once("value");
     var root = rootSnap.val() || {};
+    if (!fbRootAnahtarlari(root).length) {
+      try { localStorage.setItem(cleanKey, "1"); } catch (eClean) {}
+      return { ok: true, skipped: true, migrated: 0, reason: "root-empty" };
+    }
     Object.keys(root).forEach(function (k) {
       if (k === "users") return;
       if (k.indexOf("butce_") === 0 && keys.indexOf(k) < 0) keys.push(k);
@@ -311,6 +318,8 @@ async function fbKokModulleriTasi(uid) {
   }
   if (failed.length) {
     console.warn("[HK] Tasinamayan anahtarlar:", failed.join(", "));
+  } else if (migrated === 0) {
+    try { localStorage.setItem(cleanKey, "1"); } catch (eDone) {}
   }
   return { ok: failed.length === 0, migrated: migrated, failed: failed };
 }
@@ -417,6 +426,10 @@ async function fbRootTemizle(uid, root) {
 
 async function fbMigrateRootToUser(uid) {
   if (!_fbDb || !uid) return { ok: false, migrated: 0 };
+  var cleanKey = "hk-root-cleaned-" + uid;
+  try {
+    if (localStorage.getItem(cleanKey) === "1") return { ok: true, skipped: true, reason: "already-clean", migrated: 0 };
+  } catch (eSkip) {}
 
   var userSnap;
   try {
@@ -515,6 +528,12 @@ async function fbYoneticiMi(user) {
   return false;
 }
 
+/** Oturum basina bir kez tasima dene; tamamlaninca tekrar tarama yapma. */
+function fbKullaniciScopeHazirMi(uid) {
+  if (!uid) return false;
+  try { return localStorage.getItem("hk-root-cleaned-" + uid) === "1"; } catch (e) { return false; }
+}
+
 async function fbEnsureUserDataScope() {
   if (!_fbDb) return;
   var u = fbMevcutKullanici();
@@ -542,9 +561,11 @@ async function fbEnsureUserDataScope() {
         console.warn("fbEnsureUserDataScope role write:", eW);
       }
     }
-    var mig1 = await fbKokModulleriTasi(u.uid);
-    var mig2 = await fbMigrateRootToUser(u.uid);
-    if ((mig1 && mig1.migrated > 0) || (mig2 && mig2.migrated > 0)) window._hkVeriTasindi = true;
+    if (!fbKullaniciScopeHazirMi(u.uid)) {
+      var mig1 = await fbKokModulleriTasi(u.uid);
+      var mig2 = await fbMigrateRootToUser(u.uid);
+      if ((mig1 && mig1.migrated > 0) || (mig2 && mig2.migrated > 0)) window._hkVeriTasindi = true;
+    }
     if (window._hkKokOkumaKapali) {
       console.error(
         "[HK] Eski veriler kokte duruyor ama uygulama okuyamiyor. PowerShell: .\\tools\\deploy-database-rules.ps1"
@@ -558,11 +579,11 @@ async function fbDetectRtdbScope() {
   return fbEnsureUserDataScope();
 }
 
-/** RTDB isteklerinden once cagirin; yeni oturumda tokenin yazilmamasini onler. */
-async function fbKimlikTokenAl() {
+/** RTDB isteklerinden once cagirin; gereksiz token yenilemesi yapma. */
+async function fbKimlikTokenAl(force) {
   try {
     var u = firebase.auth().currentUser;
-    if (u) await u.getIdToken(true);
+    if (u) await u.getIdToken(!!force);
   } catch (e) {
     console.warn("fbKimlikTokenAl:", e);
   }
@@ -718,12 +739,29 @@ async function fbKategorileriYukle() {
       return;
     }
     await KategorilerDB.mergeUpsertFromRemote(uzak);
-    if (typeof KategorilerDB.dedupeNormalizeAll === "function") {
+    if (typeof KategorilerDB.dedupeNormalizeAll === "function" && !window._hkDedupeDone) {
       await KategorilerDB.dedupeNormalizeAll();
+      window._hkDedupeDone = true;
     }
   } catch (e) {
     console.warn("fbKategorileriYukle:", e);
   }
+}
+
+async function fbIslemleriBuludanOku() {
+  if (!_fbDb || !fbMevcutKullanici()) return null;
+  var u = fbMevcutKullanici();
+  if (fbKullaniciScopeHazirMi(u.uid)) {
+    try {
+      var ref = fbRtdbRef("islemler");
+      if (!ref) return null;
+      var snap = await ref.once("value");
+      return snap.val();
+    } catch (eDirect) {
+      console.warn("fbIslemleriBuludanOku:", eDirect);
+    }
+  }
+  return fbRtdbOku("islemler");
 }
 
 async function fbVerileriYukle() {
@@ -734,7 +772,7 @@ async function fbVerileriYukle() {
     return;
   }
   try {
-    var fbData = await fbRtdbOku("islemler");
+    var fbData = await fbIslemleriBuludanOku();
     await openDB();
     if (!fbData || !fbVeriGecerli("islemler", fbData)) {
       const mevcut = await IslemlerDB.getAll();

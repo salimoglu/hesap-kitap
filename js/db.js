@@ -395,8 +395,9 @@ var AyarlarDB = {
 window.initApp = async function() {
   await openDB();
   await KategorilerDB.seedDefaults();
-  if (typeof KategorilerDB.dedupeNormalizeAll === "function") {
+  if (typeof KategorilerDB.dedupeNormalizeAll === "function" && !window._hkDedupeDone) {
     await KategorilerDB.dedupeNormalizeAll();
+    window._hkDedupeDone = true;
   }
 };
 

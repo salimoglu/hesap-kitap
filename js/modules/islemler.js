@@ -594,9 +594,6 @@ const IslemlerModule = (() => {
   }
 
   async function yukle(){
-    if (typeof KategorilerDB !== "undefined" && KategorilerDB.dedupeNormalizeAll) {
-      await KategorilerDB.dedupeNormalizeAll();
-    }
     _islemler=await IslemlerDB.getAll();
     _kategoriler=await KategorilerDB.getAll();
     _islemler.sort((a,b)=>a.tarih.localeCompare(b.tarih)||(a.olusturma||0)-(b.olusturma||0));
@@ -1126,6 +1123,7 @@ const IslemlerModule = (() => {
     $("modal-sil").addEventListener("click",e=>{if(e.target===$("modal-sil"))silModalKapat();});
   }
 
-  async function init(){baglaEventler();await yukle();}
-  return{init};
+  var _eventsBound=false;
+  async function init(){if(!_eventsBound){baglaEventler();_eventsBound=true;}await yukle();}
+  return{init,yukle};
 })();
