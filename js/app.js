@@ -116,16 +116,19 @@
       HK_ERISIM.sekmeleriUygula(u);
     }
 
-    /* Hizli acilis: yerel veri ile islemler + butce hemen gosterilir */
+    /* Hizli acilis: butce onbellekten aninda; bulut ve islemler paralel */
     if (modulIzinli("islemler")) {
       if (typeof ButceModule !== "undefined" && typeof ButceModule.goster === "function") {
         ButceModule.goster();
       }
+      var butceBulut = (typeof ButceModule !== "undefined" && typeof ButceModule.yukle === "function")
+        ? ButceModule.yukle()
+        : null;
       if (typeof IslemlerModule !== "undefined") {
         await IslemlerModule.init();
       }
-      if (typeof ButceModule !== "undefined" && typeof ButceModule.yukle === "function") {
-        ButceModule.yukle();
+      if (butceBulut && typeof butceBulut.catch === "function") {
+        butceBulut.catch(function () {});
       }
     }
     var izinli = getTabSira();
@@ -342,7 +345,11 @@
     if (!modulIzinli(tabId)) return;
     if (tabId === "islemler") {
       if (typeof IslemlerModule !== "undefined") IslemlerModule.init();
-      if (typeof ButceModule !== "undefined") ButceModule.init();
+      if (typeof ButceModule !== "undefined" && typeof ButceModule.goster === "function") {
+        ButceModule.goster();
+      } else if (typeof ButceModule !== "undefined") {
+        ButceModule.init();
+      }
     }
     if (tabId === "birikim" && typeof BirikimModule !== "undefined") BirikimModule.init();
     if (tabId === "kredi" && typeof KrediModule !== "undefined") KrediModule.init();
