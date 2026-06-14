@@ -198,26 +198,58 @@ function fbRtdbRef(path) {
 }
 
 /** Kok veritabanindan users/{uid}/ altina tek seferlik tasima (yalnizca yonetici). */
-async function fbMigrateRootToUser(uid) {
+function fbVeriDolu(val) {
+  if (val == null) return false;
+  if (Array.isArray(val)) return val.length > 0;
+  if (typeof val === "object") return Object.keys(val).length > 0;
+  return true;
+}
+
+async function fbRootTemizle(uid) {
   if (!_fbDb || !uid) return { ok: false };
-  var migKey = "hk-migrated-" + uid;
+  var cleanKey = "hk-root-cleaned-" + uid;
   try {
-    if (localStorage.getItem(migKey) === "1") return { ok: true, skipped: true };
+    if (localStorage.getItem(cleanKey) === "1") return { ok: true, skipped: true };
   } catch (e) {}
 
+  var rootSnap;
   try {
-    var userSnap = await _fbDb.ref("users/" + uid).once("value");
-    var uv = userSnap.val();
-    if (uv && typeof uv === "object") {
-      var veriAnahtarlari = Object.keys(uv).filter(function (k) { return k !== "meta"; });
-      if (veriAnahtarlari.length > 0) {
-        try { localStorage.setItem(migKey, "1"); } catch (e2) {}
-        return { ok: true, skipped: true, reason: "user-has-data" };
-      }
-    }
+    rootSnap = await _fbDb.ref("/").once("value");
+  } catch (e1) {
+    console.warn("[HK] Kok okunamadi (kurallar sikilastirildiysa Console'dan silin):", e1);
+    return { ok: false, error: e1 };
+  }
+
+  var root = rootSnap.val() || {};
+  var keys = Object.keys(root).filter(function (k) { return k !== "users"; });
+  if (!keys.length) {
+    try { localStorage.setItem(cleanKey, "1"); } catch (e2) {}
+    return { ok: true, skipped: true, reason: "root-empty" };
+  }
+
+  try {
+    await Promise.all(keys.map(function (k) { return _fbDb.ref(k).remove(); }));
+    try { localStorage.setItem(cleanKey, "1"); } catch (e3) {}
+    console.info("[HK] Kok eski veriler temizlendi (" + keys.length + " anahtar).");
+    return { ok: true, cleaned: keys.length };
+  } catch (e4) {
+    console.warn("[HK] Kok temizligi basarisiz. Firebase Console → Data → kok klasorlerini silin.", e4);
+    return { ok: false, error: e4 };
+  }
+}
+
+async function fbMigrateRootToUser(uid) {
+  if (!_fbDb || !uid) return { ok: false };
+
+  var userSnap;
+  try {
+    userSnap = await _fbDb.ref("users/" + uid).once("value");
   } catch (e3) {
     console.warn("fbMigrateRootToUser user check:", e3);
+    return { ok: false, error: e3 };
   }
+
+  var uv = userSnap.val() || {};
 
   var rootSnap;
   try {
@@ -233,19 +265,20 @@ async function fbMigrateRootToUser(uid) {
   Object.keys(root).forEach(function (k) {
     if (k === "users") return;
     if (root[k] == null) return;
+    if (fbVeriDolu(uv[k])) return;
     updates["users/" + uid + "/" + k] = root[k];
     count++;
   });
 
   if (count === 0) {
-    try { localStorage.setItem(migKey, "1"); } catch (e5) {}
-    return { ok: true, skipped: true, reason: "root-empty" };
+    await fbRootTemizle(uid);
+    return { ok: true, skipped: true, reason: "nothing-to-migrate" };
   }
 
   try {
     await _fbDb.ref().update(updates);
-    try { localStorage.setItem(migKey, "1"); } catch (e6) {}
     console.info("[HK] Kok veriler users/" + uid + "/ altina tasindi (" + count + " anahtar).");
+    await fbRootTemizle(uid);
     return { ok: true, migrated: count };
   } catch (e7) {
     console.error("fbMigrateRootToUser write:", e7);

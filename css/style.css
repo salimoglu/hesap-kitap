@@ -82,6 +82,31 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 /* ── APP SHELL ── */
 .app { display: flex; flex-direction: column; height: 100dvh; overflow: hidden; }
 .topbar { display: flex; align-items: center; justify-content: space-between; box-sizing: border-box; height: calc(var(--topbar-h) + env(safe-area-inset-top, 0)); padding: env(safe-area-inset-top, 0) max(16px, env(safe-area-inset-right, 0)) 0 max(16px, env(safe-area-inset-left, 0)); background: var(--bg-card); border-bottom: 1px solid var(--border); flex-shrink: 0; z-index: 10; }
+.hk-misafir-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 16px;
+  background: rgba(52, 201, 122, 0.1);
+  border-bottom: 1px solid rgba(52, 201, 122, 0.25);
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.4;
+  flex-shrink: 0;
+}
+.hk-misafir-banner-metin { flex: 1; min-width: 0; }
+.hk-misafir-banner-kapat {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px 6px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.hk-misafir-banner-kapat:hover { color: var(--text-primary); }
 .topbar-left { display: flex; align-items: center; gap: 10px; }
 .app-logo-wrap { width: 36px; height: 36px; border-radius: 50%; overflow: hidden; flex-shrink: 0; border: 2px solid var(--border); box-sizing: border-box; display: block; }
 .app-logo-img { width: 100%; height: 100%; object-fit: contain; object-position: center; display: block; }
@@ -1820,6 +1845,31 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 /* ── APP SHELL ── */
 .app { display: flex; flex-direction: column; height: 100dvh; overflow: hidden; }
 .topbar { display: flex; align-items: center; justify-content: space-between; box-sizing: border-box; height: calc(var(--topbar-h) + env(safe-area-inset-top, 0)); padding: env(safe-area-inset-top, 0) max(16px, env(safe-area-inset-right, 0)) 0 max(16px, env(safe-area-inset-left, 0)); background: var(--bg-card); border-bottom: 1px solid var(--border); flex-shrink: 0; z-index: 10; }
+.hk-misafir-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 16px;
+  background: rgba(52, 201, 122, 0.1);
+  border-bottom: 1px solid rgba(52, 201, 122, 0.25);
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.4;
+  flex-shrink: 0;
+}
+.hk-misafir-banner-metin { flex: 1; min-width: 0; }
+.hk-misafir-banner-kapat {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px 6px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.hk-misafir-banner-kapat:hover { color: var(--text-primary); }
 .topbar-left { display: flex; align-items: center; gap: 10px; }
 .app-logo-wrap { width: 36px; height: 36px; border-radius: 50%; overflow: hidden; flex-shrink: 0; border: 2px solid var(--border); box-sizing: border-box; display: block; }
 .app-logo-img { width: 100%; height: 100%; object-fit: contain; object-position: center; display: block; }

@@ -161,6 +161,22 @@ var HK_ERISIM = (function () {
     return izinli;
   }
 
+  function misafirBilgiGoster(user) {
+    var el = document.getElementById("hk-misafir-banner");
+    if (!el) return;
+    if (yoneticiMi(user)) {
+      el.classList.add("hidden");
+      return;
+    }
+    try {
+      if (sessionStorage.getItem("hk-misafir-banner-kapali") === "1") {
+        el.classList.add("hidden");
+        return;
+      }
+    } catch (e) {}
+    el.classList.remove("hidden");
+  }
+
   return {
     yoneticiMi: yoneticiMi,
     yoneticiEpostaMi: yoneticiEpostaMi,
@@ -170,6 +186,7 @@ var HK_ERISIM = (function () {
     izinliSekmeler: izinliSekmeler,
     modulErisilebilir: modulErisilebilir,
     sekmeleriUygula: sekmeleriUygula,
+    misafirBilgiGoster: misafirBilgiGoster,
     tumSekmeler: TUM_SEKMELER
   };
 })();
