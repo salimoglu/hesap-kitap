@@ -80,6 +80,159 @@ var ArabamModule = (function () {
     return tipVarsayilanEmoji(a.aracTip || "otomobil");
   }
 
+  function parseYmd(str) {
+    if (!str || typeof str !== "string") return null;
+    var p = str.split("-");
+    if (p.length !== 3) return null;
+    var y = parseInt(p[0], 10);
+    var m = parseInt(p[1], 10) - 1;
+    var d = parseInt(p[2], 10);
+    if (isNaN(y) || isNaN(m) || isNaN(d)) return null;
+    return new Date(y, m, d);
+  }
+
+  function ymdFromDate(d) {
+    if (!d || isNaN(d.getTime())) return "";
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+
+  /** Bitiş tarihine kalan gün (negatif = süresi geçmiş). */
+  function gunKaldi(tarihStr) {
+    var hedef = parseYmd(tarihStr);
+    if (!hedef) return null;
+    var bugun = new Date();
+    bugun.setHours(0, 0, 0, 0);
+    hedef.setHours(0, 0, 0, 0);
+    return Math.round((hedef - bugun) / 86400000);
+  }
+
+  function durumSinifiGun(gun) {
+    if (gun === null || gun === undefined) return "";
+    if (gun < 0) return "ar-durum--gec";
+    if (gun <= 30) return "ar-durum--yakin";
+    return "ar-durum--ok";
+  }
+
+  function durumSinifiKm(km) {
+    if (km === null || km === undefined) return "";
+    if (km < 0) return "ar-durum--gec";
+    if (km <= 1000) return "ar-durum--yakin";
+    return "ar-durum--ok";
+  }
+
+  function gunDurumMetni(gun, etiket) {
+    if (gun === null) return etiket + " girilmedi";
+    if (gun < 0) return etiket + ": " + Math.abs(gun) + " gün gecikmiş";
+    if (gun === 0) return etiket + ": bugün bitiyor";
+    return etiket + ": " + gun + " gün kaldı";
+  }
+
+  function kmDurumMetni(km) {
+    if (km === null) return "Km bilgisi eksik";
+    if (km < 0) return Math.abs(km).toLocaleString("tr-TR") + " km gecikmiş";
+    if (km === 0) return "Bakım km'si doldu";
+    return km.toLocaleString("tr-TR") + " km kaldı";
+  }
+
+  function bakimSonrakiKm(a) {
+    if (!a) return null;
+    var son = Number(a.bakimSonKm);
+    var per = Number(a.bakimPeriyodKm);
+    if (isNaN(per) || per <= 0) per = 10000;
+    if (isNaN(son) || son < 0) return null;
+    return son + per;
+  }
+
+  function bakimSonrakiTarih(a) {
+    if (!a || !a.bakimSonTarih) return null;
+    var d = parseYmd(a.bakimSonTarih);
+    if (!d) return null;
+    var ay = Number(a.bakimPeriyodAy);
+    if (isNaN(ay) || ay <= 0) ay = 12;
+    var hedef = new Date(d.getFullYear(), d.getMonth() + ay, d.getDate());
+    return ymdFromDate(hedef);
+  }
+
+  function kmKaldiBakim(a) {
+    var hedef = bakimSonrakiKm(a);
+    var guncel = Number(a.guncelKm);
+    if (hedef === null || isNaN(guncel) || guncel < 0) return null;
+    return Math.round(hedef - guncel);
+  }
+
+  function aracHatirlatmalar(a) {
+    var list = [];
+    var gMu = gunKaldi(a.muayeneTarih);
+    if (gMu !== null) list.push({ tip: "muayene", gun: gMu, lbl: "Muayene" });
+    var gSi = gunKaldi(a.sigortaTarih);
+    if (gSi !== null) list.push({ tip: "sigorta", gun: gSi, lbl: "Sigorta" });
+    var gKa = gunKaldi(a.kaskoTarih);
+    if (gKa !== null) list.push({ tip: "kasko", gun: gKa, lbl: "Kasko" });
+    var kmB = kmKaldiBakim(a);
+    if (kmB !== null) list.push({ tip: "bakim-km", km: kmB, lbl: "Bakım km" });
+    var gBa = gunKaldi(bakimSonrakiTarih(a));
+    if (gBa !== null) list.push({ tip: "bakim-tarih", gun: gBa, lbl: "Bakım tarih" });
+    return list;
+  }
+
+  function hatirlatmaKartHtml(opts) {
+    var sinif = "";
+    var metin = "";
+    if (opts.km !== undefined && opts.km !== null) {
+      sinif = durumSinifiKm(opts.km);
+      metin = opts.lbl + " · " + kmDurumMetni(opts.km);
+    } else if (opts.gun !== undefined && opts.gun !== null) {
+      sinif = durumSinifiGun(opts.gun);
+      metin = gunDurumMetni(opts.gun, opts.lbl);
+    } else {
+      return "";
+    }
+    return '<span class="ar-hatir ' + sinif + '">' + metin + "</span>";
+  }
+
+  function bakimMuayeneOzetHtml(a) {
+    var h = '<div class="ar-bakim-ozet-baslik">Bakım & muayene</div><div class="ar-bakim-ozet-grid">';
+    var gKm = Number(a.guncelKm);
+    h += '<div class="ar-bakim-kutu"><span class="ar-bakim-kutu-l">Güncel km</span><span class="ar-bakim-kutu-v">' +
+      (!isNaN(gKm) && gKm > 0 ? gKm.toLocaleString("tr-TR") + " km" : "—") + "</span></div>";
+
+    if (a.bakimSonTarih) {
+      h += '<div class="ar-bakim-kutu"><span class="ar-bakim-kutu-l">Son bakım</span><span class="ar-bakim-kutu-v">' +
+        mTarih(a.bakimSonTarih) +
+        (a.bakimSonKm ? " · " + Number(a.bakimSonKm).toLocaleString("tr-TR") + " km" : "") +
+        "</span></div>";
+    }
+
+    var snKm = bakimSonrakiKm(a);
+    if (snKm !== null) {
+      h += '<div class="ar-bakim-kutu"><span class="ar-bakim-kutu-l">Sonraki bakım (km)</span><span class="ar-bakim-kutu-v">' +
+        snKm.toLocaleString("tr-TR") + " km</span></div>";
+    }
+
+    var snTar = bakimSonrakiTarih(a);
+    if (snTar) {
+      h += '<div class="ar-bakim-kutu"><span class="ar-bakim-kutu-l">Sonraki bakım (tarih)</span><span class="ar-bakim-kutu-v">' +
+        mTarih(snTar) + "</span></div>";
+    }
+
+    h += '</div><div class="ar-bakim-durumlar">';
+
+    var kmB = kmKaldiBakim(a);
+    if (kmB !== null) h += hatirlatmaKartHtml({ lbl: "Periyodik bakım (km)", km: kmB });
+    var gBa = gunKaldi(snTar);
+    if (gBa !== null) h += hatirlatmaKartHtml({ lbl: "Periyodik bakım (tarih)", gun: gBa });
+    if (a.muayeneTarih) h += hatirlatmaKartHtml({ lbl: "Muayene", gun: gunKaldi(a.muayeneTarih) });
+    if (a.sigortaTarih) h += hatirlatmaKartHtml({ lbl: "Trafik sigortası", gun: gunKaldi(a.sigortaTarih) });
+    if (a.kaskoTarih) h += hatirlatmaKartHtml({ lbl: "Kasko", gun: gunKaldi(a.kaskoTarih) });
+
+    if (!a.bakimSonTarih && !a.muayeneTarih && !a.sigortaTarih && kmB === null) {
+      h += '<div class="ar-bakim-bos-not">Bakım ve muayene bilgilerini araç düzenle ekranından girebilirsiniz.</div>';
+    }
+
+    h += "</div>";
+    return h;
+  }
+
   function syncAracEmojiUI() {
     var hid = $("ar-inp-emoji");
     if (!hid) return;
@@ -249,6 +402,18 @@ var ArabamModule = (function () {
         h += "</div></div>";
         h += '<div class="ar-kart-meta">';
         h += '<span class="ar-pill">' + (a.giderler ? a.giderler.length : 0) + " gider</span>";
+        var hat = aracHatirlatmalar(a).filter(function (x) {
+          if (x.km !== undefined) return x.km <= 1000;
+          return x.gun !== null && x.gun <= 30;
+        });
+        if (hat.length) {
+          h += '<div class="ar-kart-hatirlatma">';
+          hat.slice(0, 3).forEach(function (x) {
+            if (x.km !== undefined) h += hatirlatmaKartHtml({ lbl: x.lbl, km: x.km });
+            else h += hatirlatmaKartHtml({ lbl: x.lbl, gun: x.gun });
+          });
+          h += "</div>";
+        }
         h += '<span class="ar-kart-mini-yil">';
         h += '<span class="ar-mini-yil ar-mini-yil--bu"><span class="ar-mini-yil-l">Bu yıl</span><span class="ar-mini-yil-v">' + mp(tb) + " TL</span></span>";
         h += '<span class="ar-mini-yil"><span class="ar-mini-yil-l">Geçen yıl</span><span class="ar-mini-yil-v">' + mp(tg) + " TL</span></span>";
@@ -276,6 +441,7 @@ var ArabamModule = (function () {
     h += '<div class="modal-body">';
     h += '<input type="hidden" id="ar-arac-id" value=""/>';
     h += '<input type="hidden" id="ar-inp-emoji" value="🚗"/>';
+    h += '<div class="ar-form-bolum"><div class="ar-form-bolum-baslik">Araç bilgisi</div>';
     h += '<div class="field-group"><label class="field-label" for="ar-inp-plaka">Plaka</label>';
     h += '<input type="text" id="ar-inp-plaka" class="field-input" placeholder="34 ABC 123" maxlength="20" autocomplete="off"/></div>';
     h += '<div class="field-group"><label class="field-label" for="ar-inp-marka">Marka</label>';
@@ -292,11 +458,29 @@ var ArabamModule = (function () {
     EMOJI_LIST.forEach(function (em) {
       h += '<button type="button" class="ar-emoji-btn">' + em + "</button>";
     });
+    h += "</div></div></div>";
+    h += '<div class="ar-form-bolum"><div class="ar-form-bolum-baslik">Bakım takibi</div>';
+    h += '<div class="ar-form-grid-2">';
+    h += '<div class="field-group"><label class="field-label" for="ar-inp-km">Güncel km</label>';
+    h += '<input type="number" id="ar-inp-km" class="field-input" placeholder="125000" min="0" step="1" inputmode="numeric"/></div>';
+    h += '<div class="field-group"><label class="field-label" for="ar-inp-bakim-tarih">Son bakım tarihi</label>';
+    h += '<input type="date" id="ar-inp-bakim-tarih" class="field-input"/></div>';
+    h += '<div class="field-group"><label class="field-label" for="ar-inp-bakim-km">Son bakımdaki km</label>';
+    h += '<input type="number" id="ar-inp-bakim-km" class="field-input" placeholder="120000" min="0" step="1" inputmode="numeric"/></div>';
+    h += '<div class="field-group"><label class="field-label" for="ar-inp-bakim-per-km">Bakım aralığı (km)</label>';
+    h += '<input type="number" id="ar-inp-bakim-per-km" class="field-input" value="10000" min="1000" step="500" inputmode="numeric"/></div>';
+    h += '<div class="field-group ar-form-grid-full"><label class="field-label" for="ar-inp-bakim-per-ay">Bakım aralığı (ay)</label>';
+    h += '<input type="number" id="ar-inp-bakim-per-ay" class="field-input" value="12" min="1" max="36" step="1" inputmode="numeric"/></div>';
     h += "</div></div>";
-    h += '<div class="field-group"><label class="field-label" for="ar-inp-sigorta">Sigorta yenileme / bitiş</label>';
-    h += '<input type="date" id="ar-inp-sigorta" class="field-input"/></div>';
-    h += '<div class="field-group"><label class="field-label" for="ar-inp-muayene">Muayene bitiş <span class="ar-label-hint">isteğe bağlı</span></label>';
+    h += '<div class="ar-form-bolum"><div class="ar-form-bolum-baslik">Muayene & sigorta</div>';
+    h += '<div class="ar-form-grid-2">';
+    h += '<div class="field-group"><label class="field-label" for="ar-inp-muayene">Muayene geçerlilik bitiş</label>';
     h += '<input type="date" id="ar-inp-muayene" class="field-input"/></div>';
+    h += '<div class="field-group"><label class="field-label" for="ar-inp-sigorta">Trafik sigortası bitiş</label>';
+    h += '<input type="date" id="ar-inp-sigorta" class="field-input"/></div>';
+    h += '<div class="field-group ar-form-grid-full"><label class="field-label" for="ar-inp-kasko">Kasko bitiş <span class="ar-label-hint">isteğe bağlı</span></label>';
+    h += '<input type="date" id="ar-inp-kasko" class="field-input"/></div>';
+    h += "</div></div>";
     h += "</div>";
     h += '<div class="modal-footer"><button type="button" class="btn-secondary" id="ar-arac-iptal">İptal</button>';
     h += '<button type="button" class="btn-primary" id="ar-arac-kaydet">Kaydet</button></div>';
@@ -312,7 +496,6 @@ var ArabamModule = (function () {
     h += '<div class="ar-detay-plaka" id="ar-d-plaka"></div>';
     h += '<div id="ar-d-tipi" class="ar-d-tipi"></div>';
     h += '<div class="ar-detay-marka" id="ar-d-marka"></div>';
-    h += '<div class="ar-detay-tarihler"><div id="ar-d-sigorta"></div><div id="ar-d-muayene"></div></div>';
     h += "</div>";
     h += '<div class="ar-detay-toplam-blok"><div class="ar-detay-toplam-rakam" id="ar-d-toplam"></div><div class="ar-detay-toplam-lbl">gider</div></div>';
     h += "</div>";
@@ -320,6 +503,8 @@ var ArabamModule = (function () {
     h += '<button type="button" class="ar-btn-duzenle" id="ar-bilgi-duzenle">Aracı düzenle</button>';
     h += '<button type="button" class="modal-close" id="ar-detay-kapat" aria-label="Kapat">&#10005;</button>';
     h += "</div></div>";
+
+    h += '<div class="ar-bakim-ozet" id="ar-d-bakim-ozet"></div>';
 
     h += '<div class="ar-yil-ozet" id="ar-d-yil-ozet"></div>';
 
@@ -361,12 +546,11 @@ var ArabamModule = (function () {
     var dti = $("ar-d-tipi");
     if (dti) dti.textContent = tipLabel(a.aracTip || "otomobil");
     $("ar-d-marka").textContent = ((a.marka || "") + " " + (a.model || "")).trim() || "—";
-    var sg = a.sigortaTarih ? "Sigorta bitiş: " + mTarih(a.sigortaTarih) : "";
-    var my = a.muayeneTarih ? "Muayene bitiş: " + mTarih(a.muayeneTarih) : "";
-    $("ar-d-sigorta").textContent = sg || (my ? "" : "Sigorta / muayene tarihi girilmedi");
-    $("ar-d-muayene").textContent = my;
     var tt = aracToplam(a);
     $("ar-d-toplam").textContent = mp(tt) + " TL";
+
+    var ozBakim = $("ar-d-bakim-ozet");
+    if (ozBakim) ozBakim.innerHTML = bakimMuayeneOzetHtml(a);
 
     var ozYil = $("ar-d-yil-ozet");
     if (ozYil) ozYil.innerHTML = yillikOzetHtml(a);
@@ -406,19 +590,49 @@ var ArabamModule = (function () {
     }
   }
 
+  function aracFormDoldur(a) {
+    $("ar-inp-plaka").value = a.plaka || "";
+    $("ar-inp-marka").value = a.marka || "";
+    $("ar-inp-model").value = a.model || "";
+    $("ar-inp-sigorta").value = a.sigortaTarih || "";
+    $("ar-inp-muayene").value = a.muayeneTarih || "";
+    $("ar-inp-kasko").value = a.kaskoTarih || "";
+    $("ar-inp-km").value = a.guncelKm != null && a.guncelKm !== "" ? String(a.guncelKm) : "";
+    $("ar-inp-bakim-tarih").value = a.bakimSonTarih || "";
+    $("ar-inp-bakim-km").value = a.bakimSonKm != null && a.bakimSonKm !== "" ? String(a.bakimSonKm) : "";
+    $("ar-inp-bakim-per-km").value = a.bakimPeriyodKm != null && a.bakimPeriyodKm !== "" ? String(a.bakimPeriyodKm) : "10000";
+    $("ar-inp-bakim-per-ay").value = a.bakimPeriyodAy != null && a.bakimPeriyodAy !== "" ? String(a.bakimPeriyodAy) : "12";
+    if ($("ar-inp-tipi")) $("ar-inp-tipi").value = a.aracTip || "otomobil";
+    if ($("ar-inp-emoji")) $("ar-inp-emoji").value = aracEmojiGoster(a);
+  }
+
+  function aracFormOku() {
+    var km = parseInt($("ar-inp-km").value, 10);
+    var bkm = parseInt($("ar-inp-bakim-km").value, 10);
+    var perKm = parseInt($("ar-inp-bakim-per-km").value, 10);
+    var perAy = parseInt($("ar-inp-bakim-per-ay").value, 10);
+    return {
+      plaka: ($("ar-inp-plaka").value || "").trim().toUpperCase(),
+      marka: ($("ar-inp-marka").value || "").trim(),
+      model: ($("ar-inp-model").value || "").trim(),
+      sigortaTarih: $("ar-inp-sigorta").value || "",
+      muayeneTarih: $("ar-inp-muayene").value || "",
+      kaskoTarih: $("ar-inp-kasko").value || "",
+      guncelKm: isNaN(km) || km < 0 ? "" : km,
+      bakimSonTarih: $("ar-inp-bakim-tarih").value || "",
+      bakimSonKm: isNaN(bkm) || bkm < 0 ? "" : bkm,
+      bakimPeriyodKm: isNaN(perKm) || perKm < 1000 ? 10000 : perKm,
+      bakimPeriyodAy: isNaN(perAy) || perAy < 1 ? 12 : Math.min(36, perAy),
+      aracTip: ($("ar-inp-tipi") && $("ar-inp-tipi").value) || "otomobil",
+      aracEmoji: (($("ar-inp-emoji") && $("ar-inp-emoji").value) || "").trim().slice(0, 16)
+    };
+  }
+
   function aracModalAc(id) {
     $("ar-arac-id").value = id || "";
     if (id) {
       var a = aracBul(id);
-      if (a) {
-        $("ar-inp-plaka").value = a.plaka || "";
-        $("ar-inp-marka").value = a.marka || "";
-        $("ar-inp-model").value = a.model || "";
-        $("ar-inp-sigorta").value = a.sigortaTarih || "";
-        $("ar-inp-muayene").value = a.muayeneTarih || "";
-        if ($("ar-inp-tipi")) $("ar-inp-tipi").value = a.aracTip || "otomobil";
-        if ($("ar-inp-emoji")) $("ar-inp-emoji").value = aracEmojiGoster(a);
-      }
+      if (a) aracFormDoldur(a);
       $("ar-arac-modal-baslik").textContent = "Aracı düzenle";
     } else {
       $("ar-inp-plaka").value = "";
@@ -426,6 +640,12 @@ var ArabamModule = (function () {
       $("ar-inp-model").value = "";
       $("ar-inp-sigorta").value = "";
       $("ar-inp-muayene").value = "";
+      $("ar-inp-kasko").value = "";
+      $("ar-inp-km").value = "";
+      $("ar-inp-bakim-tarih").value = "";
+      $("ar-inp-bakim-km").value = "";
+      $("ar-inp-bakim-per-km").value = "10000";
+      $("ar-inp-bakim-per-ay").value = "12";
       if ($("ar-inp-tipi")) $("ar-inp-tipi").value = "otomobil";
       if ($("ar-inp-emoji")) $("ar-inp-emoji").value = tipVarsayilanEmoji("otomobil");
       $("ar-arac-modal-baslik").textContent = "Araç ekle";
@@ -442,41 +662,47 @@ var ArabamModule = (function () {
     $("ar-arac-modal") && $("ar-arac-modal").addEventListener("click", function (e) { if (e.target === $("ar-arac-modal")) $("ar-arac-modal").classList.add("hidden"); });
     $("ar-arac-kaydet") && $("ar-arac-kaydet").addEventListener("click", async function () {
       var kId = $("ar-arac-id").value;
-      var plaka = ($("ar-inp-plaka").value || "").trim().toUpperCase();
-      var marka = ($("ar-inp-marka").value || "").trim();
-      var model = ($("ar-inp-model").value || "").trim();
-      var sigorta = $("ar-inp-sigorta").value || "";
-      var muayene = $("ar-inp-muayene").value || "";
-      var tip = ($("ar-inp-tipi") && $("ar-inp-tipi").value) || "otomobil";
-      var emRaw = ($("ar-inp-emoji") && $("ar-inp-emoji").value) || "";
-      var emojiStr = (emRaw.trim() || tipVarsayilanEmoji(tip)).slice(0, 16);
-      if (!plaka) {
+      var f = aracFormOku();
+      if (!f.plaka) {
         $("ar-inp-plaka").focus();
         return;
       }
+      var emojiStr = f.aracEmoji || tipVarsayilanEmoji(f.aracTip);
       var geriDetay = null;
       if (kId) {
         var ex = aracBul(kId);
         if (ex) {
-          ex.plaka = plaka;
-          ex.marka = marka;
-          ex.model = model;
-          ex.aracTip = tip;
+          ex.plaka = f.plaka;
+          ex.marka = f.marka;
+          ex.model = f.model;
+          ex.aracTip = f.aracTip;
           ex.aracEmoji = emojiStr;
-          ex.sigortaTarih = sigorta;
-          ex.muayeneTarih = muayene || "";
+          ex.sigortaTarih = f.sigortaTarih;
+          ex.muayeneTarih = f.muayeneTarih;
+          ex.kaskoTarih = f.kaskoTarih;
+          ex.guncelKm = f.guncelKm;
+          ex.bakimSonTarih = f.bakimSonTarih;
+          ex.bakimSonKm = f.bakimSonKm;
+          ex.bakimPeriyodKm = f.bakimPeriyodKm;
+          ex.bakimPeriyodAy = f.bakimPeriyodAy;
           geriDetay = kId;
         }
       } else {
         _araclar.push({
           id: muid(),
-          plaka: plaka,
-          marka: marka,
-          model: model,
-          aracTip: tip,
+          plaka: f.plaka,
+          marka: f.marka,
+          model: f.model,
+          aracTip: f.aracTip,
           aracEmoji: emojiStr,
-          sigortaTarih: sigorta,
-          muayeneTarih: muayene || "",
+          sigortaTarih: f.sigortaTarih,
+          muayeneTarih: f.muayeneTarih,
+          kaskoTarih: f.kaskoTarih,
+          guncelKm: f.guncelKm,
+          bakimSonTarih: f.bakimSonTarih,
+          bakimSonKm: f.bakimSonKm,
+          bakimPeriyodKm: f.bakimPeriyodKm,
+          bakimPeriyodAy: f.bakimPeriyodAy,
           giderler: []
         });
       }

@@ -1638,7 +1638,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .ar-sil-arac-btn{position:absolute;top:10px;right:4px;}
 .ar-bos{padding:40px 24px;text-align:center;color:var(--text-muted);font-size:14px;line-height:1.5;}
 .ar-label-hint{font-weight:400;opacity:0.75;font-size:10px;text-transform:none;letter-spacing:0;}
-.ar-arac-modal-kutu{max-width:min(440px,calc(100vw - 32px));}
+.ar-arac-modal-kutu{max-width:min(480px,calc(100vw - 32px));max-height:min(92dvh,calc(100dvh - 32px));display:flex;flex-direction:column;}
 .ar-detay-kutu{max-width:min(560px,calc(100vw - 32px));max-height:min(90dvh,calc(100dvh - 32px));display:flex;flex-direction:column;}
 .ar-detay-head{flex-wrap:wrap;align-items:flex-start;gap:10px;flex-shrink:0;}
 .ar-detay-ust{display:flex;align-items:flex-start;gap:10px;flex:1;min-width:0;}
@@ -5067,5 +5067,132 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   #modal-hg-kat-sec .hg-kat-sec-list-wrap {
     padding-bottom: env(safe-area-inset-bottom, 0);
   }
+}
+
+/* —— Arabam: bakım & muayene —— */
+.ar-arac-modal-kutu .modal-body {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  flex: 1;
+  min-height: 0;
+}
+.ar-form-bolum {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.ar-form-bolum:first-of-type {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+.ar-form-bolum-baslik {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 10px;
+}
+.ar-form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 12px;
+}
+.ar-form-grid-full {
+  grid-column: 1 / -1;
+}
+@media (max-width: 480px) {
+  .ar-form-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+.ar-bakim-ozet {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-elevated);
+  flex-shrink: 0;
+}
+.ar-bakim-ozet-baslik {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.ar-bakim-ozet-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.ar-bakim-kutu {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  min-width: 0;
+}
+.ar-bakim-kutu-l {
+  display: block;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+.ar-bakim-kutu-v {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.35;
+  word-break: break-word;
+}
+.ar-bakim-durumlar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ar-hatir {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.35;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+}
+.ar-hatir.ar-durum--ok {
+  color: var(--green);
+  border-color: rgba(52, 201, 122, 0.35);
+  background: rgba(52, 201, 122, 0.08);
+}
+.ar-hatir.ar-durum--yakin {
+  color: var(--gold);
+  border-color: rgba(240, 184, 64, 0.4);
+  background: rgba(240, 184, 64, 0.1);
+}
+.ar-hatir.ar-durum--gec {
+  color: var(--red);
+  border-color: rgba(240, 84, 84, 0.4);
+  background: rgba(240, 84, 84, 0.1);
+}
+.ar-bakim-bos-not {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+.ar-kart-hatirlatma {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+.ar-kart-hatirlatma .ar-hatir {
+  font-size: 10px;
+  padding: 4px 8px;
 }
 
