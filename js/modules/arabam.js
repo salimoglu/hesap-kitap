@@ -46,6 +46,8 @@ var ArabamModule = (function () {
 
   var _araclar = [];
   var _aktifAracId = null;
+  var _detayBackdropDown = false;
+  var _detayModalGuardUntil = 0;
 
   var BELGE_TIPLER = [
     { key: "bakim", label: "Bakım", chip: "Bakım" },
@@ -538,6 +540,10 @@ var ArabamModule = (function () {
     var c = $("arabam-container");
     if (!c) return;
 
+    var geriDetayId = _aktifAracId;
+    var detayModalEl = $("ar-detay-modal");
+    var detayAcikMi = !!(geriDetayId && detayModalEl && !detayModalEl.classList.contains("hidden"));
+
     var topGenel = ozetToplamTumu();
     var bugun = new Date().toISOString().split("T")[0];
     var yBu = String(new Date().getFullYear());
@@ -724,6 +730,25 @@ var ArabamModule = (function () {
     }
 
     bagla();
+    if (detayAcikMi && geriDetayId && aracBul(geriDetayId)) {
+      detayModalAc(geriDetayId, false);
+    }
+  }
+
+  function detayModalAc(aracId, koruma) {
+    if (!aracId || !aracBul(aracId)) return;
+    _aktifAracId = aracId;
+    detayGuncelle(aracId);
+    var m = $("ar-detay-modal");
+    if (m) m.classList.remove("hidden");
+    if (koruma !== false) _detayModalGuardUntil = Date.now() + 450;
+  }
+
+  function detayModalKapat() {
+    var m = $("ar-detay-modal");
+    if (m) m.classList.add("hidden");
+    _aktifAracId = null;
+    _detayBackdropDown = false;
   }
 
   function detayGuncelle(aid) {
@@ -776,9 +801,6 @@ var ArabamModule = (function () {
           ar.giderler = ar.giderler.filter(function (g) { return g.id !== gida; });
           await fbKaydet();
           render();
-          _aktifAracId = arid;
-          $("ar-detay-modal").classList.remove("hidden");
-          detayGuncelle(arid);
         });
       });
     }
@@ -856,9 +878,6 @@ var ArabamModule = (function () {
         ar.belgeGecmisi = ar.belgeGecmisi.filter(function (r) { return r.id !== gid; });
         await fbKaydet();
         render();
-        _aktifAracId = aid;
-        $("ar-detay-modal").classList.remove("hidden");
-        detayGuncelle(aid);
       });
     });
   }
@@ -947,11 +966,7 @@ var ArabamModule = (function () {
       await fbKaydet();
       $("ar-arac-modal").classList.add("hidden");
       render();
-      if (geriDetay) {
-        _aktifAracId = geriDetay;
-        detayGuncelle(geriDetay);
-        $("ar-detay-modal").classList.remove("hidden");
-      }
+      if (geriDetay) detayModalAc(geriDetay, false);
     });
 
     var tipEl = $("ar-inp-tipi");
@@ -980,9 +995,8 @@ var ArabamModule = (function () {
     document.querySelectorAll(".ar-kart").forEach(function (el) {
       el.addEventListener("click", function (e) {
         if (e.target.closest(".ar-sil-arac-btn")) return;
-        _aktifAracId = el.dataset.id;
-        detayGuncelle(_aktifAracId);
-        $("ar-detay-modal").classList.remove("hidden");
+        e.stopPropagation();
+        detayModalAc(el.dataset.id);
       });
       el.addEventListener("keydown", function (e) {
         if (e.key === "Enter" || e.key === " ") {
@@ -997,29 +1011,36 @@ var ArabamModule = (function () {
         e.stopPropagation();
         if (!confirm("Bu aracı ve tüm gider kayıtlarını silmek istiyor musunuz?")) return;
         _araclar = _araclar.filter(function (x) { return x.id !== btn.dataset.id; });
-        if (_aktifAracId === btn.dataset.id) {
-          $("ar-detay-modal").classList.add("hidden");
-          _aktifAracId = null;
-        }
+        if (_aktifAracId === btn.dataset.id) detayModalKapat();
         await fbKaydet();
         render();
       });
     });
 
-    $("ar-detay-kapat") && $("ar-detay-kapat").addEventListener("click", function () {
-      $("ar-detay-modal").classList.add("hidden");
-      _aktifAracId = null;
-    });
-    $("ar-detay-modal") && $("ar-detay-modal").addEventListener("click", function (e) {
-      if (e.target === $("ar-detay-modal")) {
-        $("ar-detay-modal").classList.add("hidden");
-        _aktifAracId = null;
-      }
-    });
+    $("ar-detay-kapat") && $("ar-detay-kapat").addEventListener("click", detayModalKapat);
+    var detayModal = $("ar-detay-modal");
+    if (detayModal) {
+      detayModal.addEventListener("pointerdown", function (e) {
+        _detayBackdropDown = e.target === detayModal;
+      });
+      detayModal.addEventListener("pointercancel", function () {
+        _detayBackdropDown = false;
+      });
+      detayModal.addEventListener("click", function (e) {
+        if (Date.now() < _detayModalGuardUntil) return;
+        if (!_detayBackdropDown || e.target !== detayModal) {
+          _detayBackdropDown = false;
+          return;
+        }
+        _detayBackdropDown = false;
+        detayModalKapat();
+      });
+    }
 
     $("ar-bilgi-duzenle") && $("ar-bilgi-duzenle").addEventListener("click", function () {
       if (!_aktifAracId) return;
-      $("ar-detay-modal").classList.add("hidden");
+      var m = $("ar-detay-modal");
+      if (m) m.classList.add("hidden");
       aracModalAc(_aktifAracId);
     });
 
@@ -1057,15 +1078,9 @@ var ArabamModule = (function () {
       }
       belgeKayitUygula(ar, tip, tarih, km, not);
       await fbKaydet();
-      var keepId = _aktifAracId;
       render();
-      _aktifAracId = keepId;
-      if (keepId) {
-        $("ar-detay-modal").classList.remove("hidden");
-        if ($("ar-belge-not")) $("ar-belge-not").value = "";
-        if ($("ar-belge-km")) $("ar-belge-km").value = "";
-        detayGuncelle(keepId);
-      }
+      if ($("ar-belge-not")) $("ar-belge-not").value = "";
+      if ($("ar-belge-km")) $("ar-belge-km").value = "";
     });
 
     $("ar-gider-kaydet-btn") && $("ar-gider-kaydet-btn").addEventListener("click", async function () {
@@ -1083,21 +1098,18 @@ var ArabamModule = (function () {
       if (!ar.giderler) ar.giderler = [];
       ar.giderler.push({ id: muid(), tarih: tarih, tutar: tut, kalem: kalem, aciklama: acik });
       await fbKaydet();
-      var keepId = _aktifAracId;
       render();
-      _aktifAracId = keepId;
-      if (keepId) {
-        $("ar-detay-modal").classList.remove("hidden");
-        $("ar-g-tutar").value = "";
-        $("ar-g-aciklama").value = "";
-        detayGuncelle(keepId);
-      }
+      if ($("ar-g-tutar")) $("ar-g-tutar").value = "";
+      if ($("ar-g-aciklama")) $("ar-g-aciklama").value = "";
     });
   }
 
   async function ainit() {
+    var acikId = _aktifAracId;
+    var acikMi = acikId && $("ar-detay-modal") && !$("ar-detay-modal").classList.contains("hidden");
     await fbYukle();
     render();
+    if (acikMi && acikId && aracBul(acikId)) detayModalAc(acikId, false);
   }
 
   return { init: ainit };
