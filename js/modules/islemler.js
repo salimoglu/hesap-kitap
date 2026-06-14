@@ -58,11 +58,11 @@ const IslemlerModule = (() => {
     for(const k of liste){gelir+=k.gelir;gider+=k.gider;}
     if(gelir>0&&gider>0){
       const net=gelir-gider;
-      return{cls:"net",txt:(net>=0?"+":"-")+para(Math.abs(net))};
+      return{cls:"net",txt:(net>=0?"+":"-")+para(Math.abs(net)),gider:gider,gelir:gelir};
     }
-    if(gider>0)return{cls:"gider",txt:"-"+para(gider)};
-    if(gelir>0)return{cls:"gelir",txt:"+"+para(gelir)};
-    return{cls:"",txt:""};
+    if(gider>0)return{cls:"gider",txt:"-"+para(gider),gider:gider,gelir:gelir};
+    if(gelir>0)return{cls:"gelir",txt:"+"+para(gelir),gider:gider,gelir:gelir};
+    return{cls:"",txt:"",gider:0,gelir:0};
   }
 
   function kategoriOzetiVeri(){
@@ -146,9 +146,18 @@ const IslemlerModule = (() => {
       grupSira.forEach(function(g){
         const gListe=gruplar[g];
         const gTop=grupToplamTutar(gListe);
+        const gBarPct=gTop.gider>0?Math.round((gTop.gider/topGider)*100):0;
+        h+='<div class="ioz-grup-wrap">';
         h+='<div class="ioz-grup-baslik">';
         h+='<span class="ioz-grup-ad">'+esc(g)+'</span>';
         if(gTop.txt)h+='<span class="ioz-grup-toplam '+gTop.cls+'">'+gTop.txt+'</span>';
+        h+='</div>';
+        if(gTop.gider>0){
+          h+='<div class="ioz-grup-bar-wrap" title="Grup gideri / ay toplam gider %'+gBarPct+'">';
+          h+='<span class="ioz-kat-bar-track" aria-hidden="true"><span class="ioz-kat-bar-fill ioz-grup-bar-fill" style="width:'+gBarPct+'%"></span></span>';
+          h+='<span class="ioz-grup-pct">%'+gBarPct+'</span>';
+          h+='</div>';
+        }
         h+='</div>';
         gListe.forEach(function(k){
           const barPct=k.gider>0?Math.round((k.gider/topGider)*100):0;
