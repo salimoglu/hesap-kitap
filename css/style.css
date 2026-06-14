@@ -5195,4 +5195,206 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   font-size: 10px;
   padding: 4px 8px;
 }
+.ar-kart-belge-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  width: 100%;
+  margin-top: 4px;
+}
+.ar-mini-chip {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.3;
+  padding: 3px 7px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  white-space: nowrap;
+}
+.ar-mini-chip.ar-durum--ok {
+  color: var(--green);
+  border-color: rgba(52, 201, 122, 0.35);
+  background: rgba(52, 201, 122, 0.08);
+}
+.ar-mini-chip.ar-durum--yakin {
+  color: var(--gold);
+  border-color: rgba(240, 184, 64, 0.4);
+  background: rgba(240, 184, 64, 0.1);
+}
+.ar-mini-chip.ar-durum--gec {
+  color: var(--red);
+  border-color: rgba(240, 84, 84, 0.4);
+  background: rgba(240, 84, 84, 0.1);
+}
+.ar-kart-belge-info {
+  font-size: 10px;
+  color: var(--text-muted);
+  line-height: 1.35;
+  margin-top: 3px;
+  width: 100%;
+}
+.ar-bakim-kompakt {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin-bottom: 8px;
+}
+@media (max-width: 640px) {
+  .ar-bakim-kompakt {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.ar-bk-stat {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 8px;
+  min-width: 0;
+}
+.ar-bk-l {
+  display: block;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+.ar-bk-v {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.3;
+  word-break: break-word;
+}
+.ar-bakim-uyarilar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+.ar-bakim-uyarilar .ar-hatir {
+  display: inline-block;
+  font-size: 10px;
+  padding: 4px 8px;
+  flex: 0 1 auto;
+}
+.ar-gecmis-baslik {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin: 8px 0 6px;
+}
+.ar-gecmis-bos {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+.ar-gecmis-liste {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+.ar-gecmis-satir {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  min-width: 0;
+}
+.ar-gecmis-tip {
+  flex-shrink: 0;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+}
+.ar-gecmis-metin {
+  flex: 1;
+  min-width: 0;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ar-gecmis-not {
+  flex-shrink: 1;
+  max-width: 28%;
+  font-size: 10px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ar-gecmis-sil {
+  flex-shrink: 0;
+  margin-left: auto;
+}
+.ar-gecmis-fazla {
+  font-size: 10px;
+  color: var(--text-muted);
+  padding: 4px 8px;
+}
+.ar-belge-form-wrap {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-card);
+  flex-shrink: 0;
+}
+.ar-belge-form-baslik {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.ar-belge-form-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) minmax(0, 0.9fr) minmax(0, 1.2fr) auto;
+  gap: 8px;
+  align-items: end;
+}
+@media (max-width: 720px) {
+  .ar-belge-form-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .ar-belge-not-gr {
+    grid-column: 1 / -1;
+  }
+  .ar-belge-kaydet-btn {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+}
+.ar-belge-kaydet-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 9px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  background: var(--accent);
+  color: #fff;
+  white-space: nowrap;
+}
+.ar-belge-kaydet-btn:hover {
+  filter: brightness(1.06);
+}
 
