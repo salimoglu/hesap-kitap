@@ -4,6 +4,7 @@ const IslemlerModule = (() => {
   let _seciliKat={value:"",label:"",tip:""};
   let _katDuzId=null, _katSilId=null;
   let _baglandi=false;
+  let _iozAy=new Date().getMonth(), _iozYil=new Date().getFullYear();
   const $=id=>document.getElementById(id);
 
   function normKatStr(s){return String(s||"").replace(/\s+/g," ").trim();}
@@ -30,11 +31,67 @@ const IslemlerModule = (() => {
     return AYLAR_TR[parseInt(p[1],10)-1]+" "+p[0];
   }
 
-  function ozetAySecimi(){
-    const sel=$("filter-ay");
-    if(sel&&sel.value&&sel.value!=="hepsi")return sel.value;
+  function iozAyKey(){
+    return _iozYil+"-"+String(_iozAy+1).padStart(2,"0");
+  }
+
+  function iozBuAyKey(){
     const d=new Date();
     return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+  }
+
+  function ozetAySecimi(){
+    return iozAyKey();
+  }
+
+  function iozAyIleriKapali(){
+    return iozAyKey()>=iozBuAyKey();
+  }
+
+  function iozAyGeri(){
+    _iozAy--;
+    if(_iozAy<0){_iozAy=11;_iozYil--;}
+    renderKategoriOzeti();
+  }
+
+  function iozAyIleri(){
+    if(iozAyIleriKapali())return;
+    _iozAy++;
+    if(_iozAy>11){_iozAy=0;_iozYil++;}
+    if(iozAyKey()>iozBuAyKey()){
+      const d=new Date();
+      _iozAy=d.getMonth();
+      _iozYil=d.getFullYear();
+    }
+    renderKategoriOzeti();
+  }
+
+  function iozAyBagla(){
+    const g=$("ioz-geri"), i=$("ioz-ileri");
+    if(g)g.onclick=iozAyGeri;
+    if(i)i.onclick=iozAyIleri;
+  }
+
+  function iozHeadRender(head, ayVer, ayKey){
+    if(!head)return;
+    const ayNet=ayVer.gelir-ayVer.gider;
+    const ayLbl=ayEtiket(ayKey);
+    head.innerHTML=
+      '<div class="islemler-kol-baslik">'+
+      '<span class="islemler-kol-ad">Kategori &#246;zeti</span>'+
+      '<div class="islemler-kol-nav">'+
+      '<button type="button" class="butce-ay-btn" id="ioz-geri">&#8249;</button>'+
+      '<span class="islemler-kol-ay butce-kol-ay">'+esc(ayLbl)+'</span>'+
+      '<button type="button" class="butce-ay-btn" id="ioz-ileri"'+(iozAyIleriKapali()?' disabled':'')+'>&#8250;</button>'+
+      '</div></div>'+
+      '<div class="ozet-bar ioz-ust-ozet">'+
+      '<div class="ozet-item"><span class="ozet-label">Gelir</span><span class="ozet-val gelir">'+para(ayVer.gelir)+'</span></div>'+
+      '<div class="ozet-sep"></div>'+
+      '<div class="ozet-item"><span class="ozet-label">Gider</span><span class="ozet-val gider">'+para(ayVer.gider)+'</span></div>'+
+      '<div class="ozet-sep"></div>'+
+      '<div class="ozet-item"><span class="ozet-label">Net</span><span class="ozet-val net">'+(ayNet>=0?"":"-")+para(Math.abs(ayNet))+'</span></div>'+
+      '</div>';
+    iozAyBagla();
   }
 
   function kategoriGrupAdi(katTam){
@@ -93,11 +150,9 @@ const IslemlerModule = (() => {
   }
 
   function kolBaslikAyMetni(){
-    const ayKey=ozetAySecimi();
-    const ayLbl=ayEtiket(ayKey);
     const filtreAy=$("filter-ay");
-    if(filtreAy&&filtreAy.value==="hepsi")return ayLbl+" · bu ay";
-    return ayLbl;
+    if(filtreAy&&filtreAy.value&&filtreAy.value!=="hepsi")return ayEtiket(filtreAy.value);
+    return ayEtiket(iozBuAyKey())+" · bu ay";
   }
 
   function guncelleKolBaslikAy(){
@@ -110,32 +165,15 @@ const IslemlerModule = (() => {
     const head=$("ioz-panel-head");
     const wrap=$("islem-kat-ozet-scroll");
     if(!wrap)return;
-    if(!_islemler.length){
-      if(head)head.innerHTML="";
-      guncelleKolBaslikAy();
-      wrap.innerHTML='<div class="ioz-bos">Henüz işlem yok.<br>Kategori özetleri burada görünecek.</div>';
-      return;
-    }
-    const {byAy,byYil}=kategoriOzetiVeri();
+    guncelleKolBaslikAy();
+    const {byAy,byYil}=_islemler.length?kategoriOzetiVeri():{byAy:{},byYil:{}};
     const ayKey=ozetAySecimi();
     const ayVer=byAy[ayKey]||{gelir:0,gider:0,kat:{}};
-    const ayNet=ayVer.gelir-ayVer.gider;
-    const ayLbl=ayEtiket(ayKey);
-    guncelleKolBaslikAy();
+    iozHeadRender(head, ayVer, ayKey);
 
-    if(head){
-      head.innerHTML=
-        '<div class="islemler-kol-baslik">'+
-        '<span class="islemler-kol-ad">Kategori &#246;zeti</span>'+
-        '<span class="islemler-kol-ay">'+esc(kolBaslikAyMetni())+'</span>'+
-        '</div>'+
-        '<div class="ozet-bar ioz-ust-ozet">'+
-        '<div class="ozet-item"><span class="ozet-label">Gelir</span><span class="ozet-val gelir">'+para(ayVer.gelir)+'</span></div>'+
-        '<div class="ozet-sep"></div>'+
-        '<div class="ozet-item"><span class="ozet-label">Gider</span><span class="ozet-val gider">'+para(ayVer.gider)+'</span></div>'+
-        '<div class="ozet-sep"></div>'+
-        '<div class="ozet-item"><span class="ozet-label">Net</span><span class="ozet-val net">'+(ayNet>=0?"":"-")+para(Math.abs(ayNet))+'</span></div>'+
-        '</div>';
+    if(!_islemler.length){
+      wrap.innerHTML='<div class="ioz-bos">Henüz işlem yok.<br>Kategori özetleri burada görünecek.</div>';
+      return;
     }
 
     let h='';

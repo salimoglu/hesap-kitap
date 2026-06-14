@@ -4082,6 +4082,10 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   padding: 0;
   flex-shrink: 0;
 }
+#tab-islemler .islemler-kol-baslik .butce-ay-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
 #tab-islemler .islemler-kol-baslik .butce-rapor-btn {
   font-size: 9px;
   font-weight: 800;
