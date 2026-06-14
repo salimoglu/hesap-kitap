@@ -883,14 +883,23 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .bt-input::-webkit-outer-spin-button { -webkit-appearance: none; }
 
 /* Butce — dinamik satirlar + drag drop */
-.bt-col-sira { width: 28px; padding: 4px 4px; text-align: center; }
-.bt-col-aksiyon { width: 52px; padding: 2px 4px; text-align: right; white-space: nowrap; }
+.bt-col-sira { width: 36px; padding: 2px 2px; text-align: center; vertical-align: middle; }
+.bt-col-aksiyon { width: 40px; padding: 2px 4px; text-align: right; white-space: nowrap; }
 
 .bt-drag-handle {
-  cursor: grab; color: var(--text-muted); font-size: 14px;
-  display: inline-block; user-select: none; padding: 0 4px;
+  cursor: grab; color: var(--text-muted); font-size: 12px;
+  display: block; user-select: none; line-height: 1.1;
 }
 .bt-drag-handle:active { cursor: grabbing; }
+.bt-col-sira .bt-yukari-btn,
+.bt-col-sira .bt-asagi-btn {
+  display: block; width: 100%; line-height: 1; font-size: 9px; padding: 0;
+  opacity: 0.55;
+}
+.bt-satir-ozel:hover .bt-col-sira .bt-yukari-btn,
+.bt-satir-ozel:hover .bt-col-sira .bt-asagi-btn { opacity: 1; }
+.bt-col-sira .bt-yukari-btn:disabled,
+.bt-col-sira .bt-asagi-btn:disabled { opacity: 0.15; cursor: default; }
 
 .bt-satir-ozel { transition: background 0.1s; }
 .bt-satir-ozel:hover { background: var(--bg-elevated); }
@@ -2776,14 +2785,23 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .bt-input::-webkit-outer-spin-button { -webkit-appearance: none; }
 
 /* Butce — dinamik satirlar + drag drop */
-.bt-col-sira { width: 28px; padding: 4px 4px; text-align: center; }
-.bt-col-aksiyon { width: 52px; padding: 2px 4px; text-align: right; white-space: nowrap; }
+.bt-col-sira { width: 36px; padding: 2px 2px; text-align: center; vertical-align: middle; }
+.bt-col-aksiyon { width: 40px; padding: 2px 4px; text-align: right; white-space: nowrap; }
 
 .bt-drag-handle {
-  cursor: grab; color: var(--text-muted); font-size: 14px;
-  display: inline-block; user-select: none; padding: 0 4px;
+  cursor: grab; color: var(--text-muted); font-size: 12px;
+  display: block; user-select: none; line-height: 1.1;
 }
 .bt-drag-handle:active { cursor: grabbing; }
+.bt-col-sira .bt-yukari-btn,
+.bt-col-sira .bt-asagi-btn {
+  display: block; width: 100%; line-height: 1; font-size: 9px; padding: 0;
+  opacity: 0.55;
+}
+.bt-satir-ozel:hover .bt-col-sira .bt-yukari-btn,
+.bt-satir-ozel:hover .bt-col-sira .bt-asagi-btn { opacity: 1; }
+.bt-col-sira .bt-yukari-btn:disabled,
+.bt-col-sira .bt-asagi-btn:disabled { opacity: 0.15; cursor: default; }
 
 .bt-satir-ozel { transition: background 0.1s; }
 .bt-satir-ozel:hover { background: var(--bg-elevated); }
