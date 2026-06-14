@@ -1,14 +1,14 @@
 // sw.js — Network First: her zaman gunceli al, cache sadece fallback
-const CACHE = "hesap-kitap-v132";
+const CACHE = "hesap-kitap-v133";
 const BASE = self.location.pathname.replace(/\/?sw\.js$/i, "");
 const ASSETS = [
   BASE + "/",
   BASE + "/index.html",
-  BASE + "/css/style.css?v=20260531ioz-gelir-gider",
+  BASE + "/css/style.css?v=20260531hg-kat-mobil",
   BASE + "/js/app.js?v=20260227islemler-ozet",
   BASE + "/js/db.js?v=20260226kategori-mobil",
   BASE + "/js/firebase.js?v=20260226kategori-mobil",
-  BASE + "/js/modules/islemler.js?v=20260531ioz-gelir-gider",
+  BASE + "/js/modules/islemler.js?v=20260531hg-kat-mobil",
   BASE + "/js/modules/birikim.js?v=20260531birikim-yil-gelir",
   BASE + "/js/modules/verilen-altinlar.js?v=20260531va-tablo",
   BASE + "/js/modules/yukle.js?v=20260531butce-baslik-hiz",

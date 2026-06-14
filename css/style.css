@@ -4956,3 +4956,116 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   .ioz-ay-kutu { flex-direction: row; justify-content: space-between; text-align: left; }
 }
 
+/* —— Mobil kategori secim modali (hizli giris) —— */
+.hg-kat-sec-box {
+  max-height: min(92dvh, calc(100dvh - 32px));
+  display: flex;
+  flex-direction: column;
+}
+.hg-kat-sec-list-wrap {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  background: var(--bg-base);
+}
+.hg-kat-sec-group-label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--gold);
+  padding: 10px 14px 6px;
+  background: var(--bg-card);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  border-bottom: 1px solid var(--border);
+}
+.hg-kat-sec-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 14px 12px 22px;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.hg-kat-sec-option:active,
+.hg-kat-sec-option.selected {
+  background: var(--bg-elevated);
+}
+.hg-kat-sec-option.selected .hg-kat-sec-ad {
+  color: var(--gold);
+}
+.hg-kat-sec-ad {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.hg-kat-sec-tip {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+.hg-kat-sec-tip.gelir {
+  color: var(--green);
+  border-color: rgba(52, 201, 122, 0.35);
+  background: rgba(52, 201, 122, 0.08);
+}
+.hg-kat-sec-tip.gider {
+  color: var(--red);
+  border-color: rgba(240, 84, 84, 0.35);
+  background: rgba(240, 84, 84, 0.08);
+}
+@media (max-width: 900px) {
+  #tab-islemler .hg-kat-dropdown {
+    display: none !important;
+  }
+  #modal-hg-kat-sec.hg-kat-sec-modal {
+    align-items: stretch;
+    justify-content: stretch;
+    padding: 0;
+    z-index: 600;
+  }
+  #modal-hg-kat-sec .hg-kat-sec-box {
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: 100dvh;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    animation: none;
+    box-shadow: none;
+  }
+  #modal-hg-kat-sec .modal-header {
+    padding-top: max(16px, env(safe-area-inset-top));
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+  }
+  #modal-hg-kat-sec .hg-kat-sec-list-wrap {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+}
+

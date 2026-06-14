@@ -380,12 +380,27 @@ const IslemlerModule = (() => {
     if([...sel.options].some(x=>x.value===prev))sel.value=prev;
   }
 
-  function renderHgList(arama){
-    const liste=$("hg-kat-list");if(!liste)return;
+  function klavyeKapat(){
+    const ae=document.activeElement;
+    if(ae&&typeof ae.blur==="function")ae.blur();
+  }
+
+  function hgKatUygula(grup,kat){
+    _seciliKat={value:grup+" - "+kat.ad,label:kat.ad,tip:kat.tip};
+    const tr=$("hg-kat-trigger");
+    if(tr){tr.textContent=kat.ad;tr.classList.add("selected");}
+    closeHgDropdown();
+    closeHgKatSecModal();
+  }
+
+  function renderHgList(arama,listId){
+    const liste=$(listId||"hg-kat-list");if(!liste)return;
     liste.innerHTML="";
-    const q=arama.trim().toLocaleLowerCase("tr");
+    const q=(arama||"").trim().toLocaleLowerCase("tr");
     const kats=[..._kategoriler].sort((a,b)=>a.grup.localeCompare(b.grup,"tr")||a.ad.localeCompare(b.ad,"tr"));
     const filtered=q?kats.filter(k=>k.grup.toLocaleLowerCase("tr").includes(q)||k.ad.toLocaleLowerCase("tr").includes(q)):kats;
+    const secSinif=listId==="hg-kat-sec-list"?"hg-kat-sec-option":"hg-kat-option";
+    const grpSinif=listId==="hg-kat-sec-list"?"hg-kat-sec-group-label":"hg-kat-group-label";
     if(!filtered.length){
       const e2=document.createElement("div");e2.className="hg-kat-empty";
       e2.textContent="Sonuc bulunamadi";liste.appendChild(e2);return;
@@ -393,19 +408,50 @@ const IslemlerModule = (() => {
     const gruplar={};
     for(const k of filtered){if(!gruplar[k.grup])gruplar[k.grup]=[];gruplar[k.grup].push(k);}
     for(const[g,ks]of Object.entries(gruplar)){
-      const lbl=document.createElement("div");lbl.className="hg-kat-group-label";lbl.textContent=g;liste.appendChild(lbl);
+      const lbl=document.createElement("div");lbl.className=grpSinif;lbl.textContent=g;liste.appendChild(lbl);
+      const mobilSec=listId==="hg-kat-sec-list";
       for(const k of ks){
-        const item=document.createElement("div");
-        item.className="hg-kat-option"+(_seciliKat.value===g+" - "+k.ad?" selected":"");
-        item.textContent=k.ad;
-        item.addEventListener("click",()=>{
-          _seciliKat={value:g+" - "+k.ad,label:k.ad,tip:k.tip};
-          const tr=$("hg-kat-trigger");tr.textContent=k.ad;tr.classList.add("selected");
-          closeHgDropdown();
-        });
+        const item=document.createElement("button");
+        item.type="button";
+        item.className=secSinif+(_seciliKat.value===g+" - "+k.ad?" selected":"");
+        if(mobilSec){
+          item.innerHTML='<span class="hg-kat-sec-ad">'+esc(k.ad)+'</span><span class="hg-kat-sec-tip '+k.tip+'">'+(k.tip==="gelir"?"Gelir":"Gider")+'</span>';
+        }else{
+          item.textContent=k.ad;
+        }
+        item.addEventListener("click",function(){hgKatUygula(g,k);});
         liste.appendChild(item);
       }
     }
+  }
+
+  function renderHgKatSecList(){
+    renderHgList("","hg-kat-sec-list");
+  }
+
+  function openHgKatSecModal(){
+    klavyeKapat();
+    renderHgKatSecList();
+    const m=$("modal-hg-kat-sec");
+    if(m)m.classList.remove("hidden");
+  }
+
+  function closeHgKatSecModal(){
+    const m=$("modal-hg-kat-sec");
+    if(m)m.classList.add("hidden");
+  }
+
+  function openHgKatSec(){
+    if(mobilPanelAktifMi())openHgKatSecModal();
+    else openHgDropdown();
+  }
+
+  function toggleHgKatSec(){
+    if(mobilPanelAktifMi()){
+      const m=$("modal-hg-kat-sec");
+      if(m&&!m.classList.contains("hidden"))closeHgKatSecModal();
+      else openHgKatSecModal();
+    }else toggleHgDropdown();
   }
 
   function openHgDropdown(){
@@ -571,7 +617,7 @@ const IslemlerModule = (() => {
     const aciklama=$("hg-aciklama").value.trim();
     const tutar=parseFloat($("hg-tutar").value);
     if(!tutar||tutar<=0){$("hg-tutar").focus();return;}
-    if(!_seciliKat.value){openHgDropdown();return;}
+    if(!_seciliKat.value){openHgKatSec();return;}
     const _tarihVal=$("hg-tarih");const _yi={tip,kategori:gorunumKategori(_seciliKat.value),tutar,aciklama,tarih:(_tarihVal&&_tarihVal.value)?_tarihVal.value:bugun()};
     await IslemlerDB.add(_yi);
     $("hg-aciklama").value="";$("hg-tutar").value="";
@@ -656,7 +702,11 @@ const IslemlerModule = (() => {
     $("hg-btn-gelir").addEventListener("click",()=>hgKaydet("gelir"));
     $("hg-btn-gider").addEventListener("click",()=>hgKaydet("gider"));
     $("hg-tutar").addEventListener("keydown",e=>{if(e.key==="Enter")hgKaydet("gider");});
-    $("hg-kat-trigger").addEventListener("click",e=>{e.stopPropagation();toggleHgDropdown();});
+    $("hg-kat-trigger").addEventListener("click",e=>{e.stopPropagation();toggleHgKatSec();});
+    const hgKatSecClose=$("hg-kat-sec-close");
+    if(hgKatSecClose)hgKatSecClose.addEventListener("click",closeHgKatSecModal);
+    const hgKatSecModal=$("modal-hg-kat-sec");
+    if(hgKatSecModal)hgKatSecModal.addEventListener("click",e=>{if(e.target===hgKatSecModal)closeHgKatSecModal();});
     $("hg-kat-search-inp").addEventListener("input",function(){
       const q=this.value;
       $("hg-kat-search-clear").classList.toggle("visible",q.length>0);
