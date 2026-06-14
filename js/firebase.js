@@ -205,23 +205,30 @@ function fbVeriDolu(val) {
   return true;
 }
 
-async function fbRootTemizle(uid) {
+function fbRootAnahtarlari(root) {
+  var keys = Object.keys(root || {}).filter(function (k) { return k !== "users"; });
+  return keys.filter(function (k) { return fbVeriDolu(root[k]); });
+}
+
+async function fbRootTemizle(uid, root) {
   if (!_fbDb || !uid) return { ok: false };
   var cleanKey = "hk-root-cleaned-" + uid;
   try {
     if (localStorage.getItem(cleanKey) === "1") return { ok: true, skipped: true };
   } catch (e) {}
 
-  var rootSnap;
-  try {
-    rootSnap = await _fbDb.ref("/").once("value");
-  } catch (e1) {
-    console.warn("[HK] Kok okunamadi (kurallar sikilastirildiysa Console'dan silin):", e1);
-    return { ok: false, error: e1 };
+  var rootObj = root;
+  if (!rootObj) {
+    try {
+      var rootSnap = await _fbDb.ref("/").once("value");
+      rootObj = rootSnap.val() || {};
+    } catch (e1) {
+      console.warn("[HK] Kok okunamadi (kurallar: kok okuma auth != null olmali):", e1);
+      return { ok: false, error: e1 };
+    }
   }
 
-  var root = rootSnap.val() || {};
-  var keys = Object.keys(root).filter(function (k) { return k !== "users"; });
+  var keys = fbRootAnahtarlari(rootObj);
   if (!keys.length) {
     try { localStorage.setItem(cleanKey, "1"); } catch (e2) {}
     return { ok: true, skipped: true, reason: "root-empty" };
@@ -239,14 +246,14 @@ async function fbRootTemizle(uid) {
 }
 
 async function fbMigrateRootToUser(uid) {
-  if (!_fbDb || !uid) return { ok: false };
+  if (!_fbDb || !uid) return { ok: false, migrated: 0 };
 
   var userSnap;
   try {
     userSnap = await _fbDb.ref("users/" + uid).once("value");
   } catch (e3) {
     console.warn("fbMigrateRootToUser user check:", e3);
-    return { ok: false, error: e3 };
+    return { ok: false, error: e3, migrated: 0 };
   }
 
   var uv = userSnap.val() || {};
@@ -255,34 +262,54 @@ async function fbMigrateRootToUser(uid) {
   try {
     rootSnap = await _fbDb.ref("/").once("value");
   } catch (e4) {
-    console.warn("fbMigrateRootToUser root read:", e4);
-    return { ok: false, error: e4 };
+    console.warn(
+      "fbMigrateRootToUser root read:",
+      e4,
+      "— database.rules.json icinde kok okuma (auth != null) yayinlandi mi?"
+    );
+    return { ok: false, error: e4, migrated: 0 };
   }
 
   var root = rootSnap.val() || {};
+  var rootKeys = fbRootAnahtarlari(root);
+  if (!rootKeys.length) {
+    await fbRootTemizle(uid, root);
+    return { ok: true, skipped: true, reason: "root-empty", migrated: 0 };
+  }
+
   var updates = {};
   var count = 0;
-  Object.keys(root).forEach(function (k) {
-    if (k === "users") return;
-    if (root[k] == null) return;
+  var migratedNames = [];
+  rootKeys.forEach(function (k) {
     if (fbVeriDolu(uv[k])) return;
     updates["users/" + uid + "/" + k] = root[k];
     count++;
+    migratedNames.push(k);
   });
 
   if (count === 0) {
-    await fbRootTemizle(uid);
-    return { ok: true, skipped: true, reason: "nothing-to-migrate" };
+    var eksik = rootKeys.filter(function (k) { return !fbVeriDolu(uv[k]); });
+    if (eksik.length) {
+      console.warn("[HK] Kok veri var ama users/" + uid + "/ altina yazilamadi:", eksik);
+      return { ok: false, reason: "root-not-migrated", keys: eksik, migrated: 0 };
+    }
+    await fbRootTemizle(uid, root);
+    return { ok: true, skipped: true, reason: "already-migrated", migrated: 0 };
   }
 
   try {
+    try { localStorage.removeItem("hk-root-cleaned-" + uid); } catch (eRm) {}
     await _fbDb.ref().update(updates);
-    console.info("[HK] Kok veriler users/" + uid + "/ altina tasindi (" + count + " anahtar).");
-    await fbRootTemizle(uid);
-    return { ok: true, migrated: count };
+    console.info(
+      "[HK] Kok veriler users/" + uid + "/ altina tasindi (" + count + " anahtar):",
+      migratedNames.join(", ")
+    );
+    await fbRootTemizle(uid, root);
+    window._hkVeriTasindi = true;
+    return { ok: true, migrated: count, keys: migratedNames };
   } catch (e7) {
     console.error("fbMigrateRootToUser write:", e7);
-    return { ok: false, error: e7 };
+    return { ok: false, error: e7, migrated: 0 };
   }
 }
 
@@ -332,15 +359,21 @@ async function fbEnsureUserDataScope() {
   }
 
   var yonetici = await fbYoneticiMi(u);
-  if (yonetici) {
-    try {
-      await _fbDb.ref("users/" + u.uid + "/meta/hkRole").set("owner");
-      window._hkRtdbRole = "owner";
-      try { localStorage.setItem("hk-yonetici-uid", u.uid); } catch (eLs) {}
-    } catch (eW) {
-      console.warn("fbEnsureUserDataScope role write:", eW);
+  var storedUid = null;
+  try { storedUid = localStorage.getItem("hk-yonetici-uid"); } catch (eSt) {}
+  var ownerByUid = storedUid && storedUid === u.uid;
+  if (yonetici || ownerByUid) {
+    if (yonetici) {
+      try {
+        await _fbDb.ref("users/" + u.uid + "/meta/hkRole").set("owner");
+        window._hkRtdbRole = "owner";
+        try { localStorage.setItem("hk-yonetici-uid", u.uid); } catch (eLs) {}
+      } catch (eW) {
+        console.warn("fbEnsureUserDataScope role write:", eW);
+      }
     }
-    await fbMigrateRootToUser(u.uid);
+    var mig = await fbMigrateRootToUser(u.uid);
+    if (mig && mig.migrated > 0) window._hkVeriTasindi = true;
   }
 }
 
