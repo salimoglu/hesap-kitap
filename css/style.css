@@ -5116,6 +5116,202 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   font-family: var(--islem-ui);
   font-size: var(--islem-metin);
 }
+
+/* Kategori ozeti — grafik gorunumu */
+#tab-islemler .ioz-oran-kart {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px var(--islem-px);
+  margin-bottom: 10px;
+}
+#tab-islemler .ioz-oran-baslik {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+#tab-islemler .ioz-oran-net { font-size: 12px; letter-spacing: 0; text-transform: none; }
+#tab-islemler .ioz-oran-track {
+  display: flex;
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+}
+#tab-islemler .ioz-oran-gelir { background: var(--green); min-width: 2px; }
+#tab-islemler .ioz-oran-gider { background: var(--red); min-width: 2px; }
+#tab-islemler .ioz-oran-etiket {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-size: 11px;
+  font-weight: 700;
+}
+#tab-islemler .ioz-oran-etiket .gelir { color: var(--green); }
+#tab-islemler .ioz-oran-etiket .gider { color: var(--red); }
+
+#tab-islemler .ioz-grafik-kart {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px var(--islem-px);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-elevated);
+}
+#tab-islemler .ioz-donut-wrap { flex-shrink: 0; }
+#tab-islemler .ioz-donut {
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  background: conic-gradient(var(--ioz-conic, rgba(46,64,89,0.45) 0 100%));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);
+}
+#tab-islemler .ioz-donut-ic {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 6px;
+  text-align: center;
+}
+#tab-islemler .ioz-donut-ic-lbl {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+#tab-islemler .ioz-donut-ic-val {
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  word-break: break-word;
+}
+#tab-islemler .ioz-donut-legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+#tab-islemler .ioz-legend-satir {
+  display: grid;
+  grid-template-columns: 10px 1fr auto auto;
+  gap: 6px 8px;
+  align-items: center;
+  font-size: 12px;
+}
+#tab-islemler .ioz-legend-renk {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+#tab-islemler .ioz-legend-ad {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+#tab-islemler .ioz-legend-rakam {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+#tab-islemler .ioz-legend-pct {
+  color: var(--text-muted);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  min-width: 36px;
+  text-align: right;
+}
+#tab-islemler .ioz-detay-baslik {
+  padding: 8px var(--islem-px) 4px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+}
+
+#tab-islemler .ioz-bolum-yil-graf {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+#tab-islemler .ioz-yil-graf-liste { padding: 4px 0; }
+#tab-islemler .ioz-yil-graf-satir {
+  display: grid;
+  grid-template-columns: 42px 1fr auto;
+  gap: 8px;
+  align-items: center;
+  padding: 8px var(--islem-px);
+  border-bottom: 1px solid var(--border);
+}
+#tab-islemler .ioz-yil-graf-satir:last-child { border-bottom: none; }
+#tab-islemler .ioz-yil-graf-yil {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text-secondary);
+}
+#tab-islemler .ioz-yil-graf-bar {
+  display: flex;
+  height: 12px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  min-width: 0;
+}
+#tab-islemler .ioz-yil-graf-g { background: var(--green); min-width: 1px; }
+#tab-islemler .ioz-yil-graf-d { background: var(--red); min-width: 1px; }
+#tab-islemler .ioz-yil-graf-net {
+  font-size: 11px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+@media (max-width: 520px) {
+  #tab-islemler .ioz-grafik-kart {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  #tab-islemler .ioz-donut-wrap { display: flex; justify-content: center; }
+  #tab-islemler .ioz-legend-satir {
+    grid-template-columns: 10px 1fr auto;
+  }
+  #tab-islemler .ioz-legend-pct { grid-column: 2 / 4; text-align: left; font-size: 11px; }
+}
+
 #tab-islemler .islemler-butce .butce-wrap {
   background: var(--bg-base);
   align-items: stretch;
