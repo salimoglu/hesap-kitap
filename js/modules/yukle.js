@@ -46,7 +46,7 @@ function satirSil(bolum,id){if(!confirm("Silmek?"))return;if(_ozel[bolum])_ozel[
 function brender(){
   hesapla();var c=$("butce-container");if(!c)return;
   var g=gelir(),hr=harcanan(),kalan=g-hr;
-  var hHead='<div class="islemler-kol-baslik butce-kol-baslik">'+
+  var hHead='<div class="islemler-kol-baslik">'+
     '<span class="islemler-kol-ad">B&#252;t&#231;e</span>'+
     '<div class="islemler-kol-nav">'+
     '<button type="button" class="butce-ay-btn" id="b-geri">&#8249;</button>'+

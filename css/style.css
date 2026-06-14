@@ -4031,11 +4031,15 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  min-height: 36px;
-  padding: 6px var(--islem-px);
+  height: var(--islemler-baslik-h);
+  min-height: var(--islemler-baslik-h);
+  max-height: var(--islemler-baslik-h);
+  padding: 0 var(--islem-px);
   background: var(--bg-card);
   border-bottom: 1px solid var(--border);
   box-sizing: border-box;
+  overflow: hidden;
+  flex-shrink: 0;
 }
 #tab-islemler .islemler-kol-ad {
   font-family: var(--islem-ui);
@@ -4070,16 +4074,36 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   flex: 0 1 auto;
   min-width: 72px;
   text-align: center;
-  color: var(--gold);
-  font-weight: 700;
+}
+#tab-islemler .islemler-kol-baslik .butce-ay-btn {
+  width: 22px;
+  height: 22px;
+  font-size: 13px;
+  padding: 0;
+  flex-shrink: 0;
+}
+#tab-islemler .islemler-kol-baslik .butce-rapor-btn {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 0 6px;
+  height: 22px;
+  line-height: 20px;
+  flex-shrink: 0;
 }
 #tab-islemler .islemler-panel-head .ozet-bar,
 #tab-islemler .islemler-sol-head .ozet-bar {
-  min-height: 38px;
-  padding: var(--islem-py) var(--islem-px);
+  display: flex;
   align-items: center;
+  justify-content: space-between;
+  height: var(--islemler-ozet-h);
+  min-height: var(--islemler-ozet-h);
+  max-height: var(--islemler-ozet-h);
+  padding: 0 var(--islem-px);
+  box-sizing: border-box;
   border-bottom: 1px solid var(--border);
   background: var(--bg-card);
+  flex-shrink: 0;
 }
 #tab-islemler .ioz-panel-head .ozet-bar,
 #tab-islemler .butce-panel-head .ozet-bar {
@@ -4499,6 +4523,8 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   --islem-px: 12px;
   --islem-py: 6px;
   --islem-satir: 38px;
+  --islemler-baslik-h: 38px;
+  --islemler-ozet-h: 40px;
 }
 /* Para tutarlari: Nunito, orta kalinlik — Bebas kalin/sikisik degil */
 #tab-islemler .ozet-val,
@@ -4584,7 +4610,7 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   border-color: var(--border);
 }
 #tab-islemler .ozet-bar {
-  padding: var(--islem-py) var(--islem-px);
+  padding: 0 var(--islem-px);
 }
 #tab-islemler .islemler-butce .butce-tablo-wrap {
   background: var(--bg-card);
