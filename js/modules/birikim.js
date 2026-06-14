@@ -2,6 +2,7 @@
 var BirikimModule = (function() {
   var $ = function(id){return document.getElementById(id);};
   var _islemler = [];
+  var _kategoriler = [];
   var _manuelIslemler = {}; // { kalemAd: [{id,tarih,tutar,aciklama}] }
   var _aktifKalem = null;
 
@@ -9,6 +10,20 @@ var BirikimModule = (function() {
   function bugun(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
   function buAy(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");}
   function tarihFmt(t){if(!t)return"";var p=t.split("-");return p[2]+"."+p[1]+"."+p[0];}
+
+  function birikimGrupMu(grup) {
+    var g = typeof HKKategori !== "undefined" && HKKategori.normGrup
+      ? HKKategori.normGrup(grup)
+      : String(grup || "").trim().toUpperCase();
+    return g === "BIRIKIM";
+  }
+
+  function kategoriEtiket(islem) {
+    if (typeof HKKategori !== "undefined" && HKKategori.resolve) {
+      return HKKategori.resolve(islem.kategori, _kategoriler) || String(islem.kategori || "").trim();
+    }
+    return String(islem.kategori || "").trim();
+  }
 
   /* Firebase */
   async function fbYukle(){
@@ -23,17 +38,16 @@ var BirikimModule = (function() {
     }
   }
 
-  /* İşlemlerden BİRİKİM grubunu çek — grup adı kontrolü */
+  /* İşlemlerden BİRİKİM grubunu çek */
   function islemKalemleri(){
     var kalemler = {};
     _islemler.forEach(function(i){
-      var kat = (i.kategori||"");
+      var kat = kategoriEtiket(i);
       var parca = kat.split(" - ");
       if(parca.length < 2) return;
-      var grup = parca[0].trim().toUpperCase();
+      var grup = parca[0].trim();
       var ad = parca.slice(1).join(" - ").trim();
-      // Sadece BIRIKIM grubundakileri al
-      if(grup !== "BIRIKIM" && grup !== "B\u0130R\u0130K\u0130M") return;
+      if(!birikimGrupMu(grup) || !ad) return;
       if(!kalemler[ad]) kalemler[ad] = [];
       kalemler[ad].push({
         id:"db_"+i.id, tarih:i.tarih,
@@ -43,6 +57,17 @@ var BirikimModule = (function() {
       });
     });
     return kalemler;
+  }
+
+  /** Kategori yönetimindeki BIRIKIM grubu kalemleri (işlem olmasa da kart olarak gösterilir). */
+  function birikimKategoriAdlari(){
+    var adSet = {};
+    _kategoriler.forEach(function(k){
+      if(!birikimGrupMu(k.grup)) return;
+      var ad = String(k.ad || "").trim();
+      if(ad) adSet[ad] = true;
+    });
+    return Object.keys(adSet).sort(function(a,b){ return a.localeCompare(b, "tr"); });
   }
 
   /* Yıl çıkar — YYYY-MM-DD veya YYYY-MM için ilk 4 hane */
@@ -85,13 +110,14 @@ var BirikimModule = (function() {
     return { yToplam:yToplam,yillar:yillar,maxYearAmt:maxYearAmt };
   }
 
-  /* Manuel + İşlemler birleştir */
+  /* Manuel + İşlemler + tanımlı BIRIKIM kategorileri birleştir */
   function tumKalemler(){
     var islem = islemKalemleri();
     var manuel = _manuelIslemler;
     var kalemAdlari = new Set(Object.keys(islem).concat(Object.keys(manuel)));
+    birikimKategoriAdlari().forEach(function(ad){ kalemAdlari.add(ad); });
     var sonuc = {};
-    kalemAdlari.forEach(function(ad){
+    Array.from(kalemAdlari).sort(function(a,b){ return a.localeCompare(b, "tr"); }).forEach(function(ad){
       var liste = [];
       (islem[ad]||[]).forEach(function(i){liste.push(i);});
       (manuel[ad]||[]).forEach(function(m){
@@ -150,7 +176,7 @@ var BirikimModule = (function() {
     if(adlar.length===0){
       h+='<div style="padding:40px;text-align:center;color:var(--text-muted)">';
       h+='<div style="font-size:40px;margin-bottom:12px">\uD83C\uDFE6</div>';
-      h+='<div>\u0130\u015flemler b\u00f6l\u00fcm\u00fcnden B\u0130R\u0130K\u0130M grubuna i\u015flem girin</div>';
+      h+='<div>\u0130\u015flemler b\u00f6l\u00fcm\u00fcnden B\u0130R\u0130K\u0130M grubuna i\u015flem girin veya kategori y\u00f6netiminden yeni kalem ekleyin</div>';
       h+='</div>';
     } else {
       h+='<div class="bk-kartlar">';
@@ -269,8 +295,24 @@ var BirikimModule = (function() {
 
   async function init(){
     _islemler = await IslemlerDB.getAll();
+    if (typeof KategorilerDB !== "undefined") {
+      _kategoriler = await KategorilerDB.getAll();
+    } else {
+      _kategoriler = [];
+    }
     await fbYukle();
     render();
+  }
+
+  if (!window._hkBirikimKatEv) {
+    window._hkBirikimKatEv = true;
+    window.addEventListener("hk-kategoriler-degisti", async function() {
+      if (typeof KategorilerDB === "undefined" || typeof IslemlerDB === "undefined") return;
+      _kategoriler = await KategorilerDB.getAll();
+      _islemler = await IslemlerDB.getAll();
+      var panel = document.getElementById("tab-birikim");
+      if (panel && panel.classList.contains("active")) render();
+    });
   }
 
   return{init:init};

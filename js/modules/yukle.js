@@ -7,37 +7,32 @@ var AYLAR=["Ocak","Subat","Mart","Nisan","Mayis","Haziran","Temmuz","Agustos","E
 var _ay=new Date().getMonth(),_yil=new Date().getFullYear(),_veri={},_ozel={};
 var YAPI=[
   {b:"gelir",t:"GELİR",s:[
-    {id:"salim_maas",l:"SALİM MAAŞ"},{id:"bugra_maas",l:"BUĞRA MAAŞ"},
-    {id:"toplam_maas",l:"TOPLAM MAAŞ",h:true,fn:function(d){return(d.salim_maas||0)+(d.bugra_maas||0);}},
-    {id:"gelecek_borc",l:"GELECEK BORÇLAR"},
-    {id:"hedef_bir",l:"HEDEF BİRİKİM %40",h:true,fn:function(d){return Math.round(((d.salim_maas||0)+(d.bugra_maas||0)+(d.gelecek_borc||0))*0.40);}},
-    {id:"zekat_tah",l:"ZEKAT TAHMİNİ %2.5",h:true,fn:function(d){return Math.round(((d.salim_maas||0)+(d.bugra_maas||0)+(d.gelecek_borc||0))*0.025);}},
+    {id:"maas",l:"MAAŞ"},{id:"ek_gelir",l:"EK GELİR"},{id:"diger_gelir",l:"DİĞER GELİR"},
+    {id:"toplam_gelir",l:"TOPLAM GELİR",h:true,fn:function(d){return(d.maas||0)+(d.ek_gelir||0)+(d.diger_gelir||0);}},
   ]},
   {b:"zorunlu",t:"ZORUNLU GİDERLER",s:[
-    {id:"mutfak",l:"MUTFAK"},{id:"kira",l:"KİRA"},{id:"iase",l:"İAŞE"},
-    {id:"faturalar",l:"FATURALAR"},{id:"google_vs",l:"GOOGLE/YOUTUBE/SPOTIFY"},
-    {id:"saglik",l:"SAĞLIK"},{id:"zekat",l:"ZEKAT"},
+    {id:"mutfak",l:"MUTFAK"},{id:"kira",l:"KİRA"},{id:"faturalar",l:"FATURALAR"},
+    {id:"abonelikler",l:"ABONELİKLER"},{id:"saglik",l:"SAĞLIK"},
     {id:"arac_bakim",l:"ARAÇ BAKIM"},{id:"arac_sig",l:"ARAÇ SİGORTA"},
-    {id:"arac_muay",l:"ARAÇ MUAYENE"},{id:"arac_mtv",l:"ARAÇ MTV"},{id:"mazot",l:"MAZOT"},
-    {id:"z_top",l:"TOPLAM",h:true,fn:function(d){return ["mutfak","kira","iase","faturalar","google_vs","saglik","zekat","arac_bakim","arac_sig","arac_muay","arac_mtv","mazot"].concat((_ozel.zorunlu||[]).map(function(x){return x.id;})).reduce(function(s,k){return s+(d[k]||0);},0);}},
+    {id:"arac_muay",l:"ARAÇ MUAYENE"},{id:"arac_mtv",l:"ARAÇ MTV"},{id:"mazot",l:"YAKIT"},
+    {id:"z_top",l:"TOPLAM",h:true,fn:function(d){return ["mutfak","kira","faturalar","abonelikler","saglik","arac_bakim","arac_sig","arac_muay","arac_mtv","mazot"].concat((_ozel.zorunlu||[]).map(function(x){return x.id;})).reduce(function(s,k){return s+(d[k]||0);},0);}},
   ]},
   {b:"istege",t:"İSTEĞE BAĞLI",s:[
     {id:"eglence",l:"EĞLENCE/YEMEK"},{id:"cocuk",l:"ÇOCUK"},{id:"giyim",l:"GİYİM"},
-    {id:"kk_ev",l:"KREDİ KARTİ"},{id:"oyle",l:"ÖYLE"},
-    {id:"i_top",l:"TOPLAM",h:true,fn:function(d){return ["eglence","cocuk","giyim","kk_ev","oyle"].concat((_ozel.istege||[]).map(function(x){return x.id;})).reduce(function(s,k){return s+(d[k]||0);},0);}},
+    {id:"kk_ev",l:"KREDİ KARTİ"},{id:"diger",l:"DİĞER"},
+    {id:"i_top",l:"TOPLAM",h:true,fn:function(d){return ["eglence","cocuk","giyim","kk_ev","diger"].concat((_ozel.istege||[]).map(function(x){return x.id;})).reduce(function(s,k){return s+(d[k]||0);},0);}},
   ]},
-  {b:"yatirim",t:"YATIRIM",s:[
-    {id:"bes",l:"BES"},{id:"fon",l:"FON/YATIRIM"},{id:"kardes_fon",l:"KARDESLER FON"},
-    {id:"vefa",l:"VEFA BİRLİĞİ"},{id:"nakit",l:"NAKİT KALAN"},
-    {id:"atalira",l:"ATALİRA"},{id:"kripto",l:"KRİPTO"},
-    {id:"y_top",l:"TOPLAM",h:true,fn:function(d){return ["bes","fon","kardes_fon","vefa","nakit","atalira","kripto"].concat((_ozel.yatirim||[]).map(function(x){return x.id;})).reduce(function(s,k){return s+(d[k]||0);},0);}},
+  {b:"yatirim",t:"YATIRIM / BİRİKİM",s:[
+    {id:"bes",l:"BES"},{id:"fon",l:"FON/YATIRIM"},{id:"altin",l:"ALTIN"},
+    {id:"nakit",l:"NAKİT BİRİKİM"},{id:"diger_birikim",l:"DİĞER BİRİKİM"},
+    {id:"y_top",l:"TOPLAM",h:true,fn:function(d){return ["bes","fon","altin","nakit","diger_birikim"].concat((_ozel.yatirim||[]).map(function(x){return x.id;})).reduce(function(s,k){return s+(d[k]||0);},0);}},
   ]},
 ];
 function bpara(n){return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2});}
 function bpct(n,t){if(!t)return"0,00";return((n/t)*100).toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2});}
 function uid(){return "o"+Date.now()+"_"+Math.random().toString(36).substr(2,5);}
 function hesapla(){YAPI.forEach(function(b){b.s.forEach(function(s){if(s.h)_veri[s.id]=s.fn(_veri);});});}
-function gelir(){return(_veri.salim_maas||0)+(_veri.bugra_maas||0)+(_veri.gelecek_borc||0);}
+function gelir(){return(_veri.maas||0)+(_veri.ek_gelir||0)+(_veri.diger_gelir||0);}
 function harcanan(){return(_veri.z_top||0)+(_veri.i_top||0)+(_veri.y_top||0);}
 async function byukle(){var key="butce_"+_yil+"_"+(_ay+1);_veri={};_ozel={};if(typeof window._fbDb==="undefined"||!window._fbDb)return;try{var s=await fbRtdbRef(key).once("value");var d=s.val()||{};_veri=d.veri||{};_ozel=d.ozel||{};}catch(e){}}
 async function bkaydet(){var key="butce_"+_yil+"_"+(_ay+1);if(typeof window._fbDb==="undefined"||!window._fbDb)return;try{await fbRtdbRef(key).set({veri:_veri,ozel:_ozel});}catch(e){}}

@@ -49,6 +49,8 @@ var HK_GRUP_ALIAS = {
   "İAŞE": "IASE",
   "IAŞE": "IASE",
   "IASE": "IASE",
+  "BİRİKİM": "BIRIKIM",
+  "BIRIKIM": "BIRIKIM",
   "KREDİ KARTI": "KREDI KARTI",
   "KREDI KARTI": "KREDI KARTI"
 };
@@ -128,6 +130,11 @@ window.HKKategori = {
   normGrup: hkNormGrup,
   normAd: hkNormAd
 };
+
+/** Kategori listesi degisti — birikim vb. moduller dinleyebilir. */
+function hkKategorilerBildir() {
+  try { window.dispatchEvent(new CustomEvent("hk-kategoriler-degisti")); } catch (e) {}
+}
 
 /** Tum kategorileri RTDB'ye yazar (tamamlanana kadar bekler; sekme kapama / mobil geçişlerinde daha guvenilir). */
 async function kategorileriBulutaYaz() {
@@ -243,6 +250,7 @@ var KategorilerDB = {
     var kayit = Object.assign({}, kat, { grup: g, ad: a });
     var id = await promisify(tx(STORES.KATEGORILER, "readwrite").add(kayit));
     await kategorileriBulutaYaz();
+    hkKategorilerBildir();
     return id;
   },
   update: async function(kat) {
@@ -250,6 +258,7 @@ var KategorilerDB = {
     var kayit = Object.assign({}, kat, { grup: hkNormGrup(kat.grup), ad: hkNormAd(kat.ad) });
     var result = await promisify(tx(STORES.KATEGORILER, "readwrite").put(kayit));
     await kategorileriBulutaYaz();
+    hkKategorilerBildir();
     return result;
   },
   /** Ayni anlama gelen kategorileri birlestirir; islem etiketlerini tek canonical forma ceker. */
@@ -318,31 +327,33 @@ var KategorilerDB = {
     await openDB();
     var result = await promisify(tx(STORES.KATEGORILER, "readwrite").delete(id));
     await kategorileriBulutaYaz();
+    hkKategorilerBildir();
     return result;
   },
   seedDefaults: async function() {
     await openDB();
     var mevcut = await getAll(tx(STORES.KATEGORILER, "readonly"));
     if (mevcut.length > 0) return;
+    /** Yeni kullanicilar icin genel sablon (kisisel isimler yok). BIRIKIM grubu birikim modulu ile eslesir. */
     var giderler = [
-      { grup: "AILE", ad: "Annem" }, { grup: "AILE", ad: "Babam" }, { grup: "AILE", ad: "Talha" },
-      { grup: "ARAC", ad: "Bakim-Muayene" }, { grup: "ARAC", ad: "Ceza" }, { grup: "ARAC", ad: "Sigorta" }, { grup: "ARAC", ad: "Vergi" }, { grup: "ARAC", ad: "Yakut" },
-      { grup: "BIRIKIM", ad: "Altin" }, { grup: "BIRIKIM", ad: "Bes" }, { grup: "BIRIKIM", ad: "Fon" }, { grup: "BIRIKIM", ad: "Kardes Birikim" }, { grup: "BIRIKIM", ad: "Vefa Dernek" },
-      { grup: "BORC", ad: "Borc" }, { grup: "EGLENCE", ad: "Eglence" },
-      { grup: "EV GENEL", ad: "Esya" }, { grup: "EV GENEL", ad: "Kirtasiye" }, { grup: "EV GENEL", ad: "Kira" }, { grup: "EV GENEL", ad: "Tadilat-Bakim" },
-      { grup: "FATURALAR", ad: "Annem Tel" }, { grup: "FATURALAR", ad: "Babam Tel" }, { grup: "FATURALAR", ad: "Bugra Tel" }, { grup: "FATURALAR", ad: "Dogalgaz" }, { grup: "FATURALAR", ad: "Driver-Youtube-Spotify" }, { grup: "FATURALAR", ad: "Elektrik" }, { grup: "FATURALAR", ad: "Internet" }, { grup: "FATURALAR", ad: "Salim Tel" }, { grup: "FATURALAR", ad: "Su" },
-      { grup: "GENEL GIDERLER", ad: "Disardan Yemek" }, { grup: "GENEL GIDERLER", ad: "Egitim-Kitap-Hobi" }, { grup: "GENEL GIDERLER", ad: "Giyim" }, { grup: "GENEL GIDERLER", ad: "Hediye" }, { grup: "GENEL GIDERLER", ad: "Ikram" }, { grup: "GENEL GIDERLER", ad: "Nihai Huma" }, { grup: "GENEL GIDERLER", ad: "Saglik" }, { grup: "GENEL GIDERLER", ad: "Temizlik Malzemesi" },
-      { grup: "GEZI", ad: "Gezi" },
-      { grup: "IASE", ad: "Bugra IASE" }, { grup: "IASE", ad: "Salim IASE" },
+      { grup: "AILE", ad: "Aile" }, { grup: "AILE", ad: "Cocuk" },
+      { grup: "ARAC", ad: "Bakim-Muayene" }, { grup: "ARAC", ad: "Ceza-Otopark" }, { grup: "ARAC", ad: "Sigorta" }, { grup: "ARAC", ad: "Vergi-MTV" }, { grup: "ARAC", ad: "Yakit" },
+      { grup: "BIRIKIM", ad: "Altin" }, { grup: "BIRIKIM", ad: "Bes" }, { grup: "BIRIKIM", ad: "Diger Birikim" }, { grup: "BIRIKIM", ad: "Fon" }, { grup: "BIRIKIM", ad: "Nakit" },
+      { grup: "BORC", ad: "Borc Odeme" },
+      { grup: "EV", ad: "Esya" }, { grup: "EV", ad: "Kira" }, { grup: "EV", ad: "Tadilat-Bakim" }, { grup: "EV", ad: "Temizlik" },
+      { grup: "ABONELIKLER", ad: "Bulut Depolama" }, { grup: "ABONELIKLER", ad: "Diger Abonelik" }, { grup: "ABONELIKLER", ad: "Disney+" }, { grup: "ABONELIKLER", ad: "Netflix" }, { grup: "ABONELIKLER", ad: "Oyun Aboneligi" }, { grup: "ABONELIKLER", ad: "Spotify" }, { grup: "ABONELIKLER", ad: "YouTube Premium" },
+      { grup: "FATURALAR", ad: "Dogalgaz" }, { grup: "FATURALAR", ad: "Elektrik" }, { grup: "FATURALAR", ad: "Internet" }, { grup: "FATURALAR", ad: "Su" }, { grup: "FATURALAR", ad: "Telefon" },
+      { grup: "GENEL GIDERLER", ad: "Disardan Yemek" }, { grup: "GENEL GIDERLER", ad: "Egitim-Kitap-Hobi" }, { grup: "GENEL GIDERLER", ad: "Eglence" }, { grup: "GENEL GIDERLER", ad: "Giyim" }, { grup: "GENEL GIDERLER", ad: "Hediye" }, { grup: "GENEL GIDERLER", ad: "Ikram" },
+      { grup: "GEZI", ad: "Gezi" }, { grup: "GEZI", ad: "Konaklama" },
       { grup: "IBADET", ad: "Kurban" }, { grup: "IBADET", ad: "Zekat" },
-      { grup: "KAMP-PIKNIK", ad: "Kamp Arac Gerec" }, { grup: "KAMP-PIKNIK", ad: "Kamp Konaklama" }, { grup: "KAMP-PIKNIK", ad: "Kamp Tup" }, { grup: "KAMP-PIKNIK", ad: "Kamp Yiyecek" },
-      { grup: "KISISEL", ad: "Bugra Kisisel" }, { grup: "KISISEL", ad: "Salim Kisisel" },
+      { grup: "KISISEL", ad: "Kisisel Harcama" },
       { grup: "KREDI KARTI", ad: "Kredi Karti" },
-      { grup: "MUTFAK", ad: "Aburcubur" }, { grup: "MUTFAK", ad: "Kasap" }, { grup: "MUTFAK", ad: "Manav" }, { grup: "MUTFAK", ad: "Market" }, { grup: "MUTFAK", ad: "Mutfak Malzemesi" }, { grup: "MUTFAK", ad: "Tatli-Kuruyemis" },
+      { grup: "MUTFAK", ad: "Aburcubur" }, { grup: "MUTFAK", ad: "Kasap" }, { grup: "MUTFAK", ad: "Manav" }, { grup: "MUTFAK", ad: "Market" }, { grup: "MUTFAK", ad: "Mutfak Malzemesi" },
       { grup: "PLAN DISI", ad: "Plan Disi" },
+      { grup: "SAGLIK", ad: "Saglik" },
     ].map(function(k) { return Object.assign({}, k, { tip: "gider", varsayilan: true }); });
     var gelirler = [
-      { grup: "GELIRLER", ad: "Bugra Maas" }, { grup: "GELIRLER", ad: "Bugra Ek Ders" }, { grup: "GELIRLER", ad: "Cekilen Kredi" }, { grup: "GELIRLER", ad: "Salim Maas" },
+      { grup: "GELIRLER", ad: "Diger Gelir" }, { grup: "GELIRLER", ad: "Ek Gelir" }, { grup: "GELIRLER", ad: "Maas" }, { grup: "GELIRLER", ad: "Satis-Faiz" },
     ].map(function(k) { return Object.assign({}, k, { tip: "gelir", varsayilan: true }); });
     var s = tx(STORES.KATEGORILER, "readwrite");
     var hepsi = giderler.concat(gelirler);
