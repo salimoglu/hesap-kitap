@@ -1080,7 +1080,7 @@ function mhYilListesi(yGel,yZekat){
 
 async function fbYukle(){
   if(!window._fbDb)return;
-  try{var v=await fbRtdbOku("muhtac");_kisiler=Object.values(v||{});}catch(e){}
+  try{var v=await fbRtdbOku("muhtac");_kisiler=(Array.isArray(v)?v:Object.values(v||{})).filter(function(k){return k&&typeof k==="object";});}catch(e){}
 }
 async function fbKaydet(){
   if(!window._fbDb)return;
