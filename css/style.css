@@ -107,6 +107,126 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
   flex-shrink: 0;
 }
 .hk-misafir-banner-kapat:hover { color: var(--text-primary); }
+
+/* Tanitim / karsilama turu */
+.hk-tanitim-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 620;
+  padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  box-sizing: border-box;
+}
+.hk-tanitim-overlay.hidden { display: none !important; }
+.hk-tanitim-kutu {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 420px;
+  max-height: min(90dvh, calc(100dvh - 32px));
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px 20px 16px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.45);
+  animation: modal-center-in 0.22s ease;
+  overflow: hidden;
+}
+.hk-tanitim-ust {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.hk-tanitim-ilerleme {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.hk-tanitim-kapat {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+.hk-tanitim-kapat:hover { color: var(--text-primary); }
+.hk-tanitim-ikon {
+  font-size: 44px;
+  line-height: 1;
+  text-align: center;
+}
+.hk-tanitim-baslik {
+  font-family: var(--font-brand);
+  font-size: 24px;
+  letter-spacing: 1px;
+  color: var(--gold);
+  text-align: center;
+  line-height: 1.15;
+}
+.hk-tanitim-ozet {
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.55;
+  text-align: center;
+}
+.hk-tanitim-ipucu-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  max-height: min(28dvh, 220px);
+}
+.hk-tanitim-ipucu-list li {
+  position: relative;
+  padding-left: 16px;
+  color: var(--text-primary);
+  font-size: 13px;
+  line-height: 1.45;
+}
+.hk-tanitim-ipucu-list li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: var(--gold);
+  font-weight: 800;
+}
+.hk-tanitim-tekrar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+.hk-tanitim-tekrar input { accent-color: var(--gold); }
+.hk-tanitim-alt {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.4fr;
+  gap: 8px;
+  margin-top: 4px;
+}
+.hk-tanitim-alt .btn-secondary,
+.hk-tanitim-alt .btn-primary {
+  padding: 11px 10px;
+  font-size: 13px;
+}
+.tab-btn.hk-tanitim-sekme-vurgu {
+  border-bottom-color: var(--gold);
+  color: var(--gold);
+  box-shadow: inset 0 -3px 0 var(--gold);
+}
+
 .topbar-left { display: flex; align-items: center; gap: 10px; }
 .app-logo-wrap { width: 36px; height: 36px; border-radius: 50%; overflow: hidden; flex-shrink: 0; border: 2px solid var(--border); box-sizing: border-box; display: block; }
 .app-logo-img { width: 100%; height: 100%; object-fit: contain; object-position: center; display: block; }
@@ -1881,6 +2001,126 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
   flex-shrink: 0;
 }
 .hk-misafir-banner-kapat:hover { color: var(--text-primary); }
+
+/* Tanitim / karsilama turu */
+.hk-tanitim-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 620;
+  padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  box-sizing: border-box;
+}
+.hk-tanitim-overlay.hidden { display: none !important; }
+.hk-tanitim-kutu {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 420px;
+  max-height: min(90dvh, calc(100dvh - 32px));
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px 20px 16px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.45);
+  animation: modal-center-in 0.22s ease;
+  overflow: hidden;
+}
+.hk-tanitim-ust {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.hk-tanitim-ilerleme {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.hk-tanitim-kapat {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+.hk-tanitim-kapat:hover { color: var(--text-primary); }
+.hk-tanitim-ikon {
+  font-size: 44px;
+  line-height: 1;
+  text-align: center;
+}
+.hk-tanitim-baslik {
+  font-family: var(--font-brand);
+  font-size: 24px;
+  letter-spacing: 1px;
+  color: var(--gold);
+  text-align: center;
+  line-height: 1.15;
+}
+.hk-tanitim-ozet {
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.55;
+  text-align: center;
+}
+.hk-tanitim-ipucu-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  max-height: min(28dvh, 220px);
+}
+.hk-tanitim-ipucu-list li {
+  position: relative;
+  padding-left: 16px;
+  color: var(--text-primary);
+  font-size: 13px;
+  line-height: 1.45;
+}
+.hk-tanitim-ipucu-list li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: var(--gold);
+  font-weight: 800;
+}
+.hk-tanitim-tekrar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+.hk-tanitim-tekrar input { accent-color: var(--gold); }
+.hk-tanitim-alt {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.4fr;
+  gap: 8px;
+  margin-top: 4px;
+}
+.hk-tanitim-alt .btn-secondary,
+.hk-tanitim-alt .btn-primary {
+  padding: 11px 10px;
+  font-size: 13px;
+}
+.tab-btn.hk-tanitim-sekme-vurgu {
+  border-bottom-color: var(--gold);
+  color: var(--gold);
+  box-shadow: inset 0 -3px 0 var(--gold);
+}
+
 .topbar-left { display: flex; align-items: center; gap: 10px; }
 .app-logo-wrap { width: 36px; height: 36px; border-radius: 50%; overflow: hidden; flex-shrink: 0; border: 2px solid var(--border); box-sizing: border-box; display: block; }
 .app-logo-img { width: 100%; height: 100%; object-fit: contain; object-position: center; display: block; }

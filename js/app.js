@@ -109,11 +109,12 @@
     u = typeof fbMevcutKullanici === "function" ? fbMevcutKullanici() : u;
     if (typeof HK_ERISIM !== "undefined") {
       HK_ERISIM.sekmeleriUygula(u);
-      HK_ERISIM.misafirBilgiGoster(u);
     }
     await modulleriBaslat(u);
     var izinli = getTabSira();
     if (izinli.length) modulAc(izinli[0]);
+    if (typeof HK_TANITIM !== "undefined") await HK_TANITIM.belkiGoster(u);
+    if (typeof HK_ERISIM !== "undefined") HK_ERISIM.misafirBilgiGoster(u);
   }
 
   var _uygulamaAcPromise = null;
@@ -219,6 +220,16 @@
       var el = document.getElementById("hk-misafir-banner");
       if (el) el.classList.add("hidden");
       try { sessionStorage.setItem("hk-misafir-banner-kapali", "1"); } catch (e) {}
+    });
+  }
+
+  var tanitimBtn = document.getElementById("hk-tanitim-btn");
+  if (tanitimBtn) {
+    tanitimBtn.addEventListener("click", function () {
+      var u = null;
+      try { u = typeof fbMevcutKullanici === "function" ? fbMevcutKullanici() : null; } catch (e) { u = null; }
+      if (!u || u.isAnonymous) return;
+      if (typeof HK_TANITIM !== "undefined") HK_TANITIM.goster(u, true);
     });
   }
 
@@ -405,7 +416,7 @@
       if (!swipeOk || sx === undefined) { sx = sy = undefined; return; }
       const ls = document.getElementById("lock-screen");
       if (ls && !ls.classList.contains("hidden")) { sx = sy = undefined; return; }
-      if (document.querySelector(".modal-overlay:not(.hidden), .bk-modal-overlay:not(.hidden)")) { sx = sy = undefined; return; }
+      if (document.querySelector(".modal-overlay:not(.hidden), .bk-modal-overlay:not(.hidden), .hk-tanitim-overlay:not(.hidden)")) { sx = sy = undefined; return; }
       const t = e.changedTouches[0];
       const dx = t.clientX - sx;
       const dy = t.clientY - sy;
