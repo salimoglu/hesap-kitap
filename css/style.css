@@ -5220,11 +5220,11 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   width: 100%;
   height: 100%;
   overflow: visible;
+  pointer-events: auto;
 }
 #tab-islemler .ioz-donut-seg {
   cursor: pointer;
-  pointer-events: stroke;
-  paint-order: stroke fill;
+  pointer-events: all;
   transition: filter 0.06s ease;
   outline: none;
 }
@@ -5232,7 +5232,8 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
 #tab-islemler .ioz-donut-seg.ioz-donut-seg-hover {
   filter: brightness(1.12);
 }
-#tab-islemler .ioz-cursor-tip {
+#tab-islemler .ioz-cursor-tip,
+#ioz-cursor-tip {
   position: fixed;
   left: 0;
   top: 0;
@@ -5251,9 +5252,9 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   pointer-events: none;
   opacity: 0;
   visibility: hidden;
-  will-change: transform;
 }
-#tab-islemler .ioz-cursor-tip.visible {
+#tab-islemler .ioz-cursor-tip.visible,
+#ioz-cursor-tip.visible {
   opacity: 1;
   visibility: visible;
 }

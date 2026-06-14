@@ -272,7 +272,7 @@ const IslemlerModule = (() => {
       acc+=p.pct;
       var start=bas*3.6-90;
       var end=acc*3.6-90;
-      segs+='<path class="ioz-donut-seg" d="'+iozDonutSegPath(cx,cy,R,Ri,start,end)+'" fill="'+p.renk+'" stroke="transparent" stroke-width="14" vector-effect="non-scaling-stroke" data-ioz-chart-tip="'+(chartTip||"")+'" data-ioz-grup="'+esc(p.ad)+'" tabindex="-1" aria-label="'+esc(p.ad)+'">';
+      segs+='<path class="ioz-donut-seg" d="'+iozDonutSegPath(cx,cy,R,Ri,start,end)+'" fill="'+p.renk+'" data-ioz-chart-tip="'+(chartTip||"")+'" data-ioz-grup="'+esc(p.ad)+'">';
       segs+='</path>';
     });
     return '<svg class="ioz-donut-svg" viewBox="0 0 '+size+' '+size+'" role="img" aria-label="'+esc(baslik)+' dagilim grafigi">'+segs+'</svg>';
@@ -422,6 +422,14 @@ const IslemlerModule = (() => {
     renderKategoriOzeti();
   }
 
+  function iozDonutSegBul(node, root){
+    while(node&&node!==root){
+      if(node.nodeType===1&&node.classList&&node.classList.contains("ioz-donut-seg"))return node;
+      node=node.parentNode;
+    }
+    return null;
+  }
+
   function iozGrafikEtkilesimBagla(wrap){
     if(!wrap)return;
     if(!wrap._iozGrafikClickBound){
@@ -434,7 +442,7 @@ const IslemlerModule = (() => {
           if(tip&&grup)iozGrupSec(tip,grup);
           return;
         }
-        var seg=e.target.closest(".ioz-donut-seg");
+        var seg=iozDonutSegBul(e.target,wrap)||(e.target.closest?e.target.closest(".ioz-donut-seg"):null);
         if(seg){
           var st=seg.getAttribute("data-ioz-chart-tip");
           var sg=seg.getAttribute("data-ioz-grup");
@@ -442,12 +450,13 @@ const IslemlerModule = (() => {
         }
       });
     }
-    var tipEl=wrap.querySelector(".ioz-cursor-tip");
+    var tipEl=document.getElementById("ioz-cursor-tip");
     if(!tipEl){
       tipEl=document.createElement("div");
+      tipEl.id="ioz-cursor-tip";
       tipEl.className="ioz-donut-hover-tip ioz-cursor-tip";
       tipEl.setAttribute("aria-hidden","true");
-      wrap.appendChild(tipEl);
+      document.body.appendChild(tipEl);
     }
     if(wrap._iozGrafikTipBound)return;
     wrap._iozGrafikTipBound=true;
@@ -455,13 +464,22 @@ const IslemlerModule = (() => {
     function konumla(e){
       if(!e)return;
       var pad=10;
-      tipEl.style.transform="translate3d("+(e.clientX+pad)+"px,"+(e.clientY+pad)+"px,0)";
+      tipEl.style.left=(e.clientX+pad)+"px";
+      tipEl.style.top=(e.clientY+pad)+"px";
+    }
+    function segAt(e){
+      var hit=document.elementFromPoint(e.clientX,e.clientY);
+      if(!hit)return null;
+      var seg=iozDonutSegBul(hit,wrap);
+      if(seg)return seg;
+      if(hit.closest)return hit.closest(".ioz-donut-seg");
+      return null;
     }
     function goster(seg,e){
       if(!seg)return;
       var grupAd=seg.getAttribute("data-ioz-grup")||"";
-      if(tipEl.textContent!==grupAd)tipEl.textContent=grupAd;
-      if(!tipEl.classList.contains("visible"))tipEl.classList.add("visible");
+      tipEl.textContent=grupAd;
+      tipEl.classList.add("visible");
       konumla(e);
       if(activeSeg!==seg){
         if(activeSeg)activeSeg.classList.remove("ioz-donut-seg-hover");
@@ -472,13 +490,14 @@ const IslemlerModule = (() => {
     function gizle(){
       tipEl.classList.remove("visible");
       tipEl.textContent="";
-      tipEl.style.transform="";
+      tipEl.style.left="";
+      tipEl.style.top="";
       if(activeSeg){activeSeg.classList.remove("ioz-donut-seg-hover");activeSeg=null;}
     }
     wrap.addEventListener("mousemove",function(e){
-      var seg=e.target.closest(".ioz-donut-seg");
-      if(seg){goster(seg,e);return;}
-      if(!e.target.closest(".ioz-donut-wrap"))gizle();
+      var seg=segAt(e);
+      if(seg&&wrap.contains(seg)){goster(seg,e);return;}
+      if(!e.target.closest||!e.target.closest(".ioz-donut-wrap"))gizle();
     });
     wrap.addEventListener("mouseleave",function(e){
       if(!wrap.contains(e.relatedTarget))gizle();
