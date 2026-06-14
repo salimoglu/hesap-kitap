@@ -71,7 +71,7 @@
     }
   }
 
-  async function uygulamaAc() {
+  async function uygulamaAcIc() {
     let u = null;
     try {
       u = typeof fbMevcutKullanici === "function" ? fbMevcutKullanici() : null;
@@ -97,6 +97,7 @@
     try {
       if (typeof fbRtdbOturumHazir === "function") await fbRtdbOturumHazir();
       if (typeof fbKimlikTokenAl === "function") await fbKimlikTokenAl();
+      if (typeof fbAuthEpostalariTopla === "function") await fbAuthEpostalariTopla(u);
       if (typeof fbEnsureUserDataScope === "function") await fbEnsureUserDataScope();
       else if (typeof fbDetectRtdbScope === "function") await fbDetectRtdbScope();
       if (typeof fbVerileriYukle !== "undefined") await fbVerileriYukle();
@@ -105,10 +106,20 @@
       if (syncEl) syncEl.textContent = "";
     }
 
+    u = typeof fbMevcutKullanici === "function" ? fbMevcutKullanici() : u;
     if (typeof HK_ERISIM !== "undefined") HK_ERISIM.sekmeleriUygula(u);
     await modulleriBaslat(u);
     var izinli = getTabSira();
     if (izinli.length) modulAc(izinli[0]);
+  }
+
+  var _uygulamaAcPromise = null;
+  async function uygulamaAc() {
+    if (_uygulamaAcPromise) return _uygulamaAcPromise;
+    _uygulamaAcPromise = uygulamaAcIc().finally(function () {
+      _uygulamaAcPromise = null;
+    });
+    return _uygulamaAcPromise;
   }
 
   window.sayfaYenile = async function() {
@@ -120,6 +131,7 @@
     try {
       if (typeof fbRtdbOturumHazir === "function") await fbRtdbOturumHazir();
       if (typeof fbKimlikTokenAl === "function") await fbKimlikTokenAl();
+      if (typeof fbAuthEpostalariTopla === "function") await fbAuthEpostalariTopla(u);
       if (typeof fbEnsureUserDataScope === "function") await fbEnsureUserDataScope();
       else if (typeof fbDetectRtdbScope === "function") await fbDetectRtdbScope();
       if (typeof fbVerileriYukle !== "undefined") await fbVerileriYukle();
@@ -127,6 +139,7 @@
     } catch(e) {
       if (syncEl) syncEl.textContent = "";
     }
+    u = typeof fbMevcutKullanici === "function" ? fbMevcutKullanici() : u;
     if (typeof HK_ERISIM !== "undefined") HK_ERISIM.sekmeleriUygula(u);
     await modulleriBaslat(u);
   };

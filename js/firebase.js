@@ -254,11 +254,41 @@ async function fbMigrateRootToUser(uid) {
 }
 
 /** Oturum acildiktan sonra kullanici kapsamini hazirla; yonetici icin tasima dene. */
+async function fbAuthEpostalariTopla(user) {
+  window._hkAuthEmails = [];
+  if (!user) return [];
+  var list = typeof HK_ERISIM !== "undefined" && HK_ERISIM.kullaniciEpostalari
+    ? HK_ERISIM.kullaniciEpostalari(user)
+    : (user.email ? [user.email] : []);
+  try {
+    var tr = await user.getIdTokenResult(true);
+    if (tr.claims && tr.claims.email) list.push(tr.claims.email);
+  } catch (e) {}
+  var uniq = [];
+  list.forEach(function (em) {
+    var n = String(em || "").trim().toLowerCase();
+    if (n && uniq.indexOf(n) < 0) uniq.push(n);
+  });
+  window._hkAuthEmails = uniq;
+  return uniq;
+}
+
+async function fbYoneticiMi(user) {
+  if (!user || user.isAnonymous) return false;
+  if (typeof window !== "undefined" && window._hkRtdbRole === "owner") return true;
+  if (typeof HK_ERISIM !== "undefined") {
+    if (HK_ERISIM.yoneticiUidMi(user)) return true;
+    if (HK_ERISIM.yoneticiEpostaMi(user)) return true;
+    var emails = await fbAuthEpostalariTopla(user);
+    if (HK_ERISIM.epostaListesindeMi && HK_ERISIM.epostaListesindeMi(emails)) return true;
+  }
+  return false;
+}
+
 async function fbEnsureUserDataScope() {
   if (!_fbDb) return;
   var u = fbMevcutKullanici();
   if (!u || u.isAnonymous) return;
-  window._hkRtdbRole = "";
   try { localStorage.setItem("hk-rtdb-use-user-prefix", "1"); } catch (e) {}
 
   try {
@@ -268,11 +298,12 @@ async function fbEnsureUserDataScope() {
     console.warn("fbEnsureUserDataScope role read:", eR);
   }
 
-  var epostaYonetici = typeof HK_ERISIM !== "undefined" && HK_ERISIM.yoneticiEpostaMi(u);
-  if (epostaYonetici) {
+  var yonetici = await fbYoneticiMi(u);
+  if (yonetici) {
     try {
       await _fbDb.ref("users/" + u.uid + "/meta/hkRole").set("owner");
       window._hkRtdbRole = "owner";
+      try { localStorage.setItem("hk-yonetici-uid", u.uid); } catch (eLs) {}
     } catch (eW) {
       console.warn("fbEnsureUserDataScope role write:", eW);
     }
