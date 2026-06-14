@@ -43,15 +43,14 @@ function normalizeKayit(k){
   }
   return kk;
 }
-async function fbYukle(){if(!window._fbDb){return;}try{var s=await fbRtdbRef("alacaklar").once("value");var v=s.val();_kayitlar=v?Object.values(v):[];}catch(e){_kayitlar=[];console.error("[Alacaklar] yukle",(e&&e.code)||e.message||e);}}
+async function fbYukle(){if(!window._fbDb){return;}try{var v=await fbRtdbOku("alacaklar");_kayitlar=v?Object.values(v):[];}catch(e){_kayitlar=[];console.error("[Alacaklar] yukle",(e&&e.code)||e.message||e);}}
 async function fbKaydet(){if(!window._fbDb)return;try{var obj={};_kayitlar.forEach(function(x){obj[x.id]=x;});await fbRtdbRef("alacaklar").set(obj);}catch(e){console.error("[Alacaklar] kaydet",e);}}
 /* Altın modülüyle aynı kaynak: gram TL (Firebase), yoksa API tahmini (kaydedilmez) */
 async function altinGuncelFiyatYukle(){
   _gramAltinFiyatTL=0;
   if(typeof window._fbDb!=="undefined"&&window._fbDb){
     try{
-      var s=await fbRtdbRef("altin_guncel_fiyat").once("value");
-      var v=parseFloat(s.val());
+      var v = parseFloat(await fbRtdbOku("altin_guncel_fiyat"));
       if(v&&v>0)_gramAltinFiyatTL=v;
     }catch(e){}
   }

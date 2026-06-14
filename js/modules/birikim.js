@@ -59,7 +59,7 @@ var BirikimModule = (function() {
   /* Firebase */
   async function fbYukle(){
     if(typeof window._fbDb!=="undefined"&&window._fbDb){
-      try{var s=await fbRtdbRef("birikim_manuel").once("value");_manuelIslemler=s.val()||{};}
+      try{var v=await fbRtdbOku("birikim_manuel");_manuelIslemler=v||{};}
       catch(e){_manuelIslemler={};console.error("[Birikim] yukle",(e&&e.code)||e.message||e);}
     }
   }

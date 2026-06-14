@@ -100,6 +100,13 @@
       if (typeof fbAuthEpostalariTopla === "function") await fbAuthEpostalariTopla(u);
       if (typeof fbEnsureUserDataScope === "function") await fbEnsureUserDataScope();
       else if (typeof fbDetectRtdbScope === "function") await fbDetectRtdbScope();
+      if (window._hkKokOkumaKapali) {
+        var kokUy = document.getElementById("fb-auth-error");
+        if (kokUy) {
+          kokUy.textContent =
+            "Eski veriler kokte ama uygulama okuyamiyor. Firebase kurallarini guncelleyin: PowerShell'de .\\tools\\deploy-database-rules.ps1 — sonra cikis yapip tekrar girin.";
+        }
+      }
       if (typeof fbVerileriYukle !== "undefined") await fbVerileriYukle();
       if (syncEl) syncEl.textContent = "\u2713";
     } catch(e) {
@@ -138,6 +145,13 @@
       if (typeof fbAuthEpostalariTopla === "function") await fbAuthEpostalariTopla(u);
       if (typeof fbEnsureUserDataScope === "function") await fbEnsureUserDataScope();
       else if (typeof fbDetectRtdbScope === "function") await fbDetectRtdbScope();
+      if (window._hkKokOkumaKapali) {
+        var kokUy = document.getElementById("fb-auth-error");
+        if (kokUy) {
+          kokUy.textContent =
+            "Eski veriler kokte ama uygulama okuyamiyor. Firebase kurallarini guncelleyin: PowerShell'de .\\tools\\deploy-database-rules.ps1 — sonra cikis yapip tekrar girin.";
+        }
+      }
       if (typeof fbVerileriYukle !== "undefined") await fbVerileriYukle();
       if (syncEl) syncEl.textContent = "\u2713";
     } catch(e) {

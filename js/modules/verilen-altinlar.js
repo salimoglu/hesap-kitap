@@ -79,8 +79,7 @@ var VerilenAltinlarModule = (function () {
     _gramFiyat = 0;
     if (typeof window._fbDb !== "undefined" && window._fbDb) {
       try {
-        var s = await fbRtdbRef("altin_guncel_fiyat").once("value");
-        var v = parseFloat(s.val());
+        var v = parseFloat(await fbRtdbOku("altin_guncel_fiyat"));
         if (v && v > 0) _gramFiyat = v;
       } catch (e) {}
     }
@@ -118,8 +117,7 @@ var VerilenAltinlarModule = (function () {
   async function fbYukle() {
     if (!window._fbDb) return;
     try {
-      var s = await fbRtdbRef("verilen_altinlar").once("value");
-      var v = s.val();
+      var v = await fbRtdbOku("verilen_altinlar");
       _kayitlar = v ? Object.values(v) : [];
       vaSirala();
     } catch (e) {

@@ -77,8 +77,7 @@ async function bsablonYukle(){
   sablonInit();
   if(typeof window._fbDb==="undefined"||!window._fbDb)return;
   try{
-    var s=await fbRtdbRef("butce_sablon").once("value");
-    var d=s.val()||{};
+    var d=(await fbRtdbOku("butce_sablon"))||{};
     if(d.gizli)_gizli=d.gizli;
     if(d.ekstra)_ekstra=d.ekstra;
     sablonInit();
@@ -107,8 +106,7 @@ async function byukle(){
   _veri={};
   if(typeof window._fbDb==="undefined"||!window._fbDb)return;
   try{
-    var s=await fbRtdbRef(key).once("value");
-    var d=s.val()||{};
+    var d=(await fbRtdbOku(key))||{};
     _veri=d.veri||{};
     if(d.ozel&&ozeldenEkstrayaTasi(d.ozel))await bsablonKaydet();
   }catch(e){}
@@ -203,7 +201,7 @@ function uid(){return "k"+Date.now()+"_"+Math.random().toString(36).substr(2,5);
 function buAy(){return _yil+"-"+String(_ay+1).padStart(2,"0");}
 function ayEkle(bas,n){var d=new Date(bas+"-01");d.setMonth(d.getMonth()+n);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");}
 function ayInput(){return _yil+"-"+String(_ay+1).padStart(2,"0");}
-async function kfbYukle(){if(typeof window._fbDb==="undefined"||!window._fbDb)return;try{var s=await fbRtdbRef("kredi_harcamalar").once("value");var v=s.val();_h=v?Object.values(v):[];var sk=await fbRtdbRef("kredi_kartlar").once("value");_k=sk.val()||[];}catch(e){_h=[];_k=[];}}
+async function kfbYukle(){if(typeof window._fbDb==="undefined"||!window._fbDb)return;try{var v=await fbRtdbOku("kredi_harcamalar");_h=v?Object.values(v):[];var k=await fbRtdbOku("kredi_kartlar");_k=k||[];}catch(e){_h=[];_k=[];}}
 async function kfbKaydet(){if(typeof window._fbDb==="undefined"||!window._fbDb)return;try{var obj={};_h.forEach(function(x){obj[x.id]=x;});await fbRtdbRef("kredi_harcamalar").set(obj);await fbRtdbRef("kredi_kartlar").set(_k);}catch(e){}}
 function taksitler(h){var r=[];for(var i=0;i<h.taksit;i++){r.push({ay:ayEkle(h.basTarih,i),tutar:h.tutar/h.taksit,no:i+1});}return r;}
 function kartlar(){var s={};_h.forEach(function(h){s[h.kart]=1;});_k.forEach(function(k){s[k]=1;});return Object.keys(s).sort();}
@@ -290,13 +288,11 @@ async function guncelAltinCek(){
 async function afbYukle(){
   if(typeof window._fbDb==="undefined"||!window._fbDb)return;
   try{
-    var s=await fbRtdbRef("altin_kayitlar").once("value");
-    var v=s.val();
+    var v=await fbRtdbOku("altin_kayitlar");
     _kayitlar=v?Object.values(v):[];
     _kayitlar.sort(function(a,b){return (b.tarih||"").localeCompare(a.tarih||"");});
     /* Kayıtlı güncel fiyat */
-    var sf=await fbRtdbRef("altin_guncel_fiyat").once("value");
-    _guncelGramFiyat=parseFloat(sf.val())||0;
+    _guncelGramFiyat=parseFloat(await fbRtdbOku("altin_guncel_fiyat"))||0;
   }catch(e){_kayitlar=[];}
 }
 async function afbKaydet(){
@@ -637,20 +633,17 @@ async function fbYukle(){
   if(!window._fbDb)return;
   try{
     var d={};
-    var s=await fbRtdbRef("vefa2").once("value");
-    var v=s.val();
+    var v=await fbRtdbOku("vefa2");
     if(v!=null&&typeof v==="object"&&Object.keys(v).length>0){d=v;}
     if(Object.keys(d).length===0){
       try{
-        var sL=await fbRtdbRef("vefa").once("value");
-        var v2=sL.val();
+        var v2=await fbRtdbOku("vefa");
         if(v2!=null&&typeof v2==="object"){d=v2;}
       }catch(e2){}
     }
     _uyeler=d.uyeler||[{id:"u1",ad:"Zafer EROĞLU",rol:"Başkan"},{id:"u2",ad:"Fatma İNCE",rol:"Üye"},{id:"u3",ad:"Güler UÇAR",rol:"Üye"},{id:"u4",ad:"Salim EROĞLU",rol:"Üye"}];
     _aylar=d.aylar||[];
-    var gf=await fbRtdbRef("altin_guncel_fiyat").once("value");
-    _gramFiyat=gf.val()||0;
+    _gramFiyat=(await fbRtdbOku("altin_guncel_fiyat"))||0;
   }catch(e){}
 }
 async function fbKaydet(){
@@ -1087,7 +1080,7 @@ function mhYilListesi(yGel,yZekat){
 
 async function fbYukle(){
   if(!window._fbDb)return;
-  try{var s=await fbRtdbRef("muhtac").once("value");_kisiler=Object.values(s.val()||{});}catch(e){}
+  try{var v=await fbRtdbOku("muhtac");_kisiler=Object.values(v||{});}catch(e){}
 }
 async function fbKaydet(){
   if(!window._fbDb)return;

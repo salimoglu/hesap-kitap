@@ -1,5 +1,5 @@
 // sw.js — Network First: her zaman gunceli al, cache sadece fallback
-const CACHE = "hesap-kitap-v153";
+const CACHE = "hesap-kitap-v154";
 const BASE = self.location.pathname.replace(/\/?sw\.js$/i, "");
 const ASSETS = [
   BASE + "/",
@@ -7,15 +7,15 @@ const ASSETS = [
   BASE + "/css/style.css?v=20260531ioz-graf2",
   BASE + "/js/hk-erisim.js?v=20260531multi-final",
   BASE + "/js/hk-tanitim.js?v=20260531tanitim",
-  BASE + "/js/app.js?v=20260531tanitim",
-  BASE + "/js/firebase.js?v=20260531veri-kurtar",
+  BASE + "/js/app.js?v=20260531kok-tasima",
+  BASE + "/js/firebase.js?v=20260531kok-tasima",
   BASE + "/js/db.js?v=20260531grup-kaydet",
   BASE + "/js/modules/islemler.js?v=20260531ioz-graf2",
-  BASE + "/js/modules/birikim.js?v=20260531birikim-grup",
-  BASE + "/js/modules/verilen-altinlar.js?v=20260531va-tablo",
-  BASE + "/js/modules/yukle.js?v=20260531butce-satir-yonet",
-  BASE + "/js/modules/alacaklar.js?v=20260210altinfiyat",
-  BASE + "/js/modules/urun.js?v=20260509rtdb",
+  BASE + "/js/modules/birikim.js?v=20260531kok-tasima",
+  BASE + "/js/modules/verilen-altinlar.js?v=20260531kok-tasima",
+  BASE + "/js/modules/yukle.js?v=20260531kok-tasima",
+  BASE + "/js/modules/alacaklar.js?v=20260531kok-tasima",
+  BASE + "/js/modules/urun.js?v=20260531kok-tasima",
   BASE + "/js/modules/arabam.js?v=20260531ar-detay-modal-fix",
   BASE + "/manifest.json?v=20260209desk",
   BASE + "/icons/favicon.ico?v=20260209desk",

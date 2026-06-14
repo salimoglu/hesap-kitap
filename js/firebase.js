@@ -197,6 +197,124 @@ function fbRtdbRef(path) {
   return _fbDb.ref(p);
 }
 
+/** Kok yolu (tasima icin). */
+function fbKokRef(path) {
+  if (!_fbDb) return null;
+  return _fbDb.ref(String(path || "").replace(/^\/+/, ""));
+}
+
+var HK_KOK_MODUL_KEYS = [
+  "islemler", "kategoriler", "arabam", "alacaklar", "kredi_harcamalar", "kredi_kartlar",
+  "urunler", "urun", "altin_kayitlar", "altin_guncel_fiyat", "altin_guncel_fiyat_tarih",
+  "vefa2", "vefa", "muhtac", "verilen_altinlar", "birikim_manuel", "butce_sablon"
+];
+
+/**
+ * users/{uid}/ oku; bos ise yonetici icin kokten kopyala (lazy migrate).
+ * Modul yuklemelerinde fbRtdbRef().once yerine bunu kullanin.
+ */
+async function fbRtdbOku(path) {
+  if (!_fbDb) return null;
+  var p = String(path || "").replace(/^\/+/, "");
+  var u = fbMevcutKullanici();
+  if (!u || u.isAnonymous) {
+    try {
+      var s0 = await fbKokRef(p).once("value");
+      return s0.val();
+    } catch (e0) {
+      return null;
+    }
+  }
+  var userRef = _fbDb.ref("users/" + u.uid + "/" + p);
+  try {
+    var userSnap = await userRef.once("value");
+    if (fbVeriDolu(userSnap.val())) return userSnap.val();
+  } catch (eU) {
+    console.warn("[HK] fbRtdbOku user:", p, eU.code || eU.message);
+  }
+
+  var owner = await fbYoneticiMi(u);
+  var storedUid = null;
+  try { storedUid = localStorage.getItem("hk-yonetici-uid"); } catch (eSt) {}
+  if (!owner && !(storedUid && storedUid === u.uid)) return null;
+
+  try {
+    var rootSnap = await fbKokRef(p).once("value");
+    var rv = rootSnap.val();
+    if (!fbVeriDolu(rv)) return null;
+    await userRef.set(rv);
+    console.info("[HK] Kokten users/" + u.uid + "/" + p + " kopyalandi.");
+    window._hkVeriTasindi = true;
+    return rv;
+  } catch (eR) {
+    if (eR && eR.code === "PERMISSION_DENIED") {
+      window._hkKokOkumaKapali = true;
+      console.error(
+        "[HK] Kok okunamadi (" + p + "). Firebase kurallarini guncelleyin: .\\tools\\deploy-database-rules.ps1"
+      );
+    } else {
+      console.warn("[HK] fbRtdbOku root:", p, eR.code || eR.message);
+    }
+    return null;
+  }
+}
+
+async function fbKokAnahtarTasi(uid, key) {
+  if (!_fbDb || !uid || !key) return { ok: false };
+  var userRef = _fbDb.ref("users/" + uid + "/" + key);
+  try {
+    var userSnap = await userRef.once("value");
+    if (fbVeriDolu(userSnap.val())) return { ok: true, skipped: true, key: key };
+  } catch (eU) {
+    return { ok: false, key: key, error: eU };
+  }
+  try {
+    var rootSnap = await fbKokRef(key).once("value");
+    var rv = rootSnap.val();
+    if (!fbVeriDolu(rv)) return { ok: true, skipped: true, key: key, reason: "root-empty" };
+    await userRef.set(rv);
+    return { ok: true, migrated: true, key: key };
+  } catch (eR) {
+    if (eR && eR.code === "PERMISSION_DENIED") window._hkKokOkumaKapali = true;
+    return { ok: false, key: key, error: eR };
+  }
+}
+
+async function fbKokModulleriTasi(uid) {
+  if (!_fbDb || !uid) return { ok: false, migrated: 0 };
+  try { localStorage.removeItem("hk-root-cleaned-" + uid); } catch (eRm) {}
+
+  var keys = HK_KOK_MODUL_KEYS.slice();
+  try {
+    var rootSnap = await _fbDb.ref("/").once("value");
+    var root = rootSnap.val() || {};
+    Object.keys(root).forEach(function (k) {
+      if (k === "users") return;
+      if (k.indexOf("butce_") === 0 && keys.indexOf(k) < 0) keys.push(k);
+    });
+  } catch (eRoot) {
+    console.warn("[HK] Kok tam liste okunamadi, bilinen anahtarlar deneniyor:", eRoot.code || eRoot.message);
+    if (eRoot && eRoot.code === "PERMISSION_DENIED") window._hkKokOkumaKapali = true;
+  }
+
+  var migrated = 0;
+  var failed = [];
+  for (var i = 0; i < keys.length; i++) {
+    var r = await fbKokAnahtarTasi(uid, keys[i]);
+    if (r && r.migrated) migrated++;
+    if (r && r.error) failed.push(keys[i]);
+  }
+
+  if (migrated > 0) {
+    window._hkVeriTasindi = true;
+    console.info("[HK] Modul verisi tasindi:", migrated, "anahtar");
+  }
+  if (failed.length) {
+    console.warn("[HK] Tasinamayan anahtarlar:", failed.join(", "));
+  }
+  return { ok: failed.length === 0, migrated: migrated, failed: failed };
+}
+
 /** Kok veritabanindan users/{uid}/ altina tek seferlik tasima (yalnizca yonetici). */
 function fbVeriDolu(val) {
   if (val == null) return false;
@@ -372,8 +490,14 @@ async function fbEnsureUserDataScope() {
         console.warn("fbEnsureUserDataScope role write:", eW);
       }
     }
-    var mig = await fbMigrateRootToUser(u.uid);
-    if (mig && mig.migrated > 0) window._hkVeriTasindi = true;
+    var mig1 = await fbKokModulleriTasi(u.uid);
+    var mig2 = await fbMigrateRootToUser(u.uid);
+    if ((mig1 && mig1.migrated > 0) || (mig2 && mig2.migrated > 0)) window._hkVeriTasindi = true;
+    if (window._hkKokOkumaKapali) {
+      console.error(
+        "[HK] Eski veriler kokte duruyor ama uygulama okuyamiyor. PowerShell: .\\tools\\deploy-database-rules.ps1"
+      );
+    }
   }
 }
 

@@ -46,12 +46,10 @@ function gunlukMaliyet(tarihStr,fiyat,sonTarihStr){
 async function fbYukle(){
   if(!window._fbDb)return;
   try{
-    var s=await fbRtdbRef("urunler").once("value");
-    var v=s.val();
+    var v=await fbRtdbOku("urunler");
     _urunler=Array.isArray(v)?v:(v&&typeof v==="object"?Object.values(v):[]);
     if(!_urunler.length){
-      var s2=await fbRtdbRef("urun").once("value");
-      var v2=s2.val();
+      var v2=await fbRtdbOku("urun");
       _urunler=Array.isArray(v2)?v2:(v2&&typeof v2==="object"?Object.values(v2):[]);
     }
   }catch(e){_urunler=[];console.error("[Urun] yukle",(e&&e.code)||e.message||e);}

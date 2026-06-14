@@ -502,8 +502,7 @@ var ArabamModule = (function () {
       return;
     }
     try {
-      var s = await fbRtdbRef("arabam").once("value");
-      var v = s.val();
+      var v = await fbRtdbOku("arabam");
       _araclar = v ? Object.values(v) : [];
       _araclar.forEach(aracNormalize);
     } catch (e) {
