@@ -1,18 +1,18 @@
 // sw.js — Network First: her zaman gunceli al, cache sadece fallback
-const CACHE = "hesap-kitap-v145";
+const CACHE = "hesap-kitap-v149";
 const BASE = self.location.pathname.replace(/\/?sw\.js$/i, "");
 const ASSETS = [
   BASE + "/",
   BASE + "/index.html",
-  BASE + "/css/style.css?v=20260531multi-final",
+  BASE + "/css/style.css?v=20260531kat-duzenle-fix",
   BASE + "/js/hk-erisim.js?v=20260531multi-final",
-  BASE + "/js/app.js?v=20260531multi-final",
+  BASE + "/js/app.js?v=20260531kat-modal-guard",
   BASE + "/js/firebase.js?v=20260531multi-final",
-  BASE + "/js/db.js?v=20260531varsayilan-genel",
-  BASE + "/js/modules/islemler.js?v=20260531hg-kat-web-fix",
-  BASE + "/js/modules/birikim.js?v=20260531birikim-kat-sync",
+  BASE + "/js/db.js?v=20260531grup-kaydet",
+  BASE + "/js/modules/islemler.js?v=20260531grup-kaydet",
+  BASE + "/js/modules/birikim.js?v=20260531birikim-grup",
   BASE + "/js/modules/verilen-altinlar.js?v=20260531va-tablo",
-  BASE + "/js/modules/yukle.js?v=20260531butce-genel",
+  BASE + "/js/modules/yukle.js?v=20260531butce-satir-yonet",
   BASE + "/js/modules/alacaklar.js?v=20260210altinfiyat",
   BASE + "/js/modules/urun.js?v=20260509rtdb",
   BASE + "/js/modules/arabam.js?v=20260531ar-detay-modal-fix",

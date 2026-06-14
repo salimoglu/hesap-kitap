@@ -12,10 +12,41 @@ var BirikimModule = (function() {
   function tarihFmt(t){if(!t)return"";var p=t.split("-");return p[2]+"."+p[1]+"."+p[0];}
 
   function birikimGrupMu(grup) {
+    if (typeof HKKategori !== "undefined" && HKKategori.isBirikimGrup) {
+      return HKKategori.isBirikimGrup(grup);
+    }
     var g = typeof HKKategori !== "undefined" && HKKategori.normGrup
       ? HKKategori.normGrup(grup)
-      : String(grup || "").trim().toUpperCase();
+      : String(grup || "").trim().toLocaleUpperCase("tr");
     return g === "BIRIKIM";
+  }
+
+  /** Islem hangi birikim kalemine ait — BIRIKIM/BİRİKİM yazim farklarini kategori listesiyle eslestirir. */
+  function islemBirikimKalem(islem) {
+    if (!islem) return null;
+    var katRaw = String(islem.kategori || "").trim();
+    if (!katRaw) return null;
+    var kat = kategoriEtiket(islem) || katRaw;
+
+    if (typeof HKKategori !== "undefined" && HKKategori.normKey && _kategoriler.length) {
+      var arananKey = HKKategori.normKey(kat);
+      if (!arananKey && katRaw !== kat) arananKey = HKKategori.normKey(katRaw);
+      for (var i = 0; i < _kategoriler.length; i++) {
+        var k = _kategoriler[i];
+        if (!birikimGrupMu(k.grup)) continue;
+        var canon = HKKategori.canonicalEtiket(k.grup, k.ad);
+        if (HKKategori.normKey(canon) === arananKey) {
+          return { ad: String(k.ad || "").trim(), kategori: canon };
+        }
+      }
+    }
+
+    var parca = kat.split(" - ");
+    if (parca.length < 2) return null;
+    var grup = parca[0].trim();
+    var ad = parca.slice(1).join(" - ").trim();
+    if (!birikimGrupMu(grup) || !ad) return null;
+    return { ad: ad, kategori: kat };
   }
 
   function kategoriEtiket(islem) {
@@ -42,12 +73,9 @@ var BirikimModule = (function() {
   function islemKalemleri(){
     var kalemler = {};
     _islemler.forEach(function(i){
-      var kat = kategoriEtiket(i);
-      var parca = kat.split(" - ");
-      if(parca.length < 2) return;
-      var grup = parca[0].trim();
-      var ad = parca.slice(1).join(" - ").trim();
-      if(!birikimGrupMu(grup) || !ad) return;
+      var eslesme = islemBirikimKalem(i);
+      if (!eslesme || !eslesme.ad) return;
+      var ad = eslesme.ad;
       if(!kalemler[ad]) kalemler[ad] = [];
       kalemler[ad].push({
         id:"db_"+i.id, tarih:i.tarih,
@@ -293,26 +321,30 @@ var BirikimModule = (function() {
     render();
   }
 
-  async function init(){
+  async function birikimVeriYenile() {
+    if (typeof IslemlerDB === "undefined") return;
     _islemler = await IslemlerDB.getAll();
     if (typeof KategorilerDB !== "undefined") {
       _kategoriler = await KategorilerDB.getAll();
-    } else {
-      _kategoriler = [];
     }
+  }
+
+  async function init(){
+    await birikimVeriYenile();
     await fbYukle();
     render();
   }
 
   if (!window._hkBirikimKatEv) {
     window._hkBirikimKatEv = true;
-    window.addEventListener("hk-kategoriler-degisti", async function() {
+    async function birikimCanliYenile() {
       if (typeof KategorilerDB === "undefined" || typeof IslemlerDB === "undefined") return;
-      _kategoriler = await KategorilerDB.getAll();
-      _islemler = await IslemlerDB.getAll();
+      await birikimVeriYenile();
       var panel = document.getElementById("tab-birikim");
       if (panel && panel.classList.contains("active")) render();
-    });
+    }
+    window.addEventListener("hk-kategoriler-degisti", birikimCanliYenile);
+    window.addEventListener("hk-islemler-degisti", birikimCanliYenile);
   }
 
   return{init:init};

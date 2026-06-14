@@ -17,6 +17,67 @@ const IslemlerModule = (() => {
     return normKatStr(catStr);
   }
 
+  function katNormKey(grup, ad) {
+    var tam = katTamEtiket(grup, ad);
+    if (typeof HKKategori !== "undefined" && HKKategori.normKey) {
+      return HKKategori.normKey(tam);
+    }
+    return normKatStr(grup).toUpperCase() + "\0" + normKatStr(ad).toLocaleLowerCase("tr");
+  }
+
+  function katTamEtiket(grup, ad) {
+    if (typeof HKKategori !== "undefined" && HKKategori.canonicalEtiket) {
+      return HKKategori.canonicalEtiket(grup, ad);
+    }
+    return normKatStr(grup).toUpperCase() + " - " + normKatStr(ad);
+  }
+
+  /** İşlem kaydı bu kategori (eski grup/ad) ile mi eşleşiyor — yazım farklarını da kapsar. */
+  function islemKategoriEslesir(islem, eskiGrup, eskiAd) {
+    if (!islem) return false;
+    var mevcut = String(islem.kategori || "");
+    if (!mevcut) return false;
+    var hedefKey = katNormKey(eskiGrup, eskiAd);
+    if (typeof HKKategori !== "undefined" && HKKategori.normKey) {
+      if (HKKategori.normKey(mevcut) === hedefKey) return true;
+      if (HKKategori.normKey(gorunumKategori(mevcut)) === hedefKey) return true;
+    }
+    var eskiTam = katTamEtiket(eskiGrup, eskiAd);
+    if (normKatStr(gorunumKategori(mevcut)) === normKatStr(eskiTam)) return true;
+    if (normKatStr(mevcut) === normKatStr(eskiTam)) return true;
+    if (normKatStr(mevcut) === normKatStr(eskiGrup + " - " + eskiAd)) return true;
+    return false;
+  }
+
+  async function islemleriKategoriYenidenEtiketle(eskiGrup, eskiAd, yeniGrup, yeniAd) {
+    var yeniTam = katTamEtiket(yeniGrup, yeniAd);
+    for (var i = 0; i < _islemler.length; i++) {
+      var islem = _islemler[i];
+      if (!islemKategoriEslesir(islem, eskiGrup, eskiAd)) continue;
+      await IslemlerDB.update(Object.assign({}, islem, { kategori: yeniTam }));
+    }
+  }
+
+  function katAltModalAcikMi() {
+    var duz = $("modal-kat-duzenle");
+    var sil = $("modal-kat-sil");
+    return (duz && !duz.classList.contains("hidden")) || (sil && !sil.classList.contains("hidden"));
+  }
+
+  function katAltModalDurumGuncelle() {
+    document.body.classList.toggle("hk-kat-alt-modal-acik", katAltModalAcikMi());
+  }
+
+  function ayniGrupMu(a, b) {
+    if (typeof HKKategori !== "undefined" && HKKategori.normGrupEslestir) {
+      return HKKategori.normGrupEslestir(a) === HKKategori.normGrupEslestir(b);
+    }
+    if (typeof HKKategori !== "undefined" && HKKategori.normGrup) {
+      return HKKategori.normGrup(a) === HKKategori.normGrup(b);
+    }
+    return normKatStr(a).toLocaleUpperCase("tr") === normKatStr(b).toLocaleUpperCase("tr");
+  }
+
   function para(s){return Number(s).toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2});}
   function tarihSaat(t){if(!t)return"";const[y,m,d]=t.split("-");return d+"."+m+"."+y;}
   function bugun(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
@@ -519,10 +580,13 @@ const IslemlerModule = (() => {
 
   function katDuzenleAc(k){
     _katDuzId=k.id;
-    $("inp-duz-grup").value=k.grup;$("inp-duz-ad").value=k.ad;
+    $("inp-duz-grup").value=k.grup;
+    $("inp-duz-ad").value=k.ad;
     const aw=$("duz-ad-wrap");if(aw)aw.style.display="";
+    const ai=$("inp-duz-ad");if(ai){ai.style.display="";ai.disabled=false;}
     $("modal-kat-duzenle").querySelector(".modal-title").textContent="Kategoriyi Duzenle";
     $("modal-kat-duzenle").classList.remove("hidden");
+    katAltModalDurumGuncelle();
     setTimeout(()=>$("inp-duz-ad").focus(),200);
   }
   function grupDuzenleAc(eskiGrup){
@@ -532,51 +596,67 @@ const IslemlerModule = (() => {
     const ai=$("inp-duz-ad");if(ai)ai.style.display="none";
     $("modal-kat-duzenle").querySelector(".modal-title").textContent="Grup Adi Duzenle";
     $("modal-kat-duzenle").classList.remove("hidden");
+    katAltModalDurumGuncelle();
     setTimeout(()=>$("inp-duz-grup").focus(),200);
   }
   function katDuzenleKapatGenel(){
     $("modal-kat-duzenle").classList.add("hidden");_katDuzId=null;
     const aw=$("duz-ad-wrap");if(aw)aw.style.display="";
-    const ai=$("inp-duz-ad");if(ai)ai.style.display="";
+    const ai=$("inp-duz-ad");if(ai){ai.style.display="";ai.disabled=false;}
     $("modal-kat-duzenle").querySelector(".modal-title").textContent="Kategoriyi Duzenle";
+    katAltModalDurumGuncelle();
   }
   async function katDuzenleKaydetGenel(){
     const str=String(_katDuzId||"");
     if(str.startsWith("__GRUP__:")){
       const eg=str.replace("__GRUP__:","");
-      const yg=($("inp-duz-grup").value||"").trim().toUpperCase();
+      const yg=($("inp-duz-grup").value||"").trim().toLocaleUpperCase("tr");
       if(!yg){alert("Grup adi bos olamaz.");return;}
-      const gks=_kategoriler.filter(k=>k.grup===eg);
+      const gks=_kategoriler.filter(k=>ayniGrupMu(k.grup, eg));
       for(const gk of gks){
         await KategorilerDB.update(Object.assign({},gk,{grup:yg}));
-        const ed=eg+" - "+gk.ad,yd=yg+" - "+gk.ad;
-        const edN=normKatStr(ed);
-        for(const i of _islemler.filter(x=>normKatStr(x.kategori)===edN))await IslemlerDB.update(Object.assign({},i,{kategori:yd}));
-        if(normKatStr(_seciliKat.value)===normKatStr(ed)){_seciliKat={value:yd,label:gk.ad,tip:gk.tip};$("hg-kat-trigger").textContent=gk.ad;}
+        await islemleriKategoriYenidenEtiketle(gk.grup, gk.ad, yg, gk.ad);
+        const ed=katTamEtiket(eg, gk.ad), yd=katTamEtiket(yg, gk.ad);
+        if(normKatStr(_seciliKat.value)===normKatStr(ed)||normKatStr(_seciliKat.value)===normKatStr(gorunumKategori(ed))){
+          _seciliKat={value:yd,label:gk.ad,tip:gk.tip};
+          $("hg-kat-trigger").textContent=gk.ad;
+        }
       }
     } else {
-      const yg=($("inp-duz-grup").value||"").trim().toUpperCase();
+      const yg=($("inp-duz-grup").value||"").trim().toLocaleUpperCase("tr");
       const ya=($("inp-duz-ad").value||"").trim();
       if(!yg||!ya){alert("Bos birakilamaz.");return;}
       const k=_kategoriler.find(x=>x.id===_katDuzId);
       if(!k){alert("Bulunamadi.");return;}
-      const ed=k.grup+" - "+k.ad,yd=yg+" - "+ya;
+      const eskiGrup=k.grup, eskiAd=k.ad;
       await KategorilerDB.update(Object.assign({},k,{grup:yg,ad:ya}));
-      const edN=normKatStr(ed);
-      for(const i of _islemler.filter(x=>normKatStr(x.kategori)===edN))await IslemlerDB.update(Object.assign({},i,{kategori:yd}));
-      if(normKatStr(_seciliKat.value)===normKatStr(ed)){_seciliKat={value:yd,label:ya,tip:k.tip};$("hg-kat-trigger").textContent=ya;}
+      await islemleriKategoriYenidenEtiketle(eskiGrup, eskiAd, yg, ya);
+      const ed=katTamEtiket(eskiGrup, eskiAd), yd=katTamEtiket(yg, ya);
+      if(normKatStr(_seciliKat.value)===normKatStr(ed)||normKatStr(_seciliKat.value)===normKatStr(gorunumKategori(ed))){
+        _seciliKat={value:yd,label:ya,tip:k.tip};
+        $("hg-kat-trigger").textContent=ya;
+      }
     }
-    _kategoriler=await KategorilerDB.getAll();_islemler=await IslemlerDB.getAll();
-    katDuzenleKapatGenel();renderKatListe();doldurGrupSelect(_katTip);renderHgList("");renderList();renderSummary();renderKategoriOzeti();
+    _kategoriler=await KategorilerDB.getAll();
+    _islemler=await IslemlerDB.getAll();
+    _islemler.sort((a,b)=>a.tarih.localeCompare(b.tarih)||(a.olusturma||0)-(b.olusturma||0));
+    katDuzenleKapatGenel();
+    renderKatListe();
+    doldurGrupSelect(_katTip);
+    doldurGrupFilter();
+    renderHgList("");
+    renderList();
+    renderSummary();
+    renderKategoriOzeti();
   }
 
-  function katSilAc(k){_katSilId=k.id;$("kat-sil-text").textContent=k.grup+" - "+k.ad+" silinsin mi?";$("modal-kat-sil").classList.remove("hidden");}
-  function katSilKapat(){$("modal-kat-sil").classList.add("hidden");_katSilId=null;}
+  function katSilAc(k){_katSilId=k.id;$("kat-sil-text").textContent=k.grup+" - "+k.ad+" silinsin mi?";$("modal-kat-sil").classList.remove("hidden");katAltModalDurumGuncelle();}
+  function katSilKapat(){$("modal-kat-sil").classList.add("hidden");_katSilId=null;katAltModalDurumGuncelle();}
   async function katSilOnayla(){
     if(!_katSilId)return;
     await KategorilerDB.delete(_katSilId);
     _kategoriler=await KategorilerDB.getAll();
-    katSilKapat();renderKatListe();doldurGrupSelect(_katTip);renderHgList("");
+    katSilKapat();renderKatListe();doldurGrupSelect(_katTip);doldurGrupFilter();renderHgList("");renderList();renderSummary();renderKategoriOzeti();
   }
 
   function doldurGrupSelect(tip){
@@ -588,7 +668,7 @@ const IslemlerModule = (() => {
   }
   async function yeniKatKaydet(){
     const sel=$("sel-kat-grup");let grup=sel.value;
-    if(grup==="__YENI__"){const yg=($("inp-kat-grup-yeni").value||"").trim().toUpperCase();if(!yg){alert("Grup adi girin.");return;}grup=yg;}
+    if(grup==="__YENI__"){const yg=($("inp-kat-grup-yeni").value||"").trim().toLocaleUpperCase("tr");if(!yg){alert("Grup adi girin.");return;}grup=yg;}
     const ad=($("inp-kat-ad").value||"").trim();if(!ad){alert("Kategori adi girin.");return;}
     await KategorilerDB.add({tip:_katTip,grup,ad,varsayilan:false});
     $("inp-kat-ad").value="";
@@ -737,7 +817,10 @@ const IslemlerModule = (() => {
     $("filter-grup").addEventListener("change",listeVeOzetGuncelle);
     $("btn-yeni-kat-bar").addEventListener("click",katYonetimAc);
     $("kat-close").addEventListener("click",katYonetimKapat);
-    $("modal-kategori").addEventListener("click",e=>{if(e.target===$("modal-kategori"))katYonetimKapat();});
+    $("modal-kategori").addEventListener("click",e=>{
+      if(katAltModalAcikMi())return;
+      if(e.target===$("modal-kategori"))katYonetimKapat();
+    });
     $("kat-tab-gider").addEventListener("click",()=>katTipSec("gider"));
     $("kat-tab-gelir").addEventListener("click",()=>katTipSec("gelir"));
     $("kat-kaydet").addEventListener("click",yeniKatKaydet);
@@ -750,8 +833,21 @@ const IslemlerModule = (() => {
     $("kat-duz-close").addEventListener("click",katDuzenleKapatGenel);
     $("kat-duz-iptal").addEventListener("click",katDuzenleKapatGenel);
     $("kat-duz-kaydet").addEventListener("click",katDuzenleKaydetGenel);
-    $("modal-kat-duzenle").addEventListener("click",e=>{if(e.target===$("modal-kat-duzenle"))katDuzenleKapatGenel();});
-    [$("inp-duz-grup"),$("inp-duz-ad")].forEach(el=>el&&el.addEventListener("keydown",e=>{if(e.key==="Enter")katDuzenleKaydetGenel();}));
+    var duzModal=$("modal-kat-duzenle");
+    if(duzModal){
+      var duzBox=duzModal.querySelector(".modal-box");
+      if(duzBox){
+        duzBox.addEventListener("click",e=>e.stopPropagation());
+        duzBox.addEventListener("touchstart",e=>e.stopPropagation(),{passive:true});
+      }
+    }
+    [$("inp-duz-grup"),$("inp-duz-ad")].forEach(el=>{
+      if(!el)return;
+      el.addEventListener("keydown",e=>{
+        if(e.key==="Enter"){e.preventDefault();katDuzenleKaydetGenel();}
+        e.stopPropagation();
+      });
+    });
     $("kat-sil-close").addEventListener("click",katSilKapat);
     $("kat-sil-iptal").addEventListener("click",katSilKapat);
     $("kat-sil-onayla").addEventListener("click",katSilOnayla);

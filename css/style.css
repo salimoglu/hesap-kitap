@@ -472,6 +472,17 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
   margin: 0;
 }
 .modal-sm { max-height: min(60dvh, calc(100dvh - 32px)); }
+#modal-kat-duzenle,
+#modal-kat-sil {
+  z-index: 560;
+}
+body.hk-kat-alt-modal-acik #modal-kategori {
+  pointer-events: none;
+}
+#modal-kat-duzenle .modal-box,
+#modal-kat-sil .modal-box {
+  pointer-events: auto;
+}
 @keyframes modal-center-in {
   from { opacity: 0; transform: scale(0.96) translateY(8px); }
   to { opacity: 1; transform: scale(1) translateY(0); }
@@ -2234,6 +2245,17 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
   margin: 0;
 }
 .modal-sm { max-height: min(60dvh, calc(100dvh - 32px)); }
+#modal-kat-duzenle,
+#modal-kat-sil {
+  z-index: 560;
+}
+body.hk-kat-alt-modal-acik #modal-kategori {
+  pointer-events: none;
+}
+#modal-kat-duzenle .modal-box,
+#modal-kat-sil .modal-box {
+  pointer-events: auto;
+}
 @keyframes modal-center-in {
   from { opacity: 0; transform: scale(0.96) translateY(8px); }
   to { opacity: 1; transform: scale(1) translateY(0); }

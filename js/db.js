@@ -73,9 +73,25 @@ function hkFoldTr(s) {
     .replace(/û/g, "u");
 }
 
-function hkNormGrup(g) {
-  var u = hkNormSpaces(g).toLocaleUpperCase("tr");
+function hkNormGrupKaydet(g) {
+  return hkNormSpaces(g).toLocaleUpperCase("tr");
+}
+
+/** Eslestirme / birlestirme icin (BIRIKIM=BİRİKİM, IASE=İAŞE) — kayda yazilmaz. */
+function hkNormGrupEslestir(g) {
+  var u = hkNormGrupKaydet(g);
   return HK_GRUP_ALIAS[u] || u;
+}
+
+/** Geriye uyumluluk: gorunen / kaydedilen grup adi (alias uygulanmaz). */
+function hkNormGrup(g) {
+  return hkNormGrupKaydet(g);
+}
+
+/** BIRIKIM / BİRİKİM / birikim — birikim modulu eslesmesi (grup adi degisse de). */
+function hkIsBirikimGrup(g) {
+  if (hkNormGrupEslestir(g) === "BIRIKIM") return true;
+  return hkFoldTr(hkNormSpaces(g)) === "birikim";
 }
 
 function hkNormAd(ad) {
@@ -83,11 +99,11 @@ function hkNormAd(ad) {
 }
 
 function hkKatNormKey(grup, ad) {
-  return hkNormGrup(grup) + "\0" + hkFoldTr(ad);
+  return hkNormGrupEslestir(grup) + "\0" + hkFoldTr(ad);
 }
 
 function hkKatCanonicalEtiket(grup, ad) {
-  return hkNormGrup(grup) + " - " + hkNormAd(ad);
+  return hkNormGrupKaydet(grup) + " - " + hkNormAd(ad);
 }
 
 function hkKatNormKeyFromTam(tam) {
@@ -127,9 +143,16 @@ window.HKKategori = {
   normKey: hkKatNormKeyFromTam,
   canonicalEtiket: hkKatCanonicalEtiket,
   resolve: hkResolveCanonicalEtiket,
-  normGrup: hkNormGrup,
-  normAd: hkNormAd
+  normGrup: hkNormGrupKaydet,
+  normGrupEslestir: hkNormGrupEslestir,
+  normAd: hkNormAd,
+  isBirikimGrup: hkIsBirikimGrup
 };
+
+/** Islemler listesi degisti — birikim modulu dinleyebilir. */
+function hkIslemlerBildir() {
+  try { window.dispatchEvent(new CustomEvent("hk-islemler-degisti")); } catch (e) {}
+}
 
 /** Kategori listesi degisti — birikim vb. moduller dinleyebilir. */
 function hkKategorilerBildir() {
@@ -152,18 +175,21 @@ var IslemlerDB = {
     var id = await promisify(tx(STORES.ISLEMLER, "readwrite").add(Object.assign({}, islem, { olusturma: Date.now() })));
     var eklenen = await promisify(tx(STORES.ISLEMLER, "readonly").get(id));
     if (typeof fbIslemEkle !== "undefined") fbIslemEkle(Object.assign({}, eklenen, { id: id }));
+    hkIslemlerBildir();
     return id;
   },
   update: async function(islem) {
     await openDB();
     var result = await promisify(tx(STORES.ISLEMLER, "readwrite").put(islem));
     if (typeof fbIslemGuncelle !== "undefined") fbIslemGuncelle(islem);
+    hkIslemlerBildir();
     return result;
   },
   delete: async function(id) {
     await openDB();
     var result = await promisify(tx(STORES.ISLEMLER, "readwrite").delete(id));
     if (typeof fbIslemSil !== "undefined") fbIslemSil(id);
+    hkIslemlerBildir();
     return result;
   },
   getById: async function(id) { await openDB(); return promisify(tx(STORES.ISLEMLER, "readonly").get(id)); },
@@ -235,7 +261,7 @@ var KategorilerDB = {
   },
   add: async function(kat) {
     await openDB();
-    var g = hkNormGrup(kat.grup);
+    var g = hkNormGrupKaydet(kat.grup);
     var a = hkNormAd(kat.ad);
     var mevcut = await getAll(tx(STORES.KATEGORILER, "readonly"));
     var key = hkKatNormKey(g, a);
@@ -255,7 +281,7 @@ var KategorilerDB = {
   },
   update: async function(kat) {
     await openDB();
-    var kayit = Object.assign({}, kat, { grup: hkNormGrup(kat.grup), ad: hkNormAd(kat.ad) });
+    var kayit = Object.assign({}, kat, { grup: hkNormGrupKaydet(kat.grup), ad: hkNormAd(kat.ad) });
     var result = await promisify(tx(STORES.KATEGORILER, "readwrite").put(kayit));
     await kategorileriBulutaYaz();
     hkKategorilerBildir();
@@ -285,9 +311,9 @@ var KategorilerDB = {
       winner = list[0];
       canon = hkKatCanonicalEtiket(winner.grup, winner.ad);
       normToCanon[key] = canon;
-      if (winner.grup !== hkNormGrup(winner.grup) || winner.ad !== hkNormAd(winner.ad)) {
+      if (winner.grup !== hkNormGrupKaydet(winner.grup) || winner.ad !== hkNormAd(winner.ad)) {
         await promisify(tx(STORES.KATEGORILER, "readwrite").put(Object.assign({}, winner, {
-          grup: hkNormGrup(winner.grup),
+          grup: hkNormGrupKaydet(winner.grup),
           ad: hkNormAd(winner.ad)
         })));
       }

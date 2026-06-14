@@ -453,6 +453,10 @@
           if (now - sonYenile < minAralikMs) return;
           var u = typeof fbMevcutKullanici === "function" ? fbMevcutKullanici() : null;
           if (!u || u.isAnonymous) return;
+          var katModal = document.getElementById("modal-kat-duzenle");
+          var katYonet = document.getElementById("modal-kategori");
+          if (katModal && !katModal.classList.contains("hidden")) return;
+          if (katYonet && !katYonet.classList.contains("hidden")) return;
           sonYenile = now;
           if (typeof window.sayfaYenile === "function") window.sayfaYenile();
         } catch (eSy) {}
