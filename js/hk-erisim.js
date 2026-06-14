@@ -8,13 +8,14 @@ var HK_ERISIM = (function () {
     "salimoglu@gmail.com"
   ];
 
-  /** Diğer kullanıcılara açık modüller */
+  /** Diğer kullanıcılara açık modüller (kapalı: urun, verilen-altin, vefa, muhtac) */
   var MISAFIR_SEKMELER = [
     "islemler",
     "birikim",
     "arabam",
     "kredi",
-    "alacaklar"
+    "alacaklar",
+    "altin"
   ];
 
   /** Yöneticide görünen tüm sekmeler (sıra korunur) */
