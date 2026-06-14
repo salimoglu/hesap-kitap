@@ -48,11 +48,11 @@ var ArabamModule = (function () {
   var _aktifAracId = null;
 
   var BELGE_TIPLER = [
-    { key: "bakim", label: "Bakım" },
-    { key: "muayene", label: "Muayene" },
-    { key: "sigorta", label: "Trafik sigortası" },
-    { key: "kasko", label: "Kasko" },
-    { key: "km", label: "Km güncelleme" }
+    { key: "bakim", label: "Bakım", chip: "Bakım" },
+    { key: "muayene", label: "Muayene", chip: "Muayene" },
+    { key: "sigorta", label: "Trafik sigortası", chip: "Sigorta" },
+    { key: "kasko", label: "Kasko", chip: "Kasko" },
+    { key: "km", label: "Km güncelleme", chip: "Km" }
   ];
 
   function belgeTipLabel(key) {
@@ -668,17 +668,31 @@ var ArabamModule = (function () {
     h += '<div class="ar-bakim-ozet" id="ar-d-bakim-ozet"></div>';
 
     h += '<div class="ar-belge-form-wrap">';
+    h += '<div class="ar-belge-form-kart">';
+    h += '<div class="ar-belge-form-head">';
     h += '<div class="ar-belge-form-baslik">Hızlı kayıt</div>';
-    h += '<div class="ar-belge-form-grid">';
-    h += '<div class="field-group"><label class="field-label" for="ar-belge-tip">Tür</label><select id="ar-belge-tip" class="field-select">';
-    BELGE_TIPLER.forEach(function (bt) {
-      h += '<option value="' + bt.key + '">' + bt.label + "</option>";
+    h += '<p class="ar-belge-form-hint">Bakım, muayene veya km bilgisini tek adımda güncelleyin</p>';
+    h += "</div>";
+    h += '<div class="ar-belge-tip-blok">';
+    h += '<span class="ar-belge-tip-lbl">Kayıt türü</span>';
+    h += '<div class="ar-belge-tip-chips" id="ar-belge-tip-chips" role="group" aria-label="Kayıt türü">';
+    BELGE_TIPLER.forEach(function (bt, i) {
+      h += '<button type="button" class="ar-belge-tip-chip' + (i === 0 ? " selected" : "") + '" data-tip="' + bt.key + '">' + (bt.chip || bt.label) + "</button>";
     });
-    h += "</select></div>";
-    h += '<div class="field-group"><label class="field-label" for="ar-belge-tarih">Tarih</label><input type="date" id="ar-belge-tarih" class="field-input" value="' + bugun + '"/></div>';
-    h += '<div class="field-group hidden" id="ar-belge-km-gr"><label class="field-label" for="ar-belge-km">Km</label><input type="number" id="ar-belge-km" class="field-input" placeholder="125000" min="0" step="1" inputmode="numeric"/></div>';
-    h += '<div class="field-group ar-belge-not-gr"><label class="field-label" for="ar-belge-not">Not</label><input type="text" id="ar-belge-not" class="field-input" placeholder="İsteğe bağlı" maxlength="80"/></div>';
-    h += '<button type="button" class="ar-belge-kaydet-btn" id="ar-belge-kaydet-btn">Kaydet</button>';
+    h += '</div><input type="hidden" id="ar-belge-tip" value="bakim"/>';
+    h += "</div>";
+    h += '<div class="ar-belge-alan-grid">';
+    h += '<div class="field-group" id="ar-belge-tarih-gr">';
+    h += '<label class="field-label" for="ar-belge-tarih" id="ar-belge-tarih-lbl">Bakım tarihi</label>';
+    h += '<input type="date" id="ar-belge-tarih" class="field-input" value="' + bugun + '"/></div>';
+    h += '<div class="field-group hidden" id="ar-belge-km-gr">';
+    h += '<label class="field-label" for="ar-belge-km" id="ar-belge-km-lbl">Bakımdaki km</label>';
+    h += '<input type="number" id="ar-belge-km" class="field-input" placeholder="125000" min="0" step="1" inputmode="numeric"/></div>';
+    h += '<div class="field-group ar-belge-not-gr">';
+    h += '<label class="field-label" for="ar-belge-not">Not <span class="ar-label-hint">isteğe bağlı</span></label>';
+    h += '<input type="text" id="ar-belge-not" class="field-input" placeholder="Kısa not…" maxlength="80"/></div>';
+    h += "</div>";
+    h += '<button type="button" class="ar-belge-kaydet-btn" id="ar-belge-kaydet-btn">Kaydı ekle</button>';
     h += "</div></div>";
 
     h += '<div class="ar-yil-ozet" id="ar-d-yil-ozet"></div>';
@@ -730,7 +744,7 @@ var ArabamModule = (function () {
       wireBelgeGecmisSil(aid);
     }
 
-    belgeFormKmGoster();
+    syncBelgeFormUI();
 
     var ozYil = $("ar-d-yil-ozet");
     if (ozYil) ozYil.innerHTML = yillikOzetHtml(a);
@@ -808,12 +822,26 @@ var ArabamModule = (function () {
     };
   }
 
-  function belgeFormKmGoster() {
+  function syncBelgeFormUI() {
     var tipEl = $("ar-belge-tip");
     var kmGr = $("ar-belge-km-gr");
-    if (!tipEl || !kmGr) return;
+    var kmLbl = $("ar-belge-km-lbl");
+    var tarihGr = $("ar-belge-tarih-gr");
+    var tarihLbl = $("ar-belge-tarih-lbl");
+    if (!tipEl) return;
     var tip = tipEl.value;
-    kmGr.classList.toggle("hidden", tip !== "bakim" && tip !== "km");
+    if (kmGr) kmGr.classList.toggle("hidden", tip !== "bakim" && tip !== "km");
+    if (kmLbl) kmLbl.textContent = tip === "km" ? "Güncel km" : "Bakımdaki km";
+    if (tarihGr) tarihGr.classList.toggle("hidden", tip === "km");
+    if (tarihLbl) {
+      if (tip === "bakim") tarihLbl.textContent = "Bakım tarihi";
+      else if (tip === "muayene") tarihLbl.textContent = "Muayene bitiş";
+      else if (tip === "sigorta") tarihLbl.textContent = "Sigorta bitiş";
+      else if (tip === "kasko") tarihLbl.textContent = "Kasko bitiş";
+    }
+    document.querySelectorAll(".ar-belge-tip-chip").forEach(function (b) {
+      b.classList.toggle("selected", b.dataset.tip === tip);
+    });
   }
 
   function wireBelgeGecmisSil(aid) {
@@ -995,7 +1023,16 @@ var ArabamModule = (function () {
       aracModalAc(_aktifAracId);
     });
 
-    $("ar-belge-tip") && $("ar-belge-tip").addEventListener("change", belgeFormKmGoster);
+    var tipChips = $("ar-belge-tip-chips");
+    if (tipChips) {
+      tipChips.addEventListener("click", function (e) {
+        var btn = e.target.closest(".ar-belge-tip-chip");
+        if (!btn) return;
+        var hid = $("ar-belge-tip");
+        if (hid) hid.value = btn.dataset.tip || "bakim";
+        syncBelgeFormUI();
+      });
+    }
 
     $("ar-belge-kaydet-btn") && $("ar-belge-kaydet-btn").addEventListener("click", async function () {
       if (!_aktifAracId) return;
