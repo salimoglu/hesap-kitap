@@ -4545,23 +4545,48 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
 #tab-islemler .butce-panel-head .ozet-bar {
   border-bottom: 1px solid var(--border);
 }
-#tab-islemler .ioz-panel-head .ioz-ust-ozet-stack {
-  height: auto;
-  min-height: calc(var(--islemler-ozet-h) + 28px);
-  max-height: none;
-  flex-direction: column;
-  align-items: stretch;
-  justify-content: center;
-  gap: 2px;
-  padding: 5px var(--islem-px);
-}
-#tab-islemler .ioz-ozet-satir {
-  display: flex;
+#tab-islemler .ioz-panel-head .ioz-ust-ozet-yatay {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2px 6px;
+  height: var(--islemler-ozet-h);
+  min-height: var(--islemler-ozet-h);
+  max-height: var(--islemler-ozet-h);
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  min-height: 20px;
+  justify-items: stretch;
+  padding: 0 var(--islem-px);
 }
+#tab-islemler .ioz-ozet-hucre {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  min-width: 0;
+}
+#tab-islemler .ioz-ozet-lbl {
+  font-family: var(--islem-ui);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  line-height: 1;
+}
+#tab-islemler .ioz-ozet-val {
+  font-family: var(--islem-rakam);
+  font-size: clamp(10px, 2.2vw, 13px);
+  font-weight: var(--islem-rakam-w, 700);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+#tab-islemler .ioz-ozet-val.gelir { color: var(--green); }
+#tab-islemler .ioz-ozet-val.gider { color: var(--red); }
+#tab-islemler .ioz-ozet-val.net { color: var(--gold); }
 #tab-islemler .ioz-tip-bolum {
   background: var(--bg-card);
   border: 1px solid var(--border);
