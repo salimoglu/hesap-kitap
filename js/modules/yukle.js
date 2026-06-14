@@ -8,7 +8,7 @@ var _ay=new Date().getMonth(),_yil=new Date().getFullYear(),_veri={};
 var _gizli={gelir:[],zorunlu:[],istege:[],yatirim:[]};
 var _ekstra={gelir:[],zorunlu:[],istege:[],yatirim:[]};
 var _sira={gelir:[],zorunlu:[],istege:[],yatirim:[]};
-var _btSatirBolum=null,_butceSablonKirli=false,_btKokBagli=false,_btModalBagli=false;
+var _btSatirBolum=null,_btSatirKaydediliyor=false,_butceSablonKirli=false,_btKokBagli=false,_btModalBagli=false;
 var YAPI=[
   {b:"gelir",t:"GELİR",s:[
     {id:"maas",l:"MAAŞ"},{id:"ek_gelir",l:"EK GELİR"},{id:"diger_gelir",l:"DİĞER GELİR"},
@@ -250,22 +250,23 @@ function btSatirModalKapat(){
   if(modal)modal.classList.add("hidden");
 }
 function satirEkleKaydet(){
-  if(!_btSatirBolum)return;
+  if(!_btSatirBolum||_btSatirKaydediliyor)return;
   var inp=$("bt-satir-ad");
   var label=inp?(inp.value||"").trim():"";
   if(!label){if(inp)inp.focus();return;}
+  _btSatirKaydediliyor=true;
   var bolum=_btSatirBolum;
+  btSatirModalKapat();
   sablonInit();
   var list=_ekstra[bolum]||[];
   var id=uid();
   list.push({id:id,label:label.toUpperCase()});
   _veri[id]=0;
   bolumSiraSenk(bolum);
-  _sira[bolum].push(id);
-  btSatirModalKapat();
   sablonKaydetVeSenk();
   bkaydet();
   brender();
+  _btSatirKaydediliyor=false;
 }
 function satirSil(bolum,id){
   if(!confirm("Bu satırı kaldırmak istiyor musunuz?"))return;
