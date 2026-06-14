@@ -84,12 +84,10 @@ const IslemlerModule = (() => {
       '<span class="islemler-kol-ay butce-kol-ay">'+esc(ayLbl)+'</span>'+
       '<button type="button" class="butce-ay-btn" id="ioz-ileri"'+(iozAyIleriKapali()?' disabled':'')+'>&#8250;</button>'+
       '</div></div>'+
-      '<div class="ozet-bar ioz-ust-ozet">'+
-      '<div class="ozet-item"><span class="ozet-label">Gelir</span><span class="ozet-val gelir">'+para(ayVer.gelir)+'</span></div>'+
-      '<div class="ozet-sep"></div>'+
-      '<div class="ozet-item"><span class="ozet-label">Gider</span><span class="ozet-val gider">'+para(ayVer.gider)+'</span></div>'+
-      '<div class="ozet-sep"></div>'+
-      '<div class="ozet-item"><span class="ozet-label">Net</span><span class="ozet-val net">'+(ayNet>=0?"":"-")+para(Math.abs(ayNet))+'</span></div>'+
+      '<div class="ozet-bar ioz-ust-ozet ioz-ust-ozet-stack">'+
+      '<div class="ioz-ozet-satir"><span class="ozet-label">Gelir</span><span class="ozet-val gelir">'+para(ayVer.gelir)+'</span></div>'+
+      '<div class="ioz-ozet-satir"><span class="ozet-label">Gider</span><span class="ozet-val gider">'+para(ayVer.gider)+'</span></div>'+
+      '<div class="ioz-ozet-satir"><span class="ozet-label">Net</span><span class="ozet-val net">'+(ayNet>=0?"":"-")+para(Math.abs(ayNet))+'</span></div>'+
       '</div>';
     iozAyBagla();
   }
@@ -161,6 +159,62 @@ const IslemlerModule = (() => {
     if(sol)sol.textContent=txt;
   }
 
+  function iozKatAdKisa(ad){
+    return ad.indexOf(" - ")>=0?ad.slice(ad.indexOf(" - ")+3):ad;
+  }
+
+  function iozTipBolumRender(tip, katListe, ayVer){
+    const filtered=katListe.filter(function(k){return tip==="gelir"?k.gelir>0:k.gider>0;});
+    filtered.sort(function(a,b){return tip==="gelir"?b.gelir-a.gelir:b.gider-a.gider;});
+    const baslik=tip==="gelir"?"GELİR":"GİDER";
+    let h='<div class="ioz-tip-bolum ioz-tip-'+tip+'">';
+    h+='<div class="ioz-bolum-baslik ioz-tip-baslik">'+baslik+'</div>';
+    if(!filtered.length){
+      h+='<div class="ioz-bos ioz-tip-bos">Bu ayda '+baslik.toLocaleLowerCase("tr")+' yok.</div>';
+      h+='</div>';
+      return h;
+    }
+    const topRef=tip==="gelir"?(ayVer.gelir||1):(ayVer.gider||1);
+    const gruplar={};
+    filtered.forEach(function(k){
+      if(!gruplar[k.grup])gruplar[k.grup]=[];
+      gruplar[k.grup].push(k);
+    });
+    const grupSira=Object.keys(gruplar).sort(function(a,b){return a.localeCompare(b,"tr");});
+    grupSira.forEach(function(g){
+      const gListe=gruplar[g];
+      let gTopVal=0;
+      gListe.forEach(function(k){gTopVal+=tip==="gelir"?k.gelir:k.gider;});
+      const gBarPct=Math.round((gTopVal/topRef)*100);
+      h+='<div class="ioz-grup-wrap">';
+      h+='<div class="ioz-grup-baslik">';
+      h+='<span class="ioz-grup-ad">'+esc(g)+'</span>';
+      h+='<span class="ioz-grup-toplam '+(tip==="gelir"?"gelir":"gider")+'">'+(tip==="gelir"?"+":"-")+para(gTopVal)+'</span>';
+      h+='</div>';
+      h+='<div class="ioz-grup-bar-wrap" title="Grup '+baslik.toLocaleLowerCase("tr")+' / ay toplam %'+gBarPct+'">';
+      h+='<span class="ioz-kat-bar-track" aria-hidden="true"><span class="ioz-kat-bar-fill'+(tip==="gelir"?" gelir-bar ioz-grup-bar-fill":"")+'" style="width:'+gBarPct+'%"></span></span>';
+      h+='<span class="ioz-grup-pct">%'+gBarPct+'</span>';
+      h+='</div></div>';
+      gListe.forEach(function(k){
+        const tutVal=tip==="gelir"?k.gelir:k.gider;
+        const barPct=Math.round((tutVal/topRef)*100);
+        h+='<div class="ioz-kat-satir">';
+        h+='<div class="ioz-kat-ust">';
+        h+='<span class="ioz-kat-ad">'+esc(iozKatAdKisa(k.ad))+'</span>';
+        h+='<span class="ioz-kat-ust-sag">';
+        h+='<span class="ioz-kat-tutar '+(tip==="gelir"?"gelir":"gider")+'">'+(tip==="gelir"?"+":"-")+para(tutVal)+'</span>';
+        h+='<span class="ioz-kat-adet">'+k.adet+' işlem</span>';
+        h+='</span></div>';
+        h+='<div class="ioz-kat-bar-wrap" title="Toplam '+baslik.toLocaleLowerCase("tr")+'e göre %'+barPct+'">';
+        h+='<span class="ioz-kat-bar-track" aria-hidden="true"><span class="ioz-kat-bar-fill'+(tip==="gelir"?" gelir-bar":"")+'" style="width:'+barPct+'%"></span></span>';
+        h+='<span class="ioz-kat-pct">%'+barPct+'</span>';
+        h+='</div></div>';
+      });
+    });
+    h+='</div>';
+    return h;
+  }
+
   function renderKategoriOzeti(){
     const head=$("ioz-panel-head");
     const wrap=$("islem-kat-ozet-scroll");
@@ -178,67 +232,18 @@ const IslemlerModule = (() => {
 
     let h='';
 
-    /* —— Aylık detay (kaydiran icerik) —— */
-    h+='<div class="ioz-bolum ioz-bolum-ay">';
-
+    /* —— Aylık detay: gelir ustte, gider altta —— */
     const katListe=Object.entries(ayVer.kat).map(function(e){
       const k=e[1];
-      const top=k.gelir+k.gider;
-      return {ad:e[0],grup:k.grup||kategoriGrupAdi(e[0]),gelir:k.gelir,gider:k.gider,adet:k.adet,top:top,net:k.gelir-k.gider};
-    }).filter(function(x){return x.top>0;}).sort(function(a,b){return b.top-a.top;});
+      return {ad:e[0],grup:k.grup||kategoriGrupAdi(e[0]),gelir:k.gelir,gider:k.gider,adet:k.adet};
+    });
 
-    const topGider=ayVer.gider||1;
-
-    if(!katListe.length){
+    if(!katListe.some(function(k){return k.gelir>0||k.gider>0;})){
       h+='<div class="ioz-bos">Bu ayda kategorili işlem yok.</div>';
     }else{
-      const gruplar={};
-      katListe.forEach(function(k){
-        if(!gruplar[k.grup])gruplar[k.grup]=[];
-        gruplar[k.grup].push(k);
-      });
-      const grupSira=Object.keys(gruplar).sort(function(a,b){return a.localeCompare(b,"tr");});
-      grupSira.forEach(function(g){
-        const gListe=gruplar[g];
-        const gTop=grupToplamTutar(gListe);
-        const gBarPct=gTop.gider>0?Math.round((gTop.gider/topGider)*100):0;
-        h+='<div class="ioz-grup-wrap">';
-        h+='<div class="ioz-grup-baslik">';
-        h+='<span class="ioz-grup-ad">'+esc(g)+'</span>';
-        if(gTop.txt)h+='<span class="ioz-grup-toplam '+gTop.cls+'">'+gTop.txt+'</span>';
-        h+='</div>';
-        if(gTop.gider>0){
-          h+='<div class="ioz-grup-bar-wrap" title="Grup gideri / ay toplam gider %'+gBarPct+'">';
-          h+='<span class="ioz-kat-bar-track" aria-hidden="true"><span class="ioz-kat-bar-fill ioz-grup-bar-fill" style="width:'+gBarPct+'%"></span></span>';
-          h+='<span class="ioz-grup-pct">%'+gBarPct+'</span>';
-          h+='</div>';
-        }
-        h+='</div>';
-        gListe.forEach(function(k){
-          const barPct=k.gider>0?Math.round((k.gider/topGider)*100):0;
-          const gelirPct=k.gelir>0?Math.round((k.gelir/(ayVer.gelir||1))*100):0;
-          const adKisa=k.ad.indexOf(" - ")>=0?k.ad.slice(k.ad.indexOf(" - ")+3):k.ad;
-          const tut=katTekTutar(k);
-          h+='<div class="ioz-kat-satir">';
-          h+='<div class="ioz-kat-ust">';
-          h+='<span class="ioz-kat-ad">'+esc(adKisa)+'</span>';
-          h+='<span class="ioz-kat-ust-sag">';
-          if(tut.txt)h+='<span class="ioz-kat-tutar '+tut.cls+'">'+tut.txt+'</span>';
-          h+='<span class="ioz-kat-adet">'+k.adet+' işlem</span>';
-          h+='</span></div>';
-          if(k.gider>0){
-            h+='<div class="ioz-kat-bar-wrap" title="Toplam gidere göre %'+barPct+'">';
-            h+='<span class="ioz-kat-bar-track" aria-hidden="true"><span class="ioz-kat-bar-fill" style="width:'+barPct+'%"></span></span>';
-            h+='<span class="ioz-kat-pct">%'+barPct+'</span>';
-            h+='</div>';
-          }else if(k.gelir>0){
-            h+='<span class="ioz-kat-bar-track"><span class="ioz-kat-bar-fill gelir-bar" style="width:'+Math.min(100,gelirPct)+'%"></span></span>';
-          }
-          h+='</div>';
-        });
-      });
+      h+=iozTipBolumRender("gelir", katListe, ayVer);
+      h+=iozTipBolumRender("gider", katListe, ayVer);
     }
-    h+='</div>';
 
     /* —— Yıllık sade —— */
     const yillar=Object.keys(byYil).sort(function(a,b){return b.localeCompare(a);});

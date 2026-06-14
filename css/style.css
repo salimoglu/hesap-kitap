@@ -4113,6 +4113,45 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
 #tab-islemler .butce-panel-head .ozet-bar {
   border-bottom: 1px solid var(--border);
 }
+#tab-islemler .ioz-panel-head .ioz-ust-ozet-stack {
+  height: auto;
+  min-height: calc(var(--islemler-ozet-h) + 28px);
+  max-height: none;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  gap: 2px;
+  padding: 5px var(--islem-px);
+}
+#tab-islemler .ioz-ozet-satir {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 20px;
+}
+#tab-islemler .ioz-tip-bolum {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+#tab-islemler .ioz-tip-bolum:last-of-type {
+  margin-bottom: 0;
+}
+#tab-islemler .ioz-tip-baslik {
+  border-bottom: 1px solid var(--border);
+}
+#tab-islemler .ioz-tip-bos {
+  padding: 12px var(--islem-px);
+  margin: 0;
+  border: none;
+  background: transparent;
+}
+#tab-islemler .ioz-tip-gelir .ioz-kat-bar-fill:not(.gelir-bar) {
+  background: var(--green);
+}
 #tab-islemler .islem-sol-head {
   border-bottom: 1px solid var(--border);
 }
