@@ -3568,6 +3568,72 @@ html.theme-light textarea { color-scheme: light; }
 .theme-toggle-btn:active { transform: scale(0.92); }
 .theme-toggle-btn svg { display: block; width: 18px; height: 18px; }
 
+/* === AYARLAR MENUSU (profil + acilir panel) === */
+.hk-ayar-wrap { position: relative; flex-shrink: 0; }
+.hk-ayar-trigger {
+  background: transparent;
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  width: 36px; height: 36px;
+  padding: 0;
+  cursor: pointer;
+  overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color 0.18s, transform 0.12s;
+}
+.hk-ayar-trigger:hover { border-color: var(--gold); }
+.hk-ayar-trigger:active { transform: scale(0.94); }
+.hk-ayar-avatar { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
+.hk-ayar-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 248px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+  z-index: 500;
+  padding: 6px 0;
+  animation: hkAyarMenuIn 0.15s ease;
+}
+@keyframes hkAyarMenuIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.hk-ayar-user {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px;
+}
+.hk-ayar-menu-avatar {
+  width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex-shrink: 0;
+  border: 1px solid var(--border);
+}
+.hk-ayar-email {
+  font-size: 13px; color: var(--text-secondary);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.hk-ayar-divider { height: 1px; background: var(--border); margin: 4px 0; }
+.hk-ayar-item {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 10px 14px;
+  background: transparent; border: none;
+  color: var(--text-primary);
+  font: inherit; font-size: 14px;
+  text-align: left; text-decoration: none;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.hk-ayar-item:hover, .hk-ayar-item:focus-visible { background: var(--bg-elevated); outline: none; }
+.hk-ayar-item-ikon {
+  width: 22px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--gold); font-size: 16px;
+}
+.hk-ayar-item-ikon svg { width: 18px; height: 18px; display: block; }
+.hk-ayar-cikis { color: var(--red); }
+.hk-ayar-cikis .hk-ayar-item-ikon { color: var(--red); }
+
 /* Acik temada bazi sert rgba'lari yumusatma */
 html.theme-light .topbar { box-shadow: 0 1px 3px rgba(120, 90, 30, 0.08); }
 html.theme-light .modal-box { box-shadow: 0 8px 24px rgba(120, 90, 30, 0.15); }

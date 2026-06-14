@@ -115,6 +115,7 @@
     if (typeof HK_ERISIM !== "undefined") {
       HK_ERISIM.sekmeleriUygula(u);
     }
+    if (typeof HK_AYARLAR !== "undefined") HK_AYARLAR.guncelle(u);
 
     /* Hizli acilis: butce onbellekten aninda; bulut ve islemler paralel */
     if (modulIzinli("islemler")) {
@@ -192,6 +193,7 @@
       if (user && !user.isAnonymous) {
         await uygulamaAc();
       } else {
+        if (typeof HK_AYARLAR !== "undefined") HK_AYARLAR.gizle();
         appEl.classList.add("hidden");
         lockScreen.classList.remove("hidden");
         lockScreen.style.animation = "";
@@ -223,30 +225,12 @@
     if (installBtn) installBtn.classList.add("hidden");
   });
 
-  // Kilitle — bulut hesabından çık, giriş ekranına dön
-  const lockBtn = document.getElementById("lock-btn");
-  if (lockBtn) lockBtn.addEventListener("click", async () => {
-    try {
-      if (typeof fbCikisBulut === "function") await fbCikisBulut();
-    } catch (e) {}
-  });
-
   var misafirBannerKapat = document.getElementById("hk-misafir-banner-kapat");
   if (misafirBannerKapat) {
     misafirBannerKapat.addEventListener("click", function () {
       var el = document.getElementById("hk-misafir-banner");
       if (el) el.classList.add("hidden");
       try { sessionStorage.setItem("hk-misafir-banner-kapali", "1"); } catch (e) {}
-    });
-  }
-
-  var tanitimBtn = document.getElementById("hk-tanitim-btn");
-  if (tanitimBtn) {
-    tanitimBtn.addEventListener("click", function () {
-      var u = null;
-      try { u = typeof fbMevcutKullanici === "function" ? fbMevcutKullanici() : null; } catch (e) { u = null; }
-      if (!u || u.isAnonymous) return;
-      if (typeof HK_TANITIM !== "undefined") HK_TANITIM.goster(u, true);
     });
   }
 
