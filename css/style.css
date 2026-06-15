@@ -4555,8 +4555,10 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   line-height: 20px;
   flex-shrink: 0;
 }
-#tab-islemler .islemler-kol-baslik .ioz-gun-ozet-btn {
+#tab-islemler .islemler-kol-baslik .ioz-ozet-nav-btn {
   margin-right: 2px;
+  padding: 0 5px;
+  letter-spacing: 0.02em;
 }
 #tab-islemler .islemler-panel-head .ozet-bar,
 #tab-islemler .islemler-sol-head .ozet-bar {
@@ -4572,11 +4574,11 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   background: var(--bg-card);
   flex-shrink: 0;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-panel-head .ozet-bar,
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-panel-head .ozet-bar,
 #tab-islemler .butce-panel-head .ozet-bar {
   border-bottom: 1px solid var(--border);
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-panel-head .ioz-ust-ozet-yatay {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-panel-head .ioz-ust-ozet-yatay {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 2px 6px;
@@ -4587,7 +4589,7 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   justify-items: stretch;
   padding: 0 var(--islem-px);
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-ozet-hucre {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-ozet-hucre {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -4595,7 +4597,7 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   gap: 1px;
   min-width: 0;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-ozet-lbl {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-ozet-lbl {
   font-family: var(--islem-ui);
   font-size: 8px;
   font-weight: 800;
@@ -4604,7 +4606,7 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   color: var(--text-muted);
   line-height: 1;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-ozet-val {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-ozet-val {
   font-family: var(--islem-rakam);
   font-size: clamp(10px, 2.2vw, 13px);
   font-weight: var(--islem-rakam-w, 700);
@@ -4615,29 +4617,29 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   text-overflow: ellipsis;
   max-width: 100%;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-ozet-val.gelir { color: var(--green); }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-ozet-val.gider { color: var(--red); }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-ozet-val.net { color: var(--gold); }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-tip-bolum {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-ozet-val.gelir { color: var(--green); }
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-ozet-val.gider { color: var(--red); }
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-ozet-val.net { color: var(--gold); }
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-tip-bolum {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   overflow: hidden;
   margin-bottom: 10px;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-tip-bolum:last-of-type {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-tip-bolum:last-of-type {
   margin-bottom: 0;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-tip-baslik {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-tip-baslik {
   border-bottom: 1px solid var(--border);
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-tip-bos {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-tip-bos {
   padding: 12px var(--islem-px);
   margin: 0;
   border: none;
   background: transparent;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-tip-gelir .ioz-kat-bar-fill:not(.gelir-bar) {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-tip-gelir .ioz-kat-bar-fill:not(.gelir-bar) {
   background: var(--green);
 }
 #tab-islemler .islem-sol-head {
@@ -4655,7 +4657,7 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   scrollbar-color: var(--border-light) transparent;
 }
 /* eski baslik siniflari — geriye uyumluluk */
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-panel-baslik {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-panel-baslik {
   display: none;
 }
 #tab-islemler .butce-panel-body .butce-wrap {
@@ -5087,18 +5089,18 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
 #tab-islemler .islem-genel-toplam {
   font-size: var(--islem-metin);
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-scroll {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-scroll {
   padding: var(--islem-py) var(--islem-px) 12px;
   background: var(--bg-base);
   min-height: 100%;
   box-sizing: border-box;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-bolum {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-bolum {
   border-radius: var(--radius-sm);
   background: var(--bg-card);
   border: 1px solid var(--border);
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-bolum-baslik {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-bolum-baslik {
   font-family: var(--islem-ui);
   font-size: var(--islem-lbl);
   font-weight: 800;
@@ -5109,16 +5111,16 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   padding: 8px var(--islem-px) 6px;
   border-bottom: 1px solid var(--border);
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-grup-baslik {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-grup-baslik {
   background: var(--bg-base);
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-kat-satir {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-kat-satir {
   background: var(--bg-card);
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-yil-satir {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-yil-satir {
   background: var(--bg-card);
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-yil-satir:nth-child(even) {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-yil-satir:nth-child(even) {
   background: var(--bg-input);
 }
 #tab-islemler .islem-scroll {
@@ -5148,30 +5150,30 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-bolum-alt {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-bolum-alt {
   font-size: 11px;
   font-weight: 600;
   color: var(--text-muted);
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-ay-ust {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-ay-ust {
   background: var(--bg-card);
   border-bottom: 1px solid var(--border);
   padding: var(--islem-py) var(--islem-px);
   gap: 6px;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-ay-kutu-lbl {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-ay-kutu-lbl {
   font-family: var(--islem-ui);
   font-size: var(--islem-lbl);
   letter-spacing: 0.6px;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-ay-kutu-val {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-ay-kutu-val {
   font-family: var(--islem-rakam);
   font-size: var(--islem-rakam-size-ust);
   font-weight: var(--islem-rakam-w);
   letter-spacing: 0.01em;
   font-variant-numeric: tabular-nums;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-grup-baslik {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-grup-baslik {
   font-family: var(--islem-ui);
   font-size: var(--islem-metin);
   font-weight: 700;
@@ -5183,20 +5185,20 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   align-items: center;
   border-bottom: none;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-grup-wrap {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-grup-wrap {
   background: var(--bg-base);
   border-bottom: 1px solid var(--border);
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-grup-bar-wrap {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-grup-bar-wrap {
   gap: 6px;
   padding: 0 var(--islem-px) 6px;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-grup-pct {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-grup-pct {
   font-size: 10px;
   font-weight: 700;
   color: rgba(240, 84, 84, 0.85);
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-grup-ad {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-grup-ad {
   font-size: var(--islem-metin);
   font-weight: 700;
   text-transform: uppercase;
@@ -5204,37 +5206,37 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   color: var(--text-primary);
   line-height: 1.25;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-grup-toplam {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-grup-toplam {
   font-family: var(--islem-rakam);
   font-size: var(--islem-metin);
   font-weight: var(--islem-rakam-w);
   font-variant-numeric: tabular-nums;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-kat-satir {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-kat-satir {
   display: flex;
   flex-direction: column;
   justify-content: center;
   padding: 5px var(--islem-px);
   min-height: 36px;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-kat-ust {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-kat-ust {
   align-items: center;
   margin-bottom: 0;
   min-height: 28px;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-kat-satir:has(.ioz-kat-bar-wrap) .ioz-kat-ust,
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-kat-satir:has(.ioz-kat-bar-track) .ioz-kat-ust {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-kat-satir:has(.ioz-kat-bar-wrap) .ioz-kat-ust,
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-kat-satir:has(.ioz-kat-bar-track) .ioz-kat-ust {
   margin-bottom: 4px;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-kat-bar-wrap {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-kat-bar-wrap {
   gap: 6px;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-kat-pct {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-kat-pct {
   font-size: 10px;
   font-weight: 600;
   color: rgba(240, 84, 84, 0.72);
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-kat-ad {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-kat-ad {
   font-family: var(--islem-ui);
   font-size: 11px;
   font-weight: 600;
@@ -5243,13 +5245,13 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   color: var(--text-secondary);
   line-height: 1.3;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-kat-tutar {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-kat-tutar {
   font-family: var(--islem-rakam);
   font-size: 12px;
   font-weight: var(--islem-rakam-w);
   font-variant-numeric: tabular-nums;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-kat-adet {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-kat-adet {
   font-family: var(--islem-ui);
   font-size: 10px;
   font-weight: 600;
@@ -5258,12 +5260,12 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   border-radius: var(--radius-sm);
   padding: 2px 6px;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-kat-ust-sag {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-kat-ust-sag {
   flex-direction: row;
   align-items: center;
   gap: 6px;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-yil-satir {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-yil-satir {
   font-family: var(--islem-ui);
   font-size: var(--islem-metin);
   font-weight: 600;
@@ -5271,35 +5273,35 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   padding: var(--islem-py) var(--islem-px);
   font-variant-numeric: tabular-nums;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-yil-yil {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-yil-yil {
   font-family: var(--islem-ui);
   font-size: var(--islem-metin);
   font-weight: 800;
   letter-spacing: 0.04em;
   color: var(--text-secondary);
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-yil-g,
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-yil-d,
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-yil-n {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-yil-g,
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-yil-d,
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-yil-n {
   font-family: var(--islem-rakam);
   font-size: var(--islem-metin);
   font-weight: var(--islem-rakam-w);
   font-variant-numeric: tabular-nums;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-bos {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-bos {
   font-family: var(--islem-ui);
   font-size: var(--islem-metin);
 }
 
 /* Kategori ozeti — grafik gorunumu */
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-oran-kart {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-oran-kart {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   padding: 12px var(--islem-px);
   margin-bottom: 10px;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-oran-baslik {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-oran-baslik {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -5311,8 +5313,8 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   color: var(--text-muted);
   margin-bottom: 8px;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-oran-net { font-size: 12px; letter-spacing: 0; text-transform: none; }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-oran-track {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-oran-net { font-size: 12px; letter-spacing: 0; text-transform: none; }
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-oran-track {
   display: flex;
   width: 100%;
   height: 10px;
@@ -5321,26 +5323,26 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   background: var(--bg-elevated);
   border: 1px solid var(--border);
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-oran-gelir { background: var(--green); min-width: 2px; }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-oran-gider { background: var(--red); min-width: 2px; }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-oran-etiket {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-oran-gelir { background: var(--green); min-width: 2px; }
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-oran-gider { background: var(--red); min-width: 2px; }
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-oran-etiket {
   display: flex;
   justify-content: space-between;
   margin-top: 6px;
   font-size: 11px;
   font-weight: 700;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-oran-etiket .gelir { color: var(--green); }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-oran-etiket .gider { color: var(--red); }
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-oran-etiket .gelir { color: var(--green); }
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-oran-etiket .gider { color: var(--red); }
 
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-grafik-blok {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-grafik-blok {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   overflow: hidden;
   margin-bottom: 10px;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-donut-cift {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-donut-cift {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -5350,13 +5352,13 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   background: var(--bg-elevated);
   border-bottom: 1px solid var(--border);
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-donut-col {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-donut-col {
   display: flex;
   flex-direction: column;
   align-items: center;
   flex: 0 0 auto;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-donut-bos {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-donut-bos {
   width: 132px;
   min-height: 132px;
   display: flex;
@@ -5366,19 +5368,19 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   gap: 6px;
   text-align: center;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-donut-bos-lbl {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-donut-bos-lbl {
   font-size: 9px;
   font-weight: 800;
   letter-spacing: 0.8px;
   text-transform: uppercase;
   color: var(--text-muted);
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-gider-ozet {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-gider-ozet {
   padding: 8px var(--islem-px) 10px;
   border-bottom: 1px solid var(--border);
 }
 
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-donut-wrap {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-donut-wrap {
   position: relative;
   display: flex;
   justify-content: center;
@@ -5388,7 +5390,7 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   height: 132px;
   margin: 0 auto;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-donut-svg {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-donut-svg {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -5396,17 +5398,17 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   overflow: visible;
   pointer-events: auto;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-donut-seg {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-donut-seg {
   cursor: pointer;
   pointer-events: all;
   transition: filter 0.06s ease;
   outline: none;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-donut-seg:hover,
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-donut-seg.ioz-donut-seg-hover {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-donut-seg:hover,
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-donut-seg.ioz-donut-seg-hover {
   filter: brightness(1.12);
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-cursor-tip,
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-cursor-tip,
 #ioz-cursor-tip {
   position: fixed;
   left: 0;
@@ -5427,15 +5429,15 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   opacity: 0;
   visibility: hidden;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-cursor-tip.visible,
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-cursor-tip.visible,
 #ioz-cursor-tip.visible {
   opacity: 1;
   visibility: visible;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-donut-hover-tip:not(.ioz-cursor-tip) {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-donut-hover-tip:not(.ioz-cursor-tip) {
   display: none;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-donut-ic {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-donut-ic {
   position: relative;
   z-index: 1;
   width: 84px;
@@ -5452,21 +5454,21 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   text-align: center;
   pointer-events: none;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-donut-ic-lbl {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-donut-ic-lbl {
   font-size: 9px;
   font-weight: 800;
   letter-spacing: 0.8px;
   text-transform: uppercase;
   color: var(--text-muted);
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-donut-ic-val {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-donut-ic-val {
   font-size: 11px;
   font-weight: 800;
   line-height: 1.2;
   font-variant-numeric: tabular-nums;
   word-break: break-word;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-donut-legend {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-donut-legend {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -5475,7 +5477,7 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   flex-direction: column;
   gap: 4px;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-legend-toplam {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-legend-toplam {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -5486,19 +5488,19 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   background: var(--bg-card);
   border: 1px solid var(--border);
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-legend-toplam-lbl {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-legend-toplam-lbl {
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.5px;
   text-transform: uppercase;
   color: var(--text-muted);
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-legend-toplam-val {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-legend-toplam-val {
   font-size: 14px;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-legend-btn {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-legend-btn {
   display: block;
   width: 100%;
   margin: 0;
@@ -5512,14 +5514,14 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   color: inherit;
   -webkit-tap-highlight-color: transparent;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-legend-btn:hover .ioz-legend-satir {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-legend-btn:hover .ioz-legend-satir {
   background: rgba(240, 184, 64, 0.08);
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-legend-btn.active .ioz-legend-satir {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-legend-btn.active .ioz-legend-satir {
   background: rgba(240, 184, 64, 0.14);
   box-shadow: inset 0 0 0 1px rgba(240, 184, 64, 0.35);
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-legend-satir {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-legend-satir {
   display: grid;
   grid-template-columns: 10px 1fr auto auto;
   gap: 6px 8px;
@@ -5529,13 +5531,13 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   border-radius: var(--radius-sm);
   transition: background 0.12s ease;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-legend-renk {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-legend-renk {
   width: 10px;
   height: 10px;
   border-radius: 3px;
   flex-shrink: 0;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-legend-ad {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-legend-ad {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -5543,12 +5545,12 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   color: var(--text-primary);
   font-weight: 600;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-legend-rakam {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-legend-rakam {
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-legend-pct {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-legend-pct {
   color: var(--text-muted);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
@@ -5556,7 +5558,7 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   text-align: right;
 }
 
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-grup-detay-panel {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-grup-detay-panel {
   border-top: none;
   background: var(--bg-card);
   padding: 0 0 8px;
@@ -5566,7 +5568,7 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   from { opacity: 0; transform: translateY(-4px); }
   to { opacity: 1; transform: translateY(0); }
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-grup-detay-baslik {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-grup-detay-baslik {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -5576,28 +5578,28 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   border-bottom: 1px solid var(--border);
   background: var(--bg-elevated);
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-grup-detay-ad {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-grup-detay-ad {
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.6px;
   color: var(--gold);
   text-transform: uppercase;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-grup-detay-ipucu {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-grup-detay-ipucu {
   font-size: 10px;
   color: var(--text-muted);
   font-weight: 600;
 }
 
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-bolum-yil-graf {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-bolum-yil-graf {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   overflow: hidden;
   margin-bottom: 10px;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-yil-graf-liste { padding: 4px 0; }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-yil-graf-satir {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-yil-graf-liste { padding: 4px 0; }
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-yil-graf-satir {
   display: grid;
   grid-template-columns: 42px 1fr auto;
   gap: 8px;
@@ -5605,13 +5607,13 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   padding: 8px var(--islem-px);
   border-bottom: 1px solid var(--border);
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-yil-graf-satir:last-child { border-bottom: none; }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-yil-graf-yil {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-yil-graf-satir:last-child { border-bottom: none; }
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-yil-graf-yil {
   font-size: 12px;
   font-weight: 800;
   color: var(--text-secondary);
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-yil-graf-bar {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-yil-graf-bar {
   display: flex;
   height: 12px;
   border-radius: 999px;
@@ -5620,9 +5622,9 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   border: 1px solid var(--border);
   min-width: 0;
 }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-yil-graf-g { background: var(--green); min-width: 1px; }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-yil-graf-d { background: var(--red); min-width: 1px; }
-:is(#tab-islemler, #modal-gunluk-ozet) .ioz-yil-graf-net {
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-yil-graf-g { background: var(--green); min-width: 1px; }
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-yil-graf-d { background: var(--red); min-width: 1px; }
+:is(#tab-islemler, #modal-gunluk-ozet, #modal-yillik-ozet) .ioz-yil-graf-net {
   font-size: 11px;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
@@ -6393,24 +6395,24 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
 }
 
 /* Gunluk ozet modal */
-#modal-gunluk-ozet.modal-overlay {
+:is(#modal-gunluk-ozet, #modal-yillik-ozet).modal-overlay {
   padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
 }
-#modal-gunluk-ozet .ioz-gun-modal {
+:is(#modal-gunluk-ozet, #modal-yillik-ozet) .ioz-gun-modal {
   width: min(440px, calc(100vw - 16px));
   max-height: min(94dvh, calc(100dvh - 16px));
   display: flex;
   flex-direction: column;
 }
-#modal-gunluk-ozet .modal-header {
+:is(#modal-gunluk-ozet, #modal-yillik-ozet) .modal-header {
   padding: 10px 12px;
   flex-shrink: 0;
 }
-#modal-gunluk-ozet .modal-title {
+:is(#modal-gunluk-ozet, #modal-yillik-ozet) .modal-title {
   font-size: 15px;
   line-height: 1.2;
 }
-#modal-gunluk-ozet .ioz-gun-modal-body {
+:is(#modal-gunluk-ozet, #modal-yillik-ozet) .ioz-gun-modal-body {
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -6418,27 +6420,27 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   overflow: hidden;
   padding: 0 10px 10px;
 }
-#modal-gunluk-ozet .ioz-gun-tarih-bar {
+:is(#modal-gunluk-ozet, #modal-yillik-ozet) .ioz-gun-tarih-bar {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
 }
-#modal-gunluk-ozet .ioz-gun-tarih-inp {
+:is(#modal-gunluk-ozet, #modal-yillik-ozet) .ioz-gun-tarih-inp {
   flex: 1;
   min-width: 0;
   height: 36px;
   padding: 0 10px;
   font-size: 13px;
 }
-#modal-gunluk-ozet .ioz-gun-bugun-btn {
+:is(#modal-gunluk-ozet, #modal-yillik-ozet) .ioz-gun-bugun-btn {
   flex-shrink: 0;
   height: 36px;
   padding: 0 10px;
   font-size: 10px;
   white-space: nowrap;
 }
-#modal-gunluk-ozet .ioz-gun-ozet-icerik {
+:is(#modal-gunluk-ozet, #modal-yillik-ozet) .ioz-gun-ozet-icerik {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
@@ -6446,7 +6448,7 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   overscroll-behavior: contain;
   padding: 4px 2px 8px;
 }
-#modal-gunluk-ozet .ioz-gun-etiket {
+:is(#modal-gunluk-ozet, #modal-yillik-ozet) .ioz-gun-etiket {
   font-size: 10px;
   font-weight: 700;
   color: var(--text-muted);
@@ -6454,7 +6456,7 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   padding: 0 4px;
   line-height: 1.3;
 }
-#modal-gunluk-ozet .ioz-gun-mini-head {
+:is(#modal-gunluk-ozet, #modal-yillik-ozet) .ioz-gun-mini-head {
   position: sticky;
   top: 0;
   z-index: 2;
@@ -6464,86 +6466,86 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   border: 1px solid var(--border);
   background: var(--bg-card);
 }
-#modal-gunluk-ozet .ioz-gun-mini-head.ioz-panel-head {
+:is(#modal-gunluk-ozet, #modal-yillik-ozet) .ioz-gun-mini-head.ioz-panel-head {
   height: auto;
   min-height: 0;
   max-height: none;
   padding: 0;
 }
-#modal-gunluk-ozet .ioz-gun-mini-head .ioz-ust-ozet-yatay {
+:is(#modal-gunluk-ozet, #modal-yillik-ozet) .ioz-gun-mini-head .ioz-ust-ozet-yatay {
   height: auto;
   min-height: 44px;
   max-height: none;
   padding: 6px 8px;
   gap: 4px;
 }
-#modal-gunluk-ozet .ioz-ozet-val {
+:is(#modal-gunluk-ozet, #modal-yillik-ozet) .ioz-ozet-val {
   font-size: clamp(9px, 3.2vw, 12px);
 }
-#modal-gunluk-ozet .ioz-grafik-blok {
+:is(#modal-gunluk-ozet, #modal-yillik-ozet) .ioz-grafik-blok {
   margin-bottom: 0;
 }
-#modal-gunluk-ozet .ioz-donut-cift {
+:is(#modal-gunluk-ozet, #modal-yillik-ozet) .ioz-donut-cift {
   flex-direction: column;
   gap: 8px;
   padding: 10px 8px;
 }
-#modal-gunluk-ozet .ioz-donut-wrap,
-#modal-gunluk-ozet .ioz-donut-bos {
+:is(#modal-gunluk-ozet, #modal-yillik-ozet) .ioz-donut-wrap,
+:is(#modal-gunluk-ozet, #modal-yillik-ozet) .ioz-donut-bos {
   width: 108px;
   height: 108px;
   min-height: 108px;
 }
-#modal-gunluk-ozet .ioz-donut-ic {
+:is(#modal-gunluk-ozet, #modal-yillik-ozet) .ioz-donut-ic {
   width: 68px;
   height: 68px;
   padding: 4px;
 }
-#modal-gunluk-ozet .ioz-donut-ic-val {
+:is(#modal-gunluk-ozet, #modal-yillik-ozet) .ioz-donut-ic-val {
   font-size: 9px;
   line-height: 1.15;
 }
-#modal-gunluk-ozet .ioz-gider-ozet {
+:is(#modal-gunluk-ozet, #modal-yillik-ozet) .ioz-gider-ozet {
   padding: 6px 6px 8px;
 }
-#modal-gunluk-ozet .ioz-legend-toplam {
+:is(#modal-gunluk-ozet, #modal-yillik-ozet) .ioz-legend-toplam {
   padding: 6px 8px;
   margin-bottom: 2px;
 }
-#modal-gunluk-ozet .ioz-legend-toplam-val {
+:is(#modal-gunluk-ozet, #modal-yillik-ozet) .ioz-legend-toplam-val {
   font-size: 12px;
 }
-#modal-gunluk-ozet .ioz-legend-satir {
+:is(#modal-gunluk-ozet, #modal-yillik-ozet) .ioz-legend-satir {
   grid-template-columns: 8px 1fr auto;
   gap: 4px 6px;
   font-size: 11px;
   padding: 6px 6px;
 }
-#modal-gunluk-ozet .ioz-legend-pct {
+:is(#modal-gunluk-ozet, #modal-yillik-ozet) .ioz-legend-pct {
   display: none;
 }
-#modal-gunluk-ozet .ioz-grup-detay-baslik {
+:is(#modal-gunluk-ozet, #modal-yillik-ozet) .ioz-grup-detay-baslik {
   padding: 8px 8px 4px;
 }
-#modal-gunluk-ozet .ioz-grup-detay-ipucu {
+:is(#modal-gunluk-ozet, #modal-yillik-ozet) .ioz-grup-detay-ipucu {
   display: none;
 }
-#modal-gunluk-ozet .ioz-kat-satir {
+:is(#modal-gunluk-ozet, #modal-yillik-ozet) .ioz-kat-satir {
   padding: 4px 8px;
   min-height: 32px;
 }
-#modal-gunluk-ozet .ioz-kat-pct {
+:is(#modal-gunluk-ozet, #modal-yillik-ozet) .ioz-kat-pct {
   font-size: 9px;
   min-width: 28px;
 }
 
 @media (max-width: 520px) {
-  #modal-gunluk-ozet.modal-overlay {
+  :is(#modal-gunluk-ozet, #modal-yillik-ozet).modal-overlay {
     align-items: flex-end;
     padding: 0;
     padding-bottom: env(safe-area-inset-bottom, 0);
   }
-  #modal-gunluk-ozet .ioz-gun-modal {
+  :is(#modal-gunluk-ozet, #modal-yillik-ozet) .ioz-gun-modal {
     width: 100%;
     max-width: 100%;
     max-height: min(92dvh, calc(100dvh - env(safe-area-inset-top, 0px)));
@@ -6555,10 +6557,10 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
     from { opacity: 0; transform: translateY(100%); }
     to { opacity: 1; transform: translateY(0); }
   }
-  #modal-gunluk-ozet .ioz-gun-modal-body {
+  :is(#modal-gunluk-ozet, #modal-yillik-ozet) .ioz-gun-modal-body {
     padding: 0 8px max(10px, env(safe-area-inset-bottom));
   }
-  #modal-gunluk-ozet .ioz-donut-cift {
+  :is(#modal-gunluk-ozet, #modal-yillik-ozet) .ioz-donut-cift {
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: space-around;

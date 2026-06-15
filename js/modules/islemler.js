@@ -7,7 +7,9 @@ const IslemlerModule = (() => {
   let _iozAy=new Date().getMonth(), _iozYil=new Date().getFullYear();
   let _iozSeciliGrup={gider:null,gelir:null};
   let _iozGunSeciliGrup={gider:null,gelir:null};
+  let _iozYilSeciliGrup={gider:null,gelir:null};
   let _iozGunlukTarih=null;
+  let _iozYillikYil=null;
   const $=id=>document.getElementById(id);
 
   function normKatStr(s){return String(s||"").replace(/\s+/g," ").trim();}
@@ -138,6 +140,8 @@ const IslemlerModule = (() => {
     if(i)i.onclick=iozAyIleri;
     const gunBtn=$("ioz-gun-ozet-btn");
     if(gunBtn)gunBtn.onclick=gunlukOzetModalAc;
+    const yilBtn=$("ioz-yil-ozet-btn");
+    if(yilBtn)yilBtn.onclick=yillikOzetModalAc;
   }
 
   function gunEtiket(gunKey){
@@ -226,6 +230,99 @@ const IslemlerModule = (() => {
     if(modal)modal.classList.add("hidden");
   }
 
+  function yillikOzetVeri(yilKey){
+    const yil=String(yilKey||"");
+    const kat={};
+    let gelir=0,gider=0;
+    for(const i of _islemler){
+      if(!i.tarih||!i.tarih.startsWith(yil))continue;
+      const katAd=gorunumKategori(i.kategori);
+      const tut=parseFloat(i.tutar)||0;
+      if(!kat[katAd])kat[katAd]={gelir:0,gider:0,adet:0,grup:kategoriGrupAdi(katAd)};
+      kat[katAd].adet++;
+      if(i.tip==="gelir"){
+        gelir+=tut;kat[katAd].gelir+=tut;
+      }else{
+        gider+=tut;kat[katAd].gider+=tut;
+      }
+    }
+    const katListe=Object.entries(kat).map(function(e){
+      const k=e[1];
+      return {ad:e[0],grup:k.grup,gelir:k.gelir,gider:k.gider,adet:k.adet};
+    });
+    return {gelir,gider,katListe};
+  }
+
+  function yillikOzetYilDoldur(){
+    const sel=$("ioz-yil-sec");
+    if(!sel)return;
+    const ySet={};
+    for(const i of _islemler){
+      if(i.tarih&&i.tarih.length>=4)ySet[i.tarih.substring(0,4)]=true;
+    }
+    const yillar=Object.keys(ySet).sort(function(a,b){return b.localeCompare(a);});
+    const buYil=String(new Date().getFullYear());
+    if(!yillar.length)yillar.push(buYil);
+    sel.innerHTML=yillar.map(function(y){return '<option value="'+esc(y)+'">'+esc(y)+'</option>';}).join("");
+    const sec=_iozYillikYil||(yillar.indexOf(buYil)>=0?buYil:yillar[0]);
+    sel.value=sec;
+    _iozYillikYil=sec;
+  }
+
+  function yillikOzetHtml(yilKey){
+    const v=yillikOzetVeri(yilKey);
+    const net=v.gelir-v.gider;
+    const yilVer={gelir:v.gelir,gider:v.gider};
+    if(!v.katListe.some(function(k){return k.gelir>0||k.gider>0;})){
+      return '<div class="ioz-bos">'+esc(yilKey)+'<br>Bu y&#305;lda i&#351;lem yok.</div>';
+    }
+    let h='<div class="ioz-gun-etiket">'+esc(yilKey)+' y&#305;l&#305;</div>';
+    h+='<div class="ioz-panel-head ioz-gun-mini-head">';
+    h+='<div class="ozet-bar ioz-ust-ozet-yatay">';
+    h+='<div class="ioz-ozet-hucre"><span class="ioz-ozet-lbl">Gelir</span><span class="ioz-ozet-val gelir">'+para(v.gelir)+'</span></div>';
+    h+='<div class="ioz-ozet-hucre"><span class="ioz-ozet-lbl">Gider</span><span class="ioz-ozet-val gider">'+para(v.gider)+'</span></div>';
+    h+='<div class="ioz-ozet-hucre"><span class="ioz-ozet-lbl">Net</span><span class="ioz-ozet-val net">'+(net>=0?"":"-")+para(Math.abs(net))+'</span></div>';
+    h+='</div></div>';
+    h+=iozGrafikBlokRender(v.katListe, yilVer, _iozYilSeciliGrup);
+    return h;
+  }
+
+  function iozYilGrupSec(tip, grup){
+    if(!tip||!grup)return;
+    var diger=tip==="gelir"?"gider":"gelir";
+    if(_iozYilSeciliGrup[tip]===grup){
+      _iozYilSeciliGrup[tip]=null;
+    }else{
+      _iozYilSeciliGrup[tip]=grup;
+      _iozYilSeciliGrup[diger]=null;
+    }
+    yillikOzetIcerikGuncelle(false);
+  }
+
+  function yillikOzetIcerikGuncelle(resetSecim){
+    if(resetSecim!==false)_iozYilSeciliGrup={gider:null,gelir:null};
+    const sel=$("ioz-yil-sec");
+    const yilKey=(sel&&sel.value)||String(new Date().getFullYear());
+    _iozYillikYil=yilKey;
+    const el=$("ioz-yil-ozet-icerik");
+    if(!el)return;
+    el.innerHTML=yillikOzetHtml(yilKey);
+    iozGrafikEtkilesimBagla(el, iozYilGrupSec);
+  }
+
+  function yillikOzetModalAc(){
+    const modal=$("modal-yillik-ozet");
+    if(!modal)return;
+    yillikOzetYilDoldur();
+    yillikOzetIcerikGuncelle();
+    modal.classList.remove("hidden");
+  }
+
+  function yillikOzetModalKapat(){
+    const modal=$("modal-yillik-ozet");
+    if(modal)modal.classList.add("hidden");
+  }
+
   function iozHeadRender(head, ayVer, ayKey){
     if(!head)return;
     const ayNet=ayVer.gelir-ayVer.gider;
@@ -234,7 +331,8 @@ const IslemlerModule = (() => {
       '<div class="islemler-kol-baslik">'+
       '<span class="islemler-kol-ad">Kategori &#246;zeti</span>'+
       '<div class="islemler-kol-nav">'+
-      '<button type="button" class="butce-rapor-btn ioz-gun-ozet-btn" id="ioz-gun-ozet-btn" title="G&#252;nl&#252;k &#246;zet">G&#252;nl&#252;k</button>'+
+      '<button type="button" class="butce-rapor-btn ioz-ozet-nav-btn" id="ioz-yil-ozet-btn" title="Y&#305;ll&#305;k &#246;zet">Y&#305;ll&#305;k</button>'+
+      '<button type="button" class="butce-rapor-btn ioz-ozet-nav-btn" id="ioz-gun-ozet-btn" title="G&#252;nl&#252;k &#246;zet">G&#252;nl&#252;k</button>'+
       '<button type="button" class="butce-ay-btn" id="ioz-geri">&#8249;</button>'+
       '<span class="islemler-kol-ay butce-kol-ay">'+esc(ayLbl)+'</span>'+
       '<button type="button" class="butce-ay-btn" id="ioz-ileri"'+(iozAyIleriKapali()?' disabled':'')+'>&#8250;</button>'+
@@ -627,42 +725,12 @@ const IslemlerModule = (() => {
     return h;
   }
 
-  function iozYillikGrafikHtml(byYil){
-    var yillar=Object.keys(byYil).sort(function(a,b){return b.localeCompare(a);});
-    if(!yillar.length)return "";
-    var maxTop=0;
-    yillar.forEach(function(y){
-      var v=byYil[y];
-      maxTop=Math.max(maxTop,(v.gelir||0)+(v.gider||0));
-    });
-    if(maxTop<=0)return "";
-    var h='<div class="ioz-bolum ioz-bolum-yil-graf">';
-    h+='<div class="ioz-bolum-baslik">Y\u0131ll\u0131k grafik</div>';
-    h+='<div class="ioz-yil-graf-liste">';
-    yillar.forEach(function(y){
-      var v=byYil[y];
-      var gelir=v.gelir||0,gider=v.gider||0,net=gelir-gider;
-      var gW=maxTop>0?Math.round((gelir/maxTop)*1000)/10:0;
-      var dW=maxTop>0?Math.round((gider/maxTop)*1000)/10:0;
-      h+='<div class="ioz-yil-graf-satir">';
-      h+='<span class="ioz-yil-graf-yil">'+y+'</span>';
-      h+='<div class="ioz-yil-graf-bar" title="Gelir '+para(gelir)+' · Gider '+para(gider)+'">';
-      if(gelir>0)h+='<span class="ioz-yil-graf-g" style="width:'+gW+'%"></span>';
-      if(gider>0)h+='<span class="ioz-yil-graf-d" style="width:'+dW+'%"></span>';
-      h+='</div>';
-      h+='<span class="ioz-yil-graf-net '+(net>=0?"gelir":"gider")+'">'+(net>=0?"+":"-")+para(Math.abs(net))+'</span>';
-      h+='</div>';
-    });
-    h+='</div></div>';
-    return h;
-  }
-
   function renderKategoriOzeti(){
     const head=$("ioz-panel-head");
     const wrap=$("islem-kat-ozet-scroll");
     if(!wrap)return;
     guncelleKolBaslikAy();
-    const {byAy,byYil}=_islemler.length?kategoriOzetiVeri():{byAy:{},byYil:{}};
+    const {byAy}=_islemler.length?kategoriOzetiVeri():{byAy:{}};
     const ayKey=ozetAySecimi();
     const ayVer=byAy[ayKey]||{gelir:0,gider:0,kat:{}};
     iozHeadRender(head, ayVer, ayKey);
@@ -686,26 +754,6 @@ const IslemlerModule = (() => {
       h+=iozOranCubukHtml(ayVer);
       h+=iozGrafikBlokRender(katListe, ayVer);
     }
-
-    h+=iozYillikGrafikHtml(byYil);
-
-    /* —— Yillik tablo —— */
-    const yillar=Object.keys(byYil).sort(function(a,b){return b.localeCompare(a);});
-    h+='<div class="ioz-bolum ioz-bolum-yil">';
-    h+='<div class="ioz-bolum-baslik">Y\u0131ll\u0131k \u00f6zet</div>';
-    h+='<div class="ioz-yil-liste">';
-    yillar.forEach(function(y){
-      const v=byYil[y];
-      const net=v.gelir-v.gider;
-      h+='<div class="ioz-yil-satir">';
-      h+='<span class="ioz-yil-yil">'+y+'</span>';
-      h+='<div class="ioz-yil-rakamlar">';
-      h+='<span class="ioz-yil-g">+'+para(v.gelir)+'</span>';
-      h+='<span class="ioz-yil-d">-'+para(v.gider)+'</span>';
-      h+='<span class="ioz-yil-n">'+(net>=0?"+":"-")+para(Math.abs(net))+'</span>';
-      h+='</div></div>';
-    });
-    h+='</div></div>';
 
     wrap.innerHTML=h;
     iozGrafikEtkilesimBagla(wrap);
@@ -1256,6 +1304,19 @@ const IslemlerModule = (() => {
       gunModal.addEventListener("click",e=>{if(e.target===gunModal)gunlukOzetModalKapat();});
       const gunBox=gunModal.querySelector(".modal-box");
       if(gunBox)gunBox.addEventListener("click",e=>e.stopPropagation());
+    }
+    const yilModal=$("modal-yillik-ozet");
+    if(yilModal){
+      $("ioz-yil-ozet-kapat")&&$("ioz-yil-ozet-kapat").addEventListener("click",yillikOzetModalKapat);
+      $("ioz-yil-bu")&&$("ioz-yil-bu").addEventListener("click",function(){
+        const sel=$("ioz-yil-sec");
+        if(sel)sel.value=String(new Date().getFullYear());
+        yillikOzetIcerikGuncelle();
+      });
+      $("ioz-yil-sec")&&$("ioz-yil-sec").addEventListener("change",yillikOzetIcerikGuncelle);
+      yilModal.addEventListener("click",e=>{if(e.target===yilModal)yillikOzetModalKapat();});
+      const yilBox=yilModal.querySelector(".modal-box");
+      if(yilBox)yilBox.addEventListener("click",e=>e.stopPropagation());
     }
   }
 

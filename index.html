@@ -15,7 +15,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png?v=20260209desk" />
   <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png?v=20260209desk" />
   <link rel="manifest" href="manifest.json?v=20260209desk" />
-  <link rel="stylesheet" href="css/style.css?v=20260531gun-mobil" />
+  <link rel="stylesheet" href="css/style.css?v=20260531yil-ozet" />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <script>
     /* Tema yonetimi: flash onleme + toggle */
@@ -418,6 +418,23 @@
     </div>
   </div>
 
+  <!-- MODAL: YILLIK OZET -->
+  <div id="modal-yillik-ozet" class="modal-overlay hidden">
+    <div class="modal-box ioz-gun-modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Y&#305;ll&#305;k &#246;zet</h2>
+        <button type="button" class="modal-close" id="ioz-yil-ozet-kapat" aria-label="Kapat">&#10005;</button>
+      </div>
+      <div class="modal-body ioz-gun-modal-body">
+        <div class="ioz-gun-tarih-bar">
+          <select id="ioz-yil-sec" class="field-input ioz-gun-tarih-inp" aria-label="Y&#305;l"></select>
+          <button type="button" class="butce-rapor-btn ioz-gun-bugun-btn" id="ioz-yil-bu">Bu y&#305;l</button>
+        </div>
+        <div id="ioz-yil-ozet-icerik" class="ioz-gun-ozet-icerik ioz-scroll"></div>
+      </div>
+    </div>
+  </div>
+
 
   <!-- MODAL: BÜTÇE SATIR EKLE -->
   <div id="modal-bt-satir" class="modal-overlay hidden">
@@ -462,7 +479,7 @@
   <script src="js/hk-ayarlar.js?v=20260531temiz"></script>
   <script src="js/firebase.js?v=20260531hizli-yukle"></script>
   <script src="js/db.js?v=20260531hizli-yukle"></script>
-  <script src="js/modules/islemler.js?v=20260531gun-mobil"></script>
+  <script src="js/modules/islemler.js?v=20260531yil-ozet"></script>
   <script src="js/modules/yukle.js?v=20260531butce-hizala"></script>
   <script src="js/modules/alacaklar.js?v=20260531kok-tasima"></script>
   <script src="js/modules/urun.js?v=20260531kok-tasima"></script>
