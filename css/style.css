@@ -6254,53 +6254,11 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   color: var(--text-muted);
   padding: 4px 8px;
 }
-.ar-belge-form-wrap {
-  padding: 14px 16px 16px;
-  border-bottom: 1px solid var(--border);
-  background: var(--bg-elevated);
-  flex-shrink: 0;
-}
-.ar-belge-form-kart {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 18px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-.ar-belge-form-head {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.ar-belge-form-baslik {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--text-primary);
-  letter-spacing: 0.01em;
-}
-.ar-belge-form-hint {
-  font-size: 12px;
-  color: var(--text-muted);
-  line-height: 1.45;
-}
-.ar-belge-tip-blok {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.ar-belge-tip-lbl {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
 .ar-belge-tip-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
+  margin-bottom: 12px;
 }
 .ar-belge-tip-chip {
   appearance: none;
@@ -6309,12 +6267,12 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   background: var(--bg-elevated);
   color: var(--text-secondary);
   font-family: var(--font-body);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   line-height: 1.2;
-  padding: 9px 16px;
+  padding: 7px 12px;
   cursor: pointer;
-  transition: border-color 0.15s, background 0.15s, color 0.15s, box-shadow 0.15s;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
   white-space: nowrap;
 }
 .ar-belge-tip-chip:hover {
@@ -6325,60 +6283,109 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   border-color: var(--gold);
   background: rgba(240, 184, 64, 0.14);
   color: var(--gold);
-  box-shadow: 0 0 0 2px rgba(240, 184, 64, 0.22);
 }
-.ar-belge-alan-grid {
+.ar-kayit-panel {
+  margin: 0 12px 12px;
+  padding: 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+.ar-kayit-baslik {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.ar-kayit-seg {
+  display: flex;
+  gap: 4px;
+  margin: 10px 0 12px;
+  padding: 3px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.ar-kayit-seg-btn {
+  flex: 1;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.ar-kayit-seg-btn.active {
+  background: var(--bg-card);
+  color: var(--gold);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}
+.ar-kayit-pane.hidden {
+  display: none;
+}
+.ar-kayit-alan-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px 16px;
+  gap: 10px 12px;
 }
-.ar-belge-alan-grid .field-group {
+.ar-kayit-alan-grid .field-group {
   margin: 0;
   min-width: 0;
 }
-.ar-belge-alan-grid .field-input,
-.ar-belge-alan-grid .field-select {
-  min-height: 44px;
+.ar-kayit-alan-grid .field-input,
+.ar-kayit-alan-grid .field-select {
+  min-height: 42px;
   border-radius: 10px;
 }
-.ar-belge-not-gr {
+.ar-kayit-not-gr,
+.ar-kayit-span-2 {
   grid-column: 1 / -1;
 }
-.ar-belge-kaydet-btn {
+.ar-kayit-kaydet-btn {
   width: 100%;
+  margin-top: 12px;
   border: none;
-  border-radius: 12px;
-  padding: 13px 18px;
+  border-radius: 10px;
+  padding: 12px 16px;
   font-family: var(--font-body);
   font-size: 13px;
   font-weight: 700;
-  letter-spacing: 0.02em;
   cursor: pointer;
   background: var(--green);
   color: #0f1923;
-  transition: filter 0.15s, transform 0.1s;
+  transition: filter 0.15s;
 }
-.ar-belge-kaydet-btn:hover {
-  filter: brightness(1.08);
+.ar-kayit-kaydet-btn:hover {
+  filter: brightness(1.06);
 }
-.ar-belge-kaydet-btn:active {
-  transform: scale(0.99);
+.ar-gider-liste-wrap {
+  padding-bottom: 8px;
+}
+.ar-gider-liste-baslik {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 4px 16px 8px;
 }
 @media (max-width: 520px) {
-  .ar-belge-form-kart {
-    padding: 16px;
-    gap: 16px;
+  .ar-kayit-panel {
+    margin: 0 10px 10px;
+    padding: 12px;
   }
-  .ar-belge-alan-grid {
+  .ar-kayit-alan-grid {
     grid-template-columns: 1fr;
-    gap: 12px;
-  }
-  .ar-belge-tip-chips {
-    gap: 6px;
   }
   .ar-belge-tip-chip {
-    padding: 8px 14px;
-    font-size: 11px;
+    padding: 6px 10px;
+    font-size: 10px;
   }
 }
 
