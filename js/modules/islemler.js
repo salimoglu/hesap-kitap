@@ -6,6 +6,7 @@ const IslemlerModule = (() => {
   let _baglandi=false;
   let _iozAy=new Date().getMonth(), _iozYil=new Date().getFullYear();
   let _iozSeciliGrup={gider:null,gelir:null};
+  let _iozGunSeciliGrup={gider:null,gelir:null};
   let _iozGunlukTarih=null;
   const $=id=>document.getElementById(id);
 
@@ -149,72 +150,67 @@ const IslemlerModule = (() => {
   }
 
   function gunlukOzetVeri(gunKey){
-    const gruplar={};
+    const kat={};
     let gelir=0,gider=0;
     for(const i of _islemler){
       if(!i.tarih||i.tarih!==gunKey)continue;
-      const kat=gorunumKategori(i.kategori);
-      const grup=kategoriGrupAdi(kat);
+      const katAd=gorunumKategori(i.kategori);
       const tut=parseFloat(i.tutar)||0;
-      if(!gruplar[grup])gruplar[grup]={gelir:0,gider:0,kat:{}};
-      const g=gruplar[grup];
-      if(!g.kat[kat])g.kat[kat]={ad:kat,gelir:0,gider:0,adet:0};
-      g.kat[kat].adet++;
+      if(!kat[katAd])kat[katAd]={gelir:0,gider:0,adet:0,grup:kategoriGrupAdi(katAd)};
+      kat[katAd].adet++;
       if(i.tip==="gelir"){
-        gelir+=tut;g.gelir+=tut;g.kat[kat].gelir+=tut;
+        gelir+=tut;kat[katAd].gelir+=tut;
       }else{
-        gider+=tut;g.gider+=tut;g.kat[kat].gider+=tut;
+        gider+=tut;kat[katAd].gider+=tut;
       }
     }
-    return {gelir,gider,gruplar};
+    const katListe=Object.entries(kat).map(function(e){
+      const k=e[1];
+      return {ad:e[0],grup:k.grup,gelir:k.gelir,gider:k.gider,adet:k.adet};
+    });
+    return {gelir,gider,katListe};
   }
 
   function gunlukOzetHtml(gunKey){
     const v=gunlukOzetVeri(gunKey);
     const net=v.gelir-v.gider;
-    const grupAdlari=Object.keys(v.gruplar).sort(function(a,b){
-      return (v.gruplar[b].gelir+v.gruplar[b].gider)-(v.gruplar[a].gelir+v.gruplar[a].gider);
-    });
-    if(!grupAdlari.length){
+    const gunVer={gelir:v.gelir,gider:v.gider};
+    if(!v.katListe.some(function(k){return k.gelir>0||k.gider>0;})){
       return '<div class="ioz-bos">'+esc(gunEtiket(gunKey))+'<br>Bu g&#252;nde i&#351;lem yok.</div>';
     }
     let h='<div class="ioz-gun-etiket">'+esc(gunEtiket(gunKey))+'</div>';
-    h+='<div class="ozet-bar ioz-ust-ozet-yatay ioz-gun-ozet-bar">';
+    h+='<div class="ioz-panel-head ioz-gun-mini-head">';
+    h+='<div class="ozet-bar ioz-ust-ozet-yatay">';
     h+='<div class="ioz-ozet-hucre"><span class="ioz-ozet-lbl">Gelir</span><span class="ioz-ozet-val gelir">'+para(v.gelir)+'</span></div>';
     h+='<div class="ioz-ozet-hucre"><span class="ioz-ozet-lbl">Gider</span><span class="ioz-ozet-val gider">'+para(v.gider)+'</span></div>';
     h+='<div class="ioz-ozet-hucre"><span class="ioz-ozet-lbl">Net</span><span class="ioz-ozet-val net">'+(net>=0?"":"-")+para(Math.abs(net))+'</span></div>';
-    h+='</div>';
-    grupAdlari.forEach(function(grup){
-      const g=v.gruplar[grup];
-      const gt=grupToplamTutar(Object.values(g.kat));
-      h+='<div class="ioz-gun-grup">';
-      h+='<div class="ioz-grup-baslik ioz-gun-grup-baslik">';
-      h+='<span class="ioz-grup-ad">'+esc(grup)+'</span>';
-      h+='<span class="ioz-grup-toplam '+gt.cls+'">'+gt.txt+'</span>';
-      h+='</div>';
-      const katListe=Object.values(g.kat).sort(function(a,b){
-        return (b.gelir+b.gider)-(a.gelir+a.gider);
-      });
-      katListe.forEach(function(k){
-        const tt=katTekTutar(k);
-        h+='<div class="ioz-gun-kat-satir">';
-        h+='<span class="ioz-gun-kat-ad">'+esc(iozKatAdKisa(k.ad))+'</span>';
-        h+='<span class="ioz-gun-kat-sag">';
-        h+='<span class="ioz-kat-tutar '+tt.cls+'">'+tt.txt+'</span>';
-        h+='<span class="ioz-kat-adet">'+k.adet+' i&#351;lem</span>';
-        h+='</span></div>';
-      });
-      h+='</div>';
-    });
+    h+='</div></div>';
+    h+=iozOranCubukHtml(gunVer);
+    h+=iozGrafikBlokRender(v.katListe, gunVer, _iozGunSeciliGrup);
     return h;
   }
 
-  function gunlukOzetIcerikGuncelle(){
+  function iozGunGrupSec(tip, grup){
+    if(!tip||!grup)return;
+    var diger=tip==="gelir"?"gider":"gelir";
+    if(_iozGunSeciliGrup[tip]===grup){
+      _iozGunSeciliGrup[tip]=null;
+    }else{
+      _iozGunSeciliGrup[tip]=grup;
+      _iozGunSeciliGrup[diger]=null;
+    }
+    gunlukOzetIcerikGuncelle(false);
+  }
+
+  function gunlukOzetIcerikGuncelle(resetSecim){
+    if(resetSecim!==false)_iozGunSeciliGrup={gider:null,gelir:null};
     const inp=$("ioz-gun-tarih");
     const gunKey=(inp&&inp.value)||bugun();
     _iozGunlukTarih=gunKey;
     const el=$("ioz-gun-ozet-icerik");
-    if(el)el.innerHTML=gunlukOzetHtml(gunKey);
+    if(!el)return;
+    el.innerHTML=gunlukOzetHtml(gunKey);
+    iozGrafikEtkilesimBagla(el, iozGunGrupSec);
   }
 
   function gunlukOzetModalAc(){
@@ -453,15 +449,16 @@ const IslemlerModule = (() => {
     return h;
   }
 
-  function iozGrafikBlokRender(katListe, ayVer){
+  function iozGrafikBlokRender(katListe, ayVer, seciliGrup){
     var gelirListe=katListe.filter(function(k){return k.gelir>0;});
     var giderListe=katListe.filter(function(k){return k.gider>0;});
     gelirListe.sort(function(a,b){return b.gelir-a.gelir;});
     giderListe.sort(function(a,b){return b.gider-a.gider;});
     var gelirDag=gelirListe.length?iozGrupDagilim(gelirListe,"gelir",ayVer,6):{toplam:0,parca:[],topGrupAdlari:[]};
     var giderDag=giderListe.length?iozGrupDagilim(giderListe,"gider",ayVer,6):{toplam:0,parca:[],topGrupAdlari:[]};
-    var seciliGider=_iozSeciliGrup.gider;
-    var seciliGelir=_iozSeciliGrup.gelir;
+    seciliGrup=seciliGrup||_iozSeciliGrup;
+    var seciliGider=seciliGrup.gider;
+    var seciliGelir=seciliGrup.gelir;
     var h='<div class="ioz-grafik-blok">';
     h+='<div class="ioz-donut-cift">';
     if(gelirDag.parca.length)h+=iozDonutOnlyHtml("gelir",gelirDag,"Gelir");
@@ -539,8 +536,9 @@ const IslemlerModule = (() => {
     return null;
   }
 
-  function iozGrafikEtkilesimBagla(wrap){
+  function iozGrafikEtkilesimBagla(wrap, onGrupSec){
     if(!wrap)return;
+    wrap._iozOnGrupSec=onGrupSec||function(tip,grup){iozGrupSec(tip,grup);};
     if(!wrap._iozGrafikClickBound){
       wrap._iozGrafikClickBound=true;
       wrap.addEventListener("click",function(e){
@@ -548,14 +546,14 @@ const IslemlerModule = (() => {
         if(btn){
           var tip=btn.getAttribute("data-ioz-tip");
           var grup=btn.getAttribute("data-ioz-grup");
-          if(tip&&grup)iozGrupSec(tip,grup);
+          if(tip&&grup)wrap._iozOnGrupSec(tip,grup);
           return;
         }
         var seg=iozDonutSegBul(e.target,wrap)||(e.target.closest?e.target.closest(".ioz-donut-seg"):null);
         if(seg){
           var st=seg.getAttribute("data-ioz-chart-tip");
           var sg=seg.getAttribute("data-ioz-grup");
-          if((st==="gelir"||st==="gider")&&sg)iozGrupSec(st,sg);
+          if((st==="gelir"||st==="gider")&&sg)wrap._iozOnGrupSec(st,sg);
         }
       });
     }
