@@ -59,12 +59,14 @@
     })();
   </script>
   <script>
-    /* OAuth: /hesap-kitap ile biten URL donuste eslesmez; Firebase bekleyen yonlendirme bulunamaz (redirectUser=hayir). */
+    /* OAuth: giris ve donus URL'si birebir ayni olmali (redirectUser=hayir). */
     (function () {
       try {
         var p = location.pathname || "";
-        if (p === "/hesap-kitap") {
-          location.replace(location.origin + "/hesap-kitap/" + (location.search || "") + (location.hash || ""));
+        var q = location.search || "";
+        var h = location.hash || "";
+        if (p === "/hesap-kitap" || p === "/hesap-kitap/index.html") {
+          location.replace(location.origin + "/hesap-kitap/" + q + h);
         }
       } catch (e) {}
     })();
@@ -101,6 +103,7 @@
           <button type="button" class="lock-auth-link hidden" id="lock-toggle-giris">Zaten hesabim var</button>
         </p>
         <p class="lock-fb-error" id="fb-auth-error"></p>
+        <p class="lock-ios-install hidden" id="lock-ios-install">iPhone: Safari'de <strong>Paylas</strong> &rarr; <strong>Ana Ekrana Ekle</strong> ile kurun.</p>
       </div>
     </div>
   </div>
@@ -477,7 +480,7 @@
   <script src="js/hk-erisim.js?v=20260531multi-final"></script>
   <script src="js/hk-tanitim.js?v=20260531tanitim"></script>
   <script src="js/hk-ayarlar.js?v=20260531temiz"></script>
-  <script src="js/firebase.js?v=20260531hizli-yukle"></script>
+  <script src="js/firebase.js?v=20260615iphone-auth"></script>
   <script src="js/db.js?v=20260531hizli-yukle"></script>
   <script src="js/modules/islemler.js?v=20260531ozet-oran"></script>
   <script src="js/modules/yukle.js?v=20260531butce-hizala"></script>
@@ -486,7 +489,7 @@
   <script src="js/modules/arabam.js?v=20260531ar-kayit"></script>
   <script src="js/modules/birikim.js?v=20260531kok-tasima"></script>
   <script src="js/modules/verilen-altinlar.js?v=20260531kok-tasima"></script>
-  <script src="js/app.js?v=20260531temiz"></script>
+  <script src="js/app.js?v=20260615iphone-auth"></script>
 </body>
 </html>
 

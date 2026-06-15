@@ -229,6 +229,18 @@
     if (installBtn) installBtn.classList.add("hidden");
   });
 
+  (function hkIosAnaEkranIpucu() {
+    try {
+      var el = document.getElementById("lock-ios-install");
+      if (!el) return;
+      var ua = navigator.userAgent || "";
+      var ios = /iPhone|iPad|iPod/i.test(ua) ||
+        (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+      var standalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+      if (ios && !standalone) el.classList.remove("hidden");
+    } catch (e) {}
+  })();
+
   var misafirBannerKapat = document.getElementById("hk-misafir-banner-kapat");
   if (misafirBannerKapat) {
     misafirBannerKapat.addEventListener("click", function () {
@@ -246,6 +258,7 @@
   async function fbAuthCalistir(fonk) {
     const errEl = document.getElementById("fb-auth-error");
     if (errEl) errEl.textContent = "";
+    if (typeof fbAuthBekleyenTemizle === "function") fbAuthBekleyenTemizle();
     const emEl = document.getElementById("lock-email");
     const pwEl = document.getElementById("lock-sifre");
     const em = emEl ? emEl.value : "";

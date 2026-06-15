@@ -28,6 +28,24 @@ function fbMobilMi() {
   return false;
 }
 
+function fbIosMi() {
+  var ua = typeof navigator !== "undefined" ? navigator.userAgent || "" : "";
+  if (/iPhone|iPad|iPod/i.test(ua)) return true;
+  return (
+    typeof navigator !== "undefined" &&
+    navigator.platform === "MacIntel" &&
+    typeof navigator.maxTouchPoints === "number" &&
+    navigator.maxTouchPoints > 1
+  );
+}
+
+function fbAuthBekleyenTemizle() {
+  try {
+    sessionStorage.removeItem("hk-google-redirect-pending");
+    sessionStorage.removeItem("hk-auth-redirect-err");
+  } catch (e) {}
+}
+
 /** Google/Firebase OAuth geri donusinda URL'de gorunen parametreler (SDK islemeden once bakilir). */
 function fbOAuthDonusUrlMu() {
   try {
@@ -71,9 +89,7 @@ async function fbInit() {
         yakindaGoogleYon = !isNaN(tp0) && Date.now() - tp0 < 20 * 60 * 1000;
       }
     } catch (e0) {}
-    if (fbMobilMi()) {
-      await fbTumSwKaldir();
-    } else if (fbOAuthDonusUrlMu() || yakindaGoogleYon) {
+    if (fbOAuthDonusUrlMu() || yakindaGoogleYon) {
       await fbTumSwKaldir();
     }
 
@@ -132,7 +148,8 @@ async function fbInit() {
         if (rawP) {
           var tsP = parseInt(rawP, 10);
           var taze = !isNaN(tsP) && Date.now() - tsP < 15 * 60 * 1000;
-          if (taze) {
+          var oauthDonus = fbOAuthDonusUrlMu();
+          if (taze && (oauthDonus || yakindaGoogleYon)) {
             var tek = "";
             try {
               if (redirectResult) {
@@ -155,7 +172,11 @@ async function fbInit() {
             var ana =
               "Google dondu ama oturum acilmadi." +
               tek +
-                " Ayni adresi kullanin: https://salimoglu.github.io/hesap-kitap/ (sonda / onemli). 1) Firebase → Authentication → Authorized domains: salimoglu.github.io 2) Google Cloud → OAuth Web client → Authorized JavaScript origins: https://salimoglu.github.io , https://hesap-kitap-234d1.firebaseapp.com 3) Redirect URIs: https://hesap-kitap-234d1.firebaseapp.com/__/auth/handler 4) API key kisitlamasi: None veya https://salimoglu.github.io/*";
+                " Ayni adresi kullanin: https://salimoglu.github.io/hesap-kitap/ (sonda / onemli)." +
+                (fbIosMi()
+                  ? " iPhone'da Google yerine e-posta ile giris daha guvenilir."
+                  : "") +
+                " 1) Firebase → Authentication → Authorized domains: salimoglu.github.io 2) Google Cloud → OAuth Web client → Authorized JavaScript origins: https://salimoglu.github.io , https://hesap-kitap-234d1.firebaseapp.com 3) Redirect URIs: https://hesap-kitap-234d1.firebaseapp.com/__/auth/handler 4) API key kisitlamasi: None veya https://salimoglu.github.io/*";
             try {
               sessionStorage.setItem(
                 "hk-auth-redirect-err",
@@ -613,10 +634,12 @@ function fbAuthHataMetni(err) {
 }
 
 async function fbGirisEmail(email, sifre) {
+  fbAuthBekleyenTemizle();
   await firebase.auth().signInWithEmailAndPassword(String(email).trim(), sifre);
 }
 
 async function fbKayitEmail(email, sifre) {
+  fbAuthBekleyenTemizle();
   await firebase.auth().createUserWithEmailAndPassword(String(email).trim(), sifre);
 }
 
@@ -630,9 +653,11 @@ async function fbGirisGoogle() {
     console.warn("setPersistence (google):", pe);
   }
 
+  fbAuthBekleyenTemizle();
+
   /**
-   * Telefonda redirectUser=hayir: yonlendirme depo baglamini yitiriyor. Masaustunde calisan
-   * popup akisini mobilde de kullan; yalnizca popup acilmazsa redirect'e dus.
+   * iPhone: popup cogu ortamda desteklenmez, redirect oturumu kaybettirir.
+   * Once popup dene; olmazsa redirect (OAuth donus URL'si /hesap-kitap/ olmali).
    */
   try {
     await firebase.auth().signInWithPopup(provider);

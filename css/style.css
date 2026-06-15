@@ -65,6 +65,8 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 }
 .lock-auth-link:active { color: var(--gold); }
 .lock-fb-error { color: var(--red); font-size: 13px; text-align: center; min-height: 18px; font-weight: 600; margin: 0; }
+.lock-ios-install { font-size: 12px; color: var(--text-secondary); text-align: center; line-height: 1.45; margin: 4px 0 0; }
+.lock-ios-install strong { color: var(--gold); font-weight: 700; }
 .lock-auth-veya { font-size: 12px; color: var(--text-muted); text-align: center; margin: 0; }
 .lock-auth-btn.google {
   display: flex;
@@ -1984,6 +1986,8 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 }
 .lock-auth-link:active { color: var(--gold); }
 .lock-fb-error { color: var(--red); font-size: 13px; text-align: center; min-height: 18px; font-weight: 600; margin: 0; }
+.lock-ios-install { font-size: 12px; color: var(--text-secondary); text-align: center; line-height: 1.45; margin: 4px 0 0; }
+.lock-ios-install strong { color: var(--gold); font-weight: 700; }
 .lock-auth-veya { font-size: 12px; color: var(--text-muted); text-align: center; margin: 0; }
 .lock-auth-btn.google {
   display: flex;
