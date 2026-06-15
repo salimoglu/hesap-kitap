@@ -6393,58 +6393,76 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
 }
 
 /* Gunluk ozet modal */
-.ioz-gun-modal {
-  width: min(420px, calc(100vw - 24px));
-  max-height: min(88vh, 640px);
+#modal-gunluk-ozet.modal-overlay {
+  padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+}
+#modal-gunluk-ozet .ioz-gun-modal {
+  width: min(440px, calc(100vw - 16px));
+  max-height: min(94dvh, calc(100dvh - 16px));
   display: flex;
   flex-direction: column;
 }
-.ioz-gun-modal-body {
+#modal-gunluk-ozet .modal-header {
+  padding: 10px 12px;
+  flex-shrink: 0;
+}
+#modal-gunluk-ozet .modal-title {
+  font-size: 15px;
+  line-height: 1.2;
+}
+#modal-gunluk-ozet .ioz-gun-modal-body {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   min-height: 0;
   overflow: hidden;
+  padding: 0 10px 10px;
 }
-.ioz-gun-tarih-bar {
+#modal-gunluk-ozet .ioz-gun-tarih-bar {
   display: flex;
-  align-items: flex-end;
-  gap: 10px;
+  align-items: center;
+  gap: 8px;
   flex-shrink: 0;
 }
-.ioz-gun-tarih-gr {
+#modal-gunluk-ozet .ioz-gun-tarih-inp {
   flex: 1;
   min-width: 0;
-  margin: 0;
+  height: 36px;
+  padding: 0 10px;
+  font-size: 13px;
 }
-.ioz-gun-tarih-gr .field-input {
-  width: 100%;
-}
-.ioz-gun-bugun-btn {
+#modal-gunluk-ozet .ioz-gun-bugun-btn {
   flex-shrink: 0;
   height: 36px;
-  padding: 0 12px;
+  padding: 0 10px;
   font-size: 10px;
+  white-space: nowrap;
 }
-.ioz-gun-ozet-icerik {
+#modal-gunluk-ozet .ioz-gun-ozet-icerik {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 10px 12px 14px;
+  overscroll-behavior: contain;
+  padding: 4px 2px 8px;
 }
-.ioz-gun-etiket {
-  font-size: 11px;
+#modal-gunluk-ozet .ioz-gun-etiket {
+  font-size: 10px;
   font-weight: 700;
-  color: var(--text2);
-  margin-bottom: 8px;
-  padding: 0 2px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  padding: 0 4px;
+  line-height: 1.3;
 }
 #modal-gunluk-ozet .ioz-gun-mini-head {
+  position: sticky;
+  top: 0;
+  z-index: 2;
   border-radius: var(--radius-sm);
   overflow: hidden;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   border: 1px solid var(--border);
+  background: var(--bg-card);
 }
 #modal-gunluk-ozet .ioz-gun-mini-head.ioz-panel-head {
   height: auto;
@@ -6454,8 +6472,97 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
 }
 #modal-gunluk-ozet .ioz-gun-mini-head .ioz-ust-ozet-yatay {
   height: auto;
-  min-height: 48px;
+  min-height: 44px;
   max-height: none;
-  padding: 8px var(--islem-px, 12px);
+  padding: 6px 8px;
+  gap: 4px;
+}
+#modal-gunluk-ozet .ioz-ozet-val {
+  font-size: clamp(9px, 3.2vw, 12px);
+}
+#modal-gunluk-ozet .ioz-grafik-blok {
+  margin-bottom: 0;
+}
+#modal-gunluk-ozet .ioz-donut-cift {
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 8px;
+}
+#modal-gunluk-ozet .ioz-donut-wrap,
+#modal-gunluk-ozet .ioz-donut-bos {
+  width: 108px;
+  height: 108px;
+  min-height: 108px;
+}
+#modal-gunluk-ozet .ioz-donut-ic {
+  width: 68px;
+  height: 68px;
+  padding: 4px;
+}
+#modal-gunluk-ozet .ioz-donut-ic-val {
+  font-size: 9px;
+  line-height: 1.15;
+}
+#modal-gunluk-ozet .ioz-gider-ozet {
+  padding: 6px 6px 8px;
+}
+#modal-gunluk-ozet .ioz-legend-toplam {
+  padding: 6px 8px;
+  margin-bottom: 2px;
+}
+#modal-gunluk-ozet .ioz-legend-toplam-val {
+  font-size: 12px;
+}
+#modal-gunluk-ozet .ioz-legend-satir {
+  grid-template-columns: 8px 1fr auto;
+  gap: 4px 6px;
+  font-size: 11px;
+  padding: 6px 6px;
+}
+#modal-gunluk-ozet .ioz-legend-pct {
+  display: none;
+}
+#modal-gunluk-ozet .ioz-grup-detay-baslik {
+  padding: 8px 8px 4px;
+}
+#modal-gunluk-ozet .ioz-grup-detay-ipucu {
+  display: none;
+}
+#modal-gunluk-ozet .ioz-kat-satir {
+  padding: 4px 8px;
+  min-height: 32px;
+}
+#modal-gunluk-ozet .ioz-kat-pct {
+  font-size: 9px;
+  min-width: 28px;
+}
+
+@media (max-width: 520px) {
+  #modal-gunluk-ozet.modal-overlay {
+    align-items: flex-end;
+    padding: 0;
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  #modal-gunluk-ozet .ioz-gun-modal {
+    width: 100%;
+    max-width: 100%;
+    max-height: min(92dvh, calc(100dvh - env(safe-area-inset-top, 0px)));
+    border-radius: 16px 16px 0 0;
+    border-bottom: none;
+    animation: ioz-gun-sheet-in 0.24s ease;
+  }
+  @keyframes ioz-gun-sheet-in {
+    from { opacity: 0; transform: translateY(100%); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  #modal-gunluk-ozet .ioz-gun-modal-body {
+    padding: 0 8px max(10px, env(safe-area-inset-bottom));
+  }
+  #modal-gunluk-ozet .ioz-donut-cift {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    gap: 6px 12px;
+  }
 }
 
