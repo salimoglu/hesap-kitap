@@ -4555,6 +4555,9 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   line-height: 20px;
   flex-shrink: 0;
 }
+#tab-islemler .islemler-kol-baslik .ioz-gun-ozet-btn {
+  margin-right: 2px;
+}
 #tab-islemler .islemler-panel-head .ozet-bar,
 #tab-islemler .islemler-sol-head .ozet-bar {
   display: flex;
@@ -6387,5 +6390,93 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
     padding: 6px 10px;
     font-size: 10px;
   }
+}
+
+/* Gunluk ozet modal */
+.ioz-gun-modal {
+  width: min(420px, calc(100vw - 24px));
+  max-height: min(88vh, 640px);
+  display: flex;
+  flex-direction: column;
+}
+.ioz-gun-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  overflow: hidden;
+}
+.ioz-gun-tarih-bar {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.ioz-gun-tarih-gr {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+.ioz-gun-tarih-gr .field-input {
+  width: 100%;
+}
+.ioz-gun-bugun-btn {
+  flex-shrink: 0;
+  height: 36px;
+  padding: 0 12px;
+  font-size: 10px;
+}
+.ioz-gun-ozet-icerik {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.ioz-gun-etiket {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text2);
+  margin-bottom: 8px;
+}
+.ioz-gun-ozet-bar {
+  margin-bottom: 12px;
+}
+.ioz-gun-grup {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 10px;
+  overflow: hidden;
+  background: var(--card);
+}
+.ioz-gun-grup-baslik {
+  padding: 8px 10px;
+  background: rgba(255,255,255,0.03);
+}
+.ioz-gun-kat-satir {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 10px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+}
+.ioz-gun-kat-ad {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ioz-gun-kat-sag {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+}
+.ioz-gun-kat-sag .ioz-kat-adet {
+  font-size: 9px;
+  color: var(--text3);
 }
 
