@@ -670,6 +670,8 @@ var ArabamModule = (function () {
     h += '<button type="button" class="modal-close" id="ar-detay-kapat" aria-label="Kapat">&#10005;</button>';
     h += "</div></div>";
 
+    h += '<div class="ar-detay-body">';
+
     h += '<div class="ar-bakim-ozet" id="ar-d-bakim-ozet"></div>';
 
     h += '<div class="ar-belge-form-wrap">';
@@ -712,6 +714,7 @@ var ArabamModule = (function () {
     h += '<button type="button" class="ar-gider-ekle-btn" id="ar-gider-kaydet-btn">Ekle</button>';
     h += "</div></div>";
     h += '<div class="ar-gider-liste" id="ar-d-liste"></div>';
+    h += "</div>";
     h += "</div></div>";
 
     h += "</div>";
