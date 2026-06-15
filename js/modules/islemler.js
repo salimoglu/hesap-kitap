@@ -329,7 +329,7 @@ const IslemlerModule = (() => {
     const ayLbl=ayEtiket(ayKey);
     head.innerHTML=
       '<div class="islemler-kol-baslik">'+
-      '<span class="islemler-kol-ad">Kategori &#246;zeti</span>'+
+      '<span class="islemler-kol-ad">Ayl&#305;k Kategori &#214;zet</span>'+
       '<div class="islemler-kol-nav">'+
       '<button type="button" class="butce-rapor-btn ioz-ozet-nav-btn" id="ioz-yil-ozet-btn" title="Y&#305;ll&#305;k &#246;zet">Y&#305;ll&#305;k</button>'+
       '<button type="button" class="butce-rapor-btn ioz-ozet-nav-btn" id="ioz-gun-ozet-btn" title="G&#252;nl&#252;k &#246;zet">G&#252;nl&#252;k</button>'+
