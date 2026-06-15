@@ -6583,14 +6583,19 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
 :is(#modal-gunluk-ozet, #modal-yillik-ozet) .ioz-legend-toplam-val {
   font-size: 12px;
 }
+:is(#modal-gunluk-ozet, #modal-yillik-ozet) .ioz-oran-kart {
+  margin-bottom: 8px;
+}
 :is(#modal-gunluk-ozet, #modal-yillik-ozet) .ioz-legend-satir {
-  grid-template-columns: 8px 1fr auto;
+  grid-template-columns: 8px 1fr auto auto;
   gap: 4px 6px;
   font-size: 11px;
   padding: 6px 6px;
 }
 :is(#modal-gunluk-ozet, #modal-yillik-ozet) .ioz-legend-pct {
-  display: none;
+  display: block;
+  font-size: 10px;
+  min-width: 32px;
 }
 :is(#modal-gunluk-ozet, #modal-yillik-ozet) .ioz-grup-detay-baslik {
   padding: 8px 8px 4px;

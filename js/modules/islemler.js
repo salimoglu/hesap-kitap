@@ -194,6 +194,7 @@ const IslemlerModule = (() => {
     h+='<div class="ioz-ozet-hucre"><span class="ioz-ozet-lbl">Gider</span><span class="ioz-ozet-val gider">'+para(v.gider)+'</span></div>';
     h+='<div class="ioz-ozet-hucre"><span class="ioz-ozet-lbl">Net</span><span class="ioz-ozet-val net">'+(net>=0?"":"-")+para(Math.abs(net))+'</span></div>';
     h+='</div></div>';
+    h+=iozOranCubukHtml(gunVer);
     h+=iozGrafikBlokRender(v.katListe, gunVer, _iozGunSeciliGrup, {tur:"gun",key:gunKey}, _iozGunSeciliKatIslem);
     return h;
   }
@@ -356,6 +357,7 @@ const IslemlerModule = (() => {
     h+='<div class="ioz-ozet-hucre"><span class="ioz-ozet-lbl">Gider</span><span class="ioz-ozet-val gider">'+para(v.gider)+'</span></div>';
     h+='<div class="ioz-ozet-hucre"><span class="ioz-ozet-lbl">Net</span><span class="ioz-ozet-val net">'+(net>=0?"":"-")+para(Math.abs(net))+'</span></div>';
     h+='</div></div>';
+    h+=iozOranCubukHtml(yilVer);
     h+=iozGrafikBlokRender(v.katListe, yilVer, _iozYilSeciliGrup, {tur:"yil",key:yilKey}, _iozYilSeciliKatIslem);
     return h;
   }
