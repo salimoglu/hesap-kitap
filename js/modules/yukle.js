@@ -485,15 +485,16 @@ function ayDetay(ay){var liste=[];_h.forEach(function(h){taksitler(h).forEach(fu
 function kTipGoster(tip){
   _aktifTip=tip;
   document.querySelectorAll(".kr-tip-btn[data-tip]").forEach(function(b){b.classList.toggle("active",b.dataset.tip===tip);});
-  var tw=$("kr-taksit-wrap"),dw=$("kr-duzenli-wrap"),tl=$("kr-tutar-label");
+  var tw=$("kr-taksit-wrap"),dw=$("kr-duzenli-wrap"),tl=$("kr-tutar-label"),hint=$("kr-duzenli-hint");
   if(tw)tw.style.display=tip==="taksit"?"":"none";
   if(dw)dw.style.display=tip==="duzenli"?"":"none";
-  if(tl)tl.textContent=tip==="duzenli"?"Aylik Tutar (TL)":"Toplam Tutar (TL)";
+  if(hint)hint.style.display=tip==="duzenli"?"":"none";
+  if(tl)tl.textContent=tip==="duzenli"?"Aylik tutar (TL)":"Toplam tutar (TL)";
   kDuzenliSureGoster(_duzenliSure);
 }
 function kDuzenliSureGoster(sure){
   _duzenliSure=sure;
-  document.querySelectorAll(".kr-tip-btn[data-sure]").forEach(function(b){b.classList.toggle("active",b.dataset.sure===sure);});
+  document.querySelectorAll(".kr-sure-btn[data-sure]").forEach(function(b){b.classList.toggle("active",b.dataset.sure===sure);});
   var sw=$("kr-sure-wrap");if(sw)sw.style.display=sure==="sureli"?"":"none";
 }
 function krender(){
@@ -502,37 +503,36 @@ function krender(){
   var h='<div class="kr-wrap"><div class="kr-header"><div class="kr-ozet">';
   h+='<div class="kr-ozet-item"><span class="kr-oz-label">BU AY ÖDEME</span><span class="kr-oz-val" style="color:var(--red)">'+kpara(ayToplam(aktifAy,null))+' TL</span></div>';
   h+='<div class="kr-ozet-item"><span class="kr-oz-label">KALAN TOPLAM</span><span class="kr-oz-val" style="color:var(--gold)">'+kpara(kalanBorc(null))+' TL</span></div>';
-  h+='</div><div class="kr-header-btns"><button class="kr-yeni-btn" id="kr-yeni-btn">+ Harcama</button><button class="kr-yeni-btn kr-yeni-btn--duzenli" id="kr-duzenli-btn">+ Duzenli</button></div></div>';
+  h+='</div><button class="kr-yeni-btn" id="kr-yeni-btn">+ Harcama Ekle</button></div>';
   if(ks.length){h+='<div class="kr-kart-ozet">';ks.forEach(function(kart){h+='<div class="kr-kart-chip"><div class="kr-chip-adi">'+kart+'</div><div class="kr-chip-buay">Bu ay: <b>'+kpara(ayToplam(aktifAy,kart))+' TL</b></div><div class="kr-chip-kalan">Kalan: '+kpara(kalanBorc(kart))+' TL</div></div>';});h+='</div>';}
   h+='<div class="kr-ay-bar"><button class="kr-ay-btn" id="kr-geri">&#8249;</button><span class="kr-ay-label">'+AYLAR[_ay]+" "+_yil+'</span><button class="kr-ay-btn" id="kr-ileri">&#8250;</button></div>';
   h+='<div class="kr-tablo-wrap">';
   if(!ayItems.length){h+='<div class="kr-bos">'+AYLAR[_ay]+' '+_yil+' için ödeme yok</div>';}
   else{h+='<table class="kr-tablo"><thead><tr><th>KART</th><th>AÇIKLAMA</th><th>TİP</th><th>TUTAR</th><th></th></tr></thead><tbody>';ayItems.forEach(function(r){h+='<tr><td class="kr-td-kart">'+r.kart+'</td><td class="kr-td-aciklama">'+r.aciklama+'</td><td class="kr-td-no'+(r.duzenli?" kr-td-duzenli":"")+'" style="text-align:center">'+taksitEtiket(r,r.har)+'</td><td class="kr-td-tutar">'+kpara(r.taksitTutar)+' TL</td><td><button class="kr-duz-btn row-action-btn duzenle" data-id="'+r.id+'">&#9998;</button> <button class="kr-sil-btn row-action-btn sil" data-id="'+r.id+'">&#10005;</button></td></tr>';});h+='</tbody></table>';}
   h+='</div></div>';
-  h+='<div class="bk-modal-overlay hidden" id="kr-modal"><div class="modal-box modal-sm"><div class="modal-header"><h2 class="modal-title" id="kr-modal-baslik">Harcama Ekle</h2><button class="modal-close" id="kr-modal-kapat">&#10005;</button></div><div class="modal-body">';
-  h+='<div class="field-group"><label class="field-label">Odeme turu</label><div class="kr-tip-sec"><button type="button" class="kr-tip-btn active" data-tip="taksit">Alisveris taksiti</button><button type="button" class="kr-tip-btn" data-tip="duzenli">Duzenli odeme</button></div></div>';
-  h+='<div class="field-group"><label class="field-label">Kart Adi</label><input type="text" id="kr-kart" class="field-input" placeholder="Garanti..." list="kr-dl" autocomplete="off"/><datalist id="kr-dl">'+ks.map(function(k){return'<option value="'+k+'"/>';}).join('')+'</datalist></div>';
-  h+='<div class="field-group"><label class="field-label">Aciklama</label><input type="text" id="kr-aciklama" class="field-input" placeholder="Netflix, market..." maxlength="100"/></div>';
-  h+='<div class="field-group"><label class="field-label" id="kr-tutar-label">Toplam Tutar (TL)</label><input type="number" id="kr-tutar" class="field-input" placeholder="0" min="0" step="0.01" inputmode="decimal"/></div>';
-  h+='<div id="kr-taksit-wrap"><div class="field-group"><label class="field-label">Taksit Sayisi</label><input type="number" id="kr-taksit" class="field-input" value="1" min="1" max="60"/></div>';
-  h+='<div class="field-group"><label class="field-label">1. Taksit Ayi</label><input type="month" id="kr-bastarihi" class="field-input" value="'+ayInput()+'"/></div></div>';
-  h+='<div id="kr-duzenli-wrap" style="display:none"><div class="field-group"><label class="field-label">Baslangic Ayi</label><input type="month" id="kr-duzenli-bas" class="field-input" value="'+ayInput()+'"/></div>';
-  h+='<div class="field-group"><label class="field-label">Sure</label><div class="kr-tip-sec"><button type="button" class="kr-tip-btn active" data-sure="devam">Devam ediyor</button><button type="button" class="kr-tip-btn" data-sure="sureli">Belirli sure</button></div></div>';
+  h+='<div class="bk-modal-overlay hidden" id="kr-modal"><div class="modal-box kr-modal-box"><div class="modal-header"><h2 class="modal-title" id="kr-modal-baslik">Harcama Ekle</h2><button class="modal-close" id="kr-modal-kapat">&#10005;</button></div><div class="modal-body kr-modal-body">';
+  h+='<div class="field-group kr-field-tip"><label class="field-label">Odeme turu</label><div class="kr-tip-sec"><button type="button" class="kr-tip-btn active" data-tip="taksit">Taksitli</button><button type="button" class="kr-tip-btn" data-tip="duzenli">Duzenli</button></div></div>';
+  h+='<div class="field-group"><label class="field-label">Kart</label><input type="text" id="kr-kart" class="field-input" placeholder="Garanti..." list="kr-dl" autocomplete="off"/><datalist id="kr-dl">'+ks.map(function(k){return'<option value="'+k+'"/>';}).join('')+'</datalist></div>';
+  h+='<div class="field-group"><label class="field-label">Aciklama</label><input type="text" id="kr-aciklama" class="field-input" placeholder="Market, Netflix..." maxlength="100"/></div>';
+  h+='<div class="field-group"><label class="field-label" id="kr-tutar-label">Toplam tutar (TL)</label><input type="number" id="kr-tutar" class="field-input" placeholder="0" min="0" step="0.01" inputmode="decimal"/></div>';
+  h+='<div id="kr-taksit-wrap" class="kr-alt-alan"><div class="field-group"><label class="field-label">Taksit sayisi</label><input type="number" id="kr-taksit" class="field-input" value="1" min="1" max="60"/></div>';
+  h+='<div class="field-group"><label class="field-label">1. taksit ayi</label><input type="month" id="kr-bastarihi" class="field-input" value="'+ayInput()+'"/></div></div>';
+  h+='<div id="kr-duzenli-wrap" class="kr-alt-alan" style="display:none"><div class="field-group"><label class="field-label">Baslangic ayi</label><input type="month" id="kr-duzenli-bas" class="field-input" value="'+ayInput()+'"/></div>';
+  h+='<div class="field-group"><label class="field-label">Sure</label><div class="kr-sure-sec"><button type="button" class="kr-sure-btn active" data-sure="devam">Devam ediyor</button><button type="button" class="kr-sure-btn" data-sure="sureli">Belirli sure</button></div></div>';
   h+='<div id="kr-sure-wrap" style="display:none"><div class="field-group"><label class="field-label">Kac ay?</label><input type="number" id="kr-duzenli-ay" class="field-input" value="12" min="1" max="120"/></div></div>';
-  h+='<p class="kr-duzenli-hint">Abonelik veya her ay tekrarlayan odemeler icin aylik tutari girin; taksit sayisi gerekmez.</p></div>';
+  h+='<p class="kr-duzenli-hint" id="kr-duzenli-hint" style="display:none">Abonelik ve aylik sabit odemeler: tutar aylik olarak yansir.</p></div>';
   h+='</div><div class="modal-footer"><button class="btn-secondary" id="kr-iptal">Iptal</button><button class="btn-primary" id="kr-kaydet">Kaydet</button></div></div></div>';
   c.innerHTML=h;kbagla();
 }
 function kbagla(){
   $("kr-yeni-btn").addEventListener("click",function(){kmodalAc(null,"taksit");});
-  $("kr-duzenli-btn").addEventListener("click",function(){kmodalAc(null,"duzenli");});
   $("kr-modal-kapat").addEventListener("click",kmodalKapat);$("kr-iptal").addEventListener("click",kmodalKapat);
   $("kr-modal").addEventListener("click",function(e){if(e.target===$("kr-modal"))kmodalKapat();});
   $("kr-kaydet").addEventListener("click",kkaydet);
   $("kr-geri").addEventListener("click",function(){_ay--;if(_ay<0){_ay=11;_yil--;}krender();});
   $("kr-ileri").addEventListener("click",function(){_ay++;if(_ay>11){_ay=0;_yil++;}krender();});
   document.querySelectorAll(".kr-tip-btn[data-tip]").forEach(function(btn){btn.addEventListener("click",function(){kTipGoster(btn.dataset.tip);});});
-  document.querySelectorAll(".kr-tip-btn[data-sure]").forEach(function(btn){btn.addEventListener("click",function(){kDuzenliSureGoster(btn.dataset.sure);});});
+  document.querySelectorAll(".kr-sure-btn[data-sure]").forEach(function(btn){btn.addEventListener("click",function(){kDuzenliSureGoster(btn.dataset.sure);});});
   document.querySelectorAll(".kr-duz-btn").forEach(function(btn){btn.addEventListener("click",function(){kmodalAc(btn.dataset.id);});});
   document.querySelectorAll(".kr-sil-btn").forEach(function(btn){btn.addEventListener("click",function(){if(!confirm("Silmek?"))return;_h=_h.filter(function(x){return x.id!==btn.dataset.id;});kfbKaydet();krender();});});
 }
@@ -542,7 +542,7 @@ function kmodalAc(id,tipOpt){
   if(id){x=_h.find(function(h){return h.id===id;});if(x)tip=harTip(x);}
   _aktifTip=tip;
   _duzenliSure="devam";
-  $("kr-modal-baslik").textContent=id?(tip==="duzenli"?"Duzenli odeme duzenle":"Harcama duzenle"):(tip==="duzenli"?"Duzenli odeme ekle":"Harcama ekle");
+  $("kr-modal-baslik").textContent=id?"Harcama duzenle":"Harcama ekle";
   $("kr-kart").value="";$("kr-aciklama").value="";$("kr-tutar").value="";$("kr-taksit").value="1";
   $("kr-bastarihi").value=ayInput();$("kr-duzenli-bas").value=ayInput();$("kr-duzenli-ay").value="12";
   if(id&&x){

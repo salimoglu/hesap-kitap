@@ -378,8 +378,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
   .vf2-oz-btns { margin-left: 0; width: 100%; flex-direction: row; flex-wrap: wrap; }
   .hg-kat-dropdown { left: 8px; right: 8px; width: auto; max-width: none; }
   .kr-header { flex-wrap: wrap; justify-content: center; gap:10px; }
-  .kr-header-btns { width:100%; justify-content:stretch; }
-  .kr-header .kr-yeni-btn { flex:1 1 auto; min-width:0; }
+  .kr-header .kr-yeni-btn { flex: 1 1 auto; min-width: min(100%, 200px); }
   .kr-kart-ozet { justify-content: stretch; }
   .al-header { flex-wrap: wrap; }
   .al-header .al-yeni-btn { flex: 1 1 auto; min-width: min(100%, 200px); }
@@ -1195,11 +1194,17 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .kr-oz-val { font-family:var(--font-brand); font-size:20px; letter-spacing:0.5px; }
 .kr-yeni-btn { background:var(--gold); color:#0f1923; border:none; border-radius:var(--radius-sm); padding:8px 16px; font-size:13px; font-weight:800; cursor:pointer; transition:opacity 0.15s; white-space:nowrap; }
 .kr-yeni-btn:hover { opacity:0.85; }
-.kr-header-btns { display:flex; gap:8px; flex-shrink:0; flex-wrap:wrap; }
-.kr-yeni-btn--duzenli { background:var(--bg-elevated); color:var(--text-primary); border:1px solid var(--border); }
-.kr-yeni-btn--duzenli:hover { border-color:var(--gold); color:var(--gold); opacity:1; }
-.kr-duzenli-hint { font-size:11px; color:var(--text-muted); line-height:1.45; margin:4px 0 0; padding:8px 10px; background:var(--bg-elevated); border-radius:8px; border:1px solid rgba(46,64,89,0.45); }
+#kr-modal .kr-modal-box { max-width:420px; max-height:min(90dvh,calc(100dvh - 24px)); }
+#kr-modal .kr-modal-body { gap:10px; padding:14px 16px 16px; }
+#kr-modal .field-group { gap:5px; margin:0; }
+#kr-modal .field-label { font-size:11px; line-height:1.35; letter-spacing:0.02em; }
+#kr-modal .field-input { padding:10px 12px; font-size:14px; }
+.kr-alt-alan { display:flex; flex-direction:column; gap:10px; }
+.kr-duzenli-hint { font-size:11px; color:var(--text-muted); line-height:1.4; margin:0; padding:8px 10px; background:var(--bg-elevated); border-radius:8px; border:1px solid rgba(46,64,89,0.45); }
 .kr-td-duzenli { color:var(--green); font-weight:700; font-size:11px; }
+.kr-tip-sec, .kr-sure-sec { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin:0; }
+.kr-tip-btn, .kr-sure-btn { min-width:0; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text-muted); padding:9px 8px; font-family:var(--font-body); font-size:11px; font-weight:700; line-height:1.25; text-align:center; cursor:pointer; transition:all 0.15s; }
+.kr-tip-btn.active, .kr-sure-btn.active { background:rgba(240,184,64,0.12); border-color:var(--gold); color:var(--gold); }
 .kr-kart-ozet { width:100%; max-width:760px; display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
 .kr-kart-chip { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-md); padding:10px 14px; min-width:160px; flex:1; }
 .kr-chip-adi { font-size:11px; font-weight:800; letter-spacing:0.8px; color:var(--gold); text-transform:uppercase; margin-bottom:4px; }
@@ -1224,9 +1229,6 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .kr-kart-chip--tikl:hover { border-color:var(--gold); box-shadow:0 0 0 1px rgba(240,184,64,0.25); }
 .kr-kart-chip--tikl:focus { outline:2px solid var(--gold); outline-offset:2px; }
 .kr-chip-tikla { font-size:10px; color:var(--text-muted); margin-top:6px; font-weight:600; letter-spacing:0.3px; }
-.kr-tip-sec { display:flex; gap:8px; margin-top:4px; flex-wrap:wrap; }
-.kr-tip-btn { flex:1; min-width:120px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text-muted); padding:8px 10px; font-family:var(--font-body); font-size:12px; font-weight:700; cursor:pointer; transition:all 0.15s; }
-.kr-tip-btn.active { background:rgba(240,184,64,0.12); border-color:var(--gold); color:var(--gold); }
 .kr-oz-sub { display:block; font-family:var(--font-body); font-size:11px; font-weight:700; color:var(--green); margin-top:4px; letter-spacing:0.2px; }
 .kr-chip-sabit { font-size:12px; color:var(--green); margin-top:4px; font-weight:600; }
 .kr-plan-modal-body { max-height:min(70vh,520px); overflow-y:auto; padding-top:8px; }
@@ -2335,8 +2337,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
   .vf2-oz-btns { margin-left: 0; width: 100%; flex-direction: row; flex-wrap: wrap; }
   .hg-kat-dropdown { left: 8px; right: 8px; width: auto; max-width: none; }
   .kr-header { flex-wrap: wrap; justify-content: center; gap:10px; }
-  .kr-header-btns { width:100%; justify-content:stretch; }
-  .kr-header .kr-yeni-btn { flex:1 1 auto; min-width:0; }
+  .kr-header .kr-yeni-btn { flex: 1 1 auto; min-width: min(100%, 200px); }
   .kr-kart-ozet { justify-content: stretch; }
   .al-header { flex-wrap: wrap; }
   .al-header .al-yeni-btn { flex: 1 1 auto; min-width: min(100%, 200px); }
@@ -3152,11 +3153,17 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .kr-oz-val { font-family:var(--font-brand); font-size:20px; letter-spacing:0.5px; }
 .kr-yeni-btn { background:var(--gold); color:#0f1923; border:none; border-radius:var(--radius-sm); padding:8px 16px; font-size:13px; font-weight:800; cursor:pointer; transition:opacity 0.15s; white-space:nowrap; }
 .kr-yeni-btn:hover { opacity:0.85; }
-.kr-header-btns { display:flex; gap:8px; flex-shrink:0; flex-wrap:wrap; }
-.kr-yeni-btn--duzenli { background:var(--bg-elevated); color:var(--text-primary); border:1px solid var(--border); }
-.kr-yeni-btn--duzenli:hover { border-color:var(--gold); color:var(--gold); opacity:1; }
-.kr-duzenli-hint { font-size:11px; color:var(--text-muted); line-height:1.45; margin:4px 0 0; padding:8px 10px; background:var(--bg-elevated); border-radius:8px; border:1px solid rgba(46,64,89,0.45); }
+#kr-modal .kr-modal-box { max-width:420px; max-height:min(90dvh,calc(100dvh - 24px)); }
+#kr-modal .kr-modal-body { gap:10px; padding:14px 16px 16px; }
+#kr-modal .field-group { gap:5px; margin:0; }
+#kr-modal .field-label { font-size:11px; line-height:1.35; letter-spacing:0.02em; }
+#kr-modal .field-input { padding:10px 12px; font-size:14px; }
+.kr-alt-alan { display:flex; flex-direction:column; gap:10px; }
+.kr-duzenli-hint { font-size:11px; color:var(--text-muted); line-height:1.4; margin:0; padding:8px 10px; background:var(--bg-elevated); border-radius:8px; border:1px solid rgba(46,64,89,0.45); }
 .kr-td-duzenli { color:var(--green); font-weight:700; font-size:11px; }
+.kr-tip-sec, .kr-sure-sec { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin:0; }
+.kr-tip-btn, .kr-sure-btn { min-width:0; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text-muted); padding:9px 8px; font-family:var(--font-body); font-size:11px; font-weight:700; line-height:1.25; text-align:center; cursor:pointer; transition:all 0.15s; }
+.kr-tip-btn.active, .kr-sure-btn.active { background:rgba(240,184,64,0.12); border-color:var(--gold); color:var(--gold); }
 .kr-kart-ozet { width:100%; max-width:760px; display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
 .kr-kart-chip { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-md); padding:10px 14px; min-width:160px; flex:1; }
 .kr-chip-adi { font-size:11px; font-weight:800; letter-spacing:0.8px; color:var(--gold); text-transform:uppercase; margin-bottom:4px; }
@@ -3181,9 +3188,6 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .kr-kart-chip--tikl:hover { border-color:var(--gold); box-shadow:0 0 0 1px rgba(240,184,64,0.25); }
 .kr-kart-chip--tikl:focus { outline:2px solid var(--gold); outline-offset:2px; }
 .kr-chip-tikla { font-size:10px; color:var(--text-muted); margin-top:6px; font-weight:600; letter-spacing:0.3px; }
-.kr-tip-sec { display:flex; gap:8px; margin-top:4px; flex-wrap:wrap; }
-.kr-tip-btn { flex:1; min-width:120px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text-muted); padding:8px 10px; font-family:var(--font-body); font-size:12px; font-weight:700; cursor:pointer; transition:all 0.15s; }
-.kr-tip-btn.active { background:rgba(240,184,64,0.12); border-color:var(--gold); color:var(--gold); }
 .kr-oz-sub { display:block; font-family:var(--font-body); font-size:11px; font-weight:700; color:var(--green); margin-top:4px; letter-spacing:0.2px; }
 .kr-chip-sabit { font-size:12px; color:var(--green); margin-top:4px; font-weight:600; }
 .kr-plan-modal-body { max-height:min(70vh,520px); overflow-y:auto; padding-top:8px; }
