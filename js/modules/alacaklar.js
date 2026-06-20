@@ -117,10 +117,30 @@ function taksitIlerleme(k){
   var od=plan.filter(function(t){return t.odendi;}).length;
   return {od:od,top:top,pct:Math.round(od/top*100)};
 }
+function ozetToplamMetni(nakit,tg){
+  var parcalar=[],tryNakit=nakit.TRY||0,tryToplam=tryNakit,i,d,v;
+  if(tg>0&&_gramAltinFiyatTL>0)tryToplam+=tg*_gramAltinFiyatTL;
+  if(tryToplam>0)parcalar.push(tutarFmt(tryToplam,"TRY"));
+  else if(tryNakit>0)parcalar.push(tutarFmt(tryNakit,"TRY"));
+  for(i=0;i<DOVIZLER.length;i++){
+    d=DOVIZLER[i].k;if(d==="TRY")continue;
+    v=nakit[d]||0;if(v>0)parcalar.push(tutarFmt(v,d));
+  }
+  if(tg>0&&_gramAltinFiyatTL<=0)parcalar.push(tg.toFixed(2)+" gr");
+  if(!parcalar.length)return null;
+  return parcalar.join(" · ");
+}
+function kisiOzetMetni(ks){
+  var nakit=nakitToplamMap(ks),tg=toplamAltinGram(ks),parcalar=[],i,d,v;
+  for(i=0;i<DOVIZLER.length;i++){d=DOVIZLER[i].k;v=nakit[d]||0;if(v>0)parcalar.push(tutarFmt(v,d));}
+  if(tg>0)parcalar.push(tg.toFixed(2)+" gr");
+  if(!parcalar.length)return {metin:"Tamamlandi",ok:true};
+  return {metin:parcalar.join(" · "),ok:false};
+}
 function ozetHtml(p){
   var nakit=nakitToplamMap(p.kayitlar),tg=toplamAltinGram(p.kayitlar),h='<div class="al-ozet-tek">';
   h+='<span class="al-oz-label">'+p.lbl.ozet+'</span><div class="al-ozet-satirlar">';
-  var any=false,i,d,v;
+  var any=false,i,d,v,toplam;
   for(i=0;i<DOVIZLER.length;i++){
     d=DOVIZLER[i].k;v=nakit[d]||0;
     if(v>0){any=true;h+='<div class="al-oz-satir"><span class="al-oz-satir-etik">Nakit · '+DOVIZLER[i].label+'</span><span class="al-oz-satir-val al-oz-val-tl">'+tutarFmt(v,d)+'</span></div>';}
@@ -132,6 +152,10 @@ function ozetHtml(p){
     h+='</span></div>';
   }
   if(!any)h+='<div class="al-oz-bos">'+p.lbl.ozetBos+'</div>';
+  else{
+    toplam=ozetToplamMetni(nakit,tg);
+    if(toplam)h+='<div class="al-oz-satir al-oz-satir-toplam"><span class="al-oz-satir-etik">Toplam</span><span class="al-oz-satir-val al-oz-val-toplam">'+toplam+'</span></div>';
+  }
   h+='</div></div>';return h;
 }
 function kisiChipHtml(ks){
@@ -220,12 +244,14 @@ function renderKolon(p){
       if(!uygun)return;
       gorunen++;
       var aktifAdet=ks.filter(function(k){return kalanTutar(k)>0;}).length;
-      var kapaliAdet=ks.length-aktifAdet;
+      var oz=kisiOzetMetni(ks);
       h+='<div class="al-kisi-satir" data-panel="'+p.key+'" data-kisi="'+encodeURIComponent(ad)+'" role="button" tabindex="0">';
       h+='<span class="al-kisi-avatar" aria-hidden="true">'+esc(kisiInitial(ad))+'</span>';
-      h+='<div class="al-kisi-info"><div class="al-kisi-ad">'+esc(ad)+'</div>';
-      h+='<div class="al-kisi-meta">'+aktifAdet+' acik'+(kapaliAdet?(' · '+kapaliAdet+' kapali'):"")+' · '+ks.length+' '+p.lbl.kisiKayit+'</div></div>';
-      h+=kisiChipHtml(ks)+'<span class="al-kisi-ok" aria-hidden="true">›</span></div>';
+      h+='<div class="al-kisi-body"><div class="al-kisi-row1">';
+      h+='<span class="al-kisi-ad">'+esc(ad)+'</span>';
+      h+='<span class="al-kisi-tutar'+(oz.ok?" al-kisi-tutar-ok":"")+'">'+esc(oz.metin)+'</span>';
+      h+='<span class="al-kisi-ok" aria-hidden="true">›</span></div>';
+      h+='<div class="al-kisi-meta">'+aktifAdet+' acik · '+ks.length+' '+p.lbl.kisiKayit+'</div></div></div>';
     });
     h+='</div>';
     if(!gorunen)h+='<div class="al-bos al-bos-kolon"><div class="al-bos-baslik">Sonuc bulunamadi</div></div>';
