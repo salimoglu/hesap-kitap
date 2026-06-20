@@ -174,58 +174,63 @@ function render(){
   if(_aktifKisiAd&&kisilerMap()[_aktifKisiAd])kisiModalAc(_aktifKisiAd);
   else if(_aktifKisiAd)kisiModalKapat();
 }
+function aksiyonBtn(cls,id,ikon,baslik){
+  return '<button class="al-aksiyon-btn '+cls+'" data-id="'+id+'" type="button" title="'+baslik+'" aria-label="'+baslik+'">'+ikon+'</button>';
+}
+function odemeBtnHtml(k,no,odendi){
+  var baslik=odendi?"Odenmis (geri al)":"Odendi isaretle";
+  return '<button class="al-aksiyon-btn al-odeme-btn'+(odendi?" al-odendi-aktif":"")+'" data-id="'+k.id+'" data-no="'+no+'" type="button" title="'+baslik+'" aria-label="'+baslik+'">'+(odendi?"&#10003;":"&#9675;")+'</button>';
+}
 function kartHtml(k){
   var tamOdendi=(k.tip==="altin")?k.odendi:(kalanAlacak(k)<=0);
   var aciklama=esc(k.aciklama||""),dv=normalizeDoviz(k.doviz);
   var tipCls=k.tip==="altin"?"al-kart--altin":(k.tip==="taksit"?"al-kart--taksit":"al-kart--pesin");
   var h='<div class="al-kart '+tipCls+(tamOdendi?" al-kart-kapali":"")+'">';
-  h+='<div class="al-kart-top"><div class="al-kart-baslik">';
-  if(k.tip==="altin"){
-    h+='<span class="al-kart-tip al-tip-au">Altin</span>';
-    h+='<span class="al-kart-baslik-metin">'+ALTIN_LABEL[k.altinTur||"gram"]+' × '+(parseFloat(k.altinAdet)||1)+'</span>';
-    if(aciklama)h+='<span class="al-kart-aciklama">'+aciklama+'</span>';
-  }else if(k.tip==="taksit"){
-    h+='<span class="al-kart-tip al-tip-t">Taksitli · '+dovizSembol(dv)+'</span>';
-    h+='<span class="al-kart-baslik-metin">'+(aciklama||"Taksitli alacak")+'</span>';
-    h+='<span class="al-kart-alt-metin">Toplam '+tutarFmt(k.tutar,dv)+' · '+k.taksitSayisi+' taksit</span>';
-  }else{
-    h+='<span class="al-kart-tip al-tip-p">Pesin · '+dovizSembol(dv)+'</span>';
-    h+='<span class="al-kart-baslik-metin">'+(aciklama||"Pesin alacak")+'</span>';
-    h+='<span class="al-kart-alt-metin">'+tarihFmt(k.tarih)+' · '+tutarFmt(k.tutar,dv)+'</span>';
-  }
-  h+='</div><div class="al-kart-sag">';
-  if(k.tip==="altin"){
-    if(!tamOdendi)h+='<div class="al-kalan-val al-kalan-altin">'+altinGram(k).toFixed(2)+'<span class="al-kalan-label">gr</span></div>';
-    else h+='<span class="al-odendi-badge">Alindi</span>';
-  }else{
+  var aksiyonlar='<div class="al-kart-actions">'+aksiyonBtn("al-duz-btn duzenle",k.id,"&#9998;","Duzenle")+aksiyonBtn("al-sil-btn sil",k.id,"&#10005;","Sil")+'</div>';
+
+  if(k.tip==="pesin"){
     var kalan=kalanAlacak(k);
-    if(!tamOdendi)h+='<div class="al-kalan-val">'+tutarFmt(kalan,dv)+'<span class="al-kalan-label">kalan</span></div>';
-    else h+='<span class="al-odendi-badge">Odendi</span>';
-  }
-  h+='<div class="al-kart-actions"><button class="al-duz-btn row-action-btn duzenle" data-id="'+k.id+'" type="button" title="Duzenle">&#9998;</button><button class="al-sil-btn row-action-btn sil" data-id="'+k.id+'" type="button" title="Sil">&#10005;</button></div>';
-  h+='</div></div>';
-  var prog=taksitIlerleme(k);
-  if(prog&&!tamOdendi){
-    h+='<div class="al-kart-bar" role="progressbar" aria-valuenow="'+prog.pct+'"><div class="al-kart-bar-inner" style="width:'+prog.pct+'%"></div></div>';
-    h+='<div class="al-kart-bar-etiket">'+prog.od+' / '+prog.top+' taksit odendi</div>';
-  }
-  h+='<div class="al-plan"><div class="al-plan-head">'+(k.tip==="taksit"?"Taksit plani":(k.tip==="altin"?"Altin kaydi":"Odeme"))+'</div>';
-  if(k.tip==="altin"){
-    h+='<div class="al-plan-satir'+(k.odendi?" al-odendi":"")+'"><span class="al-plan-ay">'+tarihFmt(k.tarih)+'</span><span class="al-plan-tutar al-tutar-altin">'+altinGram(k).toFixed(2)+' gr</span>';
-    h+='<button class="al-odeme-btn'+(k.odendi?" al-odendi-aktif":"")+'" data-id="'+k.id+'" data-no="-1" type="button">'+(k.odendi?"&#10003; Alindi":"Isaretle")+'</button></div>';
+    h+='<div class="al-kart-satir">';
+    h+='<div class="al-kart-bilgi"><span class="al-kart-tip al-tip-p">Pesin</span>';
+    h+='<span class="al-kart-baslik-metin">'+(aciklama||"Pesin alacak")+'</span>';
+    h+='<span class="al-kart-ek">'+tarihFmt(k.tarih)+' · '+tutarFmt(k.tutar,dv)+'</span></div>';
+    h+='<span class="al-kart-tutar'+(tamOdendi?" al-kart-tutar-bitti":"")+'">'+(tamOdendi?"Odendi":tutarFmt(kalan,dv))+'</span>';
+    h+='<div class="al-kart-actions">'+odemeBtnHtml(k,-1,!!k.odendi)+aksiyonBtn("al-duz-btn duzenle",k.id,"&#9998;","Duzenle")+aksiyonBtn("al-sil-btn sil",k.id,"&#10005;","Sil")+'</div></div>';
+  }else if(k.tip==="altin"){
+    h+='<div class="al-kart-satir">';
+    h+='<div class="al-kart-bilgi"><span class="al-kart-tip al-tip-au">Altin</span>';
+    h+='<span class="al-kart-baslik-metin">'+ALTIN_LABEL[k.altinTur||"gram"]+' × '+(parseFloat(k.altinAdet)||1)+'</span>';
+    if(aciklama)h+='<span class="al-kart-ek">'+aciklama+' · '+tarihFmt(k.tarih)+'</span>';
+    else h+='<span class="al-kart-ek">'+tarihFmt(k.tarih)+'</span>';
+    h+='</div><span class="al-kart-tutar al-kart-tutar-au'+(tamOdendi?" al-kart-tutar-bitti":"")+'">'+(tamOdendi?"Alindi":altinGram(k).toFixed(2)+" gr")+'</span>';
+    h+='<div class="al-kart-actions">'+odemeBtnHtml(k,-1,!!k.odendi)+aksiyonBtn("al-duz-btn duzenle",k.id,"&#9998;","Duzenle")+aksiyonBtn("al-sil-btn sil",k.id,"&#10005;","Sil")+'</div></div>';
   }else{
+    var kalan=kalanAlacak(k),prog=taksitIlerleme(k);
+    h+='<div class="al-kart-satir al-kart-satir-ust">';
+    h+='<div class="al-kart-bilgi"><span class="al-kart-tip al-tip-t">Taksitli</span>';
+    h+='<span class="al-kart-baslik-metin">'+(aciklama||"Taksitli alacak")+'</span>';
+    h+='<span class="al-kart-ek">'+tutarFmt(k.tutar,dv)+' · '+k.taksitSayisi+' taksit';
+    if(prog)h+=' · '+prog.od+'/'+prog.top+' odendi';
+    h+='</span></div>';
+    h+='<span class="al-kart-tutar'+(tamOdendi?" al-kart-tutar-bitti":"")+'">'+(tamOdendi?"Odendi":tutarFmt(kalan,dv))+'</span>';
+    h+=aksiyonlar+'</div>';
+    if(prog&&!tamOdendi){
+      h+='<div class="al-kart-bar" role="progressbar" aria-valuenow="'+prog.pct+'"><div class="al-kart-bar-inner" style="width:'+prog.pct+'%"></div></div>';
+    }
     var plan=taksitPlan(k);
-    if(!plan.length)plan=[{ay:k.tarih?k.tarih.substring(0,7):"",tutar:parseFloat(k.tutar)||0,no:1,odendi:k.odendi||false}];
-    plan.forEach(function(t){
-      h+='<div class="al-plan-satir'+(t.odendi?" al-odendi":"")+'">';
-      h+='<div class="al-plan-sol"><span class="al-plan-ay">'+(k.tip==="pesin"?tarihFmt(k.tarih):ayFmt(t.ay))+'</span>';
-      if(k.tip!=="pesin")h+='<span class="al-plan-no">'+t.no+' / '+k.taksitSayisi+'</span></div>';
-      else h+='</div>';
-      h+='<span class="al-plan-tutar">'+tutarFmt(t.tutar,dv)+'</span>';
-      h+='<button class="al-odeme-btn'+(t.odendi?" al-odendi-aktif":"")+'" data-id="'+k.id+'" data-no="'+(t.no-1)+'" type="button">'+(t.odendi?"&#10003;":"Odendi")+'</button></div>';
-    });
+    if(plan.length){
+      h+='<div class="al-plan">';
+      plan.forEach(function(t){
+        h+='<div class="al-kart-satir al-kart-satir-alt'+(t.odendi?" al-odendi":"")+'">';
+        h+='<div class="al-kart-bilgi al-kart-bilgi-alt"><span class="al-kart-baslik-metin">'+ayFmt(t.ay)+'</span>';
+        h+='<span class="al-kart-ek">'+t.no+' / '+k.taksitSayisi+'</span></div>';
+        h+='<span class="al-kart-tutar">'+tutarFmt(t.tutar,dv)+'</span>';
+        h+='<div class="al-kart-actions">'+odemeBtnHtml(k,t.no-1,!!t.odendi)+'</div></div>';
+      });
+      h+='</div>';
+    }
   }
-  h+='</div></div>';return h;
+  h+='</div>';return h;
 }
 function kisiListeHtml(ks){
   var aktif=ks.filter(function(k){return kalanAlacak(k)>0;});
