@@ -625,8 +625,10 @@
           if (!u || u.isAnonymous) return;
           var katModal = document.getElementById("modal-kat-duzenle");
           var katYonet = document.getElementById("modal-kategori");
+          var krModal = document.getElementById("kr-modal");
           if (katModal && !katModal.classList.contains("hidden")) return;
           if (katYonet && !katYonet.classList.contains("hidden")) return;
+          if (krModal && !krModal.classList.contains("hidden")) return;
           sonYenile = now;
           if (typeof window.sayfaYenile === "function") window.sayfaYenile();
         } catch (eSy) {}

@@ -449,7 +449,7 @@ return{init:binit,goster:bgoster,yukle:byukleVeCiz};
 /* ===== KREDİ MODULE ===== */
 var KrediModule=(function(){
 var $=function(id){return document.getElementById(id);};
-var _h=[],_k=[],_aktif=null,_aktifTip="taksit",_duzenliSure="devam",_ay=new Date().getMonth(),_yil=new Date().getFullYear();
+var _h=[],_k=[],_aktif=null,_aktifTip="taksit",_duzenliSure="devam",_formTaslak=null,_ay=new Date().getMonth(),_yil=new Date().getFullYear();
 var AYLAR=["Ocak","Subat","Mart","Nisan","Mayis","Haziran","Temmuz","Agustos","Eylul","Ekim","Kasim","Aralik"];
 function kpara(n){return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2});}
 function uid(){return "k"+Date.now()+"_"+Math.random().toString(36).substr(2,5);}
@@ -497,7 +497,36 @@ function kDuzenliSureGoster(sure){
   document.querySelectorAll(".kr-sure-btn[data-sure]").forEach(function(b){b.classList.toggle("active",b.dataset.sure===sure);});
   var sw=$("kr-sure-wrap");if(sw)sw.style.display=sure==="sureli"?"":"none";
 }
+function kFormTaslakOku(){
+  var m=$("kr-modal");
+  if(!m||m.classList.contains("hidden"))return _formTaslak;
+  return{
+    acik:true,aktif:_aktif,tip:_aktifTip,sure:_duzenliSure,
+    kart:($("kr-kart")||{}).value||"",aciklama:($("kr-aciklama")||{}).value||"",
+    tutar:($("kr-tutar")||{}).value||"",taksit:($("kr-taksit")||{}).value||"1",
+    bastarihi:($("kr-bastarihi")||{}).value||"",duzenliBas:($("kr-duzenli-bas")||{}).value||"",
+    duzenliAy:($("kr-duzenli-ay")||{}).value||"12"
+  };
+}
+function kFormTaslakKaydet(){var t=kFormTaslakOku();if(t&&t.acik)_formTaslak=t;}
+function kFormTaslakGeriYukle(t){
+  if(!t||!t.acik)return;
+  _aktif=t.aktif;_aktifTip=t.tip||"taksit";_duzenliSure=t.sure||"devam";
+  $("kr-modal-baslik").textContent=t.aktif?"Harcama duzenle":"Harcama ekle";
+  kTipGoster(_aktifTip);
+  $("kr-kart").value=t.kart||"";
+  $("kr-aciklama").value=t.aciklama||"";
+  $("kr-tutar").value=t.tutar||"";
+  $("kr-taksit").value=t.taksit||"1";
+  $("kr-bastarihi").value=t.bastarihi||ayInput();
+  $("kr-duzenli-bas").value=t.duzenliBas||ayInput();
+  $("kr-duzenli-ay").value=t.duzenliAy||"12";
+  kDuzenliSureGoster(_duzenliSure);
+  $("kr-modal").classList.remove("hidden");
+  var f=$("kr-kart");if(f)setTimeout(function(){f.focus();},50);
+}
 function krender(){
+  var taslak=kFormTaslakOku()||_formTaslak;
   var c=$("kredi-container");if(!c)return;
   var aktifAy=buAy(),ayItems=ayDetay(aktifAy),ks=kartlar();
   var h='<div class="kr-wrap"><div class="kr-header"><div class="kr-ozet">';
@@ -523,16 +552,22 @@ function krender(){
   h+='<p class="kr-duzenli-hint" id="kr-duzenli-hint" style="display:none">Abonelik ve aylik sabit odemeler: tutar aylik olarak yansir.</p></div>';
   h+='</div><div class="modal-footer"><button class="btn-secondary" id="kr-iptal">Iptal</button><button class="btn-primary" id="kr-kaydet">Kaydet</button></div></div></div>';
   c.innerHTML=h;kbagla();
+  if(taslak&&taslak.acik)kFormTaslakGeriYukle(taslak);
 }
 function kbagla(){
   $("kr-yeni-btn").addEventListener("click",function(){kmodalAc(null,"taksit");});
+  var krModal=$("kr-modal"),krBox=krModal?krModal.querySelector(".kr-modal-box"):null;
+  if(krBox)krBox.addEventListener("click",function(e){e.stopPropagation();});
   $("kr-modal-kapat").addEventListener("click",kmodalKapat);$("kr-iptal").addEventListener("click",kmodalKapat);
-  $("kr-modal").addEventListener("click",function(e){if(e.target===$("kr-modal"))kmodalKapat();});
+  if(krModal)krModal.addEventListener("click",function(e){if(e.target===krModal)kmodalKapat();});
   $("kr-kaydet").addEventListener("click",kkaydet);
   $("kr-geri").addEventListener("click",function(){_ay--;if(_ay<0){_ay=11;_yil--;}krender();});
   $("kr-ileri").addEventListener("click",function(){_ay++;if(_ay>11){_ay=0;_yil++;}krender();});
-  document.querySelectorAll(".kr-tip-btn[data-tip]").forEach(function(btn){btn.addEventListener("click",function(){kTipGoster(btn.dataset.tip);});});
-  document.querySelectorAll(".kr-sure-btn[data-sure]").forEach(function(btn){btn.addEventListener("click",function(){kDuzenliSureGoster(btn.dataset.sure);});});
+  document.querySelectorAll(".kr-tip-btn[data-tip]").forEach(function(btn){btn.addEventListener("click",function(){kTipGoster(btn.dataset.tip);kFormTaslakKaydet();});});
+  document.querySelectorAll(".kr-sure-btn[data-sure]").forEach(function(btn){btn.addEventListener("click",function(){kDuzenliSureGoster(btn.dataset.sure);kFormTaslakKaydet();});});
+  ["kr-kart","kr-aciklama","kr-tutar","kr-taksit","kr-bastarihi","kr-duzenli-bas","kr-duzenli-ay"].forEach(function(id){
+    var el=$(id);if(el)el.addEventListener("input",kFormTaslakKaydet);
+  });
   document.querySelectorAll(".kr-duz-btn").forEach(function(btn){btn.addEventListener("click",function(){kmodalAc(btn.dataset.id);});});
   document.querySelectorAll(".kr-sil-btn").forEach(function(btn){btn.addEventListener("click",function(){if(!confirm("Silmek?"))return;_h=_h.filter(function(x){return x.id!==btn.dataset.id;});kfbKaydet();krender();});});
 }
@@ -556,10 +591,11 @@ function kmodalAc(id,tipOpt){
     }
   }
   kTipGoster(tip);
+  kFormTaslakKaydet();
   $("kr-modal").classList.remove("hidden");
-  setTimeout(function(){$("kr-kart").focus();},100);
+  setTimeout(function(){var f=$("kr-kart");if(f)f.focus();},100);
 }
-function kmodalKapat(){$("kr-modal").classList.add("hidden");_aktif=null;}
+function kmodalKapat(){$("kr-modal").classList.add("hidden");_aktif=null;_formTaslak=null;}
 async function kkaydet(){
   var kart=($("kr-kart").value||"").trim(),aciklama=($("kr-aciklama").value||"").trim(),tutar=parseFloat($("kr-tutar").value)||0;
   if(!kart||!aciklama||!tutar)return;
