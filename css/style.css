@@ -1294,11 +1294,14 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .al-kart-tutar-au { color:var(--gold); }
 .al-kart-tutar-bitti { font-family:var(--font-body); font-size:10px; font-weight:800; letter-spacing:0.04em; text-transform:uppercase; color:var(--green); }
 .al-kart-actions { display:flex; align-items:center; gap:4px; flex-shrink:0; }
-.al-aksiyon-btn { width:30px; height:30px; border-radius:8px; border:1px solid var(--border); background:var(--bg-card); color:var(--text-muted); font-size:14px; line-height:1; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; padding:0; transition:all 0.12s; flex-shrink:0; }
+.al-aksiyon-btn { width:32px; height:32px; border-radius:9px; border:1px solid var(--border); background:var(--bg-card); color:var(--text-muted); font-size:14px; line-height:1; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; padding:0; transition:background 0.12s,border-color 0.12s,color 0.12s,box-shadow 0.12s; flex-shrink:0; }
 .al-aksiyon-btn:active { background:var(--bg-elevated); color:var(--text-primary); }
 .al-aksiyon-btn.sil:active { color:var(--red); border-color:rgba(240,84,84,0.4); }
-.al-odeme-btn { width:36px; height:36px; font-size:18px; font-weight:800; }
-.al-odeme-btn.al-odendi-aktif { background:rgba(52,201,122,0.16); border-color:var(--green); color:var(--green); }
+.al-odeme-btn { width:34px; height:34px; border-radius:50%; border:2px solid rgba(138,173,204,0.35); background:rgba(15,25,35,0.35); color:var(--text-secondary); box-shadow:inset 0 1px 0 rgba(255,255,255,0.04); }
+.al-odeme-btn:active { border-color:rgba(52,201,122,0.55); color:var(--green); }
+.al-odeme-ikon { width:17px; height:17px; display:block; pointer-events:none; }
+.al-odeme-btn.al-odendi-aktif { background:linear-gradient(180deg,#3dd98a,var(--green)); border-color:#2eb86a; color:#052a16; box-shadow:0 2px 8px rgba(52,201,122,0.28); }
+.al-odeme-btn.al-odendi-aktif:active { filter:brightness(0.95); }
 .al-kart-bar { height:3px; background:var(--bg-input); margin:0 12px 2px; border-radius:999px; overflow:hidden; }
 .al-kart-bar-inner { height:100%; background:linear-gradient(90deg,var(--green),#22d977); border-radius:999px; transition:width 0.25s ease; }
 .al-plan { border-top:1px solid var(--border); }
@@ -3208,11 +3211,14 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .al-kart-tutar-au { color:var(--gold); }
 .al-kart-tutar-bitti { font-family:var(--font-body); font-size:10px; font-weight:800; letter-spacing:0.04em; text-transform:uppercase; color:var(--green); }
 .al-kart-actions { display:flex; align-items:center; gap:4px; flex-shrink:0; }
-.al-aksiyon-btn { width:30px; height:30px; border-radius:8px; border:1px solid var(--border); background:var(--bg-card); color:var(--text-muted); font-size:14px; line-height:1; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; padding:0; transition:all 0.12s; flex-shrink:0; }
+.al-aksiyon-btn { width:32px; height:32px; border-radius:9px; border:1px solid var(--border); background:var(--bg-card); color:var(--text-muted); font-size:14px; line-height:1; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; padding:0; transition:background 0.12s,border-color 0.12s,color 0.12s,box-shadow 0.12s; flex-shrink:0; }
 .al-aksiyon-btn:active { background:var(--bg-elevated); color:var(--text-primary); }
 .al-aksiyon-btn.sil:active { color:var(--red); border-color:rgba(240,84,84,0.4); }
-.al-odeme-btn { width:36px; height:36px; font-size:18px; font-weight:800; }
-.al-odeme-btn.al-odendi-aktif { background:rgba(52,201,122,0.16); border-color:var(--green); color:var(--green); }
+.al-odeme-btn { width:34px; height:34px; border-radius:50%; border:2px solid rgba(138,173,204,0.35); background:rgba(15,25,35,0.35); color:var(--text-secondary); box-shadow:inset 0 1px 0 rgba(255,255,255,0.04); }
+.al-odeme-btn:active { border-color:rgba(52,201,122,0.55); color:var(--green); }
+.al-odeme-ikon { width:17px; height:17px; display:block; pointer-events:none; }
+.al-odeme-btn.al-odendi-aktif { background:linear-gradient(180deg,#3dd98a,var(--green)); border-color:#2eb86a; color:#052a16; box-shadow:0 2px 8px rgba(52,201,122,0.28); }
+.al-odeme-btn.al-odendi-aktif:active { filter:brightness(0.95); }
 .al-kart-bar { height:3px; background:var(--bg-input); margin:0 12px 2px; border-radius:999px; overflow:hidden; }
 .al-kart-bar-inner { height:100%; background:linear-gradient(90deg,var(--green),#22d977); border-radius:999px; transition:width 0.25s ease; }
 .al-plan { border-top:1px solid var(--border); }

@@ -179,7 +179,10 @@ function aksiyonBtn(cls,id,ikon,baslik){
 }
 function odemeBtnHtml(k,no,odendi){
   var baslik=odendi?"Odenmis (geri al)":"Odendi isaretle";
-  return '<button class="al-aksiyon-btn al-odeme-btn'+(odendi?" al-odendi-aktif":"")+'" data-id="'+k.id+'" data-no="'+no+'" type="button" title="'+baslik+'" aria-label="'+baslik+'">'+(odendi?"&#10003;":"&#9675;")+'</button>';
+  var ikon=odendi
+    ? '<svg class="al-odeme-ikon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+    : '<svg class="al-odeme-ikon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/></svg>';
+  return '<button class="al-aksiyon-btn al-odeme-btn'+(odendi?" al-odendi-aktif":"")+'" data-id="'+k.id+'" data-no="'+no+'" type="button" title="'+baslik+'" aria-label="'+baslik+'">'+ikon+'</button>';
 }
 function kartHtml(k){
   var tamOdendi=(k.tip==="altin")?k.odendi:(kalanAlacak(k)<=0);
