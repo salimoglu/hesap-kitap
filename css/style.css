@@ -1230,51 +1230,50 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 /* ══ ALACAKLAR MODÜLÜ ══ */
 .al-wrap { display:flex; flex-direction:column; align-items:center; gap:12px; padding:12px 12px 40px; overflow-y:auto; height:100%; box-sizing:border-box; scrollbar-width:thin; scrollbar-color:var(--border) transparent; }
 .al-header { width:100%; max-width:920px; display:flex; align-items:stretch; justify-content:space-between; gap:12px; flex-wrap:wrap; flex-shrink:0; }
-.al-ozet-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; flex:1; min-width:min(100%,220px); }
-.al-ozet-kart { background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:14px 16px; display:flex; flex-direction:column; gap:6px; }
-.al-ozet-kart-au { border-color:rgba(240,184,64,0.25); }
+.al-ozet-tek { flex:1; min-width:min(100%,240px); background:var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:16px 18px; display:flex; flex-direction:column; gap:10px; }
+.al-ozet-satirlar { display:flex; flex-direction:column; gap:8px; }
+.al-oz-satir { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:8px 10px; background:var(--bg-elevated); border-radius:10px; border:1px solid rgba(46,64,89,0.45); }
+.al-oz-satir-etik { font-size:12px; font-weight:700; color:var(--text-secondary); }
+.al-oz-satir-val { font-family:var(--font-brand); font-size:20px; letter-spacing:0.3px; text-align:right; }
+.al-oz-satir-val small { font-family:var(--font-body); font-size:11px; font-weight:700; opacity:0.85; }
+.al-oz-satir-au { border-color:rgba(240,184,64,0.22); }
+.al-oz-bos { font-size:13px; color:var(--text-muted); padding:6px 2px; }
 .al-oz-label { font-size:10px; font-weight:800; letter-spacing:0.08em; color:var(--text-muted); text-transform:uppercase; }
-.al-oz-val { font-family:var(--font-brand); font-size:26px; letter-spacing:0.5px; line-height:1; }
-.al-oz-val small { font-family:var(--font-body); font-size:14px; font-weight:700; opacity:0.75; }
 .al-oz-val-tl { color:var(--green); }
 .al-oz-val-au { color:var(--gold); }
-.al-oz-au-guncel { display:block; font-family:var(--font-body); font-size:12px; font-weight:700; color:var(--green); margin-top:4px; }
 .al-yeni-btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; background:linear-gradient(135deg,var(--gold),var(--gold-dim)); color:#0f1923; border:none; border-radius:12px; padding:12px 18px; font-family:var(--font-body); font-size:13px; font-weight:800; cursor:pointer; transition:transform 0.12s,opacity 0.12s; white-space:nowrap; align-self:stretch; min-height:52px; box-shadow:0 4px 14px rgba(240,184,64,0.18); }
 .al-yeni-btn:active { transform:scale(0.98); opacity:0.92; }
 .al-yeni-ikon { font-size:18px; line-height:1; }
-.al-kontrol-bar { width:100%; max-width:920px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.al-kontrol-bar { width:100%; max-width:920px; display:flex; gap:8px; align-items:center; }
 .al-ara-wrap { flex:1; min-width:180px; }
 .al-ara-input { width:100%; background:var(--bg-card); border:1px solid var(--border); border-radius:12px; color:var(--text-primary); font-family:var(--font-body); font-size:14px; padding:11px 14px; outline:none; transition:border-color 0.15s; }
 .al-ara-input:focus { border-color:var(--gold); }
 .al-ara-input::placeholder { color:var(--text-muted); }
-.al-ctrl-btn { background:var(--bg-card); border:1px solid var(--border); border-radius:10px; color:var(--text-secondary); font-family:var(--font-body); font-size:12px; font-weight:700; padding:10px 12px; cursor:pointer; transition:all 0.12s; white-space:nowrap; }
-.al-ctrl-btn:active { border-color:var(--gold); color:var(--gold); }
-.al-bos { width:100%; max-width:920px; padding:48px 24px; text-align:center; color:var(--text-muted); font-family:var(--font-body); background:var(--bg-card); border:1px dashed var(--border); border-radius:16px; }
-.al-bos-ikon { font-size:42px; margin-bottom:12px; opacity:0.7; }
-.al-bos-baslik { font-size:16px; font-weight:800; color:var(--text-secondary); margin-bottom:6px; }
-.al-bos-alt { font-size:13px; line-height:1.45; }
-.al-kisi-blok { width:100%; max-width:920px; background:var(--bg-card); border:1px solid var(--border); border-radius:16px; overflow:hidden; transition:border-color 0.15s,box-shadow 0.15s; }
-.al-kisi-blok--acik { border-color:rgba(240,184,64,0.28); box-shadow:0 8px 24px rgba(0,0,0,0.12); }
-.al-kisi-header { display:flex; align-items:center; gap:12px; width:100%; padding:14px 14px 14px 16px; background:transparent; border:none; border-bottom:1px solid transparent; cursor:pointer; text-align:left; color:inherit; font:inherit; transition:background 0.12s; }
-.al-kisi-header--acik { background:var(--bg-elevated); border-bottom-color:var(--border); }
-.al-kisi-header:active { background:var(--bg-elevated); }
-.al-kisi-avatar { width:44px; height:44px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-family:var(--font-brand); font-size:22px; letter-spacing:0; color:#0f1923; background:linear-gradient(135deg,var(--gold),#e8a020); box-shadow:0 2px 8px rgba(240,184,64,0.25); }
+.al-kisi-liste { width:100%; max-width:920px; display:flex; flex-direction:column; gap:8px; }
+.al-kisi-satir { display:flex; align-items:center; gap:12px; width:100%; padding:14px 16px; background:var(--bg-card); border:1px solid var(--border); border-radius:14px; cursor:pointer; transition:background 0.12s,border-color 0.12s,transform 0.1s; text-align:left; color:inherit; }
+.al-kisi-satir:active { background:var(--bg-elevated); border-color:rgba(240,184,64,0.35); transform:scale(0.995); }
+.al-kisi-avatar { width:44px; height:44px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-family:var(--font-brand); font-size:22px; color:#0f1923; background:linear-gradient(135deg,var(--gold),#e8a020); box-shadow:0 2px 8px rgba(240,184,64,0.25); }
 .al-kisi-info { flex:1; min-width:0; }
 .al-kisi-ad { font-size:16px; font-weight:800; color:var(--text-primary); line-height:1.25; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .al-kisi-meta { font-size:12px; color:var(--text-muted); font-weight:600; margin-top:3px; }
-.al-kisi-chip-wrap { display:flex; flex-wrap:wrap; gap:6px; justify-content:flex-end; max-width:46%; }
+.al-kisi-chip-wrap { display:flex; flex-wrap:wrap; gap:6px; justify-content:flex-end; max-width:42%; }
 .al-kisi-chip { font-size:11px; font-weight:800; padding:5px 10px; border-radius:999px; white-space:nowrap; }
 .al-chip-tl { background:rgba(52,201,122,0.12); color:var(--green); border:1px solid rgba(52,201,122,0.22); }
 .al-chip-au { background:rgba(240,184,64,0.12); color:var(--gold); border:1px solid rgba(240,184,64,0.22); }
 .al-chip-ok { background:rgba(138,173,204,0.1); color:var(--text-secondary); border:1px solid var(--border); }
-.al-kisi-chevron { width:10px; height:10px; border-right:2px solid var(--text-muted); border-bottom:2px solid var(--text-muted); transform:rotate(-45deg); transition:transform 0.18s; flex-shrink:0; margin-right:2px; }
-.al-kisi-header--acik .al-kisi-chevron { transform:rotate(45deg); margin-top:-4px; }
-.al-kisi-ekle-btn { width:34px; height:34px; border-radius:10px; border:1px solid rgba(240,184,64,0.45); background:rgba(240,184,64,0.08); color:var(--gold); font-size:18px; font-weight:800; line-height:1; cursor:pointer; flex-shrink:0; transition:all 0.12s; }
-.al-kisi-ekle-btn:active { background:rgba(240,184,64,0.18); transform:scale(0.96); }
-.al-liste { display:flex; flex-direction:column; gap:8px; padding:12px; background:rgba(0,0,0,0.08); }
-.al-liste-baslik { font-size:10px; font-weight:800; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted); padding:2px 4px 4px; }
-.al-liste-baslik-kapali { margin-top:4px; opacity:0.75; }
-.al-kart { background:var(--bg-elevated); border:1px solid var(--border); border-radius:12px; overflow:hidden; border-left:3px solid var(--border-light); transition:opacity 0.15s; }
+.al-kisi-ok { font-size:22px; line-height:1; color:var(--text-muted); flex-shrink:0; margin-left:4px; }
+.al-bos { width:100%; max-width:920px; padding:48px 24px; text-align:center; color:var(--text-muted); font-family:var(--font-body); background:var(--bg-card); border:1px dashed var(--border); border-radius:16px; }
+.al-bos-kucuk { padding:24px 16px; max-width:none; border-style:solid; }
+.al-bos-ikon { font-size:42px; margin-bottom:12px; opacity:0.7; }
+.al-bos-baslik { font-size:16px; font-weight:800; color:var(--text-secondary); margin-bottom:6px; }
+.al-bos-alt { font-size:13px; line-height:1.45; }
+.al-kisi-modal-box { max-width:520px; max-height:min(88dvh,calc(100dvh - 24px)); }
+.al-kisi-modal-body { padding:10px 14px 16px; display:flex; flex-direction:column; gap:10px; -webkit-overflow-scrolling:touch; }
+.al-kisi-modal-ozet { padding-bottom:4px; }
+.al-kisi-modal-ozet .al-kisi-chip-wrap { max-width:none; justify-content:flex-start; }
+.al-liste-baslik { font-size:10px; font-weight:800; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted); padding:2px 2px 4px; }
+.al-liste-baslik-kapali { margin-top:6px; opacity:0.75; }
+.al-kart { background:var(--bg-elevated); border:1px solid var(--border); border-radius:12px; overflow:hidden; border-left:3px solid var(--border-light); }
 .al-kart--pesin { border-left-color:#38bdf8; }
 .al-kart--taksit { border-left-color:var(--gold); }
 .al-kart--altin { border-left-color:#f59e0b; }
@@ -1289,7 +1288,7 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .al-tip-t { background:rgba(240,184,64,0.14); color:var(--gold); }
 .al-tip-au { background:rgba(245,158,11,0.14); color:#f59e0b; }
 .al-kart-sag { display:flex; flex-direction:column; align-items:flex-end; gap:8px; flex-shrink:0; }
-.al-kalan-val { font-family:var(--font-brand); font-size:22px; letter-spacing:0.3px; color:var(--green); line-height:1; text-align:right; }
+.al-kalan-val { font-family:var(--font-brand); font-size:20px; letter-spacing:0.3px; color:var(--green); line-height:1; text-align:right; }
 .al-kalan-val.al-kalan-altin { color:var(--gold); }
 .al-kalan-label { display:block; font-family:var(--font-body); font-size:10px; color:var(--text-muted); font-weight:800; letter-spacing:0.04em; text-transform:uppercase; margin-top:2px; }
 .al-odendi-badge { font-size:11px; font-weight:800; color:var(--green); background:rgba(52,201,122,0.12); border:1px solid rgba(52,201,122,0.25); padding:5px 10px; border-radius:999px; }
@@ -1309,22 +1308,24 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .al-odeme-btn { min-width:72px; background:var(--bg-card); border:1px solid var(--border); border-radius:999px; color:var(--text-secondary); font-family:var(--font-body); font-size:11px; font-weight:800; padding:7px 12px; cursor:pointer; transition:all 0.12s; white-space:nowrap; }
 .al-odeme-btn:active { border-color:var(--green); color:var(--green); }
 .al-odeme-btn.al-odendi-aktif { background:rgba(52,201,122,0.14); border-color:var(--green); color:var(--green); }
-.al-tip-secici { display:flex; gap:8px; margin-top:4px; }
-.al-tip-btn { flex:1; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text-muted); padding:8px; font-family:var(--font-body); font-size:12px; font-weight:700; cursor:pointer; transition:all 0.15s; }
+.al-tip-secici { display:flex; gap:8px; margin-top:4px; flex-wrap:wrap; }
+.al-tip-btn { flex:1; min-width:90px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text-muted); padding:8px; font-family:var(--font-body); font-size:12px; font-weight:700; cursor:pointer; transition:all 0.15s; }
 .al-tip-btn.active { background:rgba(240,184,64,0.12); border-color:var(--gold); color:var(--gold); }
+.al-altin-info { padding:10px 12px; background:var(--bg-elevated); border-radius:8px; font-size:13px; color:var(--gold); border:1px solid rgba(240,184,64,0.2); }
+#al-kisi-modal { z-index:540; }
+#al-modal { z-index:560; }
+@keyframes al-sheet-in { from { opacity:0; transform:translateY(100%); } to { opacity:1; transform:translateY(0); } }
 @media (max-width:720px){
   .al-header { flex-direction:column; }
   .al-yeni-btn { width:100%; min-height:46px; }
-  .al-kisi-header { display:grid; grid-template-columns:44px 1fr auto 34px; grid-template-rows:auto auto; column-gap:10px; row-gap:8px; align-items:center; padding-right:12px; }
-  .al-kisi-avatar { grid-row:1 / span 2; }
-  .al-kisi-info { grid-column:2; grid-row:1; }
-  .al-kisi-chevron { grid-column:3; grid-row:1; justify-self:end; }
-  .al-kisi-ekle-btn { grid-column:4; grid-row:1 / span 2; align-self:center; }
-  .al-kisi-chip-wrap { grid-column:2 / span 3; grid-row:2; max-width:none; justify-content:flex-start; }
+  .al-kisi-satir { flex-wrap:wrap; }
+  .al-kisi-chip-wrap { max-width:none; width:100%; justify-content:flex-start; margin-top:2px; }
   .al-kart-top { flex-direction:column; }
   .al-kart-sag { width:100%; flex-direction:row; align-items:center; justify-content:space-between; }
   .al-plan-satir { grid-template-columns:1fr auto; }
   .al-odeme-btn { grid-column:1 / -1; width:100%; min-width:0; }
+  #al-kisi-modal { align-items:flex-end; padding:0; }
+  .al-kisi-modal-box { max-width:100%; width:100%; border-radius:20px 20px 0 0; max-height:92dvh; animation:al-sheet-in 0.25s ease; margin:0; }
 }
 
 
@@ -3150,51 +3151,50 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 /* ══ ALACAKLAR MODÜLÜ ══ */
 .al-wrap { display:flex; flex-direction:column; align-items:center; gap:12px; padding:12px 12px 40px; overflow-y:auto; height:100%; box-sizing:border-box; scrollbar-width:thin; scrollbar-color:var(--border) transparent; }
 .al-header { width:100%; max-width:920px; display:flex; align-items:stretch; justify-content:space-between; gap:12px; flex-wrap:wrap; flex-shrink:0; }
-.al-ozet-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; flex:1; min-width:min(100%,220px); }
-.al-ozet-kart { background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:14px 16px; display:flex; flex-direction:column; gap:6px; }
-.al-ozet-kart-au { border-color:rgba(240,184,64,0.25); }
+.al-ozet-tek { flex:1; min-width:min(100%,240px); background:var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:16px 18px; display:flex; flex-direction:column; gap:10px; }
+.al-ozet-satirlar { display:flex; flex-direction:column; gap:8px; }
+.al-oz-satir { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:8px 10px; background:var(--bg-elevated); border-radius:10px; border:1px solid rgba(46,64,89,0.45); }
+.al-oz-satir-etik { font-size:12px; font-weight:700; color:var(--text-secondary); }
+.al-oz-satir-val { font-family:var(--font-brand); font-size:20px; letter-spacing:0.3px; text-align:right; }
+.al-oz-satir-val small { font-family:var(--font-body); font-size:11px; font-weight:700; opacity:0.85; }
+.al-oz-satir-au { border-color:rgba(240,184,64,0.22); }
+.al-oz-bos { font-size:13px; color:var(--text-muted); padding:6px 2px; }
 .al-oz-label { font-size:10px; font-weight:800; letter-spacing:0.08em; color:var(--text-muted); text-transform:uppercase; }
-.al-oz-val { font-family:var(--font-brand); font-size:26px; letter-spacing:0.5px; line-height:1; }
-.al-oz-val small { font-family:var(--font-body); font-size:14px; font-weight:700; opacity:0.75; }
 .al-oz-val-tl { color:var(--green); }
 .al-oz-val-au { color:var(--gold); }
-.al-oz-au-guncel { display:block; font-family:var(--font-body); font-size:12px; font-weight:700; color:var(--green); margin-top:4px; }
 .al-yeni-btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; background:linear-gradient(135deg,var(--gold),var(--gold-dim)); color:#0f1923; border:none; border-radius:12px; padding:12px 18px; font-family:var(--font-body); font-size:13px; font-weight:800; cursor:pointer; transition:transform 0.12s,opacity 0.12s; white-space:nowrap; align-self:stretch; min-height:52px; box-shadow:0 4px 14px rgba(240,184,64,0.18); }
 .al-yeni-btn:active { transform:scale(0.98); opacity:0.92; }
 .al-yeni-ikon { font-size:18px; line-height:1; }
-.al-kontrol-bar { width:100%; max-width:920px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.al-kontrol-bar { width:100%; max-width:920px; display:flex; gap:8px; align-items:center; }
 .al-ara-wrap { flex:1; min-width:180px; }
 .al-ara-input { width:100%; background:var(--bg-card); border:1px solid var(--border); border-radius:12px; color:var(--text-primary); font-family:var(--font-body); font-size:14px; padding:11px 14px; outline:none; transition:border-color 0.15s; }
 .al-ara-input:focus { border-color:var(--gold); }
 .al-ara-input::placeholder { color:var(--text-muted); }
-.al-ctrl-btn { background:var(--bg-card); border:1px solid var(--border); border-radius:10px; color:var(--text-secondary); font-family:var(--font-body); font-size:12px; font-weight:700; padding:10px 12px; cursor:pointer; transition:all 0.12s; white-space:nowrap; }
-.al-ctrl-btn:active { border-color:var(--gold); color:var(--gold); }
-.al-bos { width:100%; max-width:920px; padding:48px 24px; text-align:center; color:var(--text-muted); font-family:var(--font-body); background:var(--bg-card); border:1px dashed var(--border); border-radius:16px; }
-.al-bos-ikon { font-size:42px; margin-bottom:12px; opacity:0.7; }
-.al-bos-baslik { font-size:16px; font-weight:800; color:var(--text-secondary); margin-bottom:6px; }
-.al-bos-alt { font-size:13px; line-height:1.45; }
-.al-kisi-blok { width:100%; max-width:920px; background:var(--bg-card); border:1px solid var(--border); border-radius:16px; overflow:hidden; transition:border-color 0.15s,box-shadow 0.15s; }
-.al-kisi-blok--acik { border-color:rgba(240,184,64,0.28); box-shadow:0 8px 24px rgba(0,0,0,0.12); }
-.al-kisi-header { display:flex; align-items:center; gap:12px; width:100%; padding:14px 14px 14px 16px; background:transparent; border:none; border-bottom:1px solid transparent; cursor:pointer; text-align:left; color:inherit; font:inherit; transition:background 0.12s; }
-.al-kisi-header--acik { background:var(--bg-elevated); border-bottom-color:var(--border); }
-.al-kisi-header:active { background:var(--bg-elevated); }
-.al-kisi-avatar { width:44px; height:44px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-family:var(--font-brand); font-size:22px; letter-spacing:0; color:#0f1923; background:linear-gradient(135deg,var(--gold),#e8a020); box-shadow:0 2px 8px rgba(240,184,64,0.25); }
+.al-kisi-liste { width:100%; max-width:920px; display:flex; flex-direction:column; gap:8px; }
+.al-kisi-satir { display:flex; align-items:center; gap:12px; width:100%; padding:14px 16px; background:var(--bg-card); border:1px solid var(--border); border-radius:14px; cursor:pointer; transition:background 0.12s,border-color 0.12s,transform 0.1s; text-align:left; color:inherit; }
+.al-kisi-satir:active { background:var(--bg-elevated); border-color:rgba(240,184,64,0.35); transform:scale(0.995); }
+.al-kisi-avatar { width:44px; height:44px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-family:var(--font-brand); font-size:22px; color:#0f1923; background:linear-gradient(135deg,var(--gold),#e8a020); box-shadow:0 2px 8px rgba(240,184,64,0.25); }
 .al-kisi-info { flex:1; min-width:0; }
 .al-kisi-ad { font-size:16px; font-weight:800; color:var(--text-primary); line-height:1.25; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .al-kisi-meta { font-size:12px; color:var(--text-muted); font-weight:600; margin-top:3px; }
-.al-kisi-chip-wrap { display:flex; flex-wrap:wrap; gap:6px; justify-content:flex-end; max-width:46%; }
+.al-kisi-chip-wrap { display:flex; flex-wrap:wrap; gap:6px; justify-content:flex-end; max-width:42%; }
 .al-kisi-chip { font-size:11px; font-weight:800; padding:5px 10px; border-radius:999px; white-space:nowrap; }
 .al-chip-tl { background:rgba(52,201,122,0.12); color:var(--green); border:1px solid rgba(52,201,122,0.22); }
 .al-chip-au { background:rgba(240,184,64,0.12); color:var(--gold); border:1px solid rgba(240,184,64,0.22); }
 .al-chip-ok { background:rgba(138,173,204,0.1); color:var(--text-secondary); border:1px solid var(--border); }
-.al-kisi-chevron { width:10px; height:10px; border-right:2px solid var(--text-muted); border-bottom:2px solid var(--text-muted); transform:rotate(-45deg); transition:transform 0.18s; flex-shrink:0; margin-right:2px; }
-.al-kisi-header--acik .al-kisi-chevron { transform:rotate(45deg); margin-top:-4px; }
-.al-kisi-ekle-btn { width:34px; height:34px; border-radius:10px; border:1px solid rgba(240,184,64,0.45); background:rgba(240,184,64,0.08); color:var(--gold); font-size:18px; font-weight:800; line-height:1; cursor:pointer; flex-shrink:0; transition:all 0.12s; }
-.al-kisi-ekle-btn:active { background:rgba(240,184,64,0.18); transform:scale(0.96); }
-.al-liste { display:flex; flex-direction:column; gap:8px; padding:12px; background:rgba(0,0,0,0.08); }
-.al-liste-baslik { font-size:10px; font-weight:800; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted); padding:2px 4px 4px; }
-.al-liste-baslik-kapali { margin-top:4px; opacity:0.75; }
-.al-kart { background:var(--bg-elevated); border:1px solid var(--border); border-radius:12px; overflow:hidden; border-left:3px solid var(--border-light); transition:opacity 0.15s; }
+.al-kisi-ok { font-size:22px; line-height:1; color:var(--text-muted); flex-shrink:0; margin-left:4px; }
+.al-bos { width:100%; max-width:920px; padding:48px 24px; text-align:center; color:var(--text-muted); font-family:var(--font-body); background:var(--bg-card); border:1px dashed var(--border); border-radius:16px; }
+.al-bos-kucuk { padding:24px 16px; max-width:none; border-style:solid; }
+.al-bos-ikon { font-size:42px; margin-bottom:12px; opacity:0.7; }
+.al-bos-baslik { font-size:16px; font-weight:800; color:var(--text-secondary); margin-bottom:6px; }
+.al-bos-alt { font-size:13px; line-height:1.45; }
+.al-kisi-modal-box { max-width:520px; max-height:min(88dvh,calc(100dvh - 24px)); }
+.al-kisi-modal-body { padding:10px 14px 16px; display:flex; flex-direction:column; gap:10px; -webkit-overflow-scrolling:touch; }
+.al-kisi-modal-ozet { padding-bottom:4px; }
+.al-kisi-modal-ozet .al-kisi-chip-wrap { max-width:none; justify-content:flex-start; }
+.al-liste-baslik { font-size:10px; font-weight:800; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted); padding:2px 2px 4px; }
+.al-liste-baslik-kapali { margin-top:6px; opacity:0.75; }
+.al-kart { background:var(--bg-elevated); border:1px solid var(--border); border-radius:12px; overflow:hidden; border-left:3px solid var(--border-light); }
 .al-kart--pesin { border-left-color:#38bdf8; }
 .al-kart--taksit { border-left-color:var(--gold); }
 .al-kart--altin { border-left-color:#f59e0b; }
@@ -3209,7 +3209,7 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .al-tip-t { background:rgba(240,184,64,0.14); color:var(--gold); }
 .al-tip-au { background:rgba(245,158,11,0.14); color:#f59e0b; }
 .al-kart-sag { display:flex; flex-direction:column; align-items:flex-end; gap:8px; flex-shrink:0; }
-.al-kalan-val { font-family:var(--font-brand); font-size:22px; letter-spacing:0.3px; color:var(--green); line-height:1; text-align:right; }
+.al-kalan-val { font-family:var(--font-brand); font-size:20px; letter-spacing:0.3px; color:var(--green); line-height:1; text-align:right; }
 .al-kalan-val.al-kalan-altin { color:var(--gold); }
 .al-kalan-label { display:block; font-family:var(--font-body); font-size:10px; color:var(--text-muted); font-weight:800; letter-spacing:0.04em; text-transform:uppercase; margin-top:2px; }
 .al-odendi-badge { font-size:11px; font-weight:800; color:var(--green); background:rgba(52,201,122,0.12); border:1px solid rgba(52,201,122,0.25); padding:5px 10px; border-radius:999px; }
@@ -3229,22 +3229,24 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .al-odeme-btn { min-width:72px; background:var(--bg-card); border:1px solid var(--border); border-radius:999px; color:var(--text-secondary); font-family:var(--font-body); font-size:11px; font-weight:800; padding:7px 12px; cursor:pointer; transition:all 0.12s; white-space:nowrap; }
 .al-odeme-btn:active { border-color:var(--green); color:var(--green); }
 .al-odeme-btn.al-odendi-aktif { background:rgba(52,201,122,0.14); border-color:var(--green); color:var(--green); }
-.al-tip-secici { display:flex; gap:8px; margin-top:4px; }
-.al-tip-btn { flex:1; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text-muted); padding:8px; font-family:var(--font-body); font-size:12px; font-weight:700; cursor:pointer; transition:all 0.15s; }
+.al-tip-secici { display:flex; gap:8px; margin-top:4px; flex-wrap:wrap; }
+.al-tip-btn { flex:1; min-width:90px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text-muted); padding:8px; font-family:var(--font-body); font-size:12px; font-weight:700; cursor:pointer; transition:all 0.15s; }
 .al-tip-btn.active { background:rgba(240,184,64,0.12); border-color:var(--gold); color:var(--gold); }
+.al-altin-info { padding:10px 12px; background:var(--bg-elevated); border-radius:8px; font-size:13px; color:var(--gold); border:1px solid rgba(240,184,64,0.2); }
+#al-kisi-modal { z-index:540; }
+#al-modal { z-index:560; }
+@keyframes al-sheet-in { from { opacity:0; transform:translateY(100%); } to { opacity:1; transform:translateY(0); } }
 @media (max-width:720px){
   .al-header { flex-direction:column; }
   .al-yeni-btn { width:100%; min-height:46px; }
-  .al-kisi-header { display:grid; grid-template-columns:44px 1fr auto 34px; grid-template-rows:auto auto; column-gap:10px; row-gap:8px; align-items:center; padding-right:12px; }
-  .al-kisi-avatar { grid-row:1 / span 2; }
-  .al-kisi-info { grid-column:2; grid-row:1; }
-  .al-kisi-chevron { grid-column:3; grid-row:1; justify-self:end; }
-  .al-kisi-ekle-btn { grid-column:4; grid-row:1 / span 2; align-self:center; }
-  .al-kisi-chip-wrap { grid-column:2 / span 3; grid-row:2; max-width:none; justify-content:flex-start; }
+  .al-kisi-satir { flex-wrap:wrap; }
+  .al-kisi-chip-wrap { max-width:none; width:100%; justify-content:flex-start; margin-top:2px; }
   .al-kart-top { flex-direction:column; }
   .al-kart-sag { width:100%; flex-direction:row; align-items:center; justify-content:space-between; }
   .al-plan-satir { grid-template-columns:1fr auto; }
   .al-odeme-btn { grid-column:1 / -1; width:100%; min-width:0; }
+  #al-kisi-modal { align-items:flex-end; padding:0; }
+  .al-kisi-modal-box { max-width:100%; width:100%; border-radius:20px 20px 0 0; max-height:92dvh; animation:al-sheet-in 0.25s ease; margin:0; }
 }
 
 
