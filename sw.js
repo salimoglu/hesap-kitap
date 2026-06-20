@@ -1,21 +1,21 @@
 // sw.js — Network First: her zaman gunceli al, cache sadece fallback
-const CACHE = "hesap-kitap-v188";
+const CACHE = "hesap-kitap-v189";
 const BASE = self.location.pathname.replace(/\/?sw\.js$/i, "");
 const ASSETS = [
   BASE + "/",
   BASE + "/index.html",
-  BASE + "/css/style.css?v=20260615alacak5",
+  BASE + "/css/style.css?v=20260615alborc",
   BASE + "/js/hk-erisim.js?v=20260531multi-final",
   BASE + "/js/hk-tanitim.js?v=20260531tanitim",
   BASE + "/js/hk-ayarlar.js?v=20260531temiz",
   BASE + "/js/app.js?v=20260615iphone-auth",
-  BASE + "/js/firebase.js?v=20260615iphone-auth",
+  BASE + "/js/firebase.js?v=20260615alborc",
   BASE + "/js/db.js?v=20260531hizli-yukle",
   BASE + "/js/modules/islemler.js?v=20260531ozet-oran",
   BASE + "/js/modules/birikim.js?v=20260531kok-tasima",
   BASE + "/js/modules/verilen-altinlar.js?v=20260531kok-tasima",
   BASE + "/js/modules/yukle.js?v=20260531butce-hizala",
-  BASE + "/js/modules/alacaklar.js?v=20260615alacak5",
+  BASE + "/js/modules/alacaklar.js?v=20260615alborc",
   BASE + "/js/modules/urun.js?v=20260531kok-tasima",
   BASE + "/js/modules/arabam.js?v=20260531ar-kayit",
   BASE + "/manifest.json?v=20260209desk",

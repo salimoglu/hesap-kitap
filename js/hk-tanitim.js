@@ -74,12 +74,12 @@ var HK_TANITIM = (function () {
     },
     alacaklar: {
       ikon: "🤝",
-      baslik: "Alacaklar",
+      baslik: "Alacaklar / Borclar",
       ozet:
-        "Verdiginiz borclari, taksitli alacaklari ve altin bazli alacaklari kaydedin. Kimden ne kadar alacaginiz kaldigini gorun.",
+        "Solda size olan alacaklari, sagda sizin borclarinizi takip edin. Pesin, taksitli ve altin kayitlari; doviz destegi.",
       ipuclari: [
-        "Pesin, taksitli veya altin cinsinden alacak turlerini ayri ayri takip edin.",
-        "Odeme aldiginizda kaydi guncelleyerek kalan bakiyeyi dusurun.",
+        "Alacaklar: size borclu kisiler; Borclarim: sizin borclu oldugunuz kisiler.",
+        "Odeme aldiginizda veya odediginizde daire simgesine tiklayin.",
       ],
     },
     urun: {

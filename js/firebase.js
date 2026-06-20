@@ -225,7 +225,7 @@ function fbKokRef(path) {
 }
 
 var HK_KOK_MODUL_KEYS = [
-  "islemler", "kategoriler", "arabam", "alacaklar", "kredi_harcamalar", "kredi_kartlar",
+  "islemler", "kategoriler", "arabam", "alacaklar", "borclar", "kredi_harcamalar", "kredi_kartlar",
   "urunler", "urun", "altin_kayitlar", "altin_guncel_fiyat", "altin_guncel_fiyat_tarih",
   "vefa2", "vefa", "muhtac", "verilen_altinlar", "birikim_manuel", "butce_sablon"
 ];
