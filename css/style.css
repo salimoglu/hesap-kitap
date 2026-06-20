@@ -377,8 +377,9 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
   .vf2-ozet-bar { flex-direction: column; align-items: stretch; }
   .vf2-oz-btns { margin-left: 0; width: 100%; flex-direction: row; flex-wrap: wrap; }
   .hg-kat-dropdown { left: 8px; right: 8px; width: auto; max-width: none; }
-  .kr-header { flex-wrap: wrap; justify-content: center; }
-  .kr-header .kr-yeni-btn { flex: 1 1 auto; min-width: min(100%, 200px); }
+  .kr-header { flex-wrap: wrap; justify-content: center; gap:10px; }
+  .kr-header-btns { width:100%; justify-content:stretch; }
+  .kr-header .kr-yeni-btn { flex:1 1 auto; min-width:0; }
   .kr-kart-ozet { justify-content: stretch; }
   .al-header { flex-wrap: wrap; }
   .al-header .al-yeni-btn { flex: 1 1 auto; min-width: min(100%, 200px); }
@@ -1192,8 +1193,13 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .kr-ozet-item { display:flex; flex-direction:column; gap:2px; }
 .kr-oz-label { font-size:10px; font-weight:800; letter-spacing:1px; color:var(--text-muted); text-transform:uppercase; }
 .kr-oz-val { font-family:var(--font-brand); font-size:20px; letter-spacing:0.5px; }
-.kr-yeni-btn { background:var(--gold); color:#0f1923; border:none; border-radius:var(--radius-sm); padding:8px 16px; font-size:13px; font-weight:800; cursor:pointer; transition:opacity 0.15s; }
+.kr-yeni-btn { background:var(--gold); color:#0f1923; border:none; border-radius:var(--radius-sm); padding:8px 16px; font-size:13px; font-weight:800; cursor:pointer; transition:opacity 0.15s; white-space:nowrap; }
 .kr-yeni-btn:hover { opacity:0.85; }
+.kr-header-btns { display:flex; gap:8px; flex-shrink:0; flex-wrap:wrap; }
+.kr-yeni-btn--duzenli { background:var(--bg-elevated); color:var(--text-primary); border:1px solid var(--border); }
+.kr-yeni-btn--duzenli:hover { border-color:var(--gold); color:var(--gold); opacity:1; }
+.kr-duzenli-hint { font-size:11px; color:var(--text-muted); line-height:1.45; margin:4px 0 0; padding:8px 10px; background:var(--bg-elevated); border-radius:8px; border:1px solid rgba(46,64,89,0.45); }
+.kr-td-duzenli { color:var(--green); font-weight:700; font-size:11px; }
 .kr-kart-ozet { width:100%; max-width:760px; display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
 .kr-kart-chip { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-md); padding:10px 14px; min-width:160px; flex:1; }
 .kr-chip-adi { font-size:11px; font-weight:800; letter-spacing:0.8px; color:var(--gold); text-transform:uppercase; margin-bottom:4px; }
@@ -2328,8 +2334,9 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
   .vf2-ozet-bar { flex-direction: column; align-items: stretch; }
   .vf2-oz-btns { margin-left: 0; width: 100%; flex-direction: row; flex-wrap: wrap; }
   .hg-kat-dropdown { left: 8px; right: 8px; width: auto; max-width: none; }
-  .kr-header { flex-wrap: wrap; justify-content: center; }
-  .kr-header .kr-yeni-btn { flex: 1 1 auto; min-width: min(100%, 200px); }
+  .kr-header { flex-wrap: wrap; justify-content: center; gap:10px; }
+  .kr-header-btns { width:100%; justify-content:stretch; }
+  .kr-header .kr-yeni-btn { flex:1 1 auto; min-width:0; }
   .kr-kart-ozet { justify-content: stretch; }
   .al-header { flex-wrap: wrap; }
   .al-header .al-yeni-btn { flex: 1 1 auto; min-width: min(100%, 200px); }
@@ -3143,8 +3150,13 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .kr-ozet-item { display:flex; flex-direction:column; gap:2px; }
 .kr-oz-label { font-size:10px; font-weight:800; letter-spacing:1px; color:var(--text-muted); text-transform:uppercase; }
 .kr-oz-val { font-family:var(--font-brand); font-size:20px; letter-spacing:0.5px; }
-.kr-yeni-btn { background:var(--gold); color:#0f1923; border:none; border-radius:var(--radius-sm); padding:8px 16px; font-size:13px; font-weight:800; cursor:pointer; transition:opacity 0.15s; }
+.kr-yeni-btn { background:var(--gold); color:#0f1923; border:none; border-radius:var(--radius-sm); padding:8px 16px; font-size:13px; font-weight:800; cursor:pointer; transition:opacity 0.15s; white-space:nowrap; }
 .kr-yeni-btn:hover { opacity:0.85; }
+.kr-header-btns { display:flex; gap:8px; flex-shrink:0; flex-wrap:wrap; }
+.kr-yeni-btn--duzenli { background:var(--bg-elevated); color:var(--text-primary); border:1px solid var(--border); }
+.kr-yeni-btn--duzenli:hover { border-color:var(--gold); color:var(--gold); opacity:1; }
+.kr-duzenli-hint { font-size:11px; color:var(--text-muted); line-height:1.45; margin:4px 0 0; padding:8px 10px; background:var(--bg-elevated); border-radius:8px; border:1px solid rgba(46,64,89,0.45); }
+.kr-td-duzenli { color:var(--green); font-weight:700; font-size:11px; }
 .kr-kart-ozet { width:100%; max-width:760px; display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
 .kr-kart-chip { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-md); padding:10px 14px; min-width:160px; flex:1; }
 .kr-chip-adi { font-size:11px; font-weight:800; letter-spacing:0.8px; color:var(--gold); text-transform:uppercase; margin-bottom:4px; }

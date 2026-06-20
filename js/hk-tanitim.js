@@ -68,8 +68,8 @@ var HK_TANITIM = (function () {
       ozet:
         "Kredi karti harcamalarinizi ve odeme planinizi izleyin. Donem bazli ozetlerle borcunuzu kontrol altinda tutun.",
       ipuclari: [
-        "Kart ekleyerek limit ve ekstre donemini tanimlayin.",
-        "Harcamalari KREDI KARTI grubundan islem girerek otomatik eslestirebilirsiniz.",
+        "Alisveris taksiti: toplam tutari taksit sayisina bolun.",
+        "Duzenli odeme: abonelik ve aylik sabit odemeler icin aylik tutar girin.",
       ],
     },
     alacaklar: {
