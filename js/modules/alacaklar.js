@@ -117,8 +117,6 @@ function render(){
   h+='</div><button class="al-yeni-btn" id="al-yeni-btn" type="button"><span class="al-yeni-ikon">+</span> Yeni alacak</button></div>';
   h+='<div class="al-kontrol-bar">';
   h+='<div class="al-ara-wrap"><input id="al-ara" class="al-ara-input" type="search" placeholder="Kisi veya aciklama ara..." value="'+esc(_araMetni||"")+'" autocomplete="off"/></div>';
-  h+='<button class="al-ctrl-btn" id="al-tum-ac" type="button">Tumunu ac</button>';
-  h+='<button class="al-ctrl-btn" id="al-tum-kapat" type="button">Kapat</button>';
   h+='</div>';
   if(!_kayitlar.length){h+='<div class="al-bos"><div class="al-bos-ikon">&#128184;</div><div class="al-bos-baslik">Henuz alacak yok</div><div class="al-bos-alt">Yeni alacak ekleyerek baslayin.</div></div>';}
   else{
@@ -257,9 +255,6 @@ function tipGoster(tip){
 function bagla(){
   $("al-yeni-btn").addEventListener("click",function(){modalAc(null,null);});
   var ara=$("al-ara");if(ara)ara.addEventListener("input",function(){_araMetni=ara.value||"";render();});
-  var acBtn=$("al-tum-ac"),kapatBtn=$("al-tum-kapat");
-  if(acBtn)acBtn.addEventListener("click",function(){Object.keys(kisilerMap()).forEach(function(ad){_kisiAcikMap[ad]=true;});render();});
-  if(kapatBtn)kapatBtn.addEventListener("click",function(){Object.keys(kisilerMap()).forEach(function(ad){_kisiAcikMap[ad]=false;});render();});
   document.querySelectorAll(".al-kisi-header").forEach(function(hd){
     hd.addEventListener("click",function(e){
       if(e.target.closest(".al-kisi-ekle-btn"))return;
