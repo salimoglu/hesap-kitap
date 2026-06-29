@@ -121,24 +121,19 @@ async function fbInit() {
     }
 
     try {
-      await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+      firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(function(pe) {
+        console.warn("Auth persistence:", pe);
+      });
     } catch (pe) {
       console.warn("Auth persistence:", pe);
     }
 
-    /* Kalici oturum tam oturana kadar bekle (ilk bos snapshot ile RTDB okunmasin). */
-    if (firebase.auth && typeof firebase.auth().authStateReady === "function") {
-      await firebase.auth().authStateReady();
-    } else {
-      await new Promise(function(resolve) {
-        var t = setTimeout(resolve, 3000);
-        firebase.auth().onAuthStateChanged(function() {
-          clearTimeout(t);
-          resolve();
-        });
-      });
-    }
-    /* Google redirect dondu ama oturum yok: genelde Authorized domains veya depolama. */
+    /* authStateReady acilista beklenmez — RTDB okumadan hemen once fbRtdbOturumHazir bekler. */
+    window._fbAuthOk = !!firebase.auth().currentUser;
+    window._fbReady = Promise.resolve(true);
+    firebase.auth().onAuthStateChanged(function(user) {
+      window._fbAuthOk = !!user;
+    });
     try {
       if (firebase.auth().currentUser) {
         sessionStorage.removeItem("hk-google-redirect-pending");
@@ -187,11 +182,6 @@ async function fbInit() {
         }
       }
     } catch (pendEx) {}
-    window._fbAuthOk = !!firebase.auth().currentUser;
-    window._fbReady = Promise.resolve(window._fbAuthOk);
-    firebase.auth().onAuthStateChanged(function(user) {
-      window._fbAuthOk = !!user;
-    });
   } catch (e) {
     console.warn("Firebase init:", e);
     window._fbAuthOk = false;
@@ -525,7 +515,7 @@ async function fbAuthEpostalariTopla(user) {
     ? HK_ERISIM.kullaniciEpostalari(user)
     : (user.email ? [user.email] : []);
   try {
-    var tr = await user.getIdTokenResult(true);
+    var tr = await user.getIdTokenResult(false);
     if (tr.claims && tr.claims.email) list.push(tr.claims.email);
   } catch (e) {}
   var uniq = [];
@@ -560,6 +550,14 @@ async function fbEnsureUserDataScope() {
   var u = fbMevcutKullanici();
   if (!u || u.isAnonymous) return;
   try { localStorage.setItem("hk-rtdb-use-user-prefix", "1"); } catch (e) {}
+
+  if (fbKullaniciScopeHazirMi(u.uid)) {
+    try {
+      var roleSnapFast = await _fbDb.ref("users/" + u.uid + "/meta/hkRole").once("value");
+      if (roleSnapFast.val() === "owner") window._hkRtdbRole = "owner";
+    } catch (eRf) {}
+    return;
+  }
 
   try {
     var roleSnap = await _fbDb.ref("users/" + u.uid + "/meta/hkRole").once("value");
@@ -683,11 +681,14 @@ async function fbCikisBulut() {
   await firebase.auth().signOut();
 }
 
-/** RTDB cagrisindan once: currentUser + _fbDb (yeniden baglanti). */
+/** RTDB cagrisindan once: kalici oturum + currentUser + _fbDb. */
 async function fbRtdbOturumHazir() {
   if (typeof firebase === "undefined" || !firebase.auth) return;
+  if (firebase.auth && typeof firebase.auth().authStateReady === "function") {
+    try { await firebase.auth().authStateReady(); } catch (e) {}
+  }
   var tries = 0;
-  while (tries < 60) {
+  while (tries < 40) {
     if (firebase.auth().currentUser) break;
     tries++;
     await new Promise(function(r) { setTimeout(r, 50); });

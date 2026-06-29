@@ -290,6 +290,12 @@ var KategorilerDB = {
   /** Ayni anlama gelen kategorileri birlestirir; islem etiketlerini tek canonical forma ceker. */
   dedupeNormalizeAll: async function() {
     await openDB();
+    try {
+      if (localStorage.getItem("hk-dedupe-done") === "1") {
+        window._hkDedupeDone = true;
+        return { merged: 0, islemGuncelle: 0, skipped: true };
+      }
+    } catch (eSkip) {}
     var kats = await getAll(tx(STORES.KATEGORILER, "readonly"));
     if (!kats.length) return { merged: 0, islemGuncelle: 0 };
     var byKey = {};
@@ -299,6 +305,22 @@ var KategorilerDB = {
       key = hkKatNormKey(k.grup, k.ad);
       if (!byKey[key]) byKey[key] = [];
       byKey[key].push(k);
+    }
+    var normFixNeeded = false;
+    for (key in byKey) {
+      if (!Object.prototype.hasOwnProperty.call(byKey, key)) continue;
+      list = byKey[key];
+      if (list.length > 1) { normFixNeeded = true; break; }
+      winner = list[0];
+      if (winner.grup !== hkNormGrupKaydet(winner.grup) || winner.ad !== hkNormAd(winner.ad)) {
+        normFixNeeded = true;
+        break;
+      }
+    }
+    if (!normFixNeeded) {
+      window._hkDedupeDone = true;
+      try { localStorage.setItem("hk-dedupe-done", "1"); } catch (eDone) {}
+      return { merged: 0, islemGuncelle: 0, skipped: true };
     }
     for (key in byKey) {
       if (!Object.prototype.hasOwnProperty.call(byKey, key)) continue;
@@ -347,6 +369,8 @@ var KategorilerDB = {
       await promisify(tx(STORES.KATEGORILER, "readwrite").delete(deleteIds[i]));
     }
     if (merged > 0 || islemGuncelle > 0) await kategorileriBulutaYaz();
+    window._hkDedupeDone = true;
+    try { localStorage.setItem("hk-dedupe-done", "1"); } catch (eFin) {}
     return { merged: merged, islemGuncelle: islemGuncelle };
   },
   delete: async function(id) {
@@ -395,11 +419,34 @@ var AyarlarDB = {
 window.initApp = async function() {
   await openDB();
   await KategorilerDB.seedDefaults();
-  if (typeof KategorilerDB.dedupeNormalizeAll === "function" && !window._hkDedupeDone) {
-    await KategorilerDB.dedupeNormalizeAll();
-    window._hkDedupeDone = true;
-  }
+  hkDedupeErtele();
 };
+
+/** Kategori birlestirme acilista UI'yi bloklamasin; bir kez tamamlaninca tekrar calismaz. */
+function hkDedupeErtele() {
+  if (window._hkDedupeDone) return;
+  try {
+    if (localStorage.getItem("hk-dedupe-done") === "1") {
+      window._hkDedupeDone = true;
+      return;
+    }
+  } catch (e) {}
+  var calistir = function() {
+    if (window._hkDedupeDone || typeof KategorilerDB.dedupeNormalizeAll !== "function") return;
+    KategorilerDB.dedupeNormalizeAll().then(function(r) {
+      window._hkDedupeDone = true;
+      try { localStorage.setItem("hk-dedupe-done", "1"); } catch (e2) {}
+      if (r && r.islemGuncelle > 0 && typeof window.dispatchEvent === "function") {
+        try { window.dispatchEvent(new CustomEvent("hk-islemler-degisti")); } catch (e3) {}
+      }
+    }).catch(function() {});
+  };
+  if (typeof requestIdleCallback === "function") {
+    requestIdleCallback(function() { calistir(); }, { timeout: 12000 });
+  } else {
+    setTimeout(calistir, 800);
+  }
+}
 
 } // end guard
 

@@ -1,7 +1,9 @@
 (async () => {
-  // Firebase + IndexedDB baslat
-  try { if (typeof fbInit !== "undefined") await fbInit(); } catch (e) {}
-  await initApp();
+  /* Firebase init ile IndexedDB acilisini paralel calistir — telefonda ilk boyama daha erken gelir */
+  await Promise.all([
+    typeof fbInit !== "undefined" ? fbInit().catch(function() {}) : Promise.resolve(),
+    typeof initApp !== "undefined" ? initApp().catch(function() {}) : Promise.resolve()
+  ]);
 
   try {
     var redErr = sessionStorage.getItem("hk-auth-redirect-err");
@@ -75,15 +77,39 @@
     }
   }
 
+  function hkScopeHazir(uid) {
+    if (!uid) return false;
+    try { return localStorage.getItem("hk-root-cleaned-" + uid) === "1"; } catch (e) { return false; }
+  }
+
+  function hkOAuthBekleGerekliMi() {
+    try {
+      if (typeof fbOAuthDonusUrlMu === "function" && fbOAuthDonusUrlMu()) return true;
+      var rp = sessionStorage.getItem("hk-google-redirect-pending");
+      if (!rp) return false;
+      var ts = parseInt(rp, 10);
+      return !isNaN(ts) && Date.now() - ts < 15 * 60 * 1000;
+    } catch (e) { return false; }
+  }
+
   async function hkBulutSenkron(u) {
     const syncEl = document.getElementById("sync-durum");
     if (syncEl) syncEl.textContent = "\u2601";
     try {
       if (typeof fbRtdbOturumHazir === "function") await fbRtdbOturumHazir();
       if (typeof fbKimlikTokenAl === "function") await fbKimlikTokenAl(false);
-      if (typeof fbAuthEpostalariTopla === "function") await fbAuthEpostalariTopla(u);
-      if (typeof fbEnsureUserDataScope === "function") await fbEnsureUserDataScope();
-      else if (typeof fbDetectRtdbScope === "function") await fbDetectRtdbScope();
+      var scopeHazir = hkScopeHazir(u && u.uid);
+      if (scopeHazir) {
+        if (typeof fbVerileriYukle !== "undefined") await fbVerileriYukle();
+        if (typeof fbEnsureUserDataScope === "function") {
+          fbEnsureUserDataScope().catch(function() {});
+        }
+      } else {
+        if (typeof fbAuthEpostalariTopla === "function") await fbAuthEpostalariTopla(u);
+        if (typeof fbEnsureUserDataScope === "function") await fbEnsureUserDataScope();
+        else if (typeof fbDetectRtdbScope === "function") await fbDetectRtdbScope();
+        if (typeof fbVerileriYukle !== "undefined") await fbVerileriYukle();
+      }
       if (window._hkKokOkumaKapali) {
         var kokUy = document.getElementById("fb-auth-error");
         if (kokUy) {
@@ -91,7 +117,6 @@
             "Eski veriler kokte ama uygulama okuyamiyor. Firebase kurallarini guncelleyin: PowerShell'de .\\tools\\deploy-database-rules.ps1 — sonra cikis yapip tekrar girin.";
         }
       }
-      if (typeof fbVerileriYukle !== "undefined") await fbVerileriYukle();
       if (syncEl) syncEl.textContent = "\u2713";
       return true;
     } catch (e) {
@@ -121,7 +146,7 @@
     }
     if (typeof HK_AYARLAR !== "undefined") HK_AYARLAR.guncelle(u);
 
-    /* Hizli acilis: butce onbellekten aninda; bulut ve islemler paralel */
+    /* Hizli acilis: butce onbellekten aninda; islemler yerelden; bulut arka planda */
     if (modulIzinli("islemler")) {
       if (typeof ButceModule !== "undefined" && typeof ButceModule.goster === "function") {
         ButceModule.goster();
@@ -130,7 +155,10 @@
         ? ButceModule.yukle()
         : null;
       if (typeof IslemlerModule !== "undefined") {
-        await IslemlerModule.init();
+        var islemYukle = IslemlerModule.init();
+        if (islemYukle && typeof islemYukle.then === "function") {
+          islemYukle.catch(function() {});
+        }
       }
       if (butceBulut && typeof butceBulut.catch === "function") {
         butceBulut.catch(function () {});
@@ -138,7 +166,9 @@
     }
     var izinli = getTabSira();
     if (izinli.length) modulAc(izinli[0]);
-    if (typeof HK_TANITIM !== "undefined") await HK_TANITIM.belkiGoster(u);
+    if (typeof HK_TANITIM !== "undefined") {
+      setTimeout(function() { HK_TANITIM.belkiGoster(u).catch(function() {}); }, 400);
+    }
     if (typeof HK_ERISIM !== "undefined") HK_ERISIM.misafirBilgiGoster(u);
 
     /* Bulut senkronu arka planda; bitince islemler + diger moduller guncellenir */
@@ -181,12 +211,11 @@
   if (typeof firebase !== "undefined" && firebase.auth) {
     firebase.auth().onAuthStateChanged(async function(user) {
       /**
-       * OAuth redirect donusunde: ilk callback bazen null geliyor; getRedirectResult
-       * cogu cihazda currentUser'i hemen dolduruyor. Kisa gecikme ile tekrar oku.
+       * OAuth redirect donusunde: ilk callback bazen null geliyor.
+       * Normal acilista gereksiz 900ms beklemeyin.
        */
-      if (!user || user.isAnonymous) {
-        var uaCb = typeof navigator !== "undefined" ? navigator.userAgent || "" : "";
-        var dly = /Android/i.test(uaCb) ? 900 : 400;
+      if ((!user || user.isAnonymous) && hkOAuthBekleGerekliMi()) {
+        var dly = hkMobilMi() ? 350 : 150;
         await new Promise(function(r) { setTimeout(r, dly); });
         try {
           var u2 = firebase.auth().currentUser;
