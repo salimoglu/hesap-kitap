@@ -985,7 +985,7 @@ const IslemlerModule = (() => {
     }
     if(Object.keys(gruplar).length){
       var gNet=genG-genGi;
-      parts.push("<div class=\"islem-genel-toplam\"><span>TOPLAM:</span><span style='color:var(--green);font-family:var(--font-brand)'>"+para(genG)+"</span><span style='color:var(--text-muted)'>&#8722;</span><span style='color:var(--red);font-family:var(--font-brand)'>"+para(genGi)+"</span><span style='color:var(--text-muted)'>=</span><span class='gt-val'>"+(gNet>=0?"":"-")+para(Math.abs(gNet))+"</span></div>");
+      parts.push("<div class=\"islem-genel-toplam\"><span class=\"gt-lbl\">TOPLAM:</span><span class=\"gt-gelir\">"+para(genG)+"</span><span class=\"gt-sep\">&#8722;</span><span class=\"gt-gider\">"+para(genGi)+"</span><span class=\"gt-sep\">=</span><span class=\"gt-val\">"+(gNet>=0?"":"-")+para(Math.abs(gNet))+"</span></div>");
     }
     liste.innerHTML=parts.join("");
   }

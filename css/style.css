@@ -438,8 +438,8 @@ html.hk-hizli-ac #app { display: flex !important; }
 .islem-ay-ozet .ao-sep { color: var(--text-muted); font-size: 13px; font-weight: 500; }
 .islem-genel-toplam { display: flex; justify-content: flex-end; align-items: center; flex-wrap: wrap; gap: 8px 10px; padding: 10px 16px; background: var(--bg-card); border-bottom: 1px solid var(--border); font-family: var(--font-body); font-size: 13px; font-weight: 600; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
 .islem-genel-toplam .gt-lbl { font-weight: 600; color: var(--text-secondary); letter-spacing: 0.04em; }
-.islem-genel-toplam .gt-gelir { color: var(--green); font-size: 13px; font-weight: 600; letter-spacing: 0.02em; }
-.islem-genel-toplam .gt-gider { color: var(--red); font-size: 13px; font-weight: 600; letter-spacing: 0.02em; }
+.islem-genel-toplam .gt-gelir { color: var(--green); font-size: 14px; font-weight: 700; letter-spacing: 0.02em; }
+.islem-genel-toplam .gt-gider { color: var(--red); font-size: 14px; font-weight: 700; letter-spacing: 0.02em; }
 .islem-genel-toplam .gt-sep { color: var(--text-muted); font-size: 13px; font-weight: 500; }
 .islem-genel-toplam .gt-val { font-family: var(--font-body); font-size: 14px; font-weight: 700; color: var(--gold); letter-spacing: 0.02em; }
 .empty-state { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 60px 20px; color: var(--text-muted); text-align: center; }
@@ -2405,8 +2405,8 @@ html.hk-hizli-ac #app { display: flex !important; }
 .islem-ay-ozet .ao-sep { color: var(--text-muted); font-size: 13px; font-weight: 500; }
 .islem-genel-toplam { display: flex; justify-content: flex-end; align-items: center; flex-wrap: wrap; gap: 8px 10px; padding: 10px 16px; background: var(--bg-card); border-bottom: 1px solid var(--border); font-family: var(--font-body); font-size: 13px; font-weight: 600; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
 .islem-genel-toplam .gt-lbl { font-weight: 600; color: var(--text-secondary); letter-spacing: 0.04em; }
-.islem-genel-toplam .gt-gelir { color: var(--green); font-size: 13px; font-weight: 600; letter-spacing: 0.02em; }
-.islem-genel-toplam .gt-gider { color: var(--red); font-size: 13px; font-weight: 600; letter-spacing: 0.02em; }
+.islem-genel-toplam .gt-gelir { color: var(--green); font-size: 14px; font-weight: 700; letter-spacing: 0.02em; }
+.islem-genel-toplam .gt-gider { color: var(--red); font-size: 14px; font-weight: 700; letter-spacing: 0.02em; }
 .islem-genel-toplam .gt-sep { color: var(--text-muted); font-size: 13px; font-weight: 500; }
 .islem-genel-toplam .gt-val { font-family: var(--font-body); font-size: 14px; font-weight: 700; color: var(--gold); letter-spacing: 0.02em; }
 .empty-state { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 60px 20px; color: var(--text-muted); text-align: center; }
@@ -5215,7 +5215,8 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
 #tab-islemler .islem-genel-toplam .gt-gider,
 #tab-islemler .islem-genel-toplam .gt-val {
   font-family: var(--islem-rakam) !important;
-  font-weight: var(--islem-rakam-w) !important;
+  font-size: var(--islem-rakam-size) !important;
+  font-weight: 700 !important;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.01em;
 }
