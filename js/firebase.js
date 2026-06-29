@@ -93,48 +93,63 @@ async function fbInit() {
       await fbTumSwKaldir();
     }
 
+    var oauthDonus = fbOAuthDonusUrlMu() || yakindaGoogleYon;
+
     try {
       await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
     } catch (pe) {
       console.warn("Auth persistence:", pe);
     }
 
-    /**
-     * OAuth redirect: once getRedirectResult tamamlanmali; bazi Android/PWA kurulumlarinda
-     * setPersistence bundan once cagrildiginda yonlendirme sonucu islenmeyebiliyor.
-     */
     var redirectResult = null;
-    try {
-      redirectResult = await firebase.auth().getRedirectResult();
-    } catch (e) {
-      console.warn("getRedirectResult:", e);
+    if (oauthDonus) {
       try {
-        var rmsg0 = typeof fbAuthHataMetni === "function" ? fbAuthHataMetni(e) : (e && e.message) || "";
-        if (rmsg0) sessionStorage.setItem("hk-auth-redirect-err", rmsg0);
-      } catch (x) {}
-    }
-
-    try {
-      if (redirectResult && redirectResult.credential && !firebase.auth().currentUser) {
-        await firebase.auth().signInWithCredential(redirectResult.credential);
+        redirectResult = await firebase.auth().getRedirectResult();
+      } catch (e) {
+        console.warn("getRedirectResult:", e);
+        try {
+          var rmsg0 = typeof fbAuthHataMetni === "function" ? fbAuthHataMetni(e) : (e && e.message) || "";
+          if (rmsg0) sessionStorage.setItem("hk-auth-redirect-err", rmsg0);
+        } catch (x) {}
       }
-    } catch (ce) {
-      console.warn("signInWithCredential (redirect):", ce);
+
       try {
-        var rmsg1 = typeof fbAuthHataMetni === "function" ? fbAuthHataMetni(ce) : (ce && ce.message) || "";
-        if (rmsg1) sessionStorage.setItem("hk-auth-redirect-err", rmsg1);
-      } catch (x) {}
+        if (redirectResult && redirectResult.credential && !firebase.auth().currentUser) {
+          await firebase.auth().signInWithCredential(redirectResult.credential);
+        }
+      } catch (ce) {
+        console.warn("signInWithCredential (redirect):", ce);
+        try {
+          var rmsg1 = typeof fbAuthHataMetni === "function" ? fbAuthHataMetni(ce) : (ce && ce.message) || "";
+          if (rmsg1) sessionStorage.setItem("hk-auth-redirect-err", rmsg1);
+        } catch (x) {}
+      }
     }
 
-    /* authStateReady acilista beklenmez — RTDB okumadan hemen once fbRtdbOturumHazir bekler. */
     var uInit = null;
     try { uInit = firebase.auth().currentUser; } catch (eU) {}
+
+    if ((!uInit || uInit.isAnonymous) && !oauthDonus) {
+      var storedUid = null;
+      try { storedUid = localStorage.getItem("hk-oturum-uid"); } catch (eSt) {}
+      if (storedUid && firebase.auth && typeof firebase.auth().authStateReady === "function") {
+        try {
+          await Promise.race([
+            firebase.auth().authStateReady(),
+            new Promise(function(r) { setTimeout(r, 1200); })
+          ]);
+        } catch (eAr) {}
+        try { uInit = firebase.auth().currentUser; } catch (eU2) {}
+      }
+    }
+
+    window._fbAuthStateHazir = !!(uInit && !uInit.isAnonymous);
     if (uInit && !uInit.isAnonymous) {
       window._fbAuthOk = true;
       try {
         localStorage.setItem("hk-oturum-uid", uInit.uid);
         if (typeof document !== "undefined" && document.documentElement) {
-          document.documentElement.classList.add("hk-auth-bekleniyor");
+          document.documentElement.classList.add("hk-hizli-ac");
         }
       } catch (eLs) {}
     } else {
@@ -689,20 +704,34 @@ async function fbGirisGoogle() {
 async function fbCikisBulut() {
   try { localStorage.removeItem("hk-oturum-uid"); } catch (e) {}
   try { localStorage.removeItem("hk-rtdb-use-user-prefix"); } catch (e) {}
+  try {
+    if (typeof document !== "undefined" && document.documentElement) {
+      document.documentElement.classList.remove("hk-hizli-ac");
+      document.documentElement.classList.remove("hk-auth-bekleniyor");
+    }
+  } catch (eDom) {}
+  window._fbAuthStateHazir = false;
   await firebase.auth().signOut();
 }
 
 /** RTDB cagrisindan once: kalici oturum + currentUser + _fbDb. */
 async function fbRtdbOturumHazir() {
   if (typeof firebase === "undefined" || !firebase.auth) return;
-  if (firebase.auth && typeof firebase.auth().authStateReady === "function") {
-    try { await firebase.auth().authStateReady(); } catch (e) {}
+  if (!window._fbAuthStateHazir) {
+    if (firebase.auth && typeof firebase.auth().authStateReady === "function") {
+      try {
+        await Promise.race([
+          firebase.auth().authStateReady(),
+          new Promise(function(r) { setTimeout(r, 1500); })
+        ]);
+      } catch (e) {}
+    }
   }
+  if (firebase.auth().currentUser) window._fbAuthStateHazir = true;
   var tries = 0;
-  while (tries < 40) {
-    if (firebase.auth().currentUser) break;
+  while (tries < 20 && !firebase.auth().currentUser) {
     tries++;
-    await new Promise(function(r) { setTimeout(r, 50); });
+    await new Promise(function(r) { setTimeout(r, 30); });
   }
   if (!_fbDb && firebase.apps && firebase.apps.length) {
     _fbDb = firebase.database();

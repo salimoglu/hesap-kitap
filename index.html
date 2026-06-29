@@ -19,13 +19,16 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="dns-prefetch" href="https://hesap-kitap-234d1.firebaseapp.com" />
-  <link rel="stylesheet" href="css/style.css?v=20260615oturum-flash" />
+  <link rel="stylesheet" href="css/style.css?v=20260615hizli-ac2" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800&display=swap" media="print" onload="this.media='all'" />
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800&display=swap" /></noscript>
   <style>
     /* Oturum geri yuklenirken giris formu flash etmesin (style.css gelmeden once) */
     html.hk-auth-bekleniyor #lock-auth-panel { visibility: hidden; height: 0; overflow: hidden; margin: 0; padding: 0; opacity: 0; pointer-events: none; }
     html.hk-auth-bekleniyor .lock-auth-bekliyor { display: flex !important; }
+    /* Kayitli oturum: kilit ekrani yerine uygulama kabugunu hemen goster */
+    html.hk-hizli-ac #lock-screen { display: none !important; }
+    html.hk-hizli-ac #app { display: flex !important; flex-direction: column; height: 100dvh; overflow: hidden; }
     .lock-auth-bekliyor { display: none; flex-direction: column; align-items: center; gap: 14px; margin-top: 4px; }
     .lock-auth-bekliyor-spin { width: 28px; height: 28px; border: 3px solid var(--border, rgba(255,255,255,.12)); border-top-color: var(--gold, #c9a84c); border-radius: 50%; animation: hk-lock-spin .75s linear infinite; }
     .lock-auth-bekliyor-metin { font-size: 13px; font-weight: 600; color: var(--text-secondary, #9aa8b8); margin: 0; }
@@ -34,7 +37,7 @@
   <script>
     try {
       if (localStorage.getItem("hk-oturum-uid")) {
-        document.documentElement.classList.add("hk-auth-bekleniyor");
+        document.documentElement.classList.add("hk-hizli-ac");
       }
     } catch (e) {}
   </script>
@@ -505,7 +508,7 @@
   <script defer src="js/hk-erisim.js?v=20260531multi-final"></script>
   <script defer src="js/hk-tanitim.js?v=20260531tanitim"></script>
   <script defer src="js/hk-ayarlar.js?v=20260531temiz"></script>
-  <script defer src="js/firebase.js?v=20260615oturum-flash"></script>
+  <script defer src="js/firebase.js?v=20260615hizli-ac2"></script>
   <script defer src="js/db.js?v=20260615hizli-ac"></script>
   <script defer src="js/modules/islemler.js?v=20260615hizli-ac"></script>
   <script defer src="js/modules/yukle.js?v=20260615hizli-ac"></script>
@@ -514,7 +517,7 @@
   <script defer src="js/modules/arabam.js?v=20260531ar-kayit"></script>
   <script defer src="js/modules/birikim.js?v=20260531kok-tasima"></script>
   <script defer src="js/modules/verilen-altinlar.js?v=20260531kok-tasima"></script>
-  <script defer src="js/app.js?v=20260615oturum-flash"></script>
+  <script defer src="js/app.js?v=20260615hizli-ac2"></script>
 </body>
 </html>
 

@@ -82,6 +82,8 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .lock-auth-bekliyor { display: none; flex-direction: column; align-items: center; gap: 14px; margin-top: 4px; }
 html.hk-auth-bekleniyor #lock-auth-panel { visibility: hidden; height: 0; overflow: hidden; margin: 0; padding: 0; opacity: 0; pointer-events: none; }
 html.hk-auth-bekleniyor .lock-auth-bekliyor { display: flex; }
+html.hk-hizli-ac #lock-screen { display: none !important; }
+html.hk-hizli-ac #app { display: flex !important; }
 .lock-auth-bekliyor-spin { width: 28px; height: 28px; border: 3px solid var(--border); border-top-color: var(--gold); border-radius: 50%; animation: hk-lock-spin .75s linear infinite; }
 .lock-auth-bekliyor-metin { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin: 0; }
 @keyframes hk-lock-spin { to { transform: rotate(360deg); } }
@@ -2048,6 +2050,8 @@ html, body { height: 100%; overflow: hidden; background: var(--bg-base); color: 
 .lock-auth-bekliyor { display: none; flex-direction: column; align-items: center; gap: 14px; margin-top: 4px; }
 html.hk-auth-bekleniyor #lock-auth-panel { visibility: hidden; height: 0; overflow: hidden; margin: 0; padding: 0; opacity: 0; pointer-events: none; }
 html.hk-auth-bekleniyor .lock-auth-bekliyor { display: flex; }
+html.hk-hizli-ac #lock-screen { display: none !important; }
+html.hk-hizli-ac #app { display: flex !important; }
 .lock-auth-bekliyor-spin { width: 28px; height: 28px; border: 3px solid var(--border); border-top-color: var(--gold); border-radius: 50%; animation: hk-lock-spin .75s linear infinite; }
 .lock-auth-bekliyor-metin { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin: 0; }
 @keyframes hk-lock-spin { to { transform: rotate(360deg); } }

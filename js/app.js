@@ -1,8 +1,13 @@
 (async () => {
-  /* Firebase init ile IndexedDB acilisini paralel calistir — telefonda ilk boyama daha erken gelir */
+  var _hizliDonus = false;
+  try { _hizliDonus = !!localStorage.getItem("hk-oturum-uid"); } catch (eHd) {}
+
+  /* Firebase init ile IndexedDB acilisini paralel calistir — donus ziyaretinde initApp hizli mod */
   await Promise.all([
     typeof fbInit !== "undefined" ? fbInit().catch(function() {}) : Promise.resolve(),
-    typeof initApp !== "undefined" ? initApp().catch(function() {}) : Promise.resolve()
+    typeof initApp !== "undefined"
+      ? initApp(_hizliDonus ? { hizli: true } : undefined).catch(function() {})
+      : Promise.resolve()
   ]);
 
   try {
@@ -85,12 +90,13 @@
   function hkOturumKaydet(uid) {
     if (!uid) return;
     try { localStorage.setItem("hk-oturum-uid", String(uid)); } catch (e) {}
-    document.documentElement.classList.add("hk-auth-bekleniyor");
+    document.documentElement.classList.add("hk-hizli-ac");
   }
 
   function hkOturumSil() {
     try { localStorage.removeItem("hk-oturum-uid"); } catch (e) {}
     document.documentElement.classList.remove("hk-auth-bekleniyor");
+    document.documentElement.classList.remove("hk-hizli-ac");
   }
 
   function hkOturumBeklemeGoster() {
@@ -115,12 +121,31 @@
 
   async function hkAuthIlkKullaniciOku(user) {
     if (typeof firebase === "undefined" || !firebase.auth) return user;
+    if (window._fbAuthStateHazir) {
+      try {
+        var cu0 = firebase.auth().currentUser;
+        if (cu0 && !cu0.isAnonymous) return cu0;
+      } catch (e0) {}
+      return user;
+    }
+    if (user && !user.isAnonymous) {
+      window._fbAuthStateHazir = true;
+      return user;
+    }
     if (typeof firebase.auth().authStateReady === "function") {
-      try { await firebase.auth().authStateReady(); } catch (e) {}
+      try {
+        await Promise.race([
+          firebase.auth().authStateReady(),
+          new Promise(function(r) { setTimeout(r, hkKayitliOturumVarMi() ? 800 : 1500); })
+        ]);
+      } catch (e) {}
     }
     try {
       var cu = firebase.auth().currentUser;
-      if (cu && !cu.isAnonymous) return cu;
+      if (cu && !cu.isAnonymous) {
+        window._fbAuthStateHazir = true;
+        return cu;
+      }
     } catch (e2) {}
     return user;
   }
@@ -179,6 +204,7 @@
     } catch (e) { u = null; }
     if (!u || u.isAnonymous) return;
 
+    _acikOturumUid = u.uid;
     hkOturumKaydet(u.uid);
 
     try { await hkServiceWorkerKaydet(); } catch (eSw) {}
@@ -189,6 +215,7 @@
     lockScreen.classList.add("hidden");
     appEl.classList.remove("hidden");
     hkOturumBeklemeBitir();
+    document.documentElement.classList.add("hk-hizli-ac");
 
     u = typeof fbMevcutKullanici === "function" ? fbMevcutKullanici() : u;
     if (typeof HK_ERISIM !== "undefined") {
@@ -232,6 +259,7 @@
   }
 
   var _uygulamaAcPromise = null;
+  var _acikOturumUid = null;
   async function uygulamaAc() {
     if (_uygulamaAcPromise) return _uygulamaAcPromise;
     _uygulamaAcPromise = uygulamaAcIc().finally(function () {
@@ -263,7 +291,7 @@
     firebase.auth().onAuthStateChanged(async function(user) {
       if (_authIlkSnap) {
         _authIlkSnap = false;
-        if (hkKayitliOturumVarMi() || hkOAuthBekleGerekliMi()) {
+        if (!window._fbAuthStateHazir && (hkKayitliOturumVarMi() || hkOAuthBekleGerekliMi())) {
           hkOturumBeklemeGoster();
         }
         user = await hkAuthIlkKullaniciOku(user);
@@ -284,12 +312,22 @@
 
       girisFormuSifirla();
       if (user && !user.isAnonymous) {
+        if (_acikOturumUid === user.uid && !appEl.classList.contains("hidden")) return;
         await uygulamaAc();
       } else {
+        _acikOturumUid = null;
         hkOturumSil();
         girisEkraniGoster();
       }
     });
+
+    /* fbInit oturumu bulduysa authStateChanged'i beklemeden ac */
+    try {
+      var uErken = typeof fbMevcutKullanici === "function" ? fbMevcutKullanici() : null;
+      if (uErken && !uErken.isAnonymous && window._fbAuthStateHazir) {
+        uygulamaAc();
+      }
+    } catch (eEr) {}
   }
 
   // PWA yukleme (masaustu + Android)

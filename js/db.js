@@ -416,8 +416,16 @@ var AyarlarDB = {
   set: async function(key, value) { await openDB(); return promisify(tx(STORES.AYARLAR, "readwrite").put({ key: key, value: value })); },
 };
 
-window.initApp = async function() {
+window.initApp = async function(opt) {
+  opt = opt || {};
   await openDB();
+  if (opt.hizli) {
+    setTimeout(function() {
+      KategorilerDB.seedDefaults().catch(function() {});
+    }, 0);
+    hkDedupeErtele();
+    return;
+  }
   await KategorilerDB.seedDefaults();
   hkDedupeErtele();
 };
