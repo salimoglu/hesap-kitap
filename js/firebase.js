@@ -93,6 +93,12 @@ async function fbInit() {
       await fbTumSwKaldir();
     }
 
+    try {
+      await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+    } catch (pe) {
+      console.warn("Auth persistence:", pe);
+    }
+
     /**
      * OAuth redirect: once getRedirectResult tamamlanmali; bazi Android/PWA kurulumlarinda
      * setPersistence bundan once cagrildiginda yonlendirme sonucu islenmeyebiliyor.
@@ -120,16 +126,20 @@ async function fbInit() {
       } catch (x) {}
     }
 
-    try {
-      firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(function(pe) {
-        console.warn("Auth persistence:", pe);
-      });
-    } catch (pe) {
-      console.warn("Auth persistence:", pe);
-    }
-
     /* authStateReady acilista beklenmez — RTDB okumadan hemen once fbRtdbOturumHazir bekler. */
-    window._fbAuthOk = !!firebase.auth().currentUser;
+    var uInit = null;
+    try { uInit = firebase.auth().currentUser; } catch (eU) {}
+    if (uInit && !uInit.isAnonymous) {
+      window._fbAuthOk = true;
+      try {
+        localStorage.setItem("hk-oturum-uid", uInit.uid);
+        if (typeof document !== "undefined" && document.documentElement) {
+          document.documentElement.classList.add("hk-auth-bekleniyor");
+        }
+      } catch (eLs) {}
+    } else {
+      window._fbAuthOk = false;
+    }
     window._fbReady = Promise.resolve(true);
     firebase.auth().onAuthStateChanged(function(user) {
       window._fbAuthOk = !!user;
@@ -677,6 +687,7 @@ async function fbGirisGoogle() {
 }
 
 async function fbCikisBulut() {
+  try { localStorage.removeItem("hk-oturum-uid"); } catch (e) {}
   try { localStorage.removeItem("hk-rtdb-use-user-prefix"); } catch (e) {}
   await firebase.auth().signOut();
 }

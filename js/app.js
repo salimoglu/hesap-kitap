@@ -82,6 +82,49 @@
     try { return localStorage.getItem("hk-root-cleaned-" + uid) === "1"; } catch (e) { return false; }
   }
 
+  function hkOturumKaydet(uid) {
+    if (!uid) return;
+    try { localStorage.setItem("hk-oturum-uid", String(uid)); } catch (e) {}
+    document.documentElement.classList.add("hk-auth-bekleniyor");
+  }
+
+  function hkOturumSil() {
+    try { localStorage.removeItem("hk-oturum-uid"); } catch (e) {}
+    document.documentElement.classList.remove("hk-auth-bekleniyor");
+  }
+
+  function hkOturumBeklemeGoster() {
+    document.documentElement.classList.add("hk-auth-bekleniyor");
+    var bek = document.getElementById("lock-auth-bekliyor");
+    if (bek) bek.setAttribute("aria-busy", "true");
+  }
+
+  function hkOturumBeklemeBitir() {
+    document.documentElement.classList.remove("hk-auth-bekleniyor");
+    var bek = document.getElementById("lock-auth-bekliyor");
+    if (bek) bek.setAttribute("aria-busy", "false");
+  }
+
+  function girisEkraniGoster() {
+    hkOturumBeklemeBitir();
+    if (typeof HK_AYARLAR !== "undefined") HK_AYARLAR.gizle();
+    appEl.classList.add("hidden");
+    lockScreen.classList.remove("hidden");
+    lockScreen.style.animation = "";
+  }
+
+  async function hkAuthIlkKullaniciOku(user) {
+    if (typeof firebase === "undefined" || !firebase.auth) return user;
+    if (typeof firebase.auth().authStateReady === "function") {
+      try { await firebase.auth().authStateReady(); } catch (e) {}
+    }
+    try {
+      var cu = firebase.auth().currentUser;
+      if (cu && !cu.isAnonymous) return cu;
+    } catch (e2) {}
+    return user;
+  }
+
   function hkOAuthBekleGerekliMi() {
     try {
       if (typeof fbOAuthDonusUrlMu === "function" && fbOAuthDonusUrlMu()) return true;
@@ -90,6 +133,10 @@
       var ts = parseInt(rp, 10);
       return !isNaN(ts) && Date.now() - ts < 15 * 60 * 1000;
     } catch (e) { return false; }
+  }
+
+  function hkKayitliOturumVarMi() {
+    try { return !!localStorage.getItem("hk-oturum-uid"); } catch (e) { return false; }
   }
 
   async function hkBulutSenkron(u) {
@@ -132,6 +179,8 @@
     } catch (e) { u = null; }
     if (!u || u.isAnonymous) return;
 
+    hkOturumKaydet(u.uid);
+
     try { await hkServiceWorkerKaydet(); } catch (eSw) {}
 
     const fbErrOk = document.getElementById("fb-auth-error");
@@ -139,6 +188,7 @@
 
     lockScreen.classList.add("hidden");
     appEl.classList.remove("hidden");
+    hkOturumBeklemeBitir();
 
     u = typeof fbMevcutKullanici === "function" ? fbMevcutKullanici() : u;
     if (typeof HK_ERISIM !== "undefined") {
@@ -209,12 +259,21 @@
   } catch (e) {}
 
   if (typeof firebase !== "undefined" && firebase.auth) {
+    var _authIlkSnap = true;
     firebase.auth().onAuthStateChanged(async function(user) {
+      if (_authIlkSnap) {
+        _authIlkSnap = false;
+        if (hkKayitliOturumVarMi() || hkOAuthBekleGerekliMi()) {
+          hkOturumBeklemeGoster();
+        }
+        user = await hkAuthIlkKullaniciOku(user);
+      }
+
       /**
        * OAuth redirect donusunde: ilk callback bazen null geliyor.
-       * Normal acilista gereksiz 900ms beklemeyin.
        */
       if ((!user || user.isAnonymous) && hkOAuthBekleGerekliMi()) {
+        hkOturumBeklemeGoster();
         var dly = hkMobilMi() ? 350 : 150;
         await new Promise(function(r) { setTimeout(r, dly); });
         try {
@@ -222,14 +281,13 @@
           if (u2 && !u2.isAnonymous) user = u2;
         } catch (e) {}
       }
+
       girisFormuSifirla();
       if (user && !user.isAnonymous) {
         await uygulamaAc();
       } else {
-        if (typeof HK_AYARLAR !== "undefined") HK_AYARLAR.gizle();
-        appEl.classList.add("hidden");
-        lockScreen.classList.remove("hidden");
-        lockScreen.style.animation = "";
+        hkOturumSil();
+        girisEkraniGoster();
       }
     });
   }
