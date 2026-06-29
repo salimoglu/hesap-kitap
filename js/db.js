@@ -154,6 +154,31 @@ function hkIslemlerBildir() {
   try { window.dispatchEvent(new CustomEvent("hk-islemler-degisti")); } catch (e) {}
 }
 
+/** Islemler sekmesi acilmadan IndexedDB okumasini baslat (app.js initApp ile paralel). */
+function hkIslemlerOnyukle() {
+  if (window._hkIslemlerOnbellekPromise) return window._hkIslemlerOnbellekPromise;
+  window._hkIslemlerOnbellekPromise = openDB().then(function() {
+    return Promise.all([
+      getAll(tx(STORES.ISLEMLER, "readonly")),
+      getAll(tx(STORES.KATEGORILER, "readonly"))
+    ]);
+  }).then(function(arr) {
+    window._hkIslemlerOnbellek = arr[0];
+    window._hkKategorilerOnbellek = arr[1];
+    return arr;
+  }).catch(function(err) {
+    window._hkIslemlerOnbellekPromise = null;
+    throw err;
+  });
+  return window._hkIslemlerOnbellekPromise;
+}
+
+function hkIslemlerOnbellekTemizle() {
+  window._hkIslemlerOnbellek = null;
+  window._hkKategorilerOnbellek = null;
+  window._hkIslemlerOnbellekPromise = null;
+}
+
 /** Kategori listesi degisti — birikim vb. moduller dinleyebilir. */
 function hkKategorilerBildir() {
   try { window.dispatchEvent(new CustomEvent("hk-kategoriler-degisti")); } catch (e) {}
@@ -176,6 +201,7 @@ var IslemlerDB = {
     var eklenen = await promisify(tx(STORES.ISLEMLER, "readonly").get(id));
     if (typeof fbIslemEkle !== "undefined") fbIslemEkle(Object.assign({}, eklenen, { id: id }));
     hkIslemlerBildir();
+    hkIslemlerOnbellekTemizle();
     return id;
   },
   update: async function(islem) {
@@ -183,6 +209,7 @@ var IslemlerDB = {
     var result = await promisify(tx(STORES.ISLEMLER, "readwrite").put(islem));
     if (typeof fbIslemGuncelle !== "undefined") fbIslemGuncelle(islem);
     hkIslemlerBildir();
+    hkIslemlerOnbellekTemizle();
     return result;
   },
   delete: async function(id) {
@@ -190,6 +217,7 @@ var IslemlerDB = {
     var result = await promisify(tx(STORES.ISLEMLER, "readwrite").delete(id));
     if (typeof fbIslemSil !== "undefined") fbIslemSil(id);
     hkIslemlerBildir();
+    hkIslemlerOnbellekTemizle();
     return result;
   },
   getById: async function(id) { await openDB(); return promisify(tx(STORES.ISLEMLER, "readonly").get(id)); },
@@ -419,6 +447,7 @@ var AyarlarDB = {
 window.initApp = async function(opt) {
   opt = opt || {};
   await openDB();
+  hkIslemlerOnyukle();
   if (opt.hizli) {
     setTimeout(function() {
       KategorilerDB.seedDefaults().catch(function() {});

@@ -232,10 +232,7 @@
         ? ButceModule.yukle()
         : null;
       if (typeof IslemlerModule !== "undefined") {
-        var islemYukle = IslemlerModule.init();
-        if (islemYukle && typeof islemYukle.then === "function") {
-          islemYukle.catch(function() {});
-        }
+        await IslemlerModule.init();
       }
       if (butceBulut && typeof butceBulut.catch === "function") {
         butceBulut.catch(function () {});
@@ -251,8 +248,9 @@
     /* Bulut senkronu arka planda; bitince islemler + diger moduller guncellenir */
     hkBulutSenkron(u).then(async function () {
       u = typeof fbMevcutKullanici === "function" ? fbMevcutKullanici() : u;
-      if (modulIzinli("islemler") && typeof IslemlerModule !== "undefined" && typeof IslemlerModule.yukle === "function") {
-        await IslemlerModule.yukle();
+      if (window._hkIslemlerBulutDegisti && modulIzinli("islemler") && typeof IslemlerModule !== "undefined" && typeof IslemlerModule.yukle === "function") {
+        await IslemlerModule.yukle({ zorla: true });
+        window._hkIslemlerBulutDegisti = false;
       }
       await modulleriBaslat(u, { atlaIslemler: true });
     });

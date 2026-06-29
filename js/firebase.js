@@ -891,6 +891,12 @@ async function fbVerileriYukle() {
       };
       req.onerror = resolve;
     });
+    if (typeof window !== "undefined") {
+      window._hkIslemlerOnbellek = null;
+      window._hkKategorilerOnbellek = null;
+      window._hkIslemlerOnbellekPromise = null;
+    }
+    window._hkIslemlerBulutDegisti = true;
     try { window.dispatchEvent(new CustomEvent("hk-islemler-degisti")); } catch (eEv) {}
   } catch(e) { console.warn("fbVerileriYukle:", e); }
   finally {

@@ -13,16 +13,23 @@ const IslemlerModule = (() => {
   let _iozYilSeciliKatIslem={tip:null,kat:null};
   let _iozGunlukTarih=null;
   let _iozYillikYil=null;
+  let _ozetCache=null,_bakMap={},_gorunumKatCache={},_listRenderToken=0;
   const $=id=>document.getElementById(id);
 
   function normKatStr(s){return String(s||"").replace(/\s+/g," ").trim();}
 
   /** Tek canonical etiket (yazim / Turkce karakter / grup alias farklarini birlestirir). */
   function gorunumKategori(catStr){
+    var k=String(catStr||"");
+    if(Object.prototype.hasOwnProperty.call(_gorunumKatCache,k))return _gorunumKatCache[k];
+    var out;
     if (typeof HKKategori !== "undefined" && HKKategori.resolve) {
-      return HKKategori.resolve(catStr, _kategoriler) || normKatStr(catStr);
+      out = HKKategori.resolve(catStr, _kategoriler) || normKatStr(catStr);
+    } else {
+      out = normKatStr(catStr);
     }
-    return normKatStr(catStr);
+    _gorunumKatCache[k]=out;
+    return out;
   }
 
   function katNormKey(grup, ad) {
@@ -453,6 +460,7 @@ const IslemlerModule = (() => {
   }
 
   function kategoriOzetiVeri(){
+    if(_ozetCache)return _ozetCache;
     const byAy={};
     const byYil={};
     for(const i of _islemler){
@@ -476,7 +484,21 @@ const IslemlerModule = (() => {
         ayK[kat].gider+=tut;yK[kat].gider+=tut;
       }
     }
-    return {byAy,byYil};
+    _ozetCache={byAy,byYil};
+    return _ozetCache;
+  }
+
+  function veriHazirla(){
+    _islemler.sort(function(a,b){return a.tarih.localeCompare(b.tarih)||(a.olusturma||0)-(b.olusturma||0);});
+    _bakMap={};
+    var bak=0;
+    for(var i=0;i<_islemler.length;i++){
+      var row=_islemler[i];
+      bak+=row.tip==="gelir"?parseFloat(row.tutar):-parseFloat(row.tutar);
+      _bakMap[row.id]=bak;
+    }
+    _ozetCache=null;
+    _gorunumKatCache={};
   }
 
   function kolBaslikAyMetni(){
@@ -851,11 +873,38 @@ const IslemlerModule = (() => {
     renderKategoriOzeti();
   }
 
-  async function yukle(){
-    _islemler=await IslemlerDB.getAll();
-    _kategoriler=await KategorilerDB.getAll();
-    _islemler.sort((a,b)=>a.tarih.localeCompare(b.tarih)||(a.olusturma||0)-(b.olusturma||0));
-    renderList();renderSummary();renderKategoriOzeti();doldurAyFilter();doldurGrupFilter();renderHgList("");const _ht=$("hg-tarih");if(_ht&&!_ht.value)_ht.value=bugun();setTimeout(()=>{const l=$("islem-list");if(l)l.scrollTop=l.scrollHeight;},100);
+  async function yukle(opt){
+    opt=opt||{};
+    if(typeof window._hkIslemlerOnbellekPromise!=="undefined"&&window._hkIslemlerOnbellekPromise){
+      try{await window._hkIslemlerOnbellekPromise;}catch(e){}
+    }
+    if(!opt.zorla&&window._hkIslemlerOnbellek){
+      _islemler=window._hkIslemlerOnbellek;
+      _kategoriler=window._hkKategorilerOnbellek||[];
+    }else{
+      var p=await Promise.all([IslemlerDB.getAll(),KategorilerDB.getAll()]);
+      _islemler=p[0];
+      _kategoriler=p[1];
+      window._hkIslemlerOnbellek=_islemler;
+      window._hkKategorilerOnbellek=_kategoriler;
+    }
+    veriHazirla();
+    renderSummary();
+    renderKategoriOzeti();
+    doldurAyFilter();
+    doldurGrupFilter();
+    renderHgList("");
+    var _ht=$("hg-tarih");
+    if(_ht&&!_ht.value)_ht.value=bugun();
+    var token=++_listRenderToken;
+    requestAnimationFrame(function(){
+      if(token!==_listRenderToken)return;
+      renderList();
+      requestAnimationFrame(function(){
+        var l=$("islem-list");
+        if(l)l.scrollTop=l.scrollHeight;
+      });
+    });
   }
 
   function renderSummary(){
@@ -890,49 +939,59 @@ const IslemlerModule = (() => {
     });
   }
 
+  function rowHtml(islem,bakiye){
+    var katTam=gorunumKategori(islem.kategori);
+    var katAdi=esc(katTam)+(islem.aciklama?" <span class='islem-aciklama-inline'>* "+esc(islem.aciklama)+"</span>":"");
+    return "<div class=\"islem-row "+islem.tip+"\" data-id=\""+islem.id+"\">"+
+      "<div class=\"sol-bar\"></div><div class=\"islem-row-left\"><div class=\"islem-kat-adi\">"+katAdi+"</div></div>"+
+      "<div class=\"islem-row-right\"><span class=\"islem-tarih-col\">"+tarihSaat(islem.tarih)+"</span>"+
+      "<span class=\"islem-tutar-col\">"+(islem.tip==="gider"?"-":"+")+para(islem.tutar)+"</span>"+
+      "<span class=\"islem-bakiye-col\">"+para(bakiye||0)+"</span>"+
+      "<div class=\"islem-row-actions\"><button type=\"button\" class=\"row-action-btn duzenle\" aria-label=\"Düzenle\">&#9998;</button>"+
+      "<button type=\"button\" class=\"row-action-btn sil\" aria-label=\"Sil\">&#10005;</button></div></div></div>";
+  }
+
   function renderList(){
     const liste=$("islem-list"),empty=$("empty-state");
+    if(!liste)return;
     const items=filtreliIslemler();
-    [...liste.querySelectorAll(".islem-row,.islem-grup-baslik,.islem-ay-ozet,.islem-genel-toplam")].forEach(el=>el.remove());
-    if(!items.length){empty.style.display="flex";return;}
-    empty.style.display="none";
-    const sirali=[..._islemler].sort((a,b)=>a.tarih.localeCompare(b.tarih)||(a.olusturma||0)-(b.olusturma||0));
-    const bakMap={};let bak=0;
-    for(const i of sirali){bak+=i.tip==="gelir"?parseFloat(i.tutar):-parseFloat(i.tutar);bakMap[i.id]=bak;}
+    if(!items.length){
+      liste.innerHTML="";
+      if(empty)empty.style.display="flex";
+      return;
+    }
+    if(empty)empty.style.display="none";
     const gruplar={};
-    for(const i of items){const k=i.tarih.substring(0,7);if(!gruplar[k])gruplar[k]=[];gruplar[k].push(i);}
-    let genG=0,genGi=0;
-    for(const[key,grup]of Object.entries(gruplar)){
+    for(var i=0;i<items.length;i++){
+      var it=items[i];
+      var k=it.tarih.substring(0,7);
+      if(!gruplar[k])gruplar[k]=[];
+      gruplar[k].push(it);
+    }
+    var genG=0,genGi=0;
+    var parts=[];
+    for(const [key,grup] of Object.entries(gruplar)){
       const[y,m]=key.split("-");
-      const bas=document.createElement("div");bas.className="islem-grup-baslik";
-      bas.textContent=AYLAR_TR[parseInt(m)-1]+" "+y;liste.appendChild(bas);
+      parts.push("<div class=\"islem-grup-baslik\">"+AYLAR_TR[parseInt(m)-1]+" "+y+"</div>");
       let ayG=0,ayGi=0;
-      for(const i of grup){
-        liste.appendChild(rowOlustur(i,bakMap[i.id]));
-        if(i.tip==="gelir")ayG+=parseFloat(i.tutar);else ayGi+=parseFloat(i.tutar);
+      for(var j=0;j<grup.length;j++){
+        var row=grup[j];
+        parts.push(rowHtml(row,_bakMap[row.id]));
+        if(row.tip==="gelir")ayG+=parseFloat(row.tutar);else ayGi+=parseFloat(row.tutar);
       }
       genG+=ayG;genGi+=ayGi;
-      const oz=document.createElement("div");oz.className="islem-ay-ozet";
-      const ayNet=ayG-ayGi;
-      oz.innerHTML="<span>"+AYLAR_TR[parseInt(m)-1]+":</span><span class='ao-gelir'>"+para(ayG)+"</span><span class='ao-sep'>&#8722;</span><span class='ao-gider'>"+para(ayGi)+"</span><span class='ao-sep'>=</span><span class='ao-net'>"+(ayNet>=0?"":"-")+para(Math.abs(ayNet))+"</span>";
-      liste.appendChild(oz);
+      var ayNet=ayG-ayGi;
+      parts.push("<div class=\"islem-ay-ozet\"><span>"+AYLAR_TR[parseInt(m)-1]+":</span><span class='ao-gelir'>"+para(ayG)+"</span><span class='ao-sep'>&#8722;</span><span class='ao-gider'>"+para(ayGi)+"</span><span class='ao-sep'>=</span><span class='ao-net'>"+(ayNet>=0?"":"-")+para(Math.abs(ayNet))+"</span></div>");
     }
     if(Object.keys(gruplar).length){
-      const gt=document.createElement("div");gt.className="islem-genel-toplam";
-      const gNet=genG-genGi;
-      gt.innerHTML="<span>TOPLAM:</span><span style='color:var(--green);font-family:var(--font-brand)'>"+para(genG)+"</span><span style='color:var(--text-muted)'>&#8722;</span><span style='color:var(--red);font-family:var(--font-brand)'>"+para(genGi)+"</span><span style='color:var(--text-muted)'>=</span><span class='gt-val'>"+(gNet>=0?"":"-")+para(Math.abs(gNet))+"</span>";
-      liste.appendChild(gt);
+      var gNet=genG-genGi;
+      parts.push("<div class=\"islem-genel-toplam\"><span>TOPLAM:</span><span style='color:var(--green);font-family:var(--font-brand)'>"+para(genG)+"</span><span style='color:var(--text-muted)'>&#8722;</span><span style='color:var(--red);font-family:var(--font-brand)'>"+para(genGi)+"</span><span style='color:var(--text-muted)'>=</span><span class='gt-val'>"+(gNet>=0?"":"-")+para(Math.abs(gNet))+"</span></div>");
     }
+    liste.innerHTML=parts.join("");
   }
 
   function rowOlustur(islem,bakiye){
-    const div=document.createElement("div");div.className="islem-row "+islem.tip;
-    const katTam=gorunumKategori(islem.kategori);
-    const katAdi=esc(katTam)+(islem.aciklama?" <span class='islem-aciklama-inline'>* "+esc(islem.aciklama)+"</span>":"");
-    div.innerHTML="<div class='sol-bar'></div><div class='islem-row-left'><div class='islem-kat-adi'>"+katAdi+"</div></div><div class='islem-row-right'><span class='islem-tarih-col'>"+tarihSaat(islem.tarih)+"</span><span class='islem-tutar-col'>"+(islem.tip==="gider"?"-":"+")+para(islem.tutar)+"</span><span class='islem-bakiye-col'>"+para(bakiye||0)+"</span><div class='islem-row-actions'><button class='row-action-btn duzenle'>&#9998;</button><button class='row-action-btn sil'>&#10005;</button></div></div>";
-    div.querySelector(".duzenle").addEventListener("click",e=>{e.stopPropagation();modalAc(islem.id);});
-    div.querySelector(".sil").addEventListener("click",e=>{e.stopPropagation();silModalAc(islem.id);});
-    return div;
+    return rowHtml(islem,bakiye);
   }
 
   function doldurAyFilter(){
@@ -1155,7 +1214,7 @@ const IslemlerModule = (() => {
     }
     _kategoriler=await KategorilerDB.getAll();
     _islemler=await IslemlerDB.getAll();
-    _islemler.sort((a,b)=>a.tarih.localeCompare(b.tarih)||(a.olusturma||0)-(b.olusturma||0));
+    veriHazirla();
     katDuzenleKapatGenel();
     renderKatListe();
     doldurGrupSelect(_katTip);
@@ -1331,6 +1390,21 @@ const IslemlerModule = (() => {
     $("filter-type").addEventListener("change",listeVeOzetGuncelle);
     $("filter-ay").addEventListener("change",listeVeOzetGuncelle);
     $("filter-grup").addEventListener("change",listeVeOzetGuncelle);
+    var islemListe=$("islem-list");
+    if(islemListe&&!islemListe._hkDelegasyon){
+      islemListe._hkDelegasyon=true;
+      islemListe.addEventListener("click",function(e){
+        var btn=e.target.closest(".row-action-btn");
+        if(!btn||!islemListe.contains(btn))return;
+        e.stopPropagation();
+        var row=btn.closest(".islem-row");
+        if(!row)return;
+        var id=parseInt(row.getAttribute("data-id"),10);
+        if(isNaN(id))return;
+        if(btn.classList.contains("duzenle"))modalAc(id);
+        else if(btn.classList.contains("sil"))silModalAc(id);
+      });
+    }
     $("btn-yeni-kat-bar").addEventListener("click",katYonetimAc);
     $("kat-close").addEventListener("click",katYonetimKapat);
     $("modal-kategori").addEventListener("click",e=>{
@@ -1408,6 +1482,17 @@ const IslemlerModule = (() => {
   }
 
   var _eventsBound=false;
-  async function init(){if(!_eventsBound){baglaEventler();_eventsBound=true;}await yukle();}
+  var _initPromise=null;
+  async function init(){
+    if(_initPromise)return _initPromise;
+    _initPromise=(async function(){
+      if(!_eventsBound){baglaEventler();_eventsBound=true;}
+      await yukle();
+    })().catch(function(e){
+      _initPromise=null;
+      throw e;
+    });
+    return _initPromise;
+  }
   return{init,yukle};
 })();
