@@ -48,6 +48,7 @@ var ArabamModule = (function () {
   var _aktifAracId = null;
   var _detayBackdropDown = false;
   var _detayModalGuardUntil = 0;
+  var _acikTakipTip = null;
 
   var BELGE_TIPLER = [
     { key: "bakim", label: "Bakım", chip: "Bakım", yardim: "Yapılan bakımın tarihini ve o andaki km’yi girin." },
@@ -132,27 +133,6 @@ var ArabamModule = (function () {
     a.belgeGecmisi.unshift(Object.assign({ id: muid(), olusturma: new Date().toISOString().split("T")[0] }, kayit));
   }
 
-  function aracGecmisKaydet(ex, f) {
-    if (!ex || !f) return;
-    var bugun = new Date().toISOString().split("T")[0];
-    if (f.bakimSonTarih && (f.bakimSonTarih !== ex.bakimSonTarih || String(f.bakimSonKm) !== String(ex.bakimSonKm || ""))) {
-      belgeGecmisEkle(ex, { tip: "bakim", tarih: f.bakimSonTarih, km: f.bakimSonKm || "", not: "" });
-    }
-    if (f.muayeneTarih && f.muayeneTarih !== ex.muayeneTarih) {
-      belgeGecmisEkle(ex, { tip: "muayene", bitis: f.muayeneTarih, tarih: bugun });
-      ex.muayeneTarih = f.muayeneTarih;
-    }
-    if (f.sigortaTarih && f.sigortaTarih !== ex.sigortaTarih) {
-      belgeGecmisEkle(ex, { tip: "sigorta", bitis: f.sigortaTarih, tarih: bugun });
-    }
-    if (f.kaskoTarih && f.kaskoTarih !== ex.kaskoTarih) {
-      belgeGecmisEkle(ex, { tip: "kasko", bitis: f.kaskoTarih, tarih: bugun });
-    }
-    if (f.guncelKm !== "" && f.guncelKm != null && String(f.guncelKm) !== String(ex.guncelKm || "")) {
-      belgeGecmisEkle(ex, { tip: "km", tarih: bugun, km: f.guncelKm });
-    }
-  }
-
   function belgeKayitUygula(a, tip, tarih, km, not) {
     if (!a || !tip) return;
     var bugun = new Date().toISOString().split("T")[0];
@@ -232,20 +212,61 @@ var ArabamModule = (function () {
     return h;
   }
 
-  function takipKartHtml(opts) {
+  function takipFormHtml(tip, a) {
+    var bugun = new Date().toISOString().split("T")[0];
+    var gKm = a && a.guncelKm != null && a.guncelKm !== "" ? String(a.guncelKm) : "";
+    var perKm = a && a.bakimPeriyodKm != null && a.bakimPeriyodKm !== "" ? String(a.bakimPeriyodKm) : "10000";
+    var perAy = a && a.bakimPeriyodAy != null && a.bakimPeriyodAy !== "" ? String(a.bakimPeriyodAy) : "12";
+    var h = '<div class="ar-takip-form" data-tip="' + tip + '">';
+    h += '<p class="ar-takip-form-yardim">' + belgeTipYardim(tip) + "</p>";
+    h += '<div class="ar-takip-form-grid">';
+    if (tip === "bakim") {
+      h += '<div class="field-group"><label class="field-label">Bakım tarihi</label>';
+      h += '<input type="date" class="field-input ar-tf-tarih" value="' + bugun + '"/></div>';
+      h += '<div class="field-group"><label class="field-label">Bakımdaki km</label>';
+      h += '<input type="number" class="field-input ar-tf-km" value="' + gKm + '" placeholder="125000" min="0" step="1" inputmode="numeric"/></div>';
+      h += '<div class="field-group"><label class="field-label">Kaç km’de bir?</label>';
+      h += '<input type="number" class="field-input ar-tf-per-km" value="' + perKm + '" min="1000" step="500" inputmode="numeric"/></div>';
+      h += '<div class="field-group"><label class="field-label">Kaç ayda bir?</label>';
+      h += '<input type="number" class="field-input ar-tf-per-ay" value="' + perAy + '" min="1" max="36" step="1" inputmode="numeric"/></div>';
+      h += '<div class="field-group ar-takip-form-full"><label class="field-label">Not <span class="ar-label-hint">isteğe bağlı</span></label>';
+      h += '<input type="text" class="field-input ar-tf-not" placeholder="Örn. yağ + filtre" maxlength="80"/></div>';
+    } else if (tip === "km") {
+      h += '<div class="field-group ar-takip-form-full"><label class="field-label">Güncel km</label>';
+      h += '<input type="number" class="field-input ar-tf-km" value="' + gKm + '" placeholder="125000" min="0" step="1" inputmode="numeric"/></div>';
+    } else {
+      var lbl = tip === "muayene" ? "Muayene bitiş tarihi" : tip === "sigorta" ? "Sigorta bitiş tarihi" : "Kasko bitiş tarihi";
+      h += '<div class="field-group ar-takip-form-full"><label class="field-label">' + lbl + "</label>";
+      h += '<input type="date" class="field-input ar-tf-tarih" value=""/></div>';
+      h += '<div class="field-group ar-takip-form-full"><label class="field-label">Not <span class="ar-label-hint">isteğe bağlı</span></label>';
+      h += '<input type="text" class="field-input ar-tf-not" placeholder="İsteğe bağlı" maxlength="80"/></div>';
+    }
+    h += "</div>";
+    h += '<div class="ar-takip-form-ak">';
+    h += '<button type="button" class="ar-takip-iptal">Vazgeç</button>';
+    h += '<button type="button" class="ar-takip-kaydet">Kaydet</button>';
+    h += "</div></div>";
+    return h;
+  }
+
+  function takipKartHtml(opts, a) {
     var rozet = durumRozetMetni({ gun: opts.gun, km: opts.km });
     if (opts.bosRozet && rozet.sinif === "ar-durum--bos") rozet.metin = opts.bosRozet;
+    var acik = _acikTakipTip === opts.tip;
     var ana = opts.ana || "—";
     var detay = opts.detay || "";
-    var h = '<button type="button" class="ar-takip-kart ' + rozet.sinif + '" data-tip="' + opts.tip + '" title="Güncelle">';
+    var h = '<div class="ar-takip-kart ' + rozet.sinif + (acik ? " ar-takip-kart--acik" : "") + '" data-tip="' + opts.tip + '">';
+    h += '<button type="button" class="ar-takip-kart-ozet" data-tip="' + opts.tip + '" aria-expanded="' + (acik ? "true" : "false") + '">';
     h += '<div class="ar-takip-kart-ust">';
     h += '<span class="ar-takip-ad">' + opts.ad + "</span>";
     h += '<span class="ar-takip-badge">' + rozet.metin + "</span>";
     h += "</div>";
     h += '<div class="ar-takip-ana">' + ana + "</div>";
     if (detay) h += '<div class="ar-takip-detay">' + detay + "</div>";
-    h += '<span class="ar-takip-aksiyon">Güncelle</span>';
+    h += '<span class="ar-takip-aksiyon">' + (acik ? "Kapat" : "Güncelle") + "</span>";
     h += "</button>";
+    if (acik) h += takipFormHtml(opts.tip, a);
+    h += "</div>";
     return h;
   }
 
@@ -259,19 +280,23 @@ var ArabamModule = (function () {
     var gMu = a.muayeneTarih ? gunKaldi(a.muayeneTarih) : null;
     var gSi = a.sigortaTarih ? gunKaldi(a.sigortaTarih) : null;
     var gKa = a.kaskoTarih ? gunKaldi(a.kaskoTarih) : null;
+    var kmAcik = _acikTakipTip === "km";
 
     var h = '<div class="ar-takip">';
     h += '<div class="ar-takip-baslik-satir">';
     h += '<div class="ar-takip-baslik">Bakım & belgeler</div>';
-    h += '<button type="button" class="ar-takip-km-btn" data-tip="km" title="Km güncelle">';
+    h += '<div class="ar-takip-km-wrap' + (kmAcik ? " ar-takip-km-wrap--acik" : "") + '">';
+    h += '<button type="button" class="ar-takip-km-btn" data-tip="km" aria-expanded="' + (kmAcik ? "true" : "false") + '">';
     h += '<span class="ar-takip-km-l">Güncel km</span>';
     h += '<span class="ar-takip-km-v">' + (!isNaN(gKm) && gKm > 0 ? gKm.toLocaleString("tr-TR") : "—") + "</span>";
-    h += "</button></div>";
+    h += "</button>";
+    if (kmAcik) h += takipFormHtml("km", a);
+    h += "</div></div>";
 
     h += '<div class="ar-takip-grid">';
 
     var bakimAna = "—";
-    var bakimDetay = "Son bakım ve periyot girilmedi";
+    var bakimDetay = "Dokunup son bakımı ekleyin";
     if (kmB !== null || gBa !== null) {
       var parca = [];
       if (kmB !== null) parca.push(kalanKmMetni(kmB));
@@ -295,32 +320,32 @@ var ArabamModule = (function () {
       km: kmB,
       ana: bakimAna,
       detay: bakimDetay
-    });
+    }, a);
 
     h += takipKartHtml({
       tip: "muayene",
       ad: "Muayene",
       gun: gMu,
       ana: gMu !== null ? kalanGunMetni(gMu) : "Tarih girilmedi",
-      detay: a.muayeneTarih ? "Geçerlilik bitiş: " + mTarih(a.muayeneTarih) : "Muayene bitiş tarihini ekleyin"
-    });
+      detay: a.muayeneTarih ? "Geçerlilik bitiş: " + mTarih(a.muayeneTarih) : "Dokunup bitiş tarihini ekleyin"
+    }, a);
 
     h += takipKartHtml({
       tip: "sigorta",
       ad: "Trafik sigortası",
       gun: gSi,
       ana: gSi !== null ? kalanGunMetni(gSi) : "Tarih girilmedi",
-      detay: a.sigortaTarih ? "Poliçe bitiş: " + mTarih(a.sigortaTarih) : "Sigorta bitiş tarihini ekleyin"
-    });
+      detay: a.sigortaTarih ? "Poliçe bitiş: " + mTarih(a.sigortaTarih) : "Dokunup bitiş tarihini ekleyin"
+    }, a);
 
     h += takipKartHtml({
       tip: "kasko",
       ad: "Kasko",
       gun: gKa,
       ana: gKa !== null ? kalanGunMetni(gKa) : "İsteğe bağlı",
-      detay: a.kaskoTarih ? "Poliçe bitiş: " + mTarih(a.kaskoTarih) : "Kasko yoksa boş bırakabilirsiniz",
+      detay: a.kaskoTarih ? "Poliçe bitiş: " + mTarih(a.kaskoTarih) : "Dokunup ekleyin veya boş bırakın",
       bosRozet: "Yok"
-    });
+    }, a);
 
     h += "</div>";
     h += belgeGecmisHtml(a);
@@ -337,7 +362,7 @@ var ArabamModule = (function () {
     });
     var h = '<div class="ar-gecmis-baslik">Geçmiş kayıtlar</div>';
     if (!list.length) {
-      h += '<div class="ar-gecmis-bos">Henüz kayıt yok. Kartlara veya aşağıdaki forma dokunarak ekleyin.</div>';
+      h += '<div class="ar-gecmis-bos">Henüz kayıt yok. Yukarıdaki kartlara dokunarak ekleyin.</div>';
       return h;
     }
     h += '<div class="ar-gecmis-liste">';
@@ -717,30 +742,6 @@ var ArabamModule = (function () {
       h += '<button type="button" class="ar-emoji-btn">' + em + "</button>";
     });
     h += "</div></div></div>";
-    h += '<div class="ar-form-bolum"><div class="ar-form-bolum-baslik">Bakım takibi</div>';
-    h += '<p class="ar-form-ipucu">Son bakımı ve aralığı girin; uygulama bir sonraki bakımı km ve tarihe göre hesaplar.</p>';
-    h += '<div class="ar-form-grid-2">';
-    h += '<div class="field-group"><label class="field-label" for="ar-inp-km">Güncel km</label>';
-    h += '<input type="number" id="ar-inp-km" class="field-input" placeholder="125000" min="0" step="1" inputmode="numeric"/></div>';
-    h += '<div class="field-group"><label class="field-label" for="ar-inp-bakim-tarih">Son bakım tarihi</label>';
-    h += '<input type="date" id="ar-inp-bakim-tarih" class="field-input"/></div>';
-    h += '<div class="field-group"><label class="field-label" for="ar-inp-bakim-km">Son bakımdaki km</label>';
-    h += '<input type="number" id="ar-inp-bakim-km" class="field-input" placeholder="120000" min="0" step="1" inputmode="numeric"/></div>';
-    h += '<div class="field-group"><label class="field-label" for="ar-inp-bakim-per-km">Kaç km’de bir?</label>';
-    h += '<input type="number" id="ar-inp-bakim-per-km" class="field-input" value="10000" min="1000" step="500" inputmode="numeric"/></div>';
-    h += '<div class="field-group ar-form-grid-full"><label class="field-label" for="ar-inp-bakim-per-ay">Kaç ayda bir?</label>';
-    h += '<input type="number" id="ar-inp-bakim-per-ay" class="field-input" value="12" min="1" max="36" step="1" inputmode="numeric"/></div>';
-    h += "</div></div>";
-    h += '<div class="ar-form-bolum"><div class="ar-form-bolum-baslik">Muayene & sigorta</div>';
-    h += '<p class="ar-form-ipucu">Belgelerinizin <strong>bitiş</strong> tarihlerini girin; süre yaklaşınca uyarı görünür.</p>';
-    h += '<div class="ar-form-grid-2">';
-    h += '<div class="field-group"><label class="field-label" for="ar-inp-muayene">Muayene bitiş tarihi</label>';
-    h += '<input type="date" id="ar-inp-muayene" class="field-input"/></div>';
-    h += '<div class="field-group"><label class="field-label" for="ar-inp-sigorta">Trafik sigortası bitiş</label>';
-    h += '<input type="date" id="ar-inp-sigorta" class="field-input"/></div>';
-    h += '<div class="field-group ar-form-grid-full"><label class="field-label" for="ar-inp-kasko">Kasko bitiş <span class="ar-label-hint">isteğe bağlı</span></label>';
-    h += '<input type="date" id="ar-inp-kasko" class="field-input"/></div>';
-    h += "</div></div>";
     h += "</div>";
     h += '<div class="modal-footer"><button type="button" class="btn-secondary" id="ar-arac-iptal">İptal</button>';
     h += '<button type="button" class="btn-primary" id="ar-arac-kaydet">Kaydet</button></div>';
@@ -771,41 +772,15 @@ var ArabamModule = (function () {
     h += '<div class="ar-bakim-ozet" id="ar-d-bakim-ozet"></div>';
 
     h += '<div class="ar-kayit-panel">';
-    h += '<div class="ar-kayit-head"><span class="ar-kayit-baslik">Yeni kayıt</span></div>';
-    h += '<div class="ar-kayit-seg" role="tablist" aria-label="Kayıt türü">';
-    h += '<button type="button" class="ar-kayit-seg-btn active" data-mod="belge" role="tab" aria-selected="true">Takip güncelle</button>';
-    h += '<button type="button" class="ar-kayit-seg-btn" data-mod="gider" role="tab" aria-selected="false">Gider ekle</button>';
-    h += "</div>";
-
-    h += '<div class="ar-kayit-pane" id="ar-kayit-belge" data-mod="belge">';
-    h += '<div class="ar-belge-tip-chips" id="ar-belge-tip-chips" role="group" aria-label="Ne güncellenecek">';
-    BELGE_TIPLER.forEach(function (bt, i) {
-      h += '<button type="button" class="ar-belge-tip-chip' + (i === 0 ? " selected" : "") + '" data-tip="' + bt.key + '">' + (bt.chip || bt.label) + "</button>";
-    });
-    h += '</div><input type="hidden" id="ar-belge-tip" value="bakim"/>';
-    h += '<p class="ar-belge-yardim" id="ar-belge-yardim">' + belgeTipYardim("bakim") + "</p>";
-    h += '<div class="ar-kayit-alan-grid">';
-    h += '<div class="field-group" id="ar-belge-tarih-gr">';
-    h += '<label class="field-label" for="ar-belge-tarih" id="ar-belge-tarih-lbl">Bakım tarihi</label>';
-    h += '<input type="date" id="ar-belge-tarih" class="field-input" value="' + bugun + '"/></div>';
-    h += '<div class="field-group" id="ar-belge-km-gr">';
-    h += '<label class="field-label" for="ar-belge-km" id="ar-belge-km-lbl">Bakımdaki km</label>';
-    h += '<input type="number" id="ar-belge-km" class="field-input" placeholder="125000" min="0" step="1" inputmode="numeric"/></div>';
-    h += '<div class="field-group ar-kayit-not-gr">';
-    h += '<label class="field-label" for="ar-belge-not">Not <span class="ar-label-hint">isteğe bağlı</span></label>';
-    h += '<input type="text" id="ar-belge-not" class="field-input" placeholder="Örn. yağ + filtre" maxlength="80"/></div>';
-    h += "</div></div>";
-
-    h += '<div class="ar-kayit-pane hidden" id="ar-kayit-gider" data-mod="gider">';
+    h += '<div class="ar-kayit-head"><span class="ar-kayit-baslik">Gider ekle</span></div>';
     h += '<p class="ar-belge-yardim">Yakıt, bakım ücreti, otopark gibi harcamaları buradan ekleyin.</p>';
     h += '<div class="ar-kayit-alan-grid ar-kayit-gider-grid">';
     h += '<div class="field-group"><label class="field-label" for="ar-g-tarih">Tarih</label><input type="date" id="ar-g-tarih" class="field-input" value="' + bugun + '"/></div>';
     h += '<div class="field-group"><label class="field-label" for="ar-g-tutar">Tutar (TL)</label><input type="number" id="ar-g-tutar" class="field-input" placeholder="0" min="0" step="0.01" inputmode="decimal"/></div>';
     h += '<div class="field-group ar-kayit-span-2"><label class="field-label" for="ar-g-kalem">Kalem</label><select id="ar-g-kalem" class="field-select"></select></div>';
     h += '<div class="field-group ar-kayit-span-2"><label class="field-label" for="ar-g-aciklama">Not</label><input type="text" id="ar-g-aciklama" class="field-input" placeholder="İsteğe bağlı" maxlength="120"/></div>';
-    h += "</div></div>";
-
-    h += '<button type="button" class="ar-kayit-kaydet-btn" id="ar-kayit-kaydet">Takibi kaydet</button>';
+    h += "</div>";
+    h += '<button type="button" class="ar-kayit-kaydet-btn" id="ar-kayit-kaydet">Gideri kaydet</button>';
     h += "</div>";
 
     h += '<div class="ar-gider-liste-wrap">';
@@ -848,6 +823,7 @@ var ArabamModule = (function () {
     var m = $("ar-detay-modal");
     if (m) m.classList.add("hidden");
     _aktifAracId = null;
+    _acikTakipTip = null;
     _detayBackdropDown = false;
   }
 
@@ -866,11 +842,8 @@ var ArabamModule = (function () {
     var ozBakim = $("ar-d-bakim-ozet");
     if (ozBakim) {
       ozBakim.innerHTML = bakimMuayeneOzetHtml(a);
-      wireBelgeGecmisSil(aid);
+      wireTakipPaneli(aid);
     }
-
-    syncBelgeFormUI();
-    syncKayitMod("belge");
 
     var ozYil = $("ar-d-yil-ozet");
     if (ozYil) ozYil.innerHTML = yillikOzetHtml(a);
@@ -911,110 +884,73 @@ var ArabamModule = (function () {
     $("ar-inp-plaka").value = a.plaka || "";
     $("ar-inp-marka").value = a.marka || "";
     $("ar-inp-model").value = a.model || "";
-    $("ar-inp-sigorta").value = a.sigortaTarih || "";
-    $("ar-inp-muayene").value = a.muayeneTarih || "";
-    $("ar-inp-kasko").value = a.kaskoTarih || "";
-    $("ar-inp-km").value = a.guncelKm != null && a.guncelKm !== "" ? String(a.guncelKm) : "";
-    $("ar-inp-bakim-tarih").value = a.bakimSonTarih || "";
-    $("ar-inp-bakim-km").value = a.bakimSonKm != null && a.bakimSonKm !== "" ? String(a.bakimSonKm) : "";
-    $("ar-inp-bakim-per-km").value = a.bakimPeriyodKm != null && a.bakimPeriyodKm !== "" ? String(a.bakimPeriyodKm) : "10000";
-    $("ar-inp-bakim-per-ay").value = a.bakimPeriyodAy != null && a.bakimPeriyodAy !== "" ? String(a.bakimPeriyodAy) : "12";
     if ($("ar-inp-tipi")) $("ar-inp-tipi").value = a.aracTip || "otomobil";
     if ($("ar-inp-emoji")) $("ar-inp-emoji").value = aracEmojiGoster(a);
   }
 
   function aracFormOku() {
-    var km = parseInt($("ar-inp-km").value, 10);
-    var bkm = parseInt($("ar-inp-bakim-km").value, 10);
-    var perKm = parseInt($("ar-inp-bakim-per-km").value, 10);
-    var perAy = parseInt($("ar-inp-bakim-per-ay").value, 10);
     return {
       plaka: ($("ar-inp-plaka").value || "").trim().toUpperCase(),
       marka: ($("ar-inp-marka").value || "").trim(),
       model: ($("ar-inp-model").value || "").trim(),
-      sigortaTarih: $("ar-inp-sigorta").value || "",
-      muayeneTarih: $("ar-inp-muayene").value || "",
-      kaskoTarih: $("ar-inp-kasko").value || "",
-      guncelKm: isNaN(km) || km < 0 ? "" : km,
-      bakimSonTarih: $("ar-inp-bakim-tarih").value || "",
-      bakimSonKm: isNaN(bkm) || bkm < 0 ? "" : bkm,
-      bakimPeriyodKm: isNaN(perKm) || perKm < 1000 ? 10000 : perKm,
-      bakimPeriyodAy: isNaN(perAy) || perAy < 1 ? 12 : Math.min(36, perAy),
       aracTip: ($("ar-inp-tipi") && $("ar-inp-tipi").value) || "otomobil",
       aracEmoji: (($("ar-inp-emoji") && $("ar-inp-emoji").value) || "").trim().slice(0, 16)
     };
   }
 
-  function syncKayitMod(mod) {
-    mod = mod || "belge";
-    document.querySelectorAll(".ar-kayit-seg-btn").forEach(function (b) {
-      var aktif = b.dataset.mod === mod;
-      b.classList.toggle("active", aktif);
-      b.setAttribute("aria-selected", aktif ? "true" : "false");
-    });
-    var belge = $("ar-kayit-belge");
-    var gider = $("ar-kayit-gider");
-    if (belge) belge.classList.toggle("hidden", mod !== "belge");
-    if (gider) gider.classList.toggle("hidden", mod !== "gider");
-    var btn = $("ar-kayit-kaydet");
-    if (btn) btn.textContent = mod === "gider" ? "Gideri kaydet" : "Takibi kaydet";
-  }
-
-  function belgeTipSec(tip) {
-    tip = tip || "bakim";
-    var hid = $("ar-belge-tip");
-    if (hid) hid.value = tip;
-    syncBelgeFormUI();
-    syncKayitMod("belge");
-    var ar = _aktifAracId ? aracBul(_aktifAracId) : null;
-    var bugun = new Date().toISOString().split("T")[0];
-    if ($("ar-belge-tarih")) {
-      if (tip === "bakim") $("ar-belge-tarih").value = bugun;
-      else if (tip !== "km") $("ar-belge-tarih").value = "";
-    }
-    if (ar && $("ar-belge-km")) {
-      if ((tip === "km" || tip === "bakim") && ar.guncelKm !== "" && ar.guncelKm != null) {
-        $("ar-belge-km").value = String(ar.guncelKm);
-      } else if (tip !== "bakim" && tip !== "km") {
-        $("ar-belge-km").value = "";
-      }
-    }
-    var panel = document.querySelector(".ar-kayit-panel");
-    if (panel) {
-      try { panel.scrollIntoView({ behavior: "smooth", block: "nearest" }); } catch (e) { /* ignore */ }
-    }
-    var tipEl = tip === "km" ? $("ar-belge-km") : $("ar-belge-tarih");
-    if (tipEl && !tipEl.closest(".hidden")) {
-      setTimeout(function () { tipEl.focus(); }, 80);
+  function takipTipAc(tip) {
+    _acikTakipTip = _acikTakipTip === tip ? null : tip;
+    if (_aktifAracId) detayGuncelle(_aktifAracId);
+    if (_acikTakipTip) {
+      setTimeout(function () {
+        var form = document.querySelector('.ar-takip-form[data-tip="' + _acikTakipTip + '"]');
+        if (!form) return;
+        var focusEl = form.querySelector(".ar-tf-tarih, .ar-tf-km");
+        if (focusEl) focusEl.focus();
+        try { form.scrollIntoView({ behavior: "smooth", block: "nearest" }); } catch (e) { /* ignore */ }
+      }, 40);
     }
   }
 
-  async function belgeKaydet() {
-    if (!_aktifAracId) return;
+  async function takipKartKaydet(formEl) {
+    if (!_aktifAracId || !formEl) return;
     var ar = aracBul(_aktifAracId);
     if (!ar) return;
-    var tip = ($("ar-belge-tip") && $("ar-belge-tip").value) || "bakim";
-    var tarih = ($("ar-belge-tarih") && $("ar-belge-tarih").value) || "";
-    var kmVal = parseInt(($("ar-belge-km") && $("ar-belge-km").value) || "", 10);
+    var tip = formEl.dataset.tip || "bakim";
+    var tarihEl = formEl.querySelector(".ar-tf-tarih");
+    var kmEl = formEl.querySelector(".ar-tf-km");
+    var notEl = formEl.querySelector(".ar-tf-not");
+    var tarih = tarihEl ? tarihEl.value || "" : "";
+    var kmVal = kmEl ? parseInt(kmEl.value || "", 10) : NaN;
     var km = isNaN(kmVal) || kmVal < 0 ? "" : kmVal;
-    var not = ($("ar-belge-not") && $("ar-belge-not").value || "").trim();
+    var not = notEl ? (notEl.value || "").trim() : "";
+
     if ((tip === "muayene" || tip === "sigorta" || tip === "kasko" || tip === "bakim") && !tarih) {
-      $("ar-belge-tarih") && $("ar-belge-tarih").focus();
+      if (tarihEl) tarihEl.focus();
       return;
     }
     if (tip === "km" && km === "") {
-      $("ar-belge-km") && $("ar-belge-km").focus();
+      if (kmEl) kmEl.focus();
       return;
     }
-    if (tip === "bakim" && km === "" && !tarih) {
-      $("ar-belge-tarih") && $("ar-belge-tarih").focus();
-      return;
-    }
+
     belgeKayitUygula(ar, tip, tarih, km, not);
+
+    if (tip === "bakim") {
+      var perKmEl = formEl.querySelector(".ar-tf-per-km");
+      var perAyEl = formEl.querySelector(".ar-tf-per-ay");
+      var perKm = perKmEl ? parseInt(perKmEl.value || "", 10) : NaN;
+      var perAy = perAyEl ? parseInt(perAyEl.value || "", 10) : NaN;
+      ar.bakimPeriyodKm = isNaN(perKm) || perKm < 1000 ? 10000 : perKm;
+      ar.bakimPeriyodAy = isNaN(perAy) || perAy < 1 ? 12 : Math.min(36, perAy);
+      if (km !== "" && (ar.guncelKm === "" || ar.guncelKm == null || Number(km) >= Number(ar.guncelKm))) {
+        ar.guncelKm = km;
+      }
+    }
+
+    _acikTakipTip = null;
     await fbKaydet();
     render();
-    if ($("ar-belge-not")) $("ar-belge-not").value = "";
-    if ($("ar-belge-km")) $("ar-belge-km").value = "";
   }
 
   async function giderKaydet() {
@@ -1037,31 +973,7 @@ var ArabamModule = (function () {
     if ($("ar-g-aciklama")) $("ar-g-aciklama").value = "";
   }
 
-  function syncBelgeFormUI() {
-    var tipEl = $("ar-belge-tip");
-    var kmGr = $("ar-belge-km-gr");
-    var kmLbl = $("ar-belge-km-lbl");
-    var tarihGr = $("ar-belge-tarih-gr");
-    var tarihLbl = $("ar-belge-tarih-lbl");
-    var yardim = $("ar-belge-yardim");
-    if (!tipEl) return;
-    var tip = tipEl.value;
-    if (kmGr) kmGr.classList.toggle("hidden", tip !== "bakim" && tip !== "km");
-    if (kmLbl) kmLbl.textContent = tip === "km" ? "Güncel km" : "Bakımdaki km";
-    if (tarihGr) tarihGr.classList.toggle("hidden", tip === "km");
-    if (tarihLbl) {
-      if (tip === "bakim") tarihLbl.textContent = "Bakım tarihi";
-      else if (tip === "muayene") tarihLbl.textContent = "Muayene bitiş tarihi";
-      else if (tip === "sigorta") tarihLbl.textContent = "Sigorta bitiş tarihi";
-      else if (tip === "kasko") tarihLbl.textContent = "Kasko bitiş tarihi";
-    }
-    if (yardim) yardim.textContent = belgeTipYardim(tip);
-    document.querySelectorAll(".ar-belge-tip-chip").forEach(function (b) {
-      b.classList.toggle("selected", b.dataset.tip === tip);
-    });
-  }
-
-  function wireBelgeGecmisSil(aid) {
+  function wireTakipPaneli(aid) {
     var oz = $("ar-d-bakim-ozet");
     if (!oz) return;
     oz.querySelectorAll(".ar-gecmis-sil").forEach(function (btn) {
@@ -1075,12 +987,31 @@ var ArabamModule = (function () {
         render();
       });
     });
-    oz.querySelectorAll(".ar-takip-kart, .ar-takip-km-btn").forEach(function (btn) {
+    oz.querySelectorAll(".ar-takip-kart-ozet, .ar-takip-km-btn").forEach(function (btn) {
       btn.addEventListener("click", function (e) {
         e.preventDefault();
         e.stopPropagation();
-        belgeTipSec(btn.dataset.tip || "bakim");
+        takipTipAc(btn.dataset.tip || "bakim");
       });
+    });
+    oz.querySelectorAll(".ar-takip-iptal").forEach(function (btn) {
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        _acikTakipTip = null;
+        detayGuncelle(aid);
+      });
+    });
+    oz.querySelectorAll(".ar-takip-kaydet").forEach(function (btn) {
+      btn.addEventListener("click", async function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var form = btn.closest(".ar-takip-form");
+        await takipKartKaydet(form);
+      });
+    });
+    oz.querySelectorAll(".ar-takip-form").forEach(function (form) {
+      form.addEventListener("click", function (e) { e.stopPropagation(); });
     });
   }
 
@@ -1094,14 +1025,6 @@ var ArabamModule = (function () {
       $("ar-inp-plaka").value = "";
       $("ar-inp-marka").value = "";
       $("ar-inp-model").value = "";
-      $("ar-inp-sigorta").value = "";
-      $("ar-inp-muayene").value = "";
-      $("ar-inp-kasko").value = "";
-      $("ar-inp-km").value = "";
-      $("ar-inp-bakim-tarih").value = "";
-      $("ar-inp-bakim-km").value = "";
-      $("ar-inp-bakim-per-km").value = "10000";
-      $("ar-inp-bakim-per-ay").value = "12";
       if ($("ar-inp-tipi")) $("ar-inp-tipi").value = "otomobil";
       if ($("ar-inp-emoji")) $("ar-inp-emoji").value = tipVarsayilanEmoji("otomobil");
       $("ar-arac-modal-baslik").textContent = "Araç ekle";
@@ -1128,20 +1051,11 @@ var ArabamModule = (function () {
       if (kId) {
         var ex = aracBul(kId);
         if (ex) {
-          aracGecmisKaydet(ex, f);
           ex.plaka = f.plaka;
           ex.marka = f.marka;
           ex.model = f.model;
           ex.aracTip = f.aracTip;
           ex.aracEmoji = emojiStr;
-          ex.sigortaTarih = f.sigortaTarih;
-          ex.muayeneTarih = f.muayeneTarih;
-          ex.kaskoTarih = f.kaskoTarih;
-          ex.guncelKm = f.guncelKm;
-          ex.bakimSonTarih = f.bakimSonTarih;
-          ex.bakimSonKm = f.bakimSonKm;
-          ex.bakimPeriyodKm = f.bakimPeriyodKm;
-          ex.bakimPeriyodAy = f.bakimPeriyodAy;
           geriDetay = kId;
         }
       } else {
@@ -1152,18 +1066,19 @@ var ArabamModule = (function () {
           model: f.model,
           aracTip: f.aracTip,
           aracEmoji: emojiStr,
-          sigortaTarih: f.sigortaTarih,
-          muayeneTarih: f.muayeneTarih,
-          kaskoTarih: f.kaskoTarih,
-          guncelKm: f.guncelKm,
-          bakimSonTarih: f.bakimSonTarih,
-          bakimSonKm: f.bakimSonKm,
-          bakimPeriyodKm: f.bakimPeriyodKm,
-          bakimPeriyodAy: f.bakimPeriyodAy,
+          sigortaTarih: "",
+          muayeneTarih: "",
+          kaskoTarih: "",
+          guncelKm: "",
+          bakimSonTarih: "",
+          bakimSonKm: "",
+          bakimPeriyodKm: 10000,
+          bakimPeriyodAy: 12,
+          belgeGecmisi: [],
           giderler: []
         };
-        aracNormalize(yeni);
         _araclar.push(yeni);
+        geriDetay = yeni.id;
       }
       await fbKaydet();
       $("ar-arac-modal").classList.add("hidden");
@@ -1246,25 +1161,8 @@ var ArabamModule = (function () {
       aracModalAc(_aktifAracId);
     });
 
-    var tipChips = $("ar-belge-tip-chips");
-    if (tipChips) {
-      tipChips.addEventListener("click", function (e) {
-        var btn = e.target.closest(".ar-belge-tip-chip");
-        if (!btn) return;
-        belgeTipSec(btn.dataset.tip || "bakim");
-      });
-    }
-
-    document.querySelectorAll(".ar-kayit-seg-btn").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        syncKayitMod(btn.dataset.mod || "belge");
-      });
-    });
-
     $("ar-kayit-kaydet") && $("ar-kayit-kaydet").addEventListener("click", async function () {
-      var giderPane = $("ar-kayit-gider");
-      if (giderPane && !giderPane.classList.contains("hidden")) await giderKaydet();
-      else await belgeKaydet();
+      await giderKaydet();
     });
   }
 

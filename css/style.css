@@ -6301,25 +6301,47 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 4px;
+  gap: 0;
   text-align: left;
   width: 100%;
   min-width: 0;
-  padding: 12px;
+  padding: 0;
   border-radius: 12px;
   border: 1px solid var(--border);
   background: var(--bg-card);
-  cursor: pointer;
-  transition: border-color 0.15s, box-shadow 0.15s, transform 0.12s;
+  overflow: hidden;
   font-family: var(--font-body);
   color: inherit;
+}
+.ar-takip-kart-ozet {
+  appearance: none;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  color: inherit;
+  padding: 12px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.ar-takip-kart-ozet:hover {
+  background: rgba(255, 255, 255, 0.02);
 }
 .ar-takip-kart:hover {
   border-color: var(--border-light);
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
 }
 .ar-takip-kart:active {
-  transform: scale(0.985);
+  transform: none;
+}
+.ar-takip-kart--acik {
+  grid-column: 1 / -1;
+  border-color: var(--gold);
+  box-shadow: 0 2px 14px rgba(240, 184, 64, 0.12);
 }
 .ar-takip-kart.ar-durum--ok {
   border-color: rgba(52, 201, 122, 0.35);
@@ -6336,6 +6358,90 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
 .ar-takip-kart.ar-durum--bos {
   border-style: dashed;
   opacity: 0.92;
+}
+.ar-takip-km-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  max-width: min(280px, 100%);
+}
+.ar-takip-km-wrap--acik {
+  max-width: 100%;
+  min-width: min(280px, 100%);
+}
+.ar-takip-form {
+  padding: 0 12px 12px;
+  border-top: 1px dashed var(--border);
+  margin-top: 0;
+}
+.ar-takip-km-wrap .ar-takip-form {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-card);
+}
+.ar-takip-form-yardim {
+  margin: 10px 0 10px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+.ar-takip-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 12px;
+}
+.ar-takip-form-full {
+  grid-column: 1 / -1;
+}
+.ar-takip-form-grid .field-group {
+  margin: 0;
+  min-width: 0;
+}
+.ar-takip-form-grid .field-input {
+  min-height: 42px;
+  border-radius: 10px;
+}
+.ar-takip-form-ak {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+.ar-takip-iptal,
+.ar-takip-kaydet {
+  flex: 1;
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.ar-takip-iptal {
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+}
+.ar-takip-kaydet {
+  border: none;
+  background: var(--green);
+  color: #0f1923;
+}
+@media (max-width: 420px) {
+  .ar-takip-form-grid {
+    grid-template-columns: 1fr;
+  }
+  .ar-takip-baslik-satir {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .ar-takip-km-wrap {
+    max-width: none;
+  }
+  .ar-takip-km-btn {
+    align-items: flex-start;
+  }
 }
 .ar-takip-kart-ust {
   display: flex;
