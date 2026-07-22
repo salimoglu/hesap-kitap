@@ -6212,6 +6212,16 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   color: var(--gold);
   margin-bottom: 10px;
 }
+.ar-form-ipucu {
+  margin: -4px 0 12px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+.ar-form-ipucu strong {
+  color: var(--text-secondary);
+  font-weight: 700;
+}
 .ar-form-grid-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -6226,10 +6236,173 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   }
 }
 .ar-bakim-ozet {
-  padding: 12px 16px;
+  padding: 14px 16px;
   border-bottom: 1px solid var(--border);
   background: var(--bg-elevated);
   flex-shrink: 0;
+}
+.ar-takip-baslik-satir {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.ar-takip-baslik {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+.ar-takip-km-btn {
+  appearance: none;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-card);
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.ar-takip-km-btn:hover {
+  border-color: var(--gold);
+  background: rgba(240, 184, 64, 0.08);
+}
+.ar-takip-km-l {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.ar-takip-km-v {
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+.ar-takip-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+@media (max-width: 420px) {
+  .ar-takip-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.ar-takip-kart {
+  appearance: none;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  text-align: left;
+  width: 100%;
+  min-width: 0;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.12s;
+  font-family: var(--font-body);
+  color: inherit;
+}
+.ar-takip-kart:hover {
+  border-color: var(--border-light);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+.ar-takip-kart:active {
+  transform: scale(0.985);
+}
+.ar-takip-kart.ar-durum--ok {
+  border-color: rgba(52, 201, 122, 0.35);
+  background: linear-gradient(180deg, rgba(52, 201, 122, 0.1), var(--bg-card) 55%);
+}
+.ar-takip-kart.ar-durum--yakin {
+  border-color: rgba(240, 184, 64, 0.45);
+  background: linear-gradient(180deg, rgba(240, 184, 64, 0.12), var(--bg-card) 55%);
+}
+.ar-takip-kart.ar-durum--gec {
+  border-color: rgba(240, 84, 84, 0.45);
+  background: linear-gradient(180deg, rgba(240, 84, 84, 0.12), var(--bg-card) 55%);
+}
+.ar-takip-kart.ar-durum--bos {
+  border-style: dashed;
+  opacity: 0.92;
+}
+.ar-takip-kart-ust {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.ar-takip-ad {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: 0.01em;
+}
+.ar-takip-badge {
+  flex-shrink: 0;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 3px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  background: var(--bg-elevated);
+}
+.ar-takip-kart.ar-durum--ok .ar-takip-badge {
+  color: var(--green);
+  border-color: rgba(52, 201, 122, 0.35);
+  background: rgba(52, 201, 122, 0.1);
+}
+.ar-takip-kart.ar-durum--yakin .ar-takip-badge {
+  color: var(--gold);
+  border-color: rgba(240, 184, 64, 0.4);
+  background: rgba(240, 184, 64, 0.12);
+}
+.ar-takip-kart.ar-durum--gec .ar-takip-badge {
+  color: var(--red);
+  border-color: rgba(240, 84, 84, 0.4);
+  background: rgba(240, 84, 84, 0.12);
+}
+.ar-takip-ana {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  margin-top: 2px;
+}
+.ar-takip-kart.ar-durum--gec .ar-takip-ana { color: var(--red); }
+.ar-takip-kart.ar-durum--yakin .ar-takip-ana { color: var(--gold); }
+.ar-takip-kart.ar-durum--ok .ar-takip-ana { color: var(--green); }
+.ar-takip-detay {
+  font-size: 11px;
+  line-height: 1.35;
+  color: var(--text-muted);
+}
+.ar-takip-aksiyon {
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gold);
+}
+.ar-belge-yardim {
+  margin: 0 0 12px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--text-muted);
 }
 .ar-bakim-ozet-baslik {
   font-size: 10px;
@@ -6405,7 +6578,7 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   letter-spacing: 0.12em;
   color: var(--text-muted);
   text-transform: uppercase;
-  margin: 8px 0 6px;
+  margin: 14px 0 6px;
 }
 .ar-gecmis-bos {
   font-size: 11px;
