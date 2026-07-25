@@ -932,7 +932,7 @@ function arender(){
   h+='<div class="alt-oz-item"><span class="alt-oz-label">ORT. GR</span><span class="alt-oz-val">'+apara(elimdeOrt)+'</span></div>';
   h+='<div class="alt-oz-item"><span class="alt-oz-label">KAR/ZARAR</span>';
   if(_guncelGramFiyat>0){
-    h+='<span class="alt-oz-val" style="color:'+karRenk+'">'+karIsaret+apara(elimdeKarZarar)+'<small>('+karIsaret+elimdeKarPct.toFixed(1)+'%)</small></span>';
+    h+='<span class="alt-oz-val" style="color:'+karRenk+'">'+karIsaret+apara(elimdeKarZarar)+'<small>'+karIsaret+elimdeKarPct.toFixed(0)+'%</small></span>';
   } else {
     h+='<span class="alt-oz-val">—</span>';
   }
