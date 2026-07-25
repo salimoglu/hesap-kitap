@@ -8072,6 +8072,52 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   .ar-bakim-kompakt {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  /* Üst özet kartı — sadece telefon */
+  .ar-wrap {
+    gap: 8px;
+    padding: 8px 10px 20px;
+  }
+  .ar-header {
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 10px;
+  }
+  .ar-ozet {
+    flex: 1 1 auto;
+    min-width: 0;
+    gap: 8px 12px;
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+  .ar-oz-item {
+    min-width: 0;
+    gap: 1px;
+  }
+  .ar-oz-item--vurgu {
+    padding: 4px 8px;
+    margin: 0;
+    border-radius: 8px;
+  }
+  .ar-oz-label {
+    font-size: 8px;
+    letter-spacing: 0.08em;
+    line-height: 1.1;
+  }
+  .ar-oz-val {
+    font-size: 15px;
+    line-height: 1.15;
+  }
+  .ar-ekle-btn {
+    flex-shrink: 0;
+    align-self: center;
+    padding: 6px 10px;
+    font-size: 11px;
+    border-radius: 8px;
+    white-space: nowrap;
+  }
 }
 .ar-bk-stat {
   background: var(--bg-card);
