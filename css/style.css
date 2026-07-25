@@ -1809,7 +1809,8 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .vf2-ozet-grup{display:flex;flex-direction:column;gap:8px;min-width:0;flex:1 1 200px;}
 .vf2-ozet-grup-baslik{font-family:var(--font-brand);font-size:12px;font-weight:800;color:var(--gold);}
 .vf2-ozet-grup-ic{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;}
-.vf2-altin-tipler{display:flex;flex-wrap:nowrap;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%;padding:2px 0 8px;scrollbar-width:thin;}
+.vf2-altin-tipler{display:flex;flex-wrap:nowrap;align-items:baseline;gap:0;overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%;padding:2px 0 8px;scrollbar-width:thin;}
+.vf2-tip-ayrac{color:var(--text-muted);font-family:var(--font-body);font-size:13px;font-weight:600;letter-spacing:0.02em;padding:0 2px;flex-shrink:0;}
 
 /* Ana tablo — kaydirma #vefa-container icinde flex ile (asagida) */
 .vf2-tablo-dis{border:1px solid var(--border);border-radius:var(--radius-md);overflow:auto;width:100%;-webkit-overflow-scrolling:touch;}
@@ -4014,7 +4015,8 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .vf2-ozet-grup{display:flex;flex-direction:column;gap:8px;min-width:0;flex:1 1 200px;}
 .vf2-ozet-grup-baslik{font-family:var(--font-brand);font-size:12px;font-weight:800;color:var(--gold);}
 .vf2-ozet-grup-ic{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;}
-.vf2-altin-tipler{display:flex;flex-wrap:nowrap;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%;padding:2px 0 8px;scrollbar-width:thin;}
+.vf2-altin-tipler{display:flex;flex-wrap:nowrap;align-items:baseline;gap:0;overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%;padding:2px 0 8px;scrollbar-width:thin;}
+.vf2-tip-ayrac{color:var(--text-muted);font-family:var(--font-body);font-size:13px;font-weight:600;letter-spacing:0.02em;padding:0 2px;flex-shrink:0;}
 
 /* Ana tablo — kaydirma #vefa-container icinde flex ile (asagida) */
 .vf2-tablo-dis{border:1px solid var(--border);border-radius:var(--radius-md);overflow:auto;width:100%;-webkit-overflow-scrolling:touch;}

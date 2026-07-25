@@ -1060,13 +1060,15 @@ function render(){
     h+='<div class="vf2-oz"><span class="vf2-oz-l">GÜNCEL DEĞER</span><span class="vf2-oz-v" style="color:var(--gold)">'+p(altin.guncel_deger)+' TL</span></div>';
   }
   h+='</div>';
-  /* Tip bazlı altın detayı */
+  /* Tip bazlı altın detayı — önce adet, cinsler arası / */
   h+='<div class="vf2-altin-tipler">';
+  var tipParcalar=[];
   ALTIN_TIPLER.forEach(function(t){
     var o=altin.tipDetay[t];
     if(!o||o.adet===0)return;
-    h+='<span class="vf2-tip-tag vf2-tip-'+t+'"><b class="vf2-adet-n">'+o.adet+'</b> × '+TIP_AD[t]+'</span>';
+    tipParcalar.push('<span class="vf2-tip-tag vf2-tip-'+t+'"><b class="vf2-adet-n">'+o.adet+'</b> × '+TIP_AD[t]+'</span>');
   });
+  h+=tipParcalar.join('<span class="vf2-tip-ayrac"> / </span>');
   h+='</div>';
   h+='</div>';
 
@@ -1196,13 +1198,14 @@ function render(){
       });
       h+='</div><div class="vf2-card-info">';
       h+='<div class="vf2-card-row"><span>Ay toplamı</span><b>'+p(ayOdemeM)+' TL</b></div>';
-      var chipM='';
+      var chipParts=[];
       ALTIN_TIPLER.forEach(function(t){
         (tgM[t]||[]).forEach(function(y){
-          chipM+='<span class="vf2-tip-tag vf2-tip-'+t+'"><b class="vf2-adet-n">'+y.adet+'</b> × '+TIP_AD[t]+'</span>';
+          chipParts.push('<span class="vf2-tip-tag vf2-tip-'+t+'"><b class="vf2-adet-n">'+y.adet+'</b> × '+TIP_AD[t]+'</span>');
         });
       });
-      if(ayNakitM>0) chipM+='<span class="vf2-tip-tag vf2-tip-nakit">NAKİT '+p(ayNakitM)+' TL</span>';
+      if(ayNakitM>0) chipParts.push('<span class="vf2-tip-tag vf2-tip-nakit">NAKİT '+p(ayNakitM)+' TL</span>');
+      var chipM=chipParts.join('<span class="vf2-tip-ayrac"> / </span>');
       h+='<div class="vf2-card-row vf2-card-row-chips"><span>Yatırımlar</span><div class="vf2-card-chips">'+(chipM?chipM:'<span style="color:var(--text-muted);font-size:12px">—</span>')+'</div></div>';
       h+='<div class="vf2-card-row"><span>Güncel değer</span><b>'+(_gramFiyat>0||ayNakitM>0?p(ayDegerM)+' TL':'—')+'</b></div>';
       h+='</div></div>';
@@ -1216,11 +1219,12 @@ function render(){
     });
     h+='</div><div class="vf2-card-info">';
     h+='<div class="vf2-card-row"><span>Toplam ödeme</span><b>'+p(cOdeme)+' TL</b></div>';
-    var totC='';
+    var totParts=[];
     ALTIN_TIPLER.forEach(function(t){
-      if(cAdet[t]>0) totC+='<span class="vf2-tip-tag vf2-tip-'+t+'"><b class="vf2-adet-n">'+cAdet[t]+'</b> × '+TIP_AD[t]+'</span>';
+      if(cAdet[t]>0) totParts.push('<span class="vf2-tip-tag vf2-tip-'+t+'"><b class="vf2-adet-n">'+cAdet[t]+'</b> × '+TIP_AD[t]+'</span>');
     });
-    if(cNakit>0) totC+='<span class="vf2-tip-tag vf2-tip-nakit">NAKİT '+p(cNakit)+' TL</span>';
+    if(cNakit>0) totParts.push('<span class="vf2-tip-tag vf2-tip-nakit">NAKİT '+p(cNakit)+' TL</span>');
+    var totC=totParts.join('<span class="vf2-tip-ayrac"> / </span>');
     h+='<div class="vf2-card-row vf2-card-row-chips"><span>Yatırımlar</span><div class="vf2-card-chips">'+(totC?totC:'<span style="color:var(--text-muted);font-size:12px">—</span>')+'</div></div>';
     h+='<div class="vf2-card-row"><span>Güncel değer</span><b>'+(_gramFiyat>0||cNakit>0?p(cDeger)+' TL':'—')+'</b></div>';
     h+='</div></div>';
