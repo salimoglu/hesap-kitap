@@ -2113,35 +2113,42 @@ body.hk-kat-alt-modal-acik #modal-kategori {
     flex-direction:column;align-items:stretch;
     padding:8px 10px;gap:8px;border-radius:10px;
   }
-  .mh-h-icerik{flex-direction:column;gap:8px;flex:1 1 auto;}
+  /* Toplam özet | Yıllık özet yan yana */
+  .mh-h-icerik{
+    flex-direction:row;flex-wrap:nowrap;align-items:stretch;
+    gap:8px;flex:1 1 auto;min-width:0;
+  }
   .mh-h-total{
-    flex:1 1 auto;width:100%;
-    display:flex;flex-direction:row;flex-wrap:wrap;align-items:baseline;gap:2px 0;
+    flex:0 0 auto;width:auto;max-width:42%;min-width:0;
+    display:flex;flex-direction:column;justify-content:center;
+    gap:2px;padding-right:8px;
   }
-  .mh-h-total-title{flex:1 0 100%;font-size:9px;letter-spacing:0.08em;}
+  .mh-h-total-title{flex:none;font-size:8px;letter-spacing:0.08em;line-height:1.15;}
   .mh-h-total-satir{
-    display:inline-flex;width:auto;justify-content:flex-start;
-    gap:5px;font-size:11px;margin-right:10px;
+    display:flex;width:100%;justify-content:space-between;
+    gap:4px 6px;font-size:10px;margin-right:0;line-height:1.25;
   }
-  .mh-h-total-lbl{font-size:8px;}
-  .mh-h-total-meta{flex:1 0 100%;font-size:9px;margin-top:0;}
+  .mh-h-total-lbl{font-size:7px;}
+  .mh-h-total-meta{flex:none;font-size:8px;margin-top:1px;}
 
   #muhtac-container .mh-h-yil{
-    padding-left:0;border-left:none;padding-top:8px;
-    border-top:1px solid var(--border);gap:5px;flex:1 1 auto;
+    flex:1 1 0;min-width:0;width:auto;
+    padding:0 0 0 8px;margin:0;
+    border-left:1px solid var(--border);border-top:none;
+    gap:4px;
   }
-  #muhtac-container .mh-h-yil-title{font-size:9px;letter-spacing:0.08em;}
+  #muhtac-container .mh-h-yil-title{font-size:8px;letter-spacing:0.1em;line-height:1.1;}
   #muhtac-container .mh-yil-list{
-    gap:6px;padding:2px 0 4px;
+    gap:5px;padding:2px 0 3px;margin:0;
     mask-image:none;-webkit-mask-image:none;
   }
   #muhtac-container .mh-yil-kart{
-    min-width:108px;max-width:130px;padding:7px 8px;gap:2px;border-radius:8px;
+    min-width:88px;max-width:112px;padding:6px 7px;gap:2px;border-radius:8px;
   }
   #muhtac-container .mh-yil-eti{
-    font-family:var(--font-body);font-size:13px;font-weight:800;letter-spacing:0.02em;
+    font-family:var(--font-body);font-size:12px;font-weight:800;letter-spacing:0.02em;
   }
-  #muhtac-container .mh-yil-satir{font-size:9px;gap:2px 4px;}
+  #muhtac-container .mh-yil-satir{font-size:9px;gap:1px 4px;}
   #muhtac-container .mh-yil-satir-lbl{font-size:7px;}
   #muhtac-container .mh-yil-oran{font-size:8px;}
   #muhtac-container .mh-yil-bar-track{height:2px;margin-top:1px;}
