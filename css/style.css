@@ -1824,16 +1824,15 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .vf2-tablo td{padding:6px 8px;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;vertical-align:middle;text-align:center;white-space:nowrap;}
 .vf2-satir td{height:40px;font-size:13px;font-weight:600;}
 .vf2-td-ay{text-align:left !important;font-size:12px;font-weight:600;color:var(--text-secondary);padding-left:10px !important;}
-.vf2-td-top{font-family:var(--font-brand);font-size:13px;color:var(--gold);font-weight:600;font-variant-numeric:tabular-nums;}
-.vf2-td-gun{font-family:var(--font-brand);font-size:13px;color:var(--gold);font-weight:600;font-variant-numeric:tabular-nums;}
-.vf2-td-yat{font-family:var(--font-body);font-size:13px;font-weight:700;color:var(--text-primary);font-variant-numeric:tabular-nums;letter-spacing:0.02em;}
+.vf2-td-top,.vf2-td-gun{font-family:var(--font-body);font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:0.02em;color:var(--text-primary);}
+.vf2-td-yat{font-family:var(--font-body);font-size:13px;font-weight:600;color:var(--text-primary);font-variant-numeric:tabular-nums;letter-spacing:0.02em;}
 /* Altın adet — okunaklı gövde fontu */
 .vf2-td-adet,
 .vf2-td-alt-adet,
 .vf2-td-alt-gram{
   font-family:var(--font-body);
-  font-size:14px;
-  font-weight:700;
+  font-size:13px;
+  font-weight:600;
   font-variant-numeric:tabular-nums;
   font-feature-settings:"tnum" 1;
   color:var(--text-primary);
@@ -1865,13 +1864,13 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 }
 .vf2-tot-row .vf2-td-adet,
 .vf2-tot-row .vf2-td-alt-adet,
-.vf2-tot-row .vf2-td-alt-gram{font-family:var(--font-body);font-weight:800;letter-spacing:0.02em;}
+.vf2-tot-row .vf2-td-alt-gram{font-family:var(--font-body);font-weight:600;letter-spacing:0.02em;color:var(--text-primary);}
 .vf2-k-adet{
   font-family:var(--font-body) !important;
-  font-size:15px !important;
-  font-weight:800 !important;
+  font-size:13px !important;
+  font-weight:600 !important;
   font-variant-numeric:tabular-nums;
-  letter-spacing:0.03em;
+  letter-spacing:0.02em;
   text-align:center;
 }
 .vf2-td-nakit{color:var(--green) !important;}
@@ -1887,7 +1886,7 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 
 /* Satır tipleri */
 .vf2-ort-row td{background:var(--bg-elevated);color:var(--text-muted);font-family:var(--font-body);font-size:13px;font-weight:500;font-variant-numeric:tabular-nums;font-style:italic;border-top:1px solid var(--border);padding:6px 8px;}
-.vf2-tot-row td{background:var(--bg-card);font-family:var(--font-brand);font-weight:700;font-size:14px;font-variant-numeric:tabular-nums;letter-spacing:0.02em;border-top:2px solid var(--border);padding:8px;}
+.vf2-tot-row td{background:var(--bg-card);font-family:var(--font-body);font-weight:600;font-size:13px;font-variant-numeric:tabular-nums;letter-spacing:0.02em;color:var(--text-primary);border-top:2px solid var(--border);padding:8px;}
 .vf2-gr-row td{background:var(--bg-elevated);font-family:var(--font-body);font-size:13px;color:var(--text-muted);font-weight:600;font-variant-numeric:tabular-nums;border-top:1px solid var(--border);padding:6px 8px;}
 
 /* Adet — çerçevesiz sade yazı (kişi başı puntosuyla aynı) */
@@ -4030,16 +4029,15 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .vf2-tablo td{padding:6px 8px;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;vertical-align:middle;text-align:center;white-space:nowrap;}
 .vf2-satir td{height:40px;font-size:13px;font-weight:600;}
 .vf2-td-ay{text-align:left !important;font-size:12px;font-weight:600;color:var(--text-secondary);padding-left:10px !important;}
-.vf2-td-top{font-family:var(--font-brand);font-size:13px;color:var(--gold);font-weight:600;font-variant-numeric:tabular-nums;}
-.vf2-td-gun{font-family:var(--font-brand);font-size:13px;color:var(--gold);font-weight:600;font-variant-numeric:tabular-nums;}
-.vf2-td-yat{font-family:var(--font-body);font-size:13px;font-weight:700;color:var(--text-primary);font-variant-numeric:tabular-nums;letter-spacing:0.02em;}
+.vf2-td-top,.vf2-td-gun{font-family:var(--font-body);font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:0.02em;color:var(--text-primary);}
+.vf2-td-yat{font-family:var(--font-body);font-size:13px;font-weight:600;color:var(--text-primary);font-variant-numeric:tabular-nums;letter-spacing:0.02em;}
 /* Altın adet — okunaklı gövde fontu */
 .vf2-td-adet,
 .vf2-td-alt-adet,
 .vf2-td-alt-gram{
   font-family:var(--font-body);
-  font-size:14px;
-  font-weight:700;
+  font-size:13px;
+  font-weight:600;
   font-variant-numeric:tabular-nums;
   font-feature-settings:"tnum" 1;
   color:var(--text-primary);
@@ -4071,13 +4069,13 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 }
 .vf2-tot-row .vf2-td-adet,
 .vf2-tot-row .vf2-td-alt-adet,
-.vf2-tot-row .vf2-td-alt-gram{font-family:var(--font-body);font-weight:800;letter-spacing:0.02em;}
+.vf2-tot-row .vf2-td-alt-gram{font-family:var(--font-body);font-weight:600;letter-spacing:0.02em;color:var(--text-primary);}
 .vf2-k-adet{
   font-family:var(--font-body) !important;
-  font-size:15px !important;
-  font-weight:800 !important;
+  font-size:13px !important;
+  font-weight:600 !important;
   font-variant-numeric:tabular-nums;
-  letter-spacing:0.03em;
+  letter-spacing:0.02em;
   text-align:center;
 }
 .vf2-td-nakit{color:var(--green) !important;}
@@ -4093,7 +4091,7 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 
 /* Satır tipleri */
 .vf2-ort-row td{background:var(--bg-elevated);color:var(--text-muted);font-family:var(--font-body);font-size:13px;font-weight:500;font-variant-numeric:tabular-nums;font-style:italic;border-top:1px solid var(--border);padding:6px 8px;}
-.vf2-tot-row td{background:var(--bg-card);font-family:var(--font-brand);font-weight:700;font-size:14px;font-variant-numeric:tabular-nums;letter-spacing:0.02em;border-top:2px solid var(--border);padding:8px;}
+.vf2-tot-row td{background:var(--bg-card);font-family:var(--font-body);font-weight:600;font-size:13px;font-variant-numeric:tabular-nums;letter-spacing:0.02em;color:var(--text-primary);border-top:2px solid var(--border);padding:8px;}
 .vf2-gr-row td{background:var(--bg-elevated);font-family:var(--font-body);font-size:13px;color:var(--text-muted);font-weight:600;font-variant-numeric:tabular-nums;border-top:1px solid var(--border);padding:6px 8px;}
 
 /* Adet — çerçevesiz sade yazı (kişi başı puntosuyla aynı) */
@@ -4539,9 +4537,9 @@ html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 42, 0.12); border-
   background: var(--bg-base);
   border: 1px solid var(--border);
 }
-.vf2-card-uye-tot b { font-family: var(--font-body); font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: 0.02em; color: var(--gold); }
+.vf2-card-uye-tot b { font-family: var(--font-body); font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: 0.02em; color: var(--text-primary); }
 .vf2-card-total .vf2-card-uye-tot b,
-.vf2-card-total .vf2-card-info .vf2-card-row > b { font-size: 14px; }
+.vf2-card-total .vf2-card-info .vf2-card-row > b { font-size: 13px; color: var(--text-primary); }
 .vf2-card-total .vf2-tip-tag { font-size: 13px; padding: 0; }
 
 /* Vefa: ekran once dolsun; gereksiz dis kaydirma yok — kaydirma tablo / kart listesinde */
@@ -4711,7 +4709,7 @@ html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 42, 0.12); border-
   .vf2-card-uye-deg { font-size: 13px !important; font-weight: 600 !important; color: var(--text-primary) !important; }
   .vf2-odedi .vf2-card-uye-deg { color: var(--text-primary) !important; }
   .vf2-card-total .vf2-card-uye-tot b,
-  .vf2-card-total .vf2-card-info .vf2-card-row > b { font-size: 14px !important; }
+  .vf2-card-total .vf2-card-info .vf2-card-row > b { font-size: 13px !important; color: var(--text-primary) !important; }
   .vf2-oz-sep {
     flex-basis: 100%;
     width: 100% !important;

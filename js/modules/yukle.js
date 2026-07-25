@@ -1160,7 +1160,7 @@ function render(){
       h+='<td class="vf2-td-adet">'+(cAdet[t]>0?'<span class="vf2-adet-n">'+cAdet[t]+'</span><span class="vf2-adet-l">adet</span>':'—')+'</td>';
     });
     h+='<td>'+(cNakit>0?p(cNakit)+' TL':'—')+'</td>';
-    h+='<td style="color:var(--gold)">'+(_gramFiyat>0||cNakit>0?p(cDeger):'—')+'</td><td></td></tr>';
+    h+='<td class="vf2-td-gun">'+(_gramFiyat>0||cNakit>0?p(cDeger):'—')+'</td><td></td></tr>';
     /* Gram */
     h+='<tr class="vf2-gr-row"><td>Gram</td>';
     _uyeler.forEach(function(){h+='<td>—</td>';});
@@ -1204,7 +1204,7 @@ function render(){
       });
       if(ayNakitM>0) chipM+='<span class="vf2-tip-tag vf2-tip-nakit">NAKİT '+p(ayNakitM)+' TL</span>';
       h+='<div class="vf2-card-row vf2-card-row-chips"><span>Yatırımlar</span><div class="vf2-card-chips">'+(chipM?chipM:'<span style="color:var(--text-muted);font-size:12px">—</span>')+'</div></div>';
-      h+='<div class="vf2-card-row"><span>Güncel değer</span><b style="color:var(--gold)">'+(_gramFiyat>0||ayNakitM>0?p(ayDegerM)+' TL':'—')+'</b></div>';
+      h+='<div class="vf2-card-row"><span>Güncel değer</span><b>'+(_gramFiyat>0||ayNakitM>0?p(ayDegerM)+' TL':'—')+'</b></div>';
       h+='</div></div>';
     });
     h+='<div class="vf2-card vf2-card-total">';
@@ -1222,7 +1222,7 @@ function render(){
     });
     if(cNakit>0) totC+='<span class="vf2-tip-tag vf2-tip-nakit">NAKİT '+p(cNakit)+' TL</span>';
     h+='<div class="vf2-card-row vf2-card-row-chips"><span>Yatırımlar</span><div class="vf2-card-chips">'+(totC?totC:'<span style="color:var(--text-muted);font-size:12px">—</span>')+'</div></div>';
-    h+='<div class="vf2-card-row"><span>Güncel değer</span><b style="color:var(--gold)">'+(_gramFiyat>0||cNakit>0?p(cDeger)+' TL':'—')+'</b></div>';
+    h+='<div class="vf2-card-row"><span>Güncel değer</span><b>'+(_gramFiyat>0||cNakit>0?p(cDeger)+' TL':'—')+'</b></div>';
     h+='</div></div>';
   }
   h+='</div>';
