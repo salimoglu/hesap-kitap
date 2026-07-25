@@ -139,23 +139,21 @@ function kisiOzetMetni(ks){
 }
 function ozetHtml(p){
   var nakit=nakitToplamMap(p.kayitlar),tg=toplamAltinGram(p.kayitlar),h='<div class="al-ozet-tek">';
-  h+='<span class="al-oz-label">'+p.lbl.ozet+'</span><div class="al-ozet-satirlar">';
-  var any=false,i,d,v,toplam;
+  var any=false,i,d,v,toplam=ozetToplamMetni(nakit,tg);
+  h+='<div class="al-ozet-ust"><span class="al-oz-label">'+p.lbl.ozet+'</span>';
+  if(toplam)h+='<span class="al-oz-toplam-hizli">'+toplam+'</span>';
+  h+='</div><div class="al-ozet-chip-row">';
   for(i=0;i<DOVIZLER.length;i++){
     d=DOVIZLER[i].k;v=nakit[d]||0;
-    if(v>0){any=true;h+='<div class="al-oz-satir"><span class="al-oz-satir-etik">Nakit · '+DOVIZLER[i].label+'</span><span class="al-oz-satir-val al-oz-val-tl">'+tutarFmt(v,d)+'</span></div>';}
+    if(v>0){any=true;h+='<span class="al-oz-chip al-oz-chip-tl"><em>'+DOVIZLER[i].label+'</em> '+tutarFmt(v,d)+'</span>';}
   }
   if(tg>0){
     any=true;
-    h+='<div class="al-oz-satir al-oz-satir-au"><span class="al-oz-satir-etik">Altin</span><span class="al-oz-satir-val al-oz-val-au">'+tg.toFixed(2)+' gr';
-    if(_gramAltinFiyatTL>0)h+=' <small>≈ '+para(tg*_gramAltinFiyatTL)+' TL</small>';
-    h+='</span></div>';
+    h+='<span class="al-oz-chip al-oz-chip-au"><em>Au</em> '+tg.toFixed(2)+' gr';
+    if(_gramAltinFiyatTL>0)h+=' <small>≈ '+para(tg*_gramAltinFiyatTL)+'</small>';
+    h+='</span>';
   }
-  if(!any)h+='<div class="al-oz-bos">'+p.lbl.ozetBos+'</div>';
-  else{
-    toplam=ozetToplamMetni(nakit,tg);
-    if(toplam)h+='<div class="al-oz-satir al-oz-satir-toplam"><span class="al-oz-satir-etik">Toplam</span><span class="al-oz-satir-val al-oz-val-toplam">'+toplam+'</span></div>';
-  }
+  if(!any)h+='<span class="al-oz-bos">'+p.lbl.ozetBos+'</span>';
   h+='</div></div>';return h;
 }
 function kisiChipHtml(ks){
@@ -231,7 +229,7 @@ function renderKolon(p){
   var h='<section class="al-kolon al-kolon--'+p.key+'" aria-label="'+esc(p.lbl.kolon)+'">';
   h+='<div class="al-kolon-baslik">'+esc(p.lbl.kolon)+'</div>';
   h+='<div class="al-wrap al-wrap-kolon"><div class="al-header">'+ozetHtml(p);
-  h+='<button class="al-yeni-btn" id="'+pid(p,"yeni-btn")+'" type="button" data-panel="'+p.key+'"><span class="al-yeni-ikon">+</span> '+esc(p.lbl.yeni)+'</button></div>';
+  h+='<button class="al-yeni-btn" id="'+pid(p,"yeni-btn")+'" type="button" data-panel="'+p.key+'" title="'+esc(p.lbl.yeni)+'" aria-label="'+esc(p.lbl.yeni)+'"><span class="al-yeni-ikon">+</span></button></div>';
   h+='<div class="al-kontrol-bar"><div class="al-ara-wrap"><input id="'+pid(p,"ara")+'" class="al-ara-input" type="search" placeholder="'+esc(p.lbl.araPh)+'" value="'+esc(p.araMetni)+'" autocomplete="off" data-panel="'+p.key+'"/></div></div>';
   if(!p.kayitlar.length){
     h+='<div class="al-bos al-bos-kolon"><div class="al-bos-baslik">'+esc(p.lbl.bosBaslik)+'</div><div class="al-bos-alt">'+esc(p.lbl.bosAlt)+'</div></div>';
