@@ -1348,6 +1348,34 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .kr-plan-aciklama { font-size:12px; color:var(--text-muted); margin-bottom:10px; line-height:1.45; }
 .kr-plan-tablo { margin-top:4px; }
 
+/* Kredi tablo satırları — telefon (base kurallardan sonra, ezilmesin) */
+@media (max-width: 600px) {
+  #kredi-container .kr-tablo thead th {
+    padding: 4px 6px !important;
+    font-size: 8px !important;
+    letter-spacing: 0.5px;
+    line-height: 1.15;
+  }
+  #kredi-container .kr-tablo td {
+    padding: 4px 6px !important;
+    font-size: 10px !important;
+    line-height: 1.2;
+  }
+  #kredi-container .kr-tablo tbody tr {
+    min-height: 0;
+  }
+  #kredi-container .kr-td-tutar {
+    font-size: 11px !important;
+  }
+  #kredi-container .kr-td-no,
+  #kredi-container .kr-td-duzenli {
+    font-size: 10px !important;
+  }
+  #kredi-container .kr-tablo .row-action-btn {
+    font-size: 11px;
+    padding: 1px 3px;
+  }
+}
 
 /* ══ ALACAKLAR / BORCLAR MODÜLÜ ══ */
 .al-ab-wrap { display:flex; flex-direction:column; height:100%; min-height:0; overflow:hidden; width:100%; }
@@ -3984,6 +4012,34 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .kr-plan-aciklama { font-size:12px; color:var(--text-muted); margin-bottom:10px; line-height:1.45; }
 .kr-plan-tablo { margin-top:4px; }
 
+/* Kredi tablo satırları — telefon (base kurallardan sonra, ezilmesin) */
+@media (max-width: 600px) {
+  #kredi-container .kr-tablo thead th {
+    padding: 4px 6px !important;
+    font-size: 8px !important;
+    letter-spacing: 0.5px;
+    line-height: 1.15;
+  }
+  #kredi-container .kr-tablo td {
+    padding: 4px 6px !important;
+    font-size: 10px !important;
+    line-height: 1.2;
+  }
+  #kredi-container .kr-tablo tbody tr {
+    min-height: 0;
+  }
+  #kredi-container .kr-td-tutar {
+    font-size: 11px !important;
+  }
+  #kredi-container .kr-td-no,
+  #kredi-container .kr-td-duzenli {
+    font-size: 10px !important;
+  }
+  #kredi-container .kr-tablo .row-action-btn {
+    font-size: 11px;
+    padding: 1px 3px;
+  }
+}
 
 /* ══ ALACAKLAR / BORCLAR MODÜLÜ ══ */
 .al-ab-wrap { display:flex; flex-direction:column; height:100%; min-height:0; overflow:hidden; width:100%; }
