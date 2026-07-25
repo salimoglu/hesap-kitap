@@ -1267,7 +1267,21 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .al-ozet-tek { flex:1; min-width:0; background:var(--bg-elevated); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; flex-direction:column; gap:6px; }
 .al-ozet-ust { display:flex; align-items:baseline; justify-content:space-between; gap:8px; min-width:0; }
 .al-oz-label { font-size:9px; font-weight:800; letter-spacing:0.08em; color:var(--text-muted); text-transform:uppercase; flex-shrink:0; }
-.al-oz-toplam-hizli { font-family:var(--font-brand); font-size:13px; font-weight:700; color:var(--text-primary); text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
+.al-oz-toplam-hizli {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  color: var(--text-primary);
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  line-height: 1.2;
+}
 .al-ozet-chip-row { display:flex; flex-wrap:wrap; gap:4px; }
 .al-oz-chip { display:inline-flex; align-items:baseline; gap:4px; padding:3px 7px; border-radius:999px; font-size:11px; font-weight:700; font-variant-numeric:tabular-nums; border:1px solid var(--border); background:var(--bg-card); line-height:1.25; }
 .al-oz-chip em { font-style:normal; font-size:9px; font-weight:800; letter-spacing:0.04em; text-transform:uppercase; opacity:0.75; }
@@ -3297,7 +3311,21 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .al-ozet-tek { flex:1; min-width:0; background:var(--bg-elevated); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; flex-direction:column; gap:6px; }
 .al-ozet-ust { display:flex; align-items:baseline; justify-content:space-between; gap:8px; min-width:0; }
 .al-oz-label { font-size:9px; font-weight:800; letter-spacing:0.08em; color:var(--text-muted); text-transform:uppercase; flex-shrink:0; }
-.al-oz-toplam-hizli { font-family:var(--font-brand); font-size:13px; font-weight:700; color:var(--text-primary); text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
+.al-oz-toplam-hizli {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  color: var(--text-primary);
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  line-height: 1.2;
+}
 .al-ozet-chip-row { display:flex; flex-wrap:wrap; gap:4px; }
 .al-oz-chip { display:inline-flex; align-items:baseline; gap:4px; padding:3px 7px; border-radius:999px; font-size:11px; font-weight:700; font-variant-numeric:tabular-nums; border:1px solid var(--border); background:var(--bg-card); line-height:1.25; }
 .al-oz-chip em { font-style:normal; font-size:9px; font-weight:800; letter-spacing:0.04em; text-transform:uppercase; opacity:0.75; }
