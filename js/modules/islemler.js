@@ -869,8 +869,12 @@ const IslemlerModule = (() => {
   }
 
   function listeVeOzetGuncelle(){
+    var l=$("islem-list");
+    var top=l?l.scrollTop:0;
     renderList();
     renderKategoriOzeti();
+    l=$("islem-list");
+    if(l)l.scrollTop=Math.min(top,Math.max(0,l.scrollHeight-l.clientHeight));
   }
 
   async function yukle(opt){
@@ -896,13 +900,22 @@ const IslemlerModule = (() => {
     renderHgList("");
     var _ht=$("hg-tarih");
     if(_ht&&!_ht.value)_ht.value=bugun();
+    var listeOnce=$("islem-list");
+    var onceTop=listeOnce?listeOnce.scrollTop:0;
+    var onceH=listeOnce?listeOnce.scrollHeight:0;
+    var onceCh=listeOnce?listeOnce.clientHeight:0;
+    var altaYakin=onceH>0&&(onceH-onceTop-onceCh<56);
+    var altaKaydir=!!opt.altaKaydir||!!opt.ilk||altaYakin||onceH===0;
     var token=++_listRenderToken;
     requestAnimationFrame(function(){
       if(token!==_listRenderToken)return;
       renderList();
       requestAnimationFrame(function(){
         var l=$("islem-list");
-        if(l)l.scrollTop=l.scrollHeight;
+        if(!l)return;
+        /* Bulut yenilemesi / arka plan yukle: kullanici eski kayitlara bakarken alta ziplatma */
+        if(altaKaydir)l.scrollTop=l.scrollHeight;
+        else l.scrollTop=Math.min(onceTop,Math.max(0,l.scrollHeight-l.clientHeight));
       });
     });
   }
@@ -1280,7 +1293,7 @@ const IslemlerModule = (() => {
     const _tarihVal=$("hg-tarih");const _yi={tip,kategori:gorunumKategori(_seciliKat.value),tutar,aciklama,tarih:(_tarihVal&&_tarihVal.value)?_tarihVal.value:bugun()};
     await IslemlerDB.add(_yi);
     $("hg-aciklama").value="";$("hg-tutar").value="";
-    await yukle();
+    await yukle({altaKaydir:true});
     hgOdakTutar();
   }
 
@@ -1303,13 +1316,14 @@ const IslemlerModule = (() => {
     if(!kategori){alert("Kategori secin.");return;}
     if(!tarih){alert("Tarih secin.");return;}
     const islem={tip:_aktifTip,kategori,tutar,aciklama,tarih};
+    var yeniKayit=!_duzenleId;
     if(_duzenleId){islem.id=_duzenleId;await IslemlerDB.update(islem);}
     else await IslemlerDB.add(islem);
-    modalKapat();await yukle();
+    modalKapat();await yukle({altaKaydir:yeniKayit});
   }
   function silModalAc(id){_silId=id;$("modal-sil").classList.remove("hidden");}
   function silModalKapat(){$("modal-sil").classList.add("hidden");_silId=null;}
-  async function silOnayla(){if(_silId){await IslemlerDB.delete(_silId);silModalKapat();await yukle();}}
+  async function silOnayla(){if(_silId){await IslemlerDB.delete(_silId);silModalKapat();await yukle({altaKaydir:false});}}
 
   function mobilPanelAktifMi(){
     try{return window.matchMedia("(max-width: 900px)").matches;}catch(e){return false;}
@@ -1487,7 +1501,7 @@ const IslemlerModule = (() => {
     if(_initPromise)return _initPromise;
     _initPromise=(async function(){
       if(!_eventsBound){baglaEventler();_eventsBound=true;}
-      await yukle();
+      await yukle({ilk:true});
     })().catch(function(e){
       _initPromise=null;
       throw e;

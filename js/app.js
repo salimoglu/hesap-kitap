@@ -642,19 +642,26 @@
       return el.scrollHeight > el.clientHeight + 1;
     }
 
-    function kaydirmaUstteMi(el) {
+    function kaydirmaKutusu(el) {
       while (el && el !== document.body) {
-        if (gorunurKaydiriciMi(el) && el.scrollTop > 1) return false;
+        if (gorunurKaydiriciMi(el)) return el;
         el = el.parentElement;
       }
+      return null;
+    }
+
+    /** true = liste en ustte, asagi-cek yenilemeye izin ver */
+    function kaydirmaUstteMi(el) {
+      var kutu = kaydirmaKutusu(el);
+      if (kutu && kutu.scrollTop > 0) return false;
       var panel = document.querySelector(".tab-panel.active");
-      if (!panel) return true;
+      if (!panel) return !kutu;
       /* Islemler: gizli Ozet/Butce scrollTop'u Liste PTR'sini bozmasin */
       var list = panel.querySelectorAll(".islem-scroll, .islemler-panel-body, .ioz-scroll, .butce-panel-body, .module-host > *, .al-wrap-kolon");
       for (var i = 0; i < list.length; i++) {
         var s = list[i];
         if (!gorunurKaydiriciMi(s)) continue;
-        if (s.scrollTop > 1) return false;
+        if (s.scrollTop > 0) return false;
       }
       return true;
     }
@@ -704,6 +711,7 @@
 
     document.addEventListener("touchmove", function (e) {
       if (sy === undefined || engelliMi()) return;
+      /* Liste icinde kaydirma (eski kayitlar): jesti PTR'ye kaptirma */
       if (!kaydirmaUstteMi(e.target)) {
         dokunusBitir();
         ptrSifirla();
@@ -711,14 +719,22 @@
       }
       var dx = e.touches[0].clientX - sx;
       var dy = e.touches[0].clientY - sy;
-      if (dy <= 0 && !cekiyor) return;
-      if (!cekiyor && Math.abs(dx) > Math.abs(dy)) return;
-      if (dy > 6) {
-        cekiyor = true;
-        cekMesafe = Math.min(dy * 0.45, MAX_CEK);
-        ptrGuncelle(cekMesafe, cekMesafe >= ESik ? "ready" : "idle");
-        if (cekMesafe > 10 && e.cancelable) e.preventDefault();
+      /* Parmak yukari / ters hareket = native scroll; PTR iptal */
+      if (dy <= 0) {
+        if (cekiyor) {
+          dokunusBitir();
+          ptrSifirla();
+        }
+        return;
       }
+      if (!cekiyor && Math.abs(dx) > Math.abs(dy) * 0.85) return;
+      /* Kucuk titreme / kaydirma baslangicini PTR sanma — esik yuksek */
+      if (dy < 22) return;
+      cekiyor = true;
+      cekMesafe = Math.min((dy - 14) * 0.42, MAX_CEK);
+      ptrGuncelle(cekMesafe, cekMesafe >= ESik ? "ready" : "idle");
+      /* preventDefault sadece net PTR cekisinde; yoksa liste kilitlenir */
+      if (cekMesafe > 20 && e.cancelable) e.preventDefault();
     }, { passive: false });
 
     async function cekBitir() {

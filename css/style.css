@@ -416,7 +416,7 @@ html.hk-hizli-ac #app { display: flex !important; }
 .btn-yeni-kat-bar { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--gold); font-family: var(--font-body); font-size: 12px; font-weight: 700; padding: 5px 10px; cursor: pointer; white-space: nowrap; }
 
 /* ── İŞLEM LİSTESİ ── */
-.islem-scroll { flex: 1; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
+.islem-scroll { flex: 1; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; touch-action: pan-y; overscroll-behavior-y: contain; }
 .islem-grup-baslik { font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); padding: 8px 12px 4px; background: var(--bg-base); position: sticky; top: 0; z-index: 2; border-bottom: 1px solid var(--border); }
 .islem-row { display: flex; align-items: center; padding: 0 12px; min-height: 38px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.1s; position: relative; }
 .islem-row:active { background: var(--bg-elevated); }
@@ -2827,7 +2827,7 @@ html.hk-hizli-ac #app { display: flex !important; }
 .btn-yeni-kat-bar { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--gold); font-family: var(--font-body); font-size: 12px; font-weight: 700; padding: 5px 10px; cursor: pointer; white-space: nowrap; }
 
 /* ── İŞLEM LİSTESİ ── */
-.islem-scroll { flex: 1; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
+.islem-scroll { flex: 1; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; touch-action: pan-y; overscroll-behavior-y: contain; }
 .islem-grup-baslik { font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); padding: 8px 12px 4px; background: var(--bg-base); position: sticky; top: 0; z-index: 2; border-bottom: 1px solid var(--border); }
 .islem-row { display: flex; align-items: center; padding: 0 12px; min-height: 38px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.1s; position: relative; }
 .islem-row:active { background: var(--bg-elevated); }
