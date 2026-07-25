@@ -895,51 +895,59 @@ function arender(){
 
   /* Elimdeki özeti */
   var elimde=_kayitlar.filter(function(k){return !k.durum||k.durum==="elimde";});
+  var elimdeAdet=elimde.reduce(function(s,k){return s+(parseFloat(k.adet)||0);},0);
   var elimdeGram=elimde.reduce(function(s,k){return s+(parseFloat(k.gram)||0);},0);
   var elimdeMaliyet=elimde.reduce(function(s,k){return s+(parseFloat(k.tlKarsiligi)||0);},0);
+  var elimdeOrt=elimdeGram>0?(elimdeMaliyet/elimdeGram):0;
   var elimdeGuncelDeger=_guncelGramFiyat>0?(elimdeGram*_guncelGramFiyat):0;
   var elimdeKarZarar=elimdeGuncelDeger-elimdeMaliyet;
   var elimdeKarPct=elimdeMaliyet>0?((elimdeKarZarar/elimdeMaliyet)*100):0;
+  var karRenk=elimdeKarZarar>=0?"var(--green)":"var(--red)";
+  var karIsaret=elimdeKarZarar>=0?"+":"";
 
   var h='<div class="alt-wrap">';
 
   /* Header — özet kartlar */
   h+='<div class="alt-header">';
   /* Bölüm 1: Tüm altın */
-  h+='<div class="alt-ozet-bolum">';
+  h+='<div class="alt-ozet-bolum alt-ozet-bolum--tum">';
   h+='<div class="alt-ozet-baslik">TÜM ALTINIM</div>';
-  h+='<div class="alt-ozet">';
-  h+='<div class="alt-oz-item"><span class="alt-oz-label">TOPLAM ADET</span><span class="alt-oz-val">'+genelAdet+'</span></div>';
-  h+='<div class="alt-oz-item"><span class="alt-oz-label">TOPLAM GRAM</span><span class="alt-oz-val" style="color:var(--gold)">'+agr(genelGram)+' gr</span></div>';
-  h+='<div class="alt-oz-item"><span class="alt-oz-label">TOPLAM ÖDENEN</span><span class="alt-oz-val">'+apara(genelTL)+' TL</span></div>';
-  h+='<div class="alt-oz-item"><span class="alt-oz-label">ORT. GRAM FİYATI</span><span class="alt-oz-val">'+apara(genelOrt)+' TL</span></div>';
+  h+='<div class="alt-ozet alt-ozet--tum">';
+  h+='<div class="alt-oz-item"><span class="alt-oz-label">ADET</span><span class="alt-oz-val">'+genelAdet+'</span></div>';
+  h+='<div class="alt-oz-item"><span class="alt-oz-label">GRAM</span><span class="alt-oz-val alt-oz-gold">'+agr(genelGram)+'</span></div>';
+  h+='<div class="alt-oz-item"><span class="alt-oz-label">ÖDENEN</span><span class="alt-oz-val">'+apara(genelTL)+'</span></div>';
+  h+='<div class="alt-oz-item"><span class="alt-oz-label">ORT. GR</span><span class="alt-oz-val">'+apara(genelOrt)+'</span></div>';
   h+='</div></div>';
 
   h+='<div class="alt-ozet-ayrac"></div>';
 
-  /* Bölüm 2: Elimdeki + güncel değer */
-  h+='<div class="alt-ozet-bolum">';
-  h+='<div class="alt-ozet-baslik alt-elimde-baslik">&#127950; ELİMDEKİ ALTIN</div>';
-  h+='<div class="alt-ozet">';
-  h+='<div class="alt-oz-item"><span class="alt-oz-label">GRAM</span><span class="alt-oz-val" style="color:var(--gold)">'+agr(elimdeGram)+' gr</span></div>';
-  h+='<div class="alt-oz-item"><span class="alt-oz-label">MALİYET</span><span class="alt-oz-val">'+apara(elimdeMaliyet)+' TL</span></div>';
+  /* Bölüm 2: Elimdeki — 6 metrik */
+  h+='<div class="alt-ozet-bolum alt-ozet-bolum--elimde">';
+  h+='<div class="alt-ozet-baslik alt-elimde-baslik">ELİMDEKİ ALTIN</div>';
+  h+='<div class="alt-ozet alt-ozet--elimde">';
+  h+='<div class="alt-oz-item"><span class="alt-oz-label">ADET</span><span class="alt-oz-val">'+elimdeAdet+'</span></div>';
+  h+='<div class="alt-oz-item"><span class="alt-oz-label">GRAM</span><span class="alt-oz-val alt-oz-gold">'+agr(elimdeGram)+'</span></div>';
+  h+='<div class="alt-oz-item"><span class="alt-oz-label">MALİYET</span><span class="alt-oz-val">'+apara(elimdeMaliyet)+'</span></div>';
+  h+='<div class="alt-oz-item"><span class="alt-oz-label">GÜNCEL</span><span class="alt-oz-val alt-oz-gold">'+(_guncelGramFiyat>0?apara(elimdeGuncelDeger):'—')+'</span></div>';
+  h+='<div class="alt-oz-item"><span class="alt-oz-label">ORT. GR</span><span class="alt-oz-val">'+apara(elimdeOrt)+'</span></div>';
+  h+='<div class="alt-oz-item"><span class="alt-oz-label">KAR/ZARAR</span>';
   if(_guncelGramFiyat>0){
-    h+='<div class="alt-oz-item"><span class="alt-oz-label">GÜNCEL DEĞER</span><span class="alt-oz-val" style="color:var(--gold)">'+apara(elimdeGuncelDeger)+' TL</span></div>';
-    var karRenk=elimdeKarZarar>=0?"var(--green)":"var(--red)";
-    var karIsaret=elimdeKarZarar>=0?"+":"";
-    h+='<div class="alt-oz-item"><span class="alt-oz-label">KAR / ZARAR</span>';
-    h+='<span class="alt-oz-val" style="color:'+karRenk+'">'+karIsaret+apara(elimdeKarZarar)+' TL';
-    h+='<span style="font-size:12px;margin-left:4px">('+karIsaret+elimdeKarPct.toFixed(1)+'%)</span></span></div>';
+    h+='<span class="alt-oz-val" style="color:'+karRenk+'">'+karIsaret+apara(elimdeKarZarar)+'<small>('+karIsaret+elimdeKarPct.toFixed(1)+'%)</small></span>';
+  } else {
+    h+='<span class="alt-oz-val">—</span>';
   }
+  h+='</div>';
   h+='</div></div>';
 
-  /* Güncel fiyat göstergesi + güncelle butonu */
+  /* Güncel fiyat + ekle */
+  h+='<div class="alt-header-aksiyon">';
   h+='<div class="alt-fiyat-kutu">';
-  h+='<span class="alt-fiyat-label">GRAM ALTIN</span>';
-  h+='<span class="alt-fiyat-val" id="alt-fiyat-val">'+(_guncelGramFiyat>0?apara(_guncelGramFiyat)+' TL':'Yükleniyor...')+'</span>';
+  h+='<span class="alt-fiyat-label">GR FİYAT</span>';
+  h+='<span class="alt-fiyat-val" id="alt-fiyat-val">'+(_guncelGramFiyat>0?apara(_guncelGramFiyat):'…')+'</span>';
   h+='<button class="alt-fiyat-guncelle" id="alt-fiyat-guncelle" title="Fiyatı güncelle">&#8635;</button>';
   h+='</div>';
-  h+='<button class="alt-yeni-btn" id="alt-yeni-btn">+ Altın Ekle</button>';
+  h+='<button class="alt-yeni-btn" id="alt-yeni-btn">+ Ekle</button>';
+  h+='</div>';
   h+='</div>';
 
   /* Filtre */
