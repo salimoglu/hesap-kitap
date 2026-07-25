@@ -4339,7 +4339,7 @@ html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 42, 0.12); border-
   .alt-filtre-select { font-size: 12px; padding: 5px 8px; }
   .alt-filtre-ozet-inline { font-size: 11px; }
 
-  /* Tablo -> ince kart listesi (Vefa kart mantigi) */
+  /* Tablo -> cok kompakt kart: satirda 2 bilgi */
   .alt-tablo-dis {
     border: none !important;
     background: transparent;
@@ -4352,136 +4352,150 @@ html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 42, 0.12); border-
     min-width: 0 !important;
     width: 100%;
     border-collapse: separate;
-    border-spacing: 0 6px;
+    border-spacing: 0 5px;
   }
   .alt-tablo thead { display: none; }
   .alt-tablo tbody { display: block; }
   .alt-tablo tbody tr {
     display: grid;
-    grid-template-columns: 1fr auto;
-    column-gap: 6px;
-    row-gap: 2px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+    grid-template-areas:
+      "durum tarih aks"
+      "adet  gram  gram"
+      "tl    gf    gf"
+      "nasil nerde nerde";
+    column-gap: 10px;
+    row-gap: 3px;
     background: var(--bg-elevated);
     border: 1px solid var(--border);
     border-radius: 8px;
-    padding: 8px 10px;
+    padding: 6px 8px;
     margin: 0;
   }
   .alt-tablo tbody tr:hover { background: var(--bg-elevated); }
   .alt-tablo tbody tr:last-child { border-bottom: 1px solid var(--border); }
   .alt-tablo tbody td {
-    grid-column: 1 / -1;
     display: flex;
     flex-direction: row;
-    align-items: center;
+    align-items: baseline;
     justify-content: space-between;
-    gap: 8px;
-    padding: 1px 0;
+    gap: 4px;
+    padding: 0;
     font-family: var(--font-body);
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
     font-variant-numeric: tabular-nums;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.01em;
     color: var(--text-primary);
     border: none;
-    line-height: 1.25;
+    line-height: 1.2;
     min-width: 0;
     text-align: right;
   }
   .alt-tablo tbody td::before {
     content: attr(data-l);
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 600;
     letter-spacing: 0.02em;
     color: var(--text-muted);
     text-transform: none;
     margin: 0;
-    flex: 0 0 auto;
+    flex: 0 1 auto;
     text-align: left;
+    white-space: nowrap;
   }
   .alt-tablo tbody td:not([data-l])::before { content: none; }
 
-  /* Ust satir: durum + aksiyon */
+  /* Satir 1: durum | tarih | aksiyon */
   .alt-tablo tbody td.alt-td-durum {
-    grid-column: 1;
-    grid-row: 1;
-    flex-direction: row;
+    grid-area: durum;
     justify-content: flex-start;
     align-items: center;
-    border-bottom: none;
-    padding: 0 0 4px;
-    margin: 0;
+    padding: 0;
     text-align: left;
   }
   .alt-tablo tbody td.alt-td-durum::before { display: none; }
   .alt-tablo tbody td.alt-td-durum .alt-durum-btn {
-    padding: 3px 10px;
-    font-size: 10px;
+    padding: 2px 8px;
+    font-size: 9px;
     font-weight: 700;
-    border-radius: 10px;
+    border-radius: 8px;
   }
+  .alt-tablo tbody td.alt-td-tarih {
+    grid-area: tarih;
+    justify-content: flex-start;
+    align-items: center;
+    text-align: left;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .alt-tablo tbody td.alt-td-tarih::before { display: none; }
   .alt-tablo tbody td.alt-td-aks {
-    grid-column: 2;
-    grid-row: 1;
-    flex-direction: row;
+    grid-area: aks;
     justify-content: flex-end;
     align-items: center;
-    gap: 2px;
-    border: none;
-    padding: 0 0 4px;
-    margin: 0;
+    gap: 0;
+    padding: 0;
   }
   .alt-tablo tbody td.alt-td-aks::before { display: none; }
   .alt-tablo tbody td.alt-td-aks .row-action-btn {
-    width: 28px;
-    height: 28px;
-    min-width: 28px;
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
     padding: 0;
-    font-size: 13px;
+    font-size: 12px;
   }
 
-  .alt-tablo tbody td.alt-td-tarih,
-  .alt-tablo tbody td.alt-td-adet,
-  .alt-tablo tbody td.alt-td-gram,
-  .alt-tablo tbody td.alt-td-tl,
-  .alt-tablo tbody td.alt-td-gf,
-  .alt-tablo tbody td.alt-td-nasil,
-  .alt-tablo tbody td.alt-td-nerde {
-    border-top: none;
-  }
-  .alt-tablo tbody td.alt-td-tarih { color: var(--text-primary); font-size: 12px; }
-  .alt-tablo tbody td.alt-td-adet { color: var(--text-primary); }
+  /* Satir 2: adet | gram */
+  .alt-tablo tbody td.alt-td-adet { grid-area: adet; }
   .alt-tablo tbody td.alt-td-gram {
+    grid-area: gram;
     font-family: var(--font-body);
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
     color: var(--text-primary);
   }
-  .alt-tablo tbody td.alt-td-tl { font-size: 12px; font-weight: 600; }
-  .alt-tablo tbody td.alt-td-gf { color: var(--text-primary); font-size: 12px; }
-  .alt-tablo tbody td.alt-td-nasil {
-    font-size: 12px;
+
+  /* Satir 3: TL | gram fiyati */
+  .alt-tablo tbody td.alt-td-tl { grid-area: tl; font-size: 11px; }
+  .alt-tablo tbody td.alt-td-gf {
+    grid-area: gf;
+    font-size: 11px;
     color: var(--text-primary);
-    max-width: none;
-    white-space: normal;
-    word-break: break-word;
   }
-  .alt-tablo tbody td.alt-td-nerde { align-items: center; }
+
+  /* Satir 4: nasil | nerede */
+  .alt-tablo tbody td.alt-td-nasil {
+    grid-area: nasil;
+    font-size: 11px;
+    max-width: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .alt-tablo tbody td.alt-td-nerde {
+    grid-area: nerde;
+    align-items: baseline;
+  }
   .alt-tablo tbody td .alt-tag {
     padding: 0;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
     background: transparent;
     color: var(--text-primary);
     border-radius: 0;
-    align-self: auto;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
   }
 
   .alt-tablo tbody tr td.alt-bos {
     grid-column: 1 / -1;
     text-align: center;
     justify-content: center;
-    padding: 18px 10px;
+    padding: 14px 8px;
     font-size: 12px;
     color: var(--text-muted);
   }

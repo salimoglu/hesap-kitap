@@ -792,9 +792,9 @@ function arender(){
       h+='<td class="alt-td-tarih" data-l="Tarih">'+atarihFmt(k.tarih)+'</td>';
       h+='<td class="alt-td-adet" data-l="Adet">'+k.adet+'</td>';
       h+='<td class="alt-td-gram" data-l="Gram">'+agr(k.gram)+' gr</td>';
-      h+='<td class="alt-td-tl" data-l="TL karşılığı">'+apara(k.tlKarsiligi)+' TL</td>';
-      h+='<td class="alt-td-gf" data-l="Gram fiyatı">'+apara(gF)+' TL</td>';
-      h+='<td class="alt-td-nasil" data-l="Nasıl alındı">'+(k.nasilAlindi||'—')+'</td>';
+      h+='<td class="alt-td-tl" data-l="TL">'+apara(k.tlKarsiligi)+' TL</td>';
+      h+='<td class="alt-td-gf" data-l="Gr. fiyat">'+apara(gF)+' TL</td>';
+      h+='<td class="alt-td-nasil" data-l="Nasıl">'+(k.nasilAlindi||'—')+'</td>';
       h+='<td class="alt-td-nerde" data-l="Nerede"><span class="alt-tag">'+(k.nerdeKullanildi||'—')+'</span></td>';
       h+='<td class="alt-td-aks"><button class="alt-duz-btn row-action-btn duzenle" data-id="'+k.id+'">&#9998;</button> <button class="alt-sil-btn row-action-btn sil" data-id="'+k.id+'">&#10005;</button></td>';
       h+='</tr>';
