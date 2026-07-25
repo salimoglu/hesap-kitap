@@ -414,9 +414,48 @@ html.hk-hizli-ac #app { display: flex !important; }
   .vf2-ozet-bar { flex-direction: column; align-items: stretch; }
   .vf2-oz-btns { margin-left: 0; width: 100%; flex-direction: row; flex-wrap: wrap; }
   .hg-kat-dropdown { left: 8px; right: 8px; width: auto; max-width: none; }
-  .kr-header { flex-wrap: wrap; justify-content: center; gap:10px; }
-  .kr-header .kr-yeni-btn { flex: 1 1 auto; min-width: min(100%, 200px); }
-  .kr-kart-ozet { justify-content: stretch; }
+  /* Kredi: özet + küçük Harcama Ekle (kalan toplamın sağı) */
+  .kr-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 6px 8px;
+    padding: 8px 10px;
+    margin-bottom: 8px;
+    flex-wrap: nowrap;
+    justify-content: stretch;
+  }
+  .kr-header .kr-ozet {
+    display: contents;
+  }
+  .kr-header .kr-ozet-item { min-width: 0; gap: 1px; }
+  .kr-header .kr-oz-label { font-size: 8px; letter-spacing: 0.06em; line-height: 1.1; }
+  .kr-header .kr-oz-val { font-size: 14px; letter-spacing: 0.2px; line-height: 1.15; }
+  .kr-header .kr-yeni-btn {
+    flex: none;
+    min-width: 0;
+    width: auto;
+    align-self: center;
+    padding: 5px 8px;
+    font-size: 10px;
+    font-weight: 800;
+    border-radius: 7px;
+    line-height: 1.2;
+  }
+  .kr-kart-ozet { justify-content: stretch; gap: 8px; margin-bottom: 8px; }
+  /* Alt veri satırları ~%25 inceltilsin */
+  .kr-tablo thead th {
+    padding: 6px 8px;
+    font-size: 9px;
+  }
+  .kr-tablo td {
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+  .kr-td-tutar { font-size: 11px; }
+  .kr-ay-bar { padding: 6px 10px; margin-bottom: 8px; }
+  .kr-ay-label { font-size: 13px; }
+  .kr-ay-btn { font-size: 16px; padding: 1px 8px; }
   .al-header { flex-wrap: nowrap; }
   .al-header .al-yeni-btn { flex: 0 0 40px; min-width: 40px; width: 40px; }
   .ur-header { justify-content: center; }
@@ -3011,9 +3050,48 @@ html.hk-hizli-ac #app { display: flex !important; }
   .vf2-ozet-bar { flex-direction: column; align-items: stretch; }
   .vf2-oz-btns { margin-left: 0; width: 100%; flex-direction: row; flex-wrap: wrap; }
   .hg-kat-dropdown { left: 8px; right: 8px; width: auto; max-width: none; }
-  .kr-header { flex-wrap: wrap; justify-content: center; gap:10px; }
-  .kr-header .kr-yeni-btn { flex: 1 1 auto; min-width: min(100%, 200px); }
-  .kr-kart-ozet { justify-content: stretch; }
+  /* Kredi: özet + küçük Harcama Ekle (kalan toplamın sağı) */
+  .kr-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 6px 8px;
+    padding: 8px 10px;
+    margin-bottom: 8px;
+    flex-wrap: nowrap;
+    justify-content: stretch;
+  }
+  .kr-header .kr-ozet {
+    display: contents;
+  }
+  .kr-header .kr-ozet-item { min-width: 0; gap: 1px; }
+  .kr-header .kr-oz-label { font-size: 8px; letter-spacing: 0.06em; line-height: 1.1; }
+  .kr-header .kr-oz-val { font-size: 14px; letter-spacing: 0.2px; line-height: 1.15; }
+  .kr-header .kr-yeni-btn {
+    flex: none;
+    min-width: 0;
+    width: auto;
+    align-self: center;
+    padding: 5px 8px;
+    font-size: 10px;
+    font-weight: 800;
+    border-radius: 7px;
+    line-height: 1.2;
+  }
+  .kr-kart-ozet { justify-content: stretch; gap: 8px; margin-bottom: 8px; }
+  /* Alt veri satırları ~%25 inceltilsin */
+  .kr-tablo thead th {
+    padding: 6px 8px;
+    font-size: 9px;
+  }
+  .kr-tablo td {
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+  .kr-td-tutar { font-size: 11px; }
+  .kr-ay-bar { padding: 6px 10px; margin-bottom: 8px; }
+  .kr-ay-label { font-size: 13px; }
+  .kr-ay-btn { font-size: 16px; padding: 1px 8px; }
   .al-header { flex-wrap: nowrap; }
   .al-header .al-yeni-btn { flex: 0 0 40px; min-width: 40px; width: 40px; }
   .ur-header { justify-content: center; }
