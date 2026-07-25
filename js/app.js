@@ -633,21 +633,27 @@
       return false;
     }
 
+    /** display:none panellerde clientHeight=0 ama scrollHeight/scrollTop kalabilir — sadece gorunen kaydiricilar */
+    function gorunurKaydiriciMi(el) {
+      if (!el || !el.getClientRects || !el.getClientRects().length) return false;
+      var st = window.getComputedStyle(el);
+      var oy = st.overflowY;
+      if (oy !== "auto" && oy !== "scroll" && oy !== "overlay") return false;
+      return el.scrollHeight > el.clientHeight + 1;
+    }
+
     function kaydirmaUstteMi(el) {
       while (el && el !== document.body) {
-        if (el.scrollHeight > el.clientHeight + 1 && el.scrollTop > 1) {
-          var st = window.getComputedStyle(el);
-          var oy = st.overflowY;
-          if (oy === "auto" || oy === "scroll" || oy === "overlay") return false;
-        }
+        if (gorunurKaydiriciMi(el) && el.scrollTop > 1) return false;
         el = el.parentElement;
       }
       var panel = document.querySelector(".tab-panel.active");
       if (!panel) return true;
-      var list = panel.querySelectorAll(".islem-scroll, .islemler-panel-body, .ioz-scroll, .butce-panel-body, .module-host > *, .al-wrap-kolon, .content");
+      /* Islemler: gizli Ozet/Butce scrollTop'u Liste PTR'sini bozmasin */
+      var list = panel.querySelectorAll(".islem-scroll, .islemler-panel-body, .ioz-scroll, .butce-panel-body, .module-host > *, .al-wrap-kolon");
       for (var i = 0; i < list.length; i++) {
         var s = list[i];
-        if (!s || s.scrollHeight <= s.clientHeight + 1) continue;
+        if (!gorunurKaydiriciMi(s)) continue;
         if (s.scrollTop > 1) return false;
       }
       return true;
