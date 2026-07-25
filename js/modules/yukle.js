@@ -655,6 +655,53 @@ function altTurTahmin(adet,gram){
   }
   return bestDiff<=0.2?best:"gram";
 }
+/* Eski kayit: adet 0 / yok → gramdan tur + adet cikar (adet asla 0 kalmaz) */
+function altAdetTurBul(gram){
+  gram=parseFloat(gram)||0;
+  if(gram<=0)return {tur:"gram",adet:1};
+  var best=null,i,t,birim,raw,adetInt,diff;
+  for(i=0;i<ALTIN_SIRASI.length;i++){
+    t=ALTIN_SIRASI[i];birim=ALTIN_GRAM[t]||1;
+    raw=gram/birim;adetInt=Math.round(raw);
+    if(adetInt<1)continue;
+    diff=Math.abs(adetInt*birim-gram);
+    if(diff<=0.06||diff/gram<=0.02){
+      if(!best||diff<best.diff||(Math.abs(diff-best.diff)<0.001&&birim>best.birim)){
+        best={tur:t,adet:adetInt,diff:diff,birim:birim};
+      }
+    }
+  }
+  if(best)return {tur:best.tur,adet:best.adet};
+  var a=Math.round(gram*100)/100;
+  if(a<0.01)a=1;
+  return {tur:"gram",adet:a};
+}
+function altKayitNormalize(k){
+  if(!k)return false;
+  var degisti=false;
+  var gram=parseFloat(k.gram)||0;
+  var adet=parseFloat(k.adet);
+  if(!isFinite(adet)||adet<=0){
+    var bul=altAdetTurBul(gram);
+    k.adet=bul.adet;
+    if(!k.altinTur||!ALTIN_LABEL[k.altinTur])k.altinTur=bul.tur;
+    degisti=true;
+  }
+  if(!k.altinTur||!ALTIN_LABEL[k.altinTur]){
+    k.altinTur=altTurTahmin(k.adet,gram>0?gram:(ALTIN_GRAM.gram*(parseFloat(k.adet)||1)));
+    degisti=true;
+  }
+  adet=parseFloat(k.adet)||0;
+  if(adet<=0){k.adet=1;degisti=true;}
+  return degisti;
+}
+function altKayitlariNormalize(){
+  var degisti=false,i;
+  for(i=0;i<_kayitlar.length;i++){
+    if(altKayitNormalize(_kayitlar[i]))degisti=true;
+  }
+  return degisti;
+}
 function altGramHesapla(){
   var tur=altTurAl(),adet=asayiOku(($("alt-adet")||{}).value);
   if(!adet||adet<=0)return 0;
@@ -727,6 +774,8 @@ async function afbYukle(){
     _kayitlar.sort(function(a,b){return (b.tarih||"").localeCompare(a.tarih||"");});
     /* Kayıtlı güncel fiyat */
     _guncelGramFiyat=parseFloat(await fbRtdbOku("altin_guncel_fiyat"))||0;
+    /* Eski adet=0 kayitlarini yeni duzene cevir ve kaydet */
+    if(altKayitlariNormalize())await afbKaydet();
   }catch(e){_kayitlar=[];}
 }
 async function afbKaydet(){
