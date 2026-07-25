@@ -738,6 +738,26 @@ function altGramGoster(){
   if(_guncelGramFiyat>0)metin+="  ·  ≈ "+apara(gr*_guncelGramFiyat)+" TL";
   info.textContent=metin;
 }
+function altDurumAl(){
+  var hid=$("alt-durum-val");
+  var d=hid?(hid.value||"elimde"):"elimde";
+  return d==="satildi"?"satildi":"elimde";
+}
+function altDurumBtnGuncelle(){
+  var d=altDurumAl(),hid=$("alt-durum-val"),btn=$("alt-durum-btn");
+  if(hid)hid.value=d;
+  if(!btn)return;
+  btn.textContent=d==="satildi"?"Satıldı":"Elimde";
+  btn.classList.toggle("alt-durum-btn--satildi",d==="satildi");
+  btn.classList.toggle("alt-durum-btn--elimde",d!=="satildi");
+  btn.title=d==="satildi"?"Satıldı — tıkla: Elimde":"Elimde — tıkla: Satıldı";
+}
+function altDurumDegistir(){
+  var hid=$("alt-durum-val");
+  if(!hid)return;
+  hid.value=altDurumAl()==="elimde"?"satildi":"elimde";
+  altDurumBtnGuncelle();
+}
 
 /* 1 ons (troy) altin = 31,1034768 g; API: 1 XAU = fiyat, TRY karsiligi d.xau.try */
 var TROY_ONS_GRAM = 31.1034768;
@@ -909,32 +929,33 @@ function arender(){
   }
   h+='</tbody></table></div></div>';
 
-  /* Modal — PC/telefon ortak: adet|tür yan yana, nasıl|nerede yan yana */
+  /* Modal — tek satir: tarih|adet|tur , TL|durum(tikla) , nasil|nerede */
   var bugun=new Date().toISOString().split("T")[0];
   h+='<div class="bk-modal-overlay hidden" id="alt-modal"><div class="modal-box alt-form-modal">';
   h+='<div class="modal-header"><h2 class="modal-title" id="alt-modal-baslik">Altın Ekle</h2><button class="modal-close" id="alt-modal-kapat">&#10005;</button></div>';
   h+='<div class="modal-body alt-form-body">';
-  h+='<div class="field-group"><label class="field-label">Tarih</label><input type="date" id="alt-tarih" class="field-input" value="'+bugun+'"/></div>';
-  h+='<div class="alt-form-cift">';
-  h+='<div class="field-group"><label class="field-label">Adet</label>';
+  h+='<div class="alt-form-uc">';
+  h+='<div class="field-group alt-fg-tarih"><label class="field-label">Tarih</label><input type="date" id="alt-tarih" class="field-input" value="'+bugun+'"/></div>';
+  h+='<div class="field-group alt-fg-adet"><label class="field-label">Adet</label>';
   h+='<input type="number" id="alt-adet" class="field-input" placeholder="1" min="0.01" step="0.01" inputmode="decimal"/></div>';
-  h+='<div class="field-group"><label class="field-label">Altın türü</label>';
+  h+='<div class="field-group alt-fg-tur"><label class="field-label">Tür</label>';
   h+='<input type="hidden" id="alt-tur" value="gram"/>';
   h+='<button type="button" class="alt-tur-btn" id="alt-tur-btn" title="Tıkla, tür değiştir">Gram</button></div>';
   h+='</div>';
   h+='<div class="alt-gram-info" id="alt-gram-info">Gram = 1 gr / adet  ·  Adet girin</div>';
   h+='<input type="hidden" id="alt-gram" value=""/>';
-  h+='<div class="field-group"><label class="field-label">TL Karşılığı</label><input type="number" id="alt-tl" class="field-input" placeholder="0" min="0" step="0.01" inputmode="decimal"/></div>';
+  h+='<div class="alt-form-cift">';
+  h+='<div class="field-group"><label class="field-label">TL karşılığı</label><input type="number" id="alt-tl" class="field-input" placeholder="0" min="0" step="0.01" inputmode="decimal"/></div>';
+  h+='<div class="field-group"><label class="field-label">Durum</label>';
+  h+='<input type="hidden" id="alt-durum-val" value="elimde"/>';
+  h+='<button type="button" class="alt-durum-cycle alt-durum-btn--elimde" id="alt-durum-btn" title="Tıkla, durum değiştir">Elimde</button></div>';
+  h+='</div>';
   h+='<div class="alt-form-cift">';
   h+='<div class="field-group"><label class="field-label">Nasıl alındı</label><input type="text" id="alt-nasil" class="field-input" placeholder="Nakit, KK..." maxlength="100"/></div>';
   h+='<div class="field-group"><label class="field-label">Nerede kullanıldı</label><input type="text" id="alt-nerde" class="field-input" placeholder="Seç veya yaz..." list="alt-nerde-dl" autocomplete="off"/><datalist id="alt-nerde-dl">';
   secenekler.forEach(function(s){h+='<option value="'+s+'"/>';});
   h+='</datalist></div>';
   h+='</div>';
-  h+='<div class="field-group"><label class="field-label">Durum</label><div class="alt-form-durum">';
-  h+='<button type="button" class="alt-modal-durum-btn active" id="alt-modal-elimde" data-d="elimde">&#127950; Elimde</button>';
-  h+='<button type="button" class="alt-modal-durum-btn" id="alt-modal-satildi" data-d="satildi">Satıldı</button>';
-  h+='</div><input type="hidden" id="alt-durum-val" value="elimde"/></div>';
   h+='</div>';
   h+='<div class="modal-footer"><button class="btn-secondary" id="alt-iptal">İptal</button><button class="btn-primary" id="alt-kaydet">Kaydet</button></div>';
   h+='</div></div>';
@@ -949,8 +970,9 @@ function abagla(){
   $("alt-iptal").addEventListener("click",amodalKapat);
   $("alt-modal").addEventListener("click",function(e){if(e.target===$("alt-modal"))amodalKapat();});
   $("alt-kaydet").addEventListener("click",akaydet);
-  var turBtn=$("alt-tur-btn"),adetEl=$("alt-adet");
+  var turBtn=$("alt-tur-btn"),adetEl=$("alt-adet"),durumBtn=$("alt-durum-btn");
   if(turBtn)turBtn.addEventListener("click",altTurDegistir);
+  if(durumBtn)durumBtn.addEventListener("click",altDurumDegistir);
   if(adetEl){
     adetEl.addEventListener("input",altGramGoster);
     adetEl.addEventListener("change",altGramGoster);
@@ -974,13 +996,6 @@ function abagla(){
   document.querySelectorAll(".alt-durum-btn").forEach(function(btn){
     btn.addEventListener("click",function(){durumToggle(btn.dataset.id);});
   });
-  /* Modal durum */
-  document.querySelectorAll(".alt-modal-durum-btn").forEach(function(btn){
-    btn.addEventListener("click",function(){
-      document.querySelectorAll(".alt-modal-durum-btn").forEach(function(b){b.classList.remove("active");});
-      btn.classList.add("active");$("alt-durum-val").value=btn.dataset.d;
-    });
-  });
   document.querySelectorAll(".alt-duz-btn").forEach(function(btn){btn.addEventListener("click",function(){amodalAc(btn.dataset.id);});});
   document.querySelectorAll(".alt-sil-btn").forEach(function(btn){
     btn.addEventListener("click",function(){
@@ -999,7 +1014,6 @@ function amodalAc(id){
   $("alt-tur").value="gram";$("alt-gram").value="";
   $("alt-tl").value="";$("alt-nasil").value="";$("alt-nerde").value="";
   $("alt-durum-val").value="elimde";
-  document.querySelectorAll(".alt-modal-durum-btn").forEach(function(b){b.classList.toggle("active",b.dataset.d==="elimde");});
   if(id){
     var k=_kayitlar.find(function(x){return x.id===id;});
     if(k){
@@ -1008,11 +1022,11 @@ function amodalAc(id){
       var tur=k.altinTur&&ALTIN_LABEL[k.altinTur]?k.altinTur:altTurTahmin(k.adet,k.gram);
       $("alt-tur").value=tur;
       $("alt-tl").value=k.tlKarsiligi;$("alt-nasil").value=k.nasilAlindi||"";$("alt-nerde").value=k.nerdeKullanildi||"";
-      var d=k.durum||"elimde";$("alt-durum-val").value=d;
-      document.querySelectorAll(".alt-modal-durum-btn").forEach(function(b){b.classList.toggle("active",b.dataset.d===d);});
+      $("alt-durum-val").value=(k.durum==="satildi")?"satildi":"elimde";
     }
   }
   altTurBtnGuncelle();
+  altDurumBtnGuncelle();
   $("alt-modal").classList.remove("hidden");
   setTimeout(function(){var a=$("alt-adet");if(a)a.focus();},100);
 }
