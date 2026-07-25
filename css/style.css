@@ -2068,9 +2068,108 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .mh-ekle-btn{background:var(--green);color:#0f1923;border:none;border-radius:10px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;align-self:center;flex-shrink:0;transition:opacity 0.15s,transform 0.08s;}
 .mh-ekle-btn:hover{opacity:0.92;}
 .mh-ekle-btn:active{transform:scale(0.98);}
+
+/* Muhtaç — telefon düzeni */
 @media (max-width:640px){
-  .mh-h-icerik{flex-direction:column;gap:12px;}
-  #muhtac-container .mh-h-yil{padding-left:0;border-left:none;padding-top:12px;border-top:1px solid var(--border);}
+  .mh-wrap{padding:6px 6px 12px;gap:8px;}
+  .mh-header{
+    flex-direction:column;align-items:stretch;
+    padding:8px 10px;gap:8px;border-radius:10px;
+  }
+  .mh-h-icerik{flex-direction:column;gap:8px;flex:1 1 auto;}
+  .mh-h-total{
+    flex:1 1 auto;width:100%;
+    display:flex;flex-direction:row;flex-wrap:wrap;align-items:baseline;gap:2px 0;
+  }
+  .mh-h-total-title{flex:1 0 100%;font-size:9px;letter-spacing:0.08em;}
+  .mh-h-total-satir{
+    display:inline-flex;width:auto;justify-content:flex-start;
+    gap:5px;font-size:11px;margin-right:10px;
+  }
+  .mh-h-total-lbl{font-size:8px;}
+  .mh-h-total-meta{flex:1 0 100%;font-size:9px;margin-top:0;}
+
+  #muhtac-container .mh-h-yil{
+    padding-left:0;border-left:none;padding-top:8px;
+    border-top:1px solid var(--border);gap:5px;flex:1 1 auto;
+  }
+  #muhtac-container .mh-h-yil-title{font-size:9px;letter-spacing:0.08em;}
+  #muhtac-container .mh-yil-list{
+    gap:6px;padding:2px 0 4px;
+    mask-image:none;-webkit-mask-image:none;
+  }
+  #muhtac-container .mh-yil-kart{
+    min-width:108px;max-width:130px;padding:7px 8px;gap:2px;border-radius:8px;
+  }
+  #muhtac-container .mh-yil-eti{
+    font-family:var(--font-body);font-size:13px;font-weight:800;letter-spacing:0.02em;
+  }
+  #muhtac-container .mh-yil-satir{font-size:9px;gap:2px 4px;}
+  #muhtac-container .mh-yil-satir-lbl{font-size:7px;}
+  #muhtac-container .mh-yil-oran{font-size:8px;}
+  #muhtac-container .mh-yil-bar-track{height:2px;margin-top:1px;}
+
+  .mh-ekle-btn{
+    width:100%;align-self:stretch;padding:9px 12px;font-size:12px;border-radius:8px;
+  }
+
+  .mh-liste{gap:6px;}
+  .mh-kisi-kart{
+    gap:8px;padding:8px 10px;border-radius:10px;align-items:flex-start;
+  }
+  .mh-kisi-avatar{
+    width:32px;height:32px;font-size:13px;margin-top:2px;
+  }
+  .mh-kisi-ad{font-size:13px;margin-bottom:1px;}
+  .mh-kisi-not{
+    font-size:10px;margin-bottom:3px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;
+  }
+  .mh-kisi-meta{gap:4px;}
+  .mh-meta-item,.mh-pill{
+    font-size:9px;padding:2px 7px;border-radius:6px;
+  }
+  .mh-kisi-sag{padding-right:2px;gap:0;align-items:flex-end;}
+  .mh-kisi-toplam{font-size:13px;}
+  .mh-kisi-toplam-label{font-size:8px;}
+  .mh-kisi-kart .row-action-btn{
+    width:28px;height:28px;min-width:28px;padding:0;font-size:12px;flex-shrink:0;
+  }
+  .mh-bos{padding:20px 12px;font-size:12px;}
+
+  /* Detay modal */
+  #mh-detay-modal .modal-box{
+    max-width:calc(100vw - 16px) !important;
+    max-height:min(90dvh,calc(100dvh - 16px)) !important;
+    margin:8px;width:100%;
+  }
+  #mh-detay-modal .modal-header{
+    padding:10px 12px;align-items:flex-start;
+  }
+  #mh-detay-modal .modal-header > div:first-child{
+    flex-wrap:wrap;gap:8px;align-items:flex-start;
+  }
+  .mh-detay-avatar{width:34px;height:34px;font-size:14px;}
+  .mh-detay-ad{font-size:14px;}
+  .mh-detay-not{font-size:11px;}
+  .mh-detay-toplam-rakam{font-size:15px;}
+  .mh-detay-toplam-label{font-size:8px;}
+  .mh-zekat-form{padding:10px 12px;}
+  .mh-form-baslik{font-size:9px;margin-bottom:6px;letter-spacing:0.08em;}
+  .mh-form-row{gap:6px;}
+  .mh-form-row .field-group{min-width:0;flex:1 1 calc(50% - 6px);}
+  .mh-form-row .field-group:nth-child(3){flex:1 1 100%;}
+  .mh-form-row .field-label{font-size:9px;}
+  .mh-form-row .field-input{font-size:12px;padding:6px 8px;min-height:36px;}
+  .mh-zekat-ekle-btn{width:100%;padding:9px 12px;font-size:12px;}
+  .mh-tablo thead th{padding:6px 8px;font-size:9px;}
+  .mh-satir td{padding:7px 8px;font-size:12px;}
+  .mh-td-miktar{font-size:12px;}
+  .mh-td-aciklama{font-size:11px;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .mh-toplam-row td{padding:7px 8px;font-size:12px;}
+  .mh-toplam-row td:nth-child(2){font-size:13px;}
+
+  #mh-modal .modal-box{max-width:calc(100vw - 16px);margin:8px;}
 }
 
 /* Aylık zekat özeti (akordeon) */
