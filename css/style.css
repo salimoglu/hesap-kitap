@@ -1843,23 +1843,23 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 }
 .vf2-adet-n{
   font-family:var(--font-body);
-  font-size:15px;
-  font-weight:800;
+  font-size:13px;
+  font-weight:600;
   font-variant-numeric:tabular-nums;
-  font-feature-settings:"tnum" 1;
-  letter-spacing:0.03em;
+  letter-spacing:0.02em;
   color:var(--text-primary);
   font-style:normal;
 }
 .vf2-adet-l{
   margin-left:4px;
-  font-size:11px;
+  font-size:13px;
   font-weight:600;
-  color:var(--text-muted);
+  color:var(--text-primary);
   letter-spacing:0.02em;
 }
 .vf2-tip-tag .vf2-adet-n{
-  font-size:14px;
+  font-size:inherit;
+  font-weight:inherit;
   color:inherit;
   margin-left:2px;
 }
@@ -1879,23 +1879,23 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .vf2-td-aks{white-space:nowrap;}
 .vf2-th-soyad{font-weight:600;font-size:9px;opacity:0.85;display:block;margin-top:2px;letter-spacing:0.3px;}
 
-/* Ödeme butonları */
-.vf2-ode-btn{background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;padding:4px 10px;cursor:pointer;white-space:nowrap;min-width:78px;text-align:center;transition:all 0.1s;}
-.vf2-odedi{background:rgba(52,211,153,0.12);border-color:var(--green);color:var(--green);font-weight:600;}
-.vf2-bek{color:var(--text-muted);}
-.vf2-bek:hover{border-color:var(--green);color:var(--green);}
+/* Ödeme / kişi başı — çerçevesiz, yeşilsiz sade yazı */
+.vf2-ode-btn{background:transparent;border:none;border-radius:0;padding:2px 0;font-family:var(--font-body);font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:0.02em;color:var(--text-primary);cursor:pointer;white-space:nowrap;min-width:0;text-align:left;transition:opacity 0.1s;}
+.vf2-odedi{background:transparent;border:none;color:var(--text-primary);font-weight:600;}
+.vf2-bek{background:transparent;border:none;color:var(--text-muted);font-weight:500;}
+.vf2-bek:hover,.vf2-odedi:hover{opacity:0.8;border:none;color:inherit;}
 
 /* Satır tipleri */
 .vf2-ort-row td{background:var(--bg-elevated);color:var(--text-muted);font-family:var(--font-body);font-size:13px;font-weight:500;font-variant-numeric:tabular-nums;font-style:italic;border-top:1px solid var(--border);padding:6px 8px;}
 .vf2-tot-row td{background:var(--bg-card);font-family:var(--font-brand);font-weight:700;font-size:14px;font-variant-numeric:tabular-nums;letter-spacing:0.02em;border-top:2px solid var(--border);padding:8px;}
 .vf2-gr-row td{background:var(--bg-elevated);font-family:var(--font-body);font-size:13px;color:var(--text-muted);font-weight:600;font-variant-numeric:tabular-nums;border-top:1px solid var(--border);padding:6px 8px;}
 
-/* Tip tag */
-.vf2-tip-tag{border-radius:8px;padding:5px 10px;font-family:var(--font-body);font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;letter-spacing:0.02em;line-height:1.3;display:inline-flex;align-items:baseline;gap:2px;}
-.vf2-tip-gram,.vf2-tip-ceyrek,.vf2-tip-yarim,.vf2-tip-tam{background:rgba(240,184,64,0.15);color:var(--gold);}
-.vf2-tip-nakit{background:rgba(52,211,153,0.12);color:var(--green);}
+/* Adet — çerçevesiz sade yazı (kişi başı puntosuyla aynı) */
+.vf2-tip-tag{border-radius:0;padding:0;border:none;background:transparent !important;font-family:var(--font-body);font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;letter-spacing:0.02em;line-height:1.3;display:inline;color:var(--text-primary) !important;}
+.vf2-tip-gram,.vf2-tip-ceyrek,.vf2-tip-yarim,.vf2-tip-tam,.vf2-tip-nakit{background:transparent !important;color:var(--text-primary) !important;}
 .vf2-kolon-baslik{font-family:var(--font-brand);font-size:12px;font-weight:800;letter-spacing:1.5px;color:var(--gold);}
-.vf-td-miktar{font-family:var(--font-body);font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:0.02em;}
+.vf-td-miktar{font-family:var(--font-body);font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:0.02em;}
+.vf2-td-adet,.vf2-td-alt-adet,.vf2-td-alt-gram{font-size:13px;font-weight:600;text-align:left;}
 
 /* Durum özeti */
 .vf2-durum-ozet{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 18px;display:flex;flex-direction:column;gap:8px;}
@@ -4049,23 +4049,23 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 }
 .vf2-adet-n{
   font-family:var(--font-body);
-  font-size:15px;
-  font-weight:800;
+  font-size:13px;
+  font-weight:600;
   font-variant-numeric:tabular-nums;
-  font-feature-settings:"tnum" 1;
-  letter-spacing:0.03em;
+  letter-spacing:0.02em;
   color:var(--text-primary);
   font-style:normal;
 }
 .vf2-adet-l{
   margin-left:4px;
-  font-size:11px;
+  font-size:13px;
   font-weight:600;
-  color:var(--text-muted);
+  color:var(--text-primary);
   letter-spacing:0.02em;
 }
 .vf2-tip-tag .vf2-adet-n{
-  font-size:14px;
+  font-size:inherit;
+  font-weight:inherit;
   color:inherit;
   margin-left:2px;
 }
@@ -4085,23 +4085,23 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .vf2-td-aks{white-space:nowrap;}
 .vf2-th-soyad{font-weight:600;font-size:9px;opacity:0.85;display:block;margin-top:2px;letter-spacing:0.3px;}
 
-/* Ödeme butonları */
-.vf2-ode-btn{background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;padding:4px 10px;cursor:pointer;white-space:nowrap;min-width:78px;text-align:center;transition:all 0.1s;}
-.vf2-odedi{background:rgba(52,211,153,0.12);border-color:var(--green);color:var(--green);font-weight:600;}
-.vf2-bek{color:var(--text-muted);}
-.vf2-bek:hover{border-color:var(--green);color:var(--green);}
+/* Ödeme / kişi başı — çerçevesiz, yeşilsiz sade yazı */
+.vf2-ode-btn{background:transparent;border:none;border-radius:0;padding:2px 0;font-family:var(--font-body);font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:0.02em;color:var(--text-primary);cursor:pointer;white-space:nowrap;min-width:0;text-align:left;transition:opacity 0.1s;}
+.vf2-odedi{background:transparent;border:none;color:var(--text-primary);font-weight:600;}
+.vf2-bek{background:transparent;border:none;color:var(--text-muted);font-weight:500;}
+.vf2-bek:hover,.vf2-odedi:hover{opacity:0.8;border:none;color:inherit;}
 
 /* Satır tipleri */
 .vf2-ort-row td{background:var(--bg-elevated);color:var(--text-muted);font-family:var(--font-body);font-size:13px;font-weight:500;font-variant-numeric:tabular-nums;font-style:italic;border-top:1px solid var(--border);padding:6px 8px;}
 .vf2-tot-row td{background:var(--bg-card);font-family:var(--font-brand);font-weight:700;font-size:14px;font-variant-numeric:tabular-nums;letter-spacing:0.02em;border-top:2px solid var(--border);padding:8px;}
 .vf2-gr-row td{background:var(--bg-elevated);font-family:var(--font-body);font-size:13px;color:var(--text-muted);font-weight:600;font-variant-numeric:tabular-nums;border-top:1px solid var(--border);padding:6px 8px;}
 
-/* Tip tag */
-.vf2-tip-tag{border-radius:8px;padding:5px 10px;font-family:var(--font-body);font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;letter-spacing:0.02em;line-height:1.3;display:inline-flex;align-items:baseline;gap:2px;}
-.vf2-tip-gram,.vf2-tip-ceyrek,.vf2-tip-yarim,.vf2-tip-tam{background:rgba(240,184,64,0.15);color:var(--gold);}
-.vf2-tip-nakit{background:rgba(52,211,153,0.12);color:var(--green);}
+/* Adet — çerçevesiz sade yazı (kişi başı puntosuyla aynı) */
+.vf2-tip-tag{border-radius:0;padding:0;border:none;background:transparent !important;font-family:var(--font-body);font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;letter-spacing:0.02em;line-height:1.3;display:inline;color:var(--text-primary) !important;}
+.vf2-tip-gram,.vf2-tip-ceyrek,.vf2-tip-yarim,.vf2-tip-tam,.vf2-tip-nakit{background:transparent !important;color:var(--text-primary) !important;}
 .vf2-kolon-baslik{font-family:var(--font-brand);font-size:12px;font-weight:800;letter-spacing:1.5px;color:var(--gold);}
-.vf-td-miktar{font-family:var(--font-body);font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:0.02em;}
+.vf-td-miktar{font-family:var(--font-body);font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:0.02em;}
+.vf2-td-adet,.vf2-td-alt-adet,.vf2-td-alt-gram{font-size:13px;font-weight:600;text-align:left;}
 
 /* Durum özeti */
 .vf2-durum-ozet{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 18px;display:flex;flex-direction:column;gap:8px;}
@@ -4465,22 +4465,19 @@ html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 42, 0.12); border-
 }
 .vf2-card-uye-btn {
   display: flex; flex-direction: column; align-items: flex-start; gap: 1px;
-  padding: 8px 10px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
+  padding: 4px 2px;
+  border-radius: 0;
+  border: none;
   cursor: pointer;
   text-align: left;
   font-family: var(--font-body);
-  background: var(--bg-elevated);
-  transition: all 0.12s;
+  background: transparent;
+  transition: opacity 0.12s;
 }
-.vf2-card-uye-btn.vf2-odedi {
-  background: rgba(52,201,122,0.12);
-  border-color: rgba(52,201,122,0.4);
-}
+.vf2-card-uye-btn.vf2-odedi,
 .vf2-card-uye-btn.vf2-bek {
-  background: rgba(240,84,84,0.06);
-  border-color: rgba(240,84,84,0.2);
+  background: transparent;
+  border: none;
 }
 .vf2-card-uye-ad {
   font-size: 11px;
@@ -4496,8 +4493,8 @@ html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 42, 0.12); border-
   letter-spacing: 0.02em;
   color: var(--text-primary);
 }
-.vf2-odedi .vf2-card-uye-deg { color: var(--green); }
-.vf2-bek .vf2-card-uye-deg { color: var(--text-muted); font-weight: 500; font-style: italic; font-size: 13px; }
+.vf2-odedi .vf2-card-uye-deg { color: var(--text-primary); }
+.vf2-bek .vf2-card-uye-deg { color: var(--text-muted); font-weight: 500; font-style: normal; font-size: 13px; }
 
 .vf2-card-info {
   display: flex; flex-direction: column; gap: 6px;
@@ -4545,7 +4542,7 @@ html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 42, 0.12); border-
 .vf2-card-uye-tot b { font-family: var(--font-body); font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: 0.02em; color: var(--gold); }
 .vf2-card-total .vf2-card-uye-tot b,
 .vf2-card-total .vf2-card-info .vf2-card-row > b { font-size: 14px; }
-.vf2-card-total .vf2-tip-tag { font-size: 14px; padding: 5px 11px; }
+.vf2-card-total .vf2-tip-tag { font-size: 13px; padding: 0; }
 
 /* Vefa: ekran once dolsun; gereksiz dis kaydirma yok — kaydirma tablo / kart listesinde */
 #vefa-container.module-host {
@@ -4639,8 +4636,10 @@ html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 42, 0.12); border-
     min-width: 0;
     width: 100%;
     box-sizing: border-box;
-    padding: 7px 8px;
+    padding: 4px 2px;
     align-items: stretch;
+    background: transparent !important;
+    border: none !important;
   }
   /* Tablo .vf2-ode-btn: nowrap + min-width — kartda ayni class; isimler satir kirilsin */
   .vf2-cards .vf2-card-uye-btn.vf2-ode-btn {
@@ -4703,12 +4702,14 @@ html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 42, 0.12); border-
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
   }
-  .vf2-tip-tag { font-size: 12px !important; padding: 5px 9px !important; }
-  .vf2-ozet-bar .vf2-tip-tag { font-size: 12px !important; padding: 4px 8px !important; }
+  .vf2-tip-tag { font-size: 13px !important; padding: 0 !important; background: transparent !important; }
+  .vf2-ozet-bar .vf2-tip-tag { font-size: 13px !important; padding: 0 !important; }
   .vf2-ozet-bar .vf2-adet-n,
-  .vf2-card-chips .vf2-adet-n { font-size: 14px !important; font-weight: 800 !important; }
+  .vf2-card-chips .vf2-adet-n { font-size: 13px !important; font-weight: 600 !important; color: var(--text-primary) !important; }
   .vf2-card-total .vf2-tip-tag { font-size: 13px !important; }
-  .vf2-td-adet .vf2-adet-n { font-size: 15px !important; }
+  .vf2-td-adet .vf2-adet-n { font-size: 13px !important; font-weight: 600 !important; }
+  .vf2-card-uye-deg { font-size: 13px !important; font-weight: 600 !important; color: var(--text-primary) !important; }
+  .vf2-odedi .vf2-card-uye-deg { color: var(--text-primary) !important; }
   .vf2-card-total .vf2-card-uye-tot b,
   .vf2-card-total .vf2-card-info .vf2-card-row > b { font-size: 14px !important; }
   .vf2-oz-sep {
