@@ -7244,9 +7244,12 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   #tab-islemler .islem-row-actions {
     display: none !important;
   }
+  /* İşlem satırları ~%20 küçült */
   #tab-islemler .islem-row {
     padding: 0 8px 0 6px;
-    gap: 4px;
+    gap: 3px;
+    min-height: 30px;
+    height: 30px;
   }
   #tab-islemler .islem-row-left {
     flex: 1 1 0;
@@ -7254,7 +7257,11 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
     padding-left: 6px;
   }
   #tab-islemler .islem-kat-adi {
-    font-size: 12px;
+    font-size: 11px;
+    line-height: 1.15;
+  }
+  #tab-islemler .islem-kat-adi .islem-aciklama-inline {
+    font-size: 10px;
   }
   #tab-islemler .islem-row-right {
     flex: 0 0 auto;
@@ -7265,14 +7272,48 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   #tab-islemler .islem-tarih-col {
     flex: 0 0 auto;
     padding: 0 4px;
-    font-size: 11px;
+    font-size: 10px;
   }
   #tab-islemler .islem-tutar-col {
     flex: 0 0 auto;
     min-width: 0;
     width: auto;
     padding: 0 2px 0 4px;
-    font-size: 13px !important;
+    font-size: 11px !important;
+    line-height: 1.15;
+  }
+  #tab-islemler .islem-grup-baslik {
+    padding: 5px 8px 2px;
+    font-size: 9px;
+  }
+
+  /* AY + TOPLAM satırları ~%35 inceltilsin */
+  #tab-islemler .islem-ay-ozet,
+  #tab-islemler .islem-genel-toplam {
+    padding: 4px 10px;
+    gap: 4px 6px;
+    font-size: 10px;
+    min-height: 0;
+    line-height: 1.2;
+    flex-wrap: nowrap;
+  }
+  #tab-islemler .islem-ay-ozet {
+    border-bottom-width: 1px;
+  }
+  #tab-islemler .islem-ay-ozet .ao-lbl,
+  #tab-islemler .islem-ay-ozet .ao-sep,
+  #tab-islemler .islem-genel-toplam .gt-lbl,
+  #tab-islemler .islem-genel-toplam .gt-sep {
+    font-size: 10px;
+  }
+  #tab-islemler .islem-ay-ozet .ao-gelir,
+  #tab-islemler .islem-ay-ozet .ao-gider,
+  #tab-islemler .islem-ay-ozet .ao-net,
+  #tab-islemler .islem-genel-toplam .gt-gelir,
+  #tab-islemler .islem-genel-toplam .gt-gider,
+  #tab-islemler .islem-genel-toplam .gt-val {
+    font-size: 10px !important;
+    line-height: 1.2;
   }
 
   .ioz-ay-ust {
