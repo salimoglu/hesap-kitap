@@ -650,6 +650,9 @@
     var ptr = document.getElementById("hk-ptr");
     var ptrMetin = document.getElementById("hk-ptr-metin");
     var sx, sy, cekiyor = false, cekMesafe = 0, yenileniyor = false, sonYenile = 0;
+    /* Islemler listesi alta yasli: en alttan asagi-cek ile yenile */
+    var ptrAltKenar = false;
+    var ptrSerit = false;
 
     function engelliMi() {
       if (yenileniyor) return true;
@@ -680,20 +683,32 @@
       return null;
     }
 
-    /** true = liste en ustte, asagi-cek yenilemeye izin ver */
+    function islemListesiMi(el) {
+      return !!(el && (el.id === "islem-list" || (el.classList && el.classList.contains("islem-scroll"))));
+    }
+
+    function enAlttaMi(kutu) {
+      if (!kutu) return false;
+      var max = kutu.scrollHeight - kutu.clientHeight;
+      return max > 2 && kutu.scrollTop >= max - 4;
+    }
+
+    /** Ust sabit serit (filtre/ozet/nav): liste kaydirilmis olsa da PTR */
+    function ptrSeritMi(el) {
+      return !!(el && el.closest && el.closest(
+        "#tab-islemler .islemler-mobil-nav, #tab-islemler .islemler-sol-head, #tab-islemler .islemler-sol > .filtre-bar"
+      ));
+    }
+
+    /** true = asagi-cek yenilemeye izin ver */
     function kaydirmaUstteMi(el) {
+      if (ptrSeritMi(el)) return true;
       var kutu = kaydirmaKutusu(el);
-      if (kutu && kutu.scrollTop > 0) return false;
-      var panel = document.querySelector(".tab-panel.active");
-      if (!panel) return !kutu;
-      /* Islemler: gizli Ozet/Butce scrollTop'u Liste PTR'sini bozmasin */
-      var list = panel.querySelectorAll(".islem-scroll, .islemler-panel-body, .ioz-scroll, .butce-panel-body, .module-host > *, .al-wrap-kolon");
-      for (var i = 0; i < list.length; i++) {
-        var s = list[i];
-        if (!gorunurKaydiriciMi(s)) continue;
-        if (s.scrollTop > 0) return false;
-      }
-      return true;
+      if (!kutu) return true;
+      if (kutu.scrollTop <= 1) return true;
+      /* Islemler: yeni kayitlar altta — en alttan da yenilemeye izin */
+      if (islemListesiMi(kutu) && enAlttaMi(kutu)) return true;
+      return false;
     }
 
     function ptrGuncelle(mesafe, durum) {
@@ -726,13 +741,21 @@
       sx = sy = undefined;
       cekiyor = false;
       cekMesafe = 0;
+      ptrAltKenar = false;
+      ptrSerit = false;
     }
 
     document.addEventListener("touchstart", function (e) {
       if (engelliMi() || e.touches.length !== 1) return;
       var hedef = e.target;
       if (hedef && hedef.closest && hedef.closest("input, textarea, select, button, a, label, .bt-drag-handle, .hk-ayar-wrap")) return;
-      if (!kaydirmaUstteMi(hedef)) return;
+      ptrAltKenar = false;
+      ptrSerit = ptrSeritMi(hedef);
+      if (!ptrSerit) {
+        var kutu = kaydirmaKutusu(hedef);
+        if (islemListesiMi(kutu) && enAlttaMi(kutu)) ptrAltKenar = true;
+        else if (!kaydirmaUstteMi(hedef)) return;
+      }
       sx = e.touches[0].clientX;
       sy = e.touches[0].clientY;
       cekiyor = false;
@@ -741,14 +764,23 @@
 
     document.addEventListener("touchmove", function (e) {
       if (sy === undefined || engelliMi()) return;
-      /* Liste icinde kaydirma (eski kayitlar): jesti PTR'ye kaptirma */
-      if (!kaydirmaUstteMi(e.target)) {
+      var dx = e.touches[0].clientX - sx;
+      var dy = e.touches[0].clientY - sy;
+
+      /* En alttan yukari kaydirma = eski kayitlara bak; PTR iptal */
+      if (ptrAltKenar && dy <= 0) {
         dokunusBitir();
         ptrSifirla();
         return;
       }
-      var dx = e.touches[0].clientX - sx;
-      var dy = e.touches[0].clientY - sy;
+
+      /* Serit disinda, ortada kaydirirken PTR kapansin */
+      if (!ptrSerit && !ptrAltKenar && !kaydirmaUstteMi(e.target)) {
+        dokunusBitir();
+        ptrSifirla();
+        return;
+      }
+
       /* Parmak yukari / ters hareket = native scroll; PTR iptal */
       if (dy <= 0) {
         if (cekiyor) {
@@ -758,13 +790,20 @@
         return;
       }
       if (!cekiyor && Math.abs(dx) > Math.abs(dy) * 0.85) return;
-      /* Kucuk titreme / kaydirma baslangicini PTR sanma — esik yuksek */
-      if (dy < 22) return;
+
+      /*
+       * Alt kenarda: erken preventDefault — yoksa scrollTop dusup PTR iptal olur.
+       * Seritte / listenin en ustunde: onceki esiklerle ayni.
+       */
+      var esik = (ptrAltKenar || ptrSerit) ? 12 : 22;
+      if (dy < esik) {
+        if (ptrAltKenar && dy > 6 && e.cancelable) e.preventDefault();
+        return;
+      }
       cekiyor = true;
-      cekMesafe = Math.min((dy - 14) * 0.42, MAX_CEK);
+      cekMesafe = Math.min((dy - (esik - 8)) * 0.42, MAX_CEK);
       ptrGuncelle(cekMesafe, cekMesafe >= ESik ? "ready" : "idle");
-      /* preventDefault sadece net PTR cekisinde; yoksa liste kilitlenir */
-      if (cekMesafe > 20 && e.cancelable) e.preventDefault();
+      if ((cekMesafe > 12 || ptrAltKenar || ptrSerit) && e.cancelable) e.preventDefault();
     }, { passive: false });
 
     async function cekBitir() {
