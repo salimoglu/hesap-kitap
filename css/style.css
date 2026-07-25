@@ -6398,24 +6398,38 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   font-weight: 700;
   cursor: pointer;
 }
-.ar-gecmis {
-  margin-top: 10px;
+.ar-kart-gecmis {
+  border-top: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.08);
 }
-.ar-gecmis-baslik {
+.ar-kart-gecmis-baslik {
   list-style: none;
   cursor: pointer;
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--text-muted);
-  padding: 6px 2px;
+  padding: 7px 10px;
   user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
-.ar-gecmis-baslik::-webkit-details-marker { display: none; }
+.ar-kart-gecmis-baslik::-webkit-details-marker { display: none; }
+.ar-kart-gecmis[open] .ar-kart-gecmis-baslik {
+  color: var(--gold);
+}
+.ar-kart-gecmis .ar-gecmis-liste {
+  padding: 0 8px 8px;
+  max-height: 140px;
+}
+.ar-kart-gecmis-bos {
+  font-size: 11px;
+  color: var(--text-muted);
+  padding: 0 10px 8px;
+}
 .ar-gecmis-adet {
   display: inline-block;
-  margin-left: 6px;
+  margin-left: 4px;
   padding: 1px 6px;
   border-radius: 999px;
   border: 1px solid var(--border);
@@ -6786,15 +6800,32 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   filter: brightness(1.06);
 }
 .ar-gider-liste-wrap {
-  padding-bottom: 8px;
+  margin: 0 10px 12px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-card);
+  overflow: hidden;
 }
 .ar-gider-liste-baslik {
-  font-size: 10px;
+  list-style: none;
+  cursor: pointer;
+  font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-muted);
-  padding: 4px 16px 8px;
+  padding: 12px 14px;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.ar-gider-liste-baslik::-webkit-details-marker { display: none; }
+.ar-gider-liste-wrap[open] .ar-gider-liste-baslik {
+  color: var(--gold);
+  border-bottom: 1px solid var(--border);
+}
+.ar-gider-liste-wrap .ar-gider-liste {
+  padding: 8px 10px 12px;
 }
 @media (max-width: 520px) {
   .ar-kayit-panel {

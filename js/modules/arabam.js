@@ -244,6 +244,39 @@ var ArabamModule = (function () {
     return h;
   }
 
+  function tipBelgeGecmisListesi(a, tip) {
+    var list = (a.belgeGecmisi || []).filter(function (r) { return r.tip === tip; });
+    list.sort(function (x, y) {
+      var dx = x.olusturma || x.tarih || x.bitis || "";
+      var dy = y.olusturma || y.tarih || y.bitis || "";
+      return dy.localeCompare(dx);
+    });
+    return list;
+  }
+
+  function tipBelgeGecmisHtml(a, tip) {
+    var list = tipBelgeGecmisListesi(a, tip);
+    var h = '<details class="ar-kart-gecmis">';
+    h += '<summary class="ar-kart-gecmis-baslik">Geçmiş';
+    if (list.length) h += ' <span class="ar-gecmis-adet">' + list.length + "</span>";
+    h += "</summary>";
+    if (!list.length) {
+      h += '<div class="ar-kart-gecmis-bos">Bu kart için kayıt yok</div>';
+    } else {
+      h += '<div class="ar-gecmis-liste">';
+      list.slice(0, 8).forEach(function (r) {
+        h += '<div class="ar-gecmis-satir" data-gid="' + r.id + '">';
+        h += '<span class="ar-gecmis-metin">' + belgeGecmisSatirMetni(r) + "</span>";
+        h += '<button type="button" class="ar-gecmis-sil row-action-btn sil" data-gid="' + r.id + '" title="Sil">&#10005;</button>';
+        h += "</div>";
+      });
+      if (list.length > 8) h += '<div class="ar-gecmis-fazla">+' + (list.length - 8) + "</div>";
+      h += "</div>";
+    }
+    h += "</details>";
+    return h;
+  }
+
   function takipKartHtml(opts, a) {
     var rozet = opts.tip === "km"
       ? { sinif: opts.ana && opts.ana !== "—" ? "ar-durum--ok" : "ar-durum--bos", metin: "" }
@@ -263,6 +296,7 @@ var ArabamModule = (function () {
       if (alt) h += '<span class="ar-takip-alt">' + alt + "</span>";
       h += "</span></button>";
     }
+    h += tipBelgeGecmisHtml(a, opts.tip);
     h += "</div>";
     return h;
   }
@@ -322,32 +356,7 @@ var ArabamModule = (function () {
       ana: gKa !== null ? kalanGunMetni(gKa) : "—",
       alt: a.kaskoTarih ? mTarih(a.kaskoTarih) : ""
     }, a);
-    h += "</div>";
-    h += belgeGecmisHtml(a);
-    h += "</div>";
-    return h;
-  }
-
-  function belgeGecmisHtml(a) {
-    var list = (a.belgeGecmisi || []).slice();
-    list.sort(function (x, y) {
-      var dx = x.olusturma || x.tarih || x.bitis || "";
-      var dy = y.olusturma || y.tarih || y.bitis || "";
-      return dy.localeCompare(dx);
-    });
-    if (!list.length) return "";
-    var h = '<details class="ar-gecmis">';
-    h += '<summary class="ar-gecmis-baslik">Geçmiş <span class="ar-gecmis-adet">' + list.length + "</span></summary>";
-    h += '<div class="ar-gecmis-liste">';
-    list.slice(0, 6).forEach(function (r) {
-      h += '<div class="ar-gecmis-satir" data-gid="' + r.id + '">';
-      h += '<span class="ar-gecmis-tip">' + belgeTipLabel(r.tip) + "</span>";
-      h += '<span class="ar-gecmis-metin">' + belgeGecmisSatirMetni(r) + "</span>";
-      h += '<button type="button" class="ar-gecmis-sil row-action-btn sil" data-gid="' + r.id + '" title="Sil">&#10005;</button>';
-      h += "</div>";
-    });
-    if (list.length > 6) h += '<div class="ar-gecmis-fazla">+' + (list.length - 6) + "</div>";
-    h += "</div></details>";
+    h += "</div></div>";
     return h;
   }
 
@@ -730,10 +739,10 @@ var ArabamModule = (function () {
     h += '<div class="ar-kayit-aksiyon"><button type="button" class="ar-kayit-kaydet-btn" id="ar-kayit-kaydet">Kaydet</button></div>';
     h += "</div>";
 
-    h += '<div class="ar-gider-liste-wrap">';
-    h += '<div class="ar-gider-liste-baslik">Gider geçmişi</div>';
+    h += '<details class="ar-gider-liste-wrap" id="ar-gider-gecmis">';
+    h += '<summary class="ar-gider-liste-baslik">Gider geçmişi <span class="ar-gecmis-adet" id="ar-gider-adet">0</span></summary>';
     h += '<div class="ar-gider-liste" id="ar-d-liste"></div>';
-    h += "</div>";
+    h += "</details>";
     h += "</div>";
     h += "</div></div>";
 
@@ -795,9 +804,13 @@ var ArabamModule = (function () {
     var ozYil = $("ar-d-yil-ozet");
     if (ozYil) ozYil.innerHTML = yillikOzetHtml(a);
 
+    var giderAdet = $("ar-gider-adet");
+    var giderSayisi = a.giderler ? a.giderler.length : 0;
+    if (giderAdet) giderAdet.textContent = String(giderSayisi);
+
     var liste = $("ar-d-liste");
     if (!liste) return;
-    if (!a.giderler || !a.giderler.length) {
+    if (!giderSayisi) {
       liste.innerHTML = '<div class="ar-bos-kucuk">Henüz bu araç için gider yok</div>';
     } else {
       var satirlar = a.giderler.slice().sort(function (x, y) { return (y.tarih || "").localeCompare(x.tarih || ""); });
@@ -940,6 +953,9 @@ var ArabamModule = (function () {
         e.stopPropagation();
         takipTipAc(btn.dataset.tip || "bakim");
       });
+    });
+    oz.querySelectorAll(".ar-kart-gecmis").forEach(function (det) {
+      det.addEventListener("click", function (e) { e.stopPropagation(); });
     });
     oz.querySelectorAll(".ar-takip-iptal").forEach(function (btn) {
       btn.addEventListener("click", function (e) {
