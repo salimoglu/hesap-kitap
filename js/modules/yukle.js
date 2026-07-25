@@ -936,6 +936,7 @@ var _uyeler=[],_aylar=[],_gramFiyat=0;
 var AY_TR=["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
 var TIP_GR={gram:1.00,ceyrek:1.75,yarim:3.50,tam:7.00};
 var TIP_AD={gram:"1 GRAM",ceyrek:"1 ÇEYREK",yarim:"1 YARIM",tam:"1 TAM",nakit:"NAKİT"};
+var TIP_KISA={gram:"GRAM",ceyrek:"ÇEYREK",yarim:"YARIM",tam:"TAM",nakit:"NAKİT"};
 var ALTIN_TIPLER=["gram","ceyrek","yarim","tam"];
 var TUM_TIPLER=["gram","ceyrek","yarim","tam","nakit"];
 
@@ -1066,7 +1067,7 @@ function render(){
   ALTIN_TIPLER.forEach(function(t){
     var o=altin.tipDetay[t];
     if(!o||o.adet===0)return;
-    tipParcalar.push('<span class="vf2-tip-tag vf2-tip-'+t+'"><b class="vf2-adet-n">'+o.adet+'</b> × '+TIP_AD[t]+'</span>');
+    tipParcalar.push('<span class="vf2-tip-tag vf2-tip-'+t+'"><b class="vf2-adet-n">'+o.adet+'</b> × '+TIP_KISA[t]+'</span>');
   });
   h+=tipParcalar.join('<span class="vf2-tip-ayrac"> / </span>');
   h+='</div>';
@@ -1201,7 +1202,7 @@ function render(){
       var chipParts=[];
       ALTIN_TIPLER.forEach(function(t){
         (tgM[t]||[]).forEach(function(y){
-          chipParts.push('<span class="vf2-tip-tag vf2-tip-'+t+'"><b class="vf2-adet-n">'+y.adet+'</b> × '+TIP_AD[t]+'</span>');
+          chipParts.push('<span class="vf2-tip-tag vf2-tip-'+t+'"><b class="vf2-adet-n">'+y.adet+'</b> × '+TIP_KISA[t]+'</span>');
         });
       });
       if(ayNakitM>0) chipParts.push('<span class="vf2-tip-tag vf2-tip-nakit">NAKİT '+p(ayNakitM)+' TL</span>');
@@ -1221,7 +1222,7 @@ function render(){
     h+='<div class="vf2-card-row"><span>Toplam ödeme</span><b>'+p(cOdeme)+' TL</b></div>';
     var totParts=[];
     ALTIN_TIPLER.forEach(function(t){
-      if(cAdet[t]>0) totParts.push('<span class="vf2-tip-tag vf2-tip-'+t+'"><b class="vf2-adet-n">'+cAdet[t]+'</b> × '+TIP_AD[t]+'</span>');
+      if(cAdet[t]>0) totParts.push('<span class="vf2-tip-tag vf2-tip-'+t+'"><b class="vf2-adet-n">'+cAdet[t]+'</b> × '+TIP_KISA[t]+'</span>');
     });
     if(cNakit>0) totParts.push('<span class="vf2-tip-tag vf2-tip-nakit">NAKİT '+p(cNakit)+' TL</span>');
     var totC=totParts.join('<span class="vf2-tip-ayrac"> / </span>');
