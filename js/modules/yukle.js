@@ -1065,7 +1065,7 @@ function render(){
   ALTIN_TIPLER.forEach(function(t){
     var o=altin.tipDetay[t];
     if(!o||o.adet===0)return;
-    h+='<span class="vf2-tip-tag vf2-tip-'+t+'">'+TIP_AD[t]+' × <b class="vf2-adet-n">'+o.adet+'</b></span>';
+    h+='<span class="vf2-tip-tag vf2-tip-'+t+'"><b class="vf2-adet-n">'+o.adet+'</b> × '+TIP_AD[t]+'</span>';
   });
   h+='</div>';
   h+='</div>';
@@ -1199,7 +1199,7 @@ function render(){
       var chipM='';
       ALTIN_TIPLER.forEach(function(t){
         (tgM[t]||[]).forEach(function(y){
-          chipM+='<span class="vf2-tip-tag vf2-tip-'+t+'">'+TIP_AD[t]+' × <b class="vf2-adet-n">'+y.adet+'</b></span>';
+          chipM+='<span class="vf2-tip-tag vf2-tip-'+t+'"><b class="vf2-adet-n">'+y.adet+'</b> × '+TIP_AD[t]+'</span>';
         });
       });
       if(ayNakitM>0) chipM+='<span class="vf2-tip-tag vf2-tip-nakit">NAKİT '+p(ayNakitM)+' TL</span>';
@@ -1218,7 +1218,7 @@ function render(){
     h+='<div class="vf2-card-row"><span>Toplam ödeme</span><b>'+p(cOdeme)+' TL</b></div>';
     var totC='';
     ALTIN_TIPLER.forEach(function(t){
-      if(cAdet[t]>0) totC+='<span class="vf2-tip-tag vf2-tip-'+t+'">'+TIP_AD[t]+' × <b class="vf2-adet-n">'+cAdet[t]+'</b></span>';
+      if(cAdet[t]>0) totC+='<span class="vf2-tip-tag vf2-tip-'+t+'"><b class="vf2-adet-n">'+cAdet[t]+'</b> × '+TIP_AD[t]+'</span>';
     });
     if(cNakit>0) totC+='<span class="vf2-tip-tag vf2-tip-nakit">NAKİT '+p(cNakit)+' TL</span>';
     h+='<div class="vf2-card-row vf2-card-row-chips"><span>Yatırımlar</span><div class="vf2-card-chips">'+(totC?totC:'<span style="color:var(--text-muted);font-size:12px">—</span>')+'</div></div>';
