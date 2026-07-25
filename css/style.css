@@ -1394,22 +1394,8 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .al-form-modal .modal-footer { padding:10px 14px; gap:8px; }
 .al-form-modal .modal-footer .btn-primary,
 .al-form-modal .modal-footer .btn-secondary { min-height:36px; padding:8px 14px; font-size:13px; }
-.al-altin-alan { display:flex; flex-direction:column; gap:8px; }
-.al-altin-birim-sec { display:flex; flex-wrap:wrap; gap:4px; }
-.al-altin-birim-btn {
-  appearance:none; flex:1 1 auto; min-width:52px; min-height:30px; padding:5px 8px;
-  border:1px solid var(--border); border-radius:8px; background:var(--bg-elevated);
-  color:var(--text-muted); font-family:var(--font-body); font-size:11px; font-weight:700;
-  cursor:pointer; -webkit-tap-highlight-color:transparent;
-}
-.al-altin-birim-btn.active {
-  background:rgba(240,184,64,0.14); border-color:rgba(240,184,64,0.55); color:var(--gold);
-}
-.al-altin-miktar-wrap { flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:2px; }
-.al-altin-miktar-wrap .field-label,
-.al-altin-alan .al-form-tarih-wrap .field-label { font-size:10px; margin:0; }
-.al-altin-alan .al-form-tarih-wrap { display:flex; flex-direction:column; gap:2px; width:132px; flex:0 0 auto; }
-.al-altin-alan .al-form-satir { align-items:flex-end; }
+.al-altin-alan { display:flex; flex-direction:column; gap:6px; }
+.al-altin-btn { min-width:58px; }
 .al-altin-info { padding:6px 10px; background:rgba(240,184,64,0.08); border-radius:8px; font-size:11px; font-weight:600; color:var(--gold); border:1px solid rgba(240,184,64,0.22); }
 .al-kisi-liste { gap:4px; }
 .al-kisi-satir { padding:8px 10px; gap:8px; border-radius:10px; }
@@ -3438,22 +3424,8 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .al-form-modal .modal-footer { padding:10px 14px; gap:8px; }
 .al-form-modal .modal-footer .btn-primary,
 .al-form-modal .modal-footer .btn-secondary { min-height:36px; padding:8px 14px; font-size:13px; }
-.al-altin-alan { display:flex; flex-direction:column; gap:8px; }
-.al-altin-birim-sec { display:flex; flex-wrap:wrap; gap:4px; }
-.al-altin-birim-btn {
-  appearance:none; flex:1 1 auto; min-width:52px; min-height:30px; padding:5px 8px;
-  border:1px solid var(--border); border-radius:8px; background:var(--bg-elevated);
-  color:var(--text-muted); font-family:var(--font-body); font-size:11px; font-weight:700;
-  cursor:pointer; -webkit-tap-highlight-color:transparent;
-}
-.al-altin-birim-btn.active {
-  background:rgba(240,184,64,0.14); border-color:rgba(240,184,64,0.55); color:var(--gold);
-}
-.al-altin-miktar-wrap { flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:2px; }
-.al-altin-miktar-wrap .field-label,
-.al-altin-alan .al-form-tarih-wrap .field-label { font-size:10px; margin:0; }
-.al-altin-alan .al-form-tarih-wrap { display:flex; flex-direction:column; gap:2px; width:132px; flex:0 0 auto; }
-.al-altin-alan .al-form-satir { align-items:flex-end; }
+.al-altin-alan { display:flex; flex-direction:column; gap:6px; }
+.al-altin-btn { min-width:58px; }
 .al-altin-info { padding:6px 10px; background:rgba(240,184,64,0.08); border-radius:8px; font-size:11px; font-weight:600; color:var(--gold); border:1px solid rgba(240,184,64,0.22); }
 .al-kisi-liste { gap:4px; }
 .al-kisi-satir { padding:8px 10px; gap:8px; border-radius:10px; }
