@@ -5510,31 +5510,82 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
 }
 
 @media (max-width: 640px) {
+  /* Toplam | Yıllık özet yan yana — üst alanı küçült */
   #birikim-container .bk-header {
-    flex-direction: column;
-    gap: 12px;
-    padding: 12px 14px;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 8px;
+    padding: 8px 10px;
+    margin-bottom: 10px;
   }
   #birikim-container .bk-h-total {
-    flex: none;
-    width: 100%;
+    flex: 0 0 auto;
+    width: auto;
+    max-width: 42%;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    padding-right: 8px;
+  }
+  #birikim-container .bk-h-total .bk-gt-label {
+    font-size: 8px;
+    letter-spacing: 0.06em;
+    line-height: 1.15;
+  }
+  #birikim-container .bk-gt-val {
+    font-size: 15px;
+    letter-spacing: 0.3px;
+    line-height: 1.15;
+    word-break: break-word;
   }
   #birikim-container .bk-h-yil {
-    flex: none;
-    width: 100%;
-    padding-left: 0;
-    margin-left: 0;
-    border-left: none;
-    padding-top: 11px;
-    border-top: 1px dashed var(--border);
+    flex: 1 1 0;
+    min-width: 0;
+    width: auto;
+    padding: 0 0 0 8px;
+    margin: 0;
+    border-left: 1px solid var(--border);
+    border-top: none;
+    gap: 4px;
+  }
+  #birikim-container .bk-h-yil-title {
+    font-size: 8px;
+    letter-spacing: 0.1em;
+    line-height: 1.1;
   }
   #birikim-container .bk-yil-list {
     mask-image: none;
     -webkit-mask-image: none;
-    gap: 6px;
+    gap: 5px;
+    padding: 2px 0 3px;
+    margin: 0;
   }
-  #birikim-container .bk-gt-val {
-    font-size: 22px;
+  #birikim-container .bk-yil-kart {
+    min-width: 88px;
+    max-width: 110px;
+    padding: 6px 7px;
+    gap: 2px;
+    border-radius: 8px;
+  }
+  #birikim-container .bk-yil-eti {
+    font-size: 13px;
+  }
+  #birikim-container .bk-yil-satir {
+    font-size: 10px;
+    gap: 1px 4px;
+  }
+  #birikim-container .bk-yil-satir-lbl {
+    font-size: 8px;
+  }
+  #birikim-container .bk-yil-oran {
+    font-size: 9px;
+  }
+  #birikim-container .bk-yil-bar-track {
+    height: 2px;
+    margin-top: 1px;
   }
 }
 
