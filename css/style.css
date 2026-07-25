@@ -5727,6 +5727,75 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
     height: 2px;
     margin-top: 1px;
   }
+
+  /* Alt kalem kartları — telefonda inceltilmiş */
+  #birikim-container .bk-kartlar {
+    gap: 8px;
+    grid-template-columns: 1fr;
+  }
+  #birikim-container .bk-kart {
+    border-radius: 8px;
+  }
+  #birikim-container .bk-kart-ust {
+    padding: 7px 10px;
+    gap: 8px;
+  }
+  #birikim-container .bk-kart-label {
+    font-size: 9px;
+    letter-spacing: 0.6px;
+    line-height: 1.15;
+  }
+  #birikim-container .bk-kart-toplam {
+    font-size: 15px;
+    letter-spacing: 0.3px;
+    margin-top: 0;
+    line-height: 1.15;
+  }
+  #birikim-container .bk-kart-gram {
+    font-size: 10px;
+    margin-top: 0;
+  }
+  #birikim-container .bk-ekle-btn {
+    width: 26px;
+    height: 26px;
+    font-size: 16px;
+  }
+  #birikim-container .bk-kart-alt {
+    padding: 6px 10px 8px;
+    gap: 5px;
+  }
+  #birikim-container .bk-buay {
+    font-size: 11px;
+    line-height: 1.2;
+  }
+  #birikim-container .bk-islem-liste {
+    gap: 1px;
+    max-height: 140px;
+  }
+  #birikim-container .bk-islem-row {
+    padding: 2px 4px;
+    gap: 4px;
+    font-size: 10px;
+    min-height: 0;
+    line-height: 1.25;
+  }
+  #birikim-container .bk-islem-tarih {
+    min-width: 62px;
+    font-size: 10px;
+  }
+  #birikim-container .bk-islem-tutar {
+    font-size: 10px;
+  }
+  #birikim-container .bk-bos,
+  #birikim-container .bk-devam {
+    font-size: 10px;
+    padding: 2px 0;
+  }
+  #birikim-container .bk-sil-btn {
+    opacity: 0.55;
+    font-size: 10px;
+    padding: 0 2px;
+  }
 }
 
 /* ══ İŞLEMLER: sol liste + sağ kategori özeti ══ */
