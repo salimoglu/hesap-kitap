@@ -279,6 +279,37 @@
     await modulleriBaslat(u);
   };
 
+  /** SW/cache temizle + bulut senkron + hard reload (yeni ozellikler icin). */
+  window.hkGuncelleVeYenidenYukle = async function() {
+    try {
+      if ("serviceWorker" in navigator && navigator.serviceWorker.getRegistrations) {
+        var regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map(async function(reg) {
+          try { await reg.update(); } catch (eUp) {}
+          if (reg.waiting) {
+            try { reg.waiting.postMessage({ type: "SKIP_WAITING" }); } catch (eSk) {}
+          }
+        }));
+      }
+    } catch (eSw) {}
+    try {
+      if (typeof caches !== "undefined" && caches.keys) {
+        var keys = await caches.keys();
+        await Promise.all(keys.map(function(k) { return caches.delete(k); }));
+      }
+    } catch (eCa) {}
+    try {
+      if (typeof window.sayfaYenile === "function") await window.sayfaYenile();
+    } catch (eSy) {}
+    try {
+      var url = new URL(location.href);
+      url.searchParams.set("hk_r", String(Date.now()));
+      location.replace(url.toString());
+    } catch (eRl) {
+      location.reload();
+    }
+  };
+
   try {
     const uAn = typeof fbMevcutKullanici === "function" ? fbMevcutKullanici() : null;
     if (uAn && uAn.isAnonymous && typeof fbCikisBulut === "function") await fbCikisBulut();
@@ -579,13 +610,13 @@
     }, { passive: true });
   })();
 
-  /* Mobil: asagi cekince bulut senkronu / sayfa yenile */
+  /* Mobil: asagi cekince guncelleme + yeni ozellikler + veri senkronu */
   (function hkPullRefreshBagla() {
     if (!hkMobilMi()) return;
 
-    var ESik = 68;
-    var MAX_CEK = 110;
-    var MIN_ARALIK = 8000;
+    var ESik = 62;
+    var MAX_CEK = 120;
+    var MIN_ARALIK = 5000;
     var ptr = document.getElementById("hk-ptr");
     var ptrMetin = document.getElementById("hk-ptr-metin");
     var sx, sy, cekiyor = false, cekMesafe = 0, yenileniyor = false, sonYenile = 0;
@@ -604,24 +635,20 @@
 
     function kaydirmaUstteMi(el) {
       while (el && el !== document.body) {
-        var st = window.getComputedStyle(el);
-        var oy = st.overflowY;
-        if ((oy === "auto" || oy === "scroll" || oy === "overlay") && el.scrollHeight > el.clientHeight + 1) {
-          if (el.scrollTop > 1) return false;
+        if (el.scrollHeight > el.clientHeight + 1 && el.scrollTop > 1) {
+          var st = window.getComputedStyle(el);
+          var oy = st.overflowY;
+          if (oy === "auto" || oy === "scroll" || oy === "overlay") return false;
         }
         el = el.parentElement;
       }
       var panel = document.querySelector(".tab-panel.active");
       if (!panel) return true;
-      var list = panel.querySelectorAll(".islem-scroll, .islemler-panel-body, .ioz-scroll, .butce-panel-body, .module-host > *");
+      var list = panel.querySelectorAll(".islem-scroll, .islemler-panel-body, .ioz-scroll, .butce-panel-body, .module-host > *, .al-wrap-kolon, .content");
       for (var i = 0; i < list.length; i++) {
         var s = list[i];
-        if (!s.offsetParent) continue;
-        var st2 = window.getComputedStyle(s);
-        var oy2 = st2.overflowY;
-        if ((oy2 === "auto" || oy2 === "scroll" || oy2 === "overlay") && s.scrollHeight > s.clientHeight + 1) {
-          if (s.scrollTop > 1) return false;
-        }
+        if (!s || s.scrollHeight <= s.clientHeight + 1) continue;
+        if (s.scrollTop > 1) return false;
       }
       return true;
     }
@@ -629,16 +656,17 @@
     function ptrGuncelle(mesafe, durum) {
       if (!ptr) return;
       ptr.classList.remove("hidden", "hk-ptr-loading", "hk-ptr-ready");
+      ptr.setAttribute("aria-hidden", "false");
       ptr.style.opacity = String(Math.min(1, Math.max(0.35, mesafe / ESik)));
       ptr.style.setProperty("--hk-ptr-offset", Math.min(mesafe, MAX_CEK) + "px");
       if (durum === "loading") {
         ptr.classList.add("hk-ptr-loading");
-        if (ptrMetin) ptrMetin.textContent = "Yenileniyor\u2026";
+        if (ptrMetin) ptrMetin.textContent = "Guncelleme cekiliyor\u2026";
       } else if (durum === "ready") {
         ptr.classList.add("hk-ptr-ready");
-        if (ptrMetin) ptrMetin.textContent = "Birak, yenilensin";
+        if (ptrMetin) ptrMetin.textContent = "Birak, guncellensin";
       } else if (ptrMetin) {
-        ptrMetin.textContent = "Yenilemek icin cekin";
+        ptrMetin.textContent = "Asagi cek, guncelle";
       }
     }
 
@@ -646,6 +674,7 @@
       if (!ptr) return;
       ptr.classList.add("hidden");
       ptr.classList.remove("hk-ptr-loading", "hk-ptr-ready");
+      ptr.setAttribute("aria-hidden", "true");
       ptr.style.opacity = "";
       ptr.style.removeProperty("--hk-ptr-offset");
     }
@@ -680,9 +709,9 @@
       if (!cekiyor && Math.abs(dx) > Math.abs(dy)) return;
       if (dy > 6) {
         cekiyor = true;
-        cekMesafe = Math.min(dy * 0.42, MAX_CEK);
+        cekMesafe = Math.min(dy * 0.45, MAX_CEK);
         ptrGuncelle(cekMesafe, cekMesafe >= ESik ? "ready" : "idle");
-        if (cekMesafe > 12 && e.cancelable) e.preventDefault();
+        if (cekMesafe > 10 && e.cancelable) e.preventDefault();
       }
     }, { passive: false });
 
@@ -707,8 +736,17 @@
       yenileniyor = true;
       ptrGuncelle(ESik, "loading");
       try {
-        if (typeof window.sayfaYenile === "function") await window.sayfaYenile();
-      } catch (ePtr) {}
+        if (typeof window.hkGuncelleVeYenidenYukle === "function") {
+          await window.hkGuncelleVeYenidenYukle();
+        } else if (typeof window.sayfaYenile === "function") {
+          await window.sayfaYenile();
+          location.reload();
+        } else {
+          location.reload();
+        }
+      } catch (ePtr) {
+        try { location.reload(); } catch (eRl) {}
+      }
       yenileniyor = false;
       ptrSifirla();
     }
