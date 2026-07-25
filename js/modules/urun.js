@@ -1,11 +1,38 @@
 /* urun.js - Urun Takip: tarih + ad + fiyat + gunluk maliyet; istege bagli son kullanim (omur) tarihi */
 var UrunModule=(function(){
 var $=function(id){return document.getElementById(id);};
-var _urunler=[],_aktif=null,_omurId=null;
+var _urunler=[],_aktif=null,_omurId=null,_detayId=null;
 
 function para(n){return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2});}
 function uid(){return "u"+Date.now()+"_"+Math.random().toString(36).substr(2,5);}
 function tarihFmt(t){if(!t)return"";var p=t.split("-");return p[2]+"."+p[1]+"."+p[0];}
+function esc(v){return String(v==null?"":v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+
+function detayKartHtml(u){
+  var gun=kullanimGunSayisi(u.tarih,u.sonTarih);
+  var gunluk=gunlukMaliyet(u.tarih,u.fiyat,u.sonTarih);
+  var sonVar=u.sonTarih&&String(u.sonTarih).trim();
+  var sonStr=sonVar?tarihFmt(String(u.sonTarih).trim()):"Belirtilmedi";
+  var h='<div class="ur-detay-kart">';
+  h+='<div class="ur-detay-ust">';
+  h+='<div class="ur-detay-baslik">'+esc(u.urun)+'</div>';
+  h+='<button type="button" class="ur-detay-kapat" data-id="'+u.id+'" title="Kapat" aria-label="Kapat">&#10005;</button>';
+  h+='</div>';
+  h+='<div class="ur-detay-grid">';
+  h+='<div class="ur-detay-item"><span class="ur-detay-l">Alis</span><span class="ur-detay-v">'+tarihFmt(u.tarih)+'</span></div>';
+  h+='<div class="ur-detay-item"><span class="ur-detay-l">Fiyat</span><span class="ur-detay-v ur-detay-v--altin">'+para(u.fiyat)+' TL</span></div>';
+  h+='<div class="ur-detay-item"><span class="ur-detay-l">Kullanim</span><span class="ur-detay-v">'+gun+' gun</span></div>';
+  h+='<div class="ur-detay-item"><span class="ur-detay-l">Son gun</span><span class="ur-detay-v">'+(sonVar?sonStr:'—')+'</span></div>';
+  h+='<div class="ur-detay-item ur-detay-item--full"><span class="ur-detay-l">Gunluk maliyet</span><span class="ur-detay-v ur-detay-v--altin">'+para(gunluk)+' TL/gun</span></div>';
+  h+='<div class="ur-detay-item ur-detay-item--full"><span class="ur-detay-l">Hesap</span><span class="ur-detay-v ur-detay-formul">'+para(u.fiyat)+' ÷ '+gun+(sonVar?"":" · bugune kadar")+'</span></div>';
+  h+='</div>';
+  h+='<div class="ur-detay-ak">';
+  h+='<button type="button" class="ur-detay-btn ur-omur-btn" data-id="'+u.id+'">Omur</button>';
+  h+='<button type="button" class="ur-detay-btn ur-duz-btn duzenle" data-id="'+u.id+'">Duzenle</button>';
+  h+='<button type="button" class="ur-detay-btn ur-sil-btn sil" data-id="'+u.id+'">Sil</button>';
+  h+='</div></div>';
+  return h;
+}
 
 function parseYmd(str){
   if(!str)return null;
@@ -109,9 +136,10 @@ function render(){
       var gun=kullanimGunSayisi(u.tarih,u.sonTarih);
       var gunluk=gunlukMaliyet(u.tarih,u.fiyat,u.sonTarih);
       var sonStr=u.sonTarih&&String(u.sonTarih).trim()?tarihFmt(u.sonTarih.trim()):"—";
-      h+='<tr class="ur-satir">';
+      var acik=_detayId===u.id;
+      h+='<tr class="ur-satir'+(acik?" ur-satir--acik":"")+'" data-id="'+u.id+'" role="button" tabindex="0" aria-expanded="'+(acik?"true":"false")+'">';
       h+='<td class="ur-td-tarih">'+tarihFmt(u.tarih)+'</td>';
-      h+='<td class="ur-td-urun">'+u.urun+'</td>';
+      h+='<td class="ur-td-urun">'+esc(u.urun)+'</td>';
       h+='<td class="ur-td-fiyat">'+para(u.fiyat)+' TL</td>';
       h+='<td class="ur-td-gun">'+gun+'</td>';
       h+='<td class="ur-td-son">'+sonStr+'</td>';
@@ -121,6 +149,9 @@ function render(){
       h+='<button class="ur-duz-btn row-action-btn duzenle" data-id="'+u.id+'">&#9998;</button> ';
       h+='<button class="ur-sil-btn row-action-btn sil" data-id="'+u.id+'">&#10005;</button>';
       h+='</td></tr>';
+      if(acik){
+        h+='<tr class="ur-detay-satir"><td colspan="7">'+detayKartHtml(u)+'</td></tr>';
+      }
     });
     h+='</tbody></table>';
   }
@@ -180,16 +211,40 @@ function bagla(){
   $("ur-omur-modal").addEventListener("click",function(e){if(e.target===$("ur-omur-modal"))omurKapat();});
   $("ur-omur-kaydet").addEventListener("click",omurKaydet);
   $("ur-omur-temizle").addEventListener("click",omurTemizle);
+  document.querySelectorAll(".ur-satir").forEach(function(tr){
+    tr.addEventListener("click",function(e){
+      if(e.target.closest(".ur-td-aksiyon, button, a, input"))return;
+      var id=tr.dataset.id;
+      _detayId=_detayId===id?null:id;
+      render();
+    });
+    tr.addEventListener("keydown",function(e){
+      if(e.key!=="Enter"&&e.key!==" ")return;
+      e.preventDefault();
+      var id=tr.dataset.id;
+      _detayId=_detayId===id?null:id;
+      render();
+    });
+  });
+  document.querySelectorAll(".ur-detay-kapat").forEach(function(btn){
+    btn.addEventListener("click",function(e){
+      e.stopPropagation();
+      _detayId=null;
+      render();
+    });
+  });
   document.querySelectorAll(".ur-duz-btn").forEach(function(btn){
-    btn.addEventListener("click",function(){modalAc(btn.dataset.id);});
+    btn.addEventListener("click",function(e){e.stopPropagation();modalAc(btn.dataset.id);});
   });
   document.querySelectorAll(".ur-omur-btn").forEach(function(btn){
-    btn.addEventListener("click",function(){omurModalAc(btn.dataset.id);});
+    btn.addEventListener("click",function(e){e.stopPropagation();omurModalAc(btn.dataset.id);});
   });
   document.querySelectorAll(".ur-sil-btn").forEach(function(btn){
-    btn.addEventListener("click",function(){
+    btn.addEventListener("click",function(e){
+      e.stopPropagation();
       if(!confirm("Bu ürünü silmek istiyor musunuz?"))return;
       _urunler=_urunler.filter(function(x){return x.id!==btn.dataset.id;});
+      if(_detayId===btn.dataset.id)_detayId=null;
       fbKaydet();render();
     });
   });
