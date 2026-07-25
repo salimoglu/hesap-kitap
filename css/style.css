@@ -1558,6 +1558,74 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .ur-gunluk-birim { font-size:10px; font-weight:600; color:var(--text-muted); margin-left:2px; }
 .ur-opt { font-weight:400; color:var(--text-muted); }
 .ur-field-hint { font-size:11px; color:var(--text-muted); margin:-4px 0 8px 0; line-height:1.4; }
+/* Ürün ekle/düzenle: Tarih|Ad — Fiyat|Son|Kaydet */
+#ur-modal .ur-modal-body { display:flex; flex-direction:column; gap:10px; }
+#ur-modal .ur-form-cift {
+  display:grid;
+  grid-template-columns:minmax(7.5rem, 0.85fr) minmax(0, 1.35fr);
+  gap:8px;
+  align-items:end;
+}
+#ur-modal .ur-form-uc {
+  display:grid;
+  grid-template-columns:minmax(0, 1fr) minmax(0, 1fr) auto;
+  gap:8px;
+  align-items:end;
+}
+#ur-modal .ur-form-cift .field-group,
+#ur-modal .ur-form-uc .field-group { margin:0; min-width:0; }
+#ur-modal .ur-form-cift .field-label,
+#ur-modal .ur-form-uc .field-label { font-size:10px; margin-bottom:3px; }
+#ur-modal .ur-form-cift .field-input,
+#ur-modal .ur-form-uc .field-input {
+  min-height:40px;
+  height:40px;
+  font-size:14px;
+  border-radius:9px;
+  box-sizing:border-box;
+}
+#ur-modal .ur-form-aksiyon {
+  display:flex;
+  align-items:stretch;
+  gap:6px;
+  height:40px;
+}
+#ur-modal .ur-form-aksiyon .btn-secondary,
+#ur-modal .ur-form-aksiyon .btn-primary {
+  height:40px;
+  min-height:40px;
+  padding:0 12px;
+  font-size:13px;
+  white-space:nowrap;
+  border-radius:9px;
+}
+#ur-modal .ur-field-hint { margin:0; }
+@media (max-width: 600px) {
+  #ur-modal .ur-form-cift {
+    grid-template-columns:minmax(6.4rem, 0.8fr) minmax(0, 1.4fr);
+    gap:6px;
+  }
+  #ur-modal .ur-form-uc {
+    grid-template-columns:minmax(0, 1fr) minmax(0, 1.05fr) auto;
+    gap:6px;
+  }
+  #ur-modal .ur-form-cift .field-input,
+  #ur-modal .ur-form-uc .field-input {
+    min-height:38px;
+    height:38px;
+    font-size:12px;
+    padding:0 8px;
+  }
+  #ur-modal .ur-form-aksiyon { height:38px; gap:4px; }
+  #ur-modal .ur-form-aksiyon .btn-secondary,
+  #ur-modal .ur-form-aksiyon .btn-primary {
+    height:38px;
+    min-height:38px;
+    padding:0 10px;
+    font-size:12px;
+  }
+  #ur-modal .ur-form-aksiyon .btn-secondary { padding:0 8px; }
+}
 .ur-omur-aciklama { font-size:13px; margin-bottom:10px; color:var(--text-secondary); }
 .ur-omur-btn { font-size:11px !important; font-weight:700; padding:4px 8px !important; margin-bottom:2px !important; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text-primary); cursor:pointer; }
 .ur-omur-btn:hover { border-color:var(--gold); color:var(--gold); }
@@ -4087,6 +4155,74 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .ur-gunluk-birim { font-size:10px; font-weight:600; color:var(--text-muted); margin-left:2px; }
 .ur-opt { font-weight:400; color:var(--text-muted); }
 .ur-field-hint { font-size:11px; color:var(--text-muted); margin:-4px 0 8px 0; line-height:1.4; }
+/* Ürün ekle/düzenle: Tarih|Ad — Fiyat|Son|Kaydet */
+#ur-modal .ur-modal-body { display:flex; flex-direction:column; gap:10px; }
+#ur-modal .ur-form-cift {
+  display:grid;
+  grid-template-columns:minmax(7.5rem, 0.85fr) minmax(0, 1.35fr);
+  gap:8px;
+  align-items:end;
+}
+#ur-modal .ur-form-uc {
+  display:grid;
+  grid-template-columns:minmax(0, 1fr) minmax(0, 1fr) auto;
+  gap:8px;
+  align-items:end;
+}
+#ur-modal .ur-form-cift .field-group,
+#ur-modal .ur-form-uc .field-group { margin:0; min-width:0; }
+#ur-modal .ur-form-cift .field-label,
+#ur-modal .ur-form-uc .field-label { font-size:10px; margin-bottom:3px; }
+#ur-modal .ur-form-cift .field-input,
+#ur-modal .ur-form-uc .field-input {
+  min-height:40px;
+  height:40px;
+  font-size:14px;
+  border-radius:9px;
+  box-sizing:border-box;
+}
+#ur-modal .ur-form-aksiyon {
+  display:flex;
+  align-items:stretch;
+  gap:6px;
+  height:40px;
+}
+#ur-modal .ur-form-aksiyon .btn-secondary,
+#ur-modal .ur-form-aksiyon .btn-primary {
+  height:40px;
+  min-height:40px;
+  padding:0 12px;
+  font-size:13px;
+  white-space:nowrap;
+  border-radius:9px;
+}
+#ur-modal .ur-field-hint { margin:0; }
+@media (max-width: 600px) {
+  #ur-modal .ur-form-cift {
+    grid-template-columns:minmax(6.4rem, 0.8fr) minmax(0, 1.4fr);
+    gap:6px;
+  }
+  #ur-modal .ur-form-uc {
+    grid-template-columns:minmax(0, 1fr) minmax(0, 1.05fr) auto;
+    gap:6px;
+  }
+  #ur-modal .ur-form-cift .field-input,
+  #ur-modal .ur-form-uc .field-input {
+    min-height:38px;
+    height:38px;
+    font-size:12px;
+    padding:0 8px;
+  }
+  #ur-modal .ur-form-aksiyon { height:38px; gap:4px; }
+  #ur-modal .ur-form-aksiyon .btn-secondary,
+  #ur-modal .ur-form-aksiyon .btn-primary {
+    height:38px;
+    min-height:38px;
+    padding:0 10px;
+    font-size:12px;
+  }
+  #ur-modal .ur-form-aksiyon .btn-secondary { padding:0 8px; }
+}
 .ur-omur-aciklama { font-size:13px; margin-bottom:10px; color:var(--text-secondary); }
 .ur-omur-btn { font-size:11px !important; font-weight:700; padding:4px 8px !important; margin-bottom:2px !important; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text-primary); cursor:pointer; }
 .ur-omur-btn:hover { border-color:var(--gold); color:var(--gold); }
