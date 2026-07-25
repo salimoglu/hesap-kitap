@@ -691,8 +691,8 @@ function altAdetTurBul(gram){
   if(best)return {tur:best.tur,adet:best.adet};
   var a=Math.round(gram*100)/100;
   if(a<0.01)a=1;
-  /* Tam sayı değilse (küsur gram) → bilezik */
-  if(altKusurluMu(a))return {tur:"bilezik",adet:a};
+  /* Tam sayı değilse (küsur gram) → bilezik, adet her zaman 1 */
+  if(altKusurluMu(a))return {tur:"bilezik",adet:1};
   return {tur:"gram",adet:a};
 }
 function altKayitNormalize(k){
@@ -713,19 +713,25 @@ function altKayitNormalize(k){
   adet=parseFloat(k.adet)||0;
   if(adet<=0){k.adet=1;degisti=true;adet=1;}
 
-  /* Küsur gram görünenler (10,xx gr vb.) → Bilezik; adet = gram (tam sikke katı değilse) */
+  /* Küsur gram → Bilezik; adet=1, gram=girilen miktar */
   var tur=k.altinTur;
   if(gram>0&&altKusurluMu(gram)&&!altTamSikkeKatiMi(gram)&&(tur==="gram"||tur==="bilezik"||!ALTIN_LABEL[tur])){
-    var yeniAdet=Math.round(gram*100)/100;
-    if(k.altinTur!=="bilezik"||Math.abs((parseFloat(k.adet)||0)-yeniAdet)>0.001){
+    if(k.altinTur!=="bilezik"||parseFloat(k.adet)!==1){
       k.altinTur="bilezik";
-      k.adet=yeniAdet;
+      k.adet=1;
       degisti=true;
     }
   } else if(tur==="gram"&&adet>0&&altKusurluMu(adet)&&gram>0&&Math.abs(adet-gram)<=0.06&&!altTamSikkeKatiMi(gram)){
     k.altinTur="bilezik";
-    k.adet=Math.round(gram*100)/100;
+    k.adet=1;
     degisti=true;
+  }
+  /* Mevcut bileziklerde adet=gram yazılmışsa düzelt: adet=1 */
+  if(k.altinTur==="bilezik"&&gram>0){
+    if(parseFloat(k.adet)!==1){
+      k.adet=1;
+      degisti=true;
+    }
   }
   return degisti;
 }
@@ -737,18 +743,26 @@ function altKayitlariNormalize(){
   return degisti;
 }
 function altGramHesapla(){
-  var tur=altTurAl(),adet=asayiOku(($("alt-adet")||{}).value);
-  if(!adet||adet<=0)return 0;
-  return (ALTIN_GRAM[tur]||1)*adet;
+  var tur=altTurAl(),v=asayiOku(($("alt-adet")||{}).value);
+  if(!v||v<=0)return 0;
+  /* Bilezik: alandaki değer doğrudan gram; adet kayıtta 1 olur */
+  if(tur==="bilezik")return v;
+  return (ALTIN_GRAM[tur]||1)*v;
+}
+function altAdetAlanGuncelle(){
+  var tur=altTurAl(),lbl=$("alt-adet-label"),inp=$("alt-adet");
+  if(lbl)lbl.textContent=tur==="bilezik"?"Gram":"Adet";
+  if(inp)inp.placeholder=tur==="bilezik"?"9.90":"1";
 }
 function altTurBtnGuncelle(){
   var tur=altTurAl(),hid=$("alt-tur"),btn=$("alt-tur-btn");
   if(hid)hid.value=tur;
   if(btn){
     btn.textContent=ALTIN_LABEL[tur];
-    if(tur==="bilezik")btn.title="Bilezik — girilen adet = gram; tıkla, tür değiştir";
+    if(tur==="bilezik")btn.title="Bilezik — 1 adet, girilen miktar gramdır; tıkla, tür değiştir";
     else btn.title=ALTIN_LABEL[tur]+" ("+(ALTIN_GRAM[tur]||1)+" gr) — tıkla, tür değiştir";
   }
+  altAdetAlanGuncelle();
   altGramGoster();
 }
 function altTurDegistir(){
@@ -761,18 +775,18 @@ function altTurDegistir(){
 function altGramGoster(){
   var info=$("alt-gram-info"),hid=$("alt-gram");
   var tur=altTurAl(),birim=ALTIN_GRAM[tur]||1;
-  var adet=asayiOku(($("alt-adet")||{}).value);
+  var v=asayiOku(($("alt-adet")||{}).value);
   var gr=altGramHesapla();
   if(hid)hid.value=gr>0?String(Math.round(gr*100)/100):"";
   if(!info)return;
-  if(!adet||adet<=0){
-    if(tur==="bilezik")info.textContent="Bilezik: girilen adet doğrudan gram olur";
+  if(!v||v<=0){
+    if(tur==="bilezik")info.textContent="Bilezik: 1 adet · buraya gram miktarını girin";
     else info.textContent=ALTIN_LABEL[tur]+" = "+birim+" gr / adet  ·  Adet girin";
     return;
   }
   var metin;
-  if(tur==="bilezik")metin=adet+" adet = "+agr(gr)+" gr";
-  else metin=adet+" × "+birim+" gr = "+agr(gr)+" gr";
+  if(tur==="bilezik")metin="1 × Bilezik = "+agr(gr)+" gr";
+  else metin=v+" × "+birim+" gr = "+agr(gr)+" gr";
   if(_guncelGramFiyat>0)metin+="  ·  ≈ "+apara(gr*_guncelGramFiyat)+" TL";
   info.textContent=metin;
 }
@@ -959,7 +973,7 @@ function arender(){
       h+='<tr class="alt-satir'+(satildi?" alt-satir-satildi":"")+'">';
       h+='<td class="alt-td-durum"><button class="alt-durum-btn '+(satildi?"alt-satildi-btn":"alt-elimde-btn")+'" data-id="'+k.id+'">'+(satildi?"SATILDI":"ELİMDE")+'</button></td>';
       h+='<td class="alt-td-tarih" data-l="Tarih">'+atarihFmt(k.tarih)+'</td>';
-      h+='<td class="alt-td-adet" data-l="Adet">'+(k.adet||0)+(k.altinTur&&ALTIN_LABEL[k.altinTur]?' × '+ALTIN_LABEL[k.altinTur]:'')+'</td>';
+      h+='<td class="alt-td-adet" data-l="Adet">'+(k.altinTur==="bilezik"?1:(k.adet||0))+(k.altinTur&&ALTIN_LABEL[k.altinTur]?' × '+ALTIN_LABEL[k.altinTur]:'')+'</td>';
       h+='<td class="alt-td-gram" data-l="Gram">'+agr(k.gram)+' gr</td>';
       h+='<td class="alt-td-tl" data-l="TL">'+apara(k.tlKarsiligi)+' TL</td>';
       h+='<td class="alt-td-gf" data-l="Gr. fiyat">'+apara(gF)+' TL</td>';
@@ -978,7 +992,7 @@ function arender(){
   h+='<div class="modal-body alt-form-body">';
   h+='<div class="alt-form-uc">';
   h+='<div class="field-group alt-fg-tarih"><label class="field-label">Tarih</label><input type="date" id="alt-tarih" class="field-input" value="'+bugun+'"/></div>';
-  h+='<div class="field-group alt-fg-adet"><label class="field-label">Adet</label>';
+  h+='<div class="field-group alt-fg-adet"><label class="field-label" id="alt-adet-label">Adet</label>';
   h+='<input type="number" id="alt-adet" class="field-input" placeholder="1" min="0.01" step="0.01" inputmode="decimal"/></div>';
   h+='<div class="field-group alt-fg-tur"><label class="field-label">Tür</label>';
   h+='<input type="hidden" id="alt-tur" value="gram"/>';
@@ -1068,9 +1082,11 @@ function amodalAc(id){
     var k=_kayitlar.find(function(x){return x.id===id;});
     if(k){
       $("alt-tarih").value=k.tarih||bugun;
-      $("alt-adet").value=k.adet!=null&&k.adet!==""?k.adet:"";
       var tur=k.altinTur&&ALTIN_LABEL[k.altinTur]?k.altinTur:altTurTahmin(k.adet,k.gram);
       $("alt-tur").value=tur;
+      /* Bilezikte alanda gram gösterilir; diğerlerinde adet */
+      if(tur==="bilezik")$("alt-adet").value=k.gram!=null&&k.gram!==""?k.gram:"";
+      else $("alt-adet").value=k.adet!=null&&k.adet!==""?k.adet:"";
       $("alt-tl").value=k.tlKarsiligi;$("alt-nasil").value=k.nasilAlindi||"";$("alt-nerde").value=k.nerdeKullanildi||"";
       $("alt-durum-val").value=(k.durum==="satildi")?"satildi":"elimde";
     }
@@ -1097,14 +1113,15 @@ function amodalKapat(){
 
 async function akaydet(){
   var tarih=$("alt-tarih").value;
-  var adet=asayiOku(($("alt-adet")||{}).value);
+  var girilen=asayiOku(($("alt-adet")||{}).value);
   var tur=altTurAl();
   var gram=altGramHesapla();
+  var adet=tur==="bilezik"?1:girilen;
   var tl=asayiOku(($("alt-tl")||{}).value)||0;
   var nasil=($("alt-nasil").value||"").trim(),nerde=($("alt-nerde").value||"").trim();
   var durum=$("alt-durum-val").value||"elimde";
   if(!tarih){alert("Tarih giriniz.");return;}
-  if(!adet||adet<=0){$("alt-adet").focus();return;}
+  if(!girilen||girilen<=0){$("alt-adet").focus();return;}
   if(!gram||gram<=0){$("alt-adet").focus();return;}
   if(!tl||tl<=0){$("alt-tl").focus();return;}
   gram=Math.round(gram*100)/100;
