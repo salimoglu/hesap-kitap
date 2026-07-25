@@ -6308,6 +6308,15 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
   font-size: 12px;
   padding: 0 8px;
 }
+#ar-g-tutar {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+#ar-g-tutar::-webkit-outer-spin-button,
+#ar-g-tutar::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
 .ar-kayit-panel--yan .ar-kayit-aksiyon {
   margin-top: 6px;
   justify-content: flex-end;
