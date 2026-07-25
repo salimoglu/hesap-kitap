@@ -28,6 +28,7 @@ var L_BORC={
 };
 var P_ALACAK={key:"alacak",fbPath:"alacaklar",pfx:"al-a-",lbl:L_ALACAK,kayitlar:[],aktif:null,aktifTip:"pesin",araMetni:"",aktifKisiAd:null};
 var P_BORC={key:"borc",fbPath:"borclar",pfx:"al-b-",lbl:L_BORC,kayitlar:[],aktif:null,aktifTip:"pesin",araMetni:"",aktifKisiAd:null};
+var _aktifPanel="alacak";
 function pid(p,n){return p.pfx+n;}
 function para(n){return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2});}
 function uid(){return "a"+Date.now()+"_"+Math.random().toString(36).substr(2,5);}
@@ -493,13 +494,35 @@ async function kaydet(p){
   p.aktifKisiAd=kisi;
   await fbKaydet(p);modalKapat(p);render();
 }
+function panelGoster(key){
+  _aktifPanel=key==="borc"?"borc":"alacak";
+  var wrap=document.querySelector(".al-ab-wrap");
+  if(wrap)wrap.setAttribute("data-panel",_aktifPanel);
+  document.querySelectorAll(".al-panel-btn").forEach(function(btn){
+    var aktif=btn.dataset.panel===_aktifPanel;
+    btn.classList.toggle("active",aktif);
+    btn.setAttribute("aria-selected",aktif?"true":"false");
+  });
+}
+function baglaPanelGecis(){
+  document.querySelectorAll(".al-panel-btn").forEach(function(btn){
+    btn.onclick=function(){panelGoster(btn.dataset.panel||"alacak");};
+  });
+}
 function render(){
   var c=$("alacaklar-container");if(!c)return;
-  var h='<div class="al-ab-wrap"><div class="al-ab-split">';
+  var h='<div class="al-ab-wrap" data-panel="'+esc(_aktifPanel)+'">';
+  h+='<div class="al-panel-gecis" role="tablist" aria-label="Alacak borc gecisi">';
+  h+='<button type="button" class="al-panel-btn al-panel-btn--alacak'+(_aktifPanel==="alacak"?" active":"")+'" data-panel="alacak" role="tab" aria-selected="'+(_aktifPanel==="alacak"?"true":"false")+'"><span class="al-panel-yon" aria-hidden="true">‹</span><span>Alacaklar</span></button>';
+  h+='<button type="button" class="al-panel-btn al-panel-btn--borc'+(_aktifPanel==="borc"?" active":"")+'" data-panel="borc" role="tab" aria-selected="'+(_aktifPanel==="borc"?"true":"false")+'"><span>Borclarim</span><span class="al-panel-yon" aria-hidden="true">›</span></button>';
+  h+='</div>';
+  h+='<div class="al-ab-split">';
   h+=renderKolon(P_ALACAK)+renderKolon(P_BORC);
   h+='</div>'+modalHtml(P_ALACAK)+kisiModalShell(P_ALACAK)+modalHtml(P_BORC)+kisiModalShell(P_BORC)+'</div>';
   c.innerHTML=h;
+  baglaPanelGecis();
   baglaPanel(P_ALACAK);baglaPanel(P_BORC);
+  panelGoster(_aktifPanel);
   if(P_ALACAK.aktifKisiAd&&kisilerMap(P_ALACAK)[P_ALACAK.aktifKisiAd])kisiModalAc(P_ALACAK,P_ALACAK.aktifKisiAd);
   else if(P_ALACAK.aktifKisiAd)kisiModalKapat(P_ALACAK);
   if(P_BORC.aktifKisiAd&&kisilerMap(P_BORC)[P_BORC.aktifKisiAd])kisiModalAc(P_BORC,P_BORC.aktifKisiAd);

@@ -1246,6 +1246,20 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 
 /* ══ ALACAKLAR / BORCLAR MODÜLÜ ══ */
 .al-ab-wrap { display:flex; flex-direction:column; height:100%; min-height:0; overflow:hidden; width:100%; }
+.al-panel-gecis { display:none; flex-shrink:0; gap:6px; padding:8px 10px 0; box-sizing:border-box; width:100%; max-width:1200px; margin:0 auto; }
+.al-panel-btn {
+  appearance:none; flex:1; display:inline-flex; align-items:center; justify-content:center; gap:6px;
+  min-height:40px; padding:8px 12px; border:1px solid var(--border); border-radius:10px;
+  background:var(--bg-elevated); color:var(--text-muted); font-family:var(--font-body);
+  font-size:13px; font-weight:800; cursor:pointer; -webkit-tap-highlight-color:transparent;
+}
+.al-panel-yon { font-size:16px; line-height:1; opacity:0.8; }
+.al-panel-btn--alacak.active {
+  background:rgba(52,201,122,0.14); border-color:rgba(52,201,122,0.45); color:var(--green);
+}
+.al-panel-btn--borc.active {
+  background:rgba(240,84,84,0.14); border-color:rgba(240,84,84,0.45); color:var(--red);
+}
 .al-ab-split { display:grid; grid-template-columns:1fr 1fr; gap:8px; flex:1; min-height:0; padding:8px 10px 10px; box-sizing:border-box; width:100%; max-width:1200px; margin:0 auto; }
 .al-kolon { display:flex; flex-direction:column; min-height:0; min-width:0; background:var(--bg-card); border:1px solid var(--border); border-radius:14px; overflow:hidden; }
 .al-kolon-baslik { padding:8px 12px; font-size:11px; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; border-bottom:1px solid var(--border); flex-shrink:0; }
@@ -1259,8 +1273,17 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 #al-a-modal, #al-b-modal { z-index:560; }
 #al-a-kisi-modal, #al-b-kisi-modal { z-index:540; }
 @media (max-width:900px){
-  .al-ab-split { grid-template-columns:1fr; overflow-y:auto; -webkit-overflow-scrolling:touch; }
-  .al-kolon { min-height:280px; max-height:none; }
+  .al-panel-gecis { display:flex; }
+  .al-ab-split {
+    grid-template-columns:1fr;
+    overflow:hidden;
+    padding-top:6px;
+    min-height:0;
+  }
+  .al-ab-wrap[data-panel="alacak"] .al-kolon--borc,
+  .al-ab-wrap[data-panel="borc"] .al-kolon--alacak { display:none; }
+  .al-kolon { min-height:0; max-height:none; height:100%; }
+  .al-kolon-baslik { display:none; }
 }
 .al-wrap { display:flex; flex-direction:column; align-items:center; gap:12px; padding:12px 12px 40px; overflow-y:auto; height:100%; box-sizing:border-box; scrollbar-width:thin; scrollbar-color:var(--border) transparent; }
 .al-header { width:100%; max-width:920px; display:flex; align-items:stretch; justify-content:space-between; gap:6px; flex-wrap:nowrap; flex-shrink:0; }
@@ -3276,6 +3299,20 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 
 /* ══ ALACAKLAR / BORCLAR MODÜLÜ ══ */
 .al-ab-wrap { display:flex; flex-direction:column; height:100%; min-height:0; overflow:hidden; width:100%; }
+.al-panel-gecis { display:none; flex-shrink:0; gap:6px; padding:8px 10px 0; box-sizing:border-box; width:100%; max-width:1200px; margin:0 auto; }
+.al-panel-btn {
+  appearance:none; flex:1; display:inline-flex; align-items:center; justify-content:center; gap:6px;
+  min-height:40px; padding:8px 12px; border:1px solid var(--border); border-radius:10px;
+  background:var(--bg-elevated); color:var(--text-muted); font-family:var(--font-body);
+  font-size:13px; font-weight:800; cursor:pointer; -webkit-tap-highlight-color:transparent;
+}
+.al-panel-yon { font-size:16px; line-height:1; opacity:0.8; }
+.al-panel-btn--alacak.active {
+  background:rgba(52,201,122,0.14); border-color:rgba(52,201,122,0.45); color:var(--green);
+}
+.al-panel-btn--borc.active {
+  background:rgba(240,84,84,0.14); border-color:rgba(240,84,84,0.45); color:var(--red);
+}
 .al-ab-split { display:grid; grid-template-columns:1fr 1fr; gap:8px; flex:1; min-height:0; padding:8px 10px 10px; box-sizing:border-box; width:100%; max-width:1200px; margin:0 auto; }
 .al-kolon { display:flex; flex-direction:column; min-height:0; min-width:0; background:var(--bg-card); border:1px solid var(--border); border-radius:14px; overflow:hidden; }
 .al-kolon-baslik { padding:8px 12px; font-size:11px; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; border-bottom:1px solid var(--border); flex-shrink:0; }
@@ -3289,8 +3326,17 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 #al-a-modal, #al-b-modal { z-index:560; }
 #al-a-kisi-modal, #al-b-kisi-modal { z-index:540; }
 @media (max-width:900px){
-  .al-ab-split { grid-template-columns:1fr; overflow-y:auto; -webkit-overflow-scrolling:touch; }
-  .al-kolon { min-height:280px; max-height:none; }
+  .al-panel-gecis { display:flex; }
+  .al-ab-split {
+    grid-template-columns:1fr;
+    overflow:hidden;
+    padding-top:6px;
+    min-height:0;
+  }
+  .al-ab-wrap[data-panel="alacak"] .al-kolon--borc,
+  .al-ab-wrap[data-panel="borc"] .al-kolon--alacak { display:none; }
+  .al-kolon { min-height:0; max-height:none; height:100%; }
+  .al-kolon-baslik { display:none; }
 }
 .al-wrap { display:flex; flex-direction:column; align-items:center; gap:12px; padding:12px 12px 40px; overflow-y:auto; height:100%; box-sizing:border-box; scrollbar-width:thin; scrollbar-color:var(--border) transparent; }
 .al-header { width:100%; max-width:920px; display:flex; align-items:stretch; justify-content:space-between; gap:6px; flex-wrap:nowrap; flex-shrink:0; }
