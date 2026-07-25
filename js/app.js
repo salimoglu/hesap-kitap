@@ -580,31 +580,61 @@
   (function tabSwipeBagla() {
     const mainEl = document.querySelector("main.content");
     if (!mainEl) return;
-    let sx, sy, swipeOk = false;
-    mainEl.addEventListener("touchstart", e => {
+    let sx, sy, swipeOk = false, scrollKutu = null, startScrollLeft = 0;
+
+    function yatayKaydiriciBul(el) {
+      while (el && el !== mainEl && el !== document.body) {
+        if (el.scrollWidth > el.clientWidth + 2) {
+          var st = window.getComputedStyle(el);
+          var ox = st.overflowX;
+          if (ox === "auto" || ox === "scroll" || ox === "overlay") return el;
+        }
+        el = el.parentElement;
+      }
+      return null;
+    }
+
+    function swipeSifirla() {
       sx = sy = undefined;
       swipeOk = false;
+      scrollKutu = null;
+      startScrollLeft = 0;
+    }
+
+    mainEl.addEventListener("touchstart", e => {
+      swipeSifirla();
       if (e.touches.length !== 1) return;
       const el = e.target;
       if (el && el.closest && el.closest("input, textarea, select, button, a, label")) return;
       sx = e.touches[0].clientX;
       sy = e.touches[0].clientY;
+      scrollKutu = yatayKaydiriciBul(el);
+      startScrollLeft = scrollKutu ? scrollKutu.scrollLeft : 0;
       swipeOk = true;
     }, { passive: true });
-    mainEl.addEventListener("touchcancel", () => { sx = sy = undefined; swipeOk = false; }, { passive: true });
+    mainEl.addEventListener("touchcancel", () => { swipeSifirla(); }, { passive: true });
     mainEl.addEventListener("touchend", e => {
-      if (!swipeOk || sx === undefined) { sx = sy = undefined; return; }
+      if (!swipeOk || sx === undefined) { swipeSifirla(); return; }
       const ls = document.getElementById("lock-screen");
-      if (ls && !ls.classList.contains("hidden")) { sx = sy = undefined; return; }
-      if (document.querySelector(".modal-overlay:not(.hidden), .bk-modal-overlay:not(.hidden), .hk-tanitim-overlay:not(.hidden)")) { sx = sy = undefined; return; }
+      if (ls && !ls.classList.contains("hidden")) { swipeSifirla(); return; }
+      if (document.querySelector(".modal-overlay:not(.hidden), .bk-modal-overlay:not(.hidden), .hk-tanitim-overlay:not(.hidden)")) { swipeSifirla(); return; }
       const t = e.changedTouches[0];
       const dx = t.clientX - sx;
       const dy = t.clientY - sy;
-      sx = sy = undefined;
+      const kutu = scrollKutu;
+      const basScroll = startScrollLeft;
+      swipeSifirla();
       const ax = Math.abs(dx);
       const ay = Math.abs(dy);
       if (ax < 56) return;
       if (ay > ax * 0.78) return;
+      /* Verilen Altın / Altın tablosu: önce yatay kaydır, kenara gelince sekme değişsin */
+      if (kutu) {
+        if (Math.abs(kutu.scrollLeft - basScroll) > 6) return;
+        var maxS = kutu.scrollWidth - kutu.clientWidth;
+        if (dx < 0 && kutu.scrollLeft < maxS - 4) return;
+        if (dx > 0 && kutu.scrollLeft > 4) return;
+      }
       if (dx < 0) tabKaydir(1);
       else tabKaydir(-1);
     }, { passive: true });

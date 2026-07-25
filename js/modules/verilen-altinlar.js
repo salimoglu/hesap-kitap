@@ -259,9 +259,53 @@ var VerilenAltinlarModule = (function () {
     h += '<button type="button" class="btn-primary" id="va-kaydet">Kaydet</button></div>';
     h += "</div></div>";
 
+    h += '<div class="bk-modal-overlay hidden" id="va-detay-modal">';
+    h += '<div class="modal-box va-detay-box">';
+    h += '<div class="modal-header"><h2 class="modal-title" id="va-detay-baslik">Kayıt</h2>';
+    h += '<button type="button" class="modal-close" id="va-detay-kapat">&#10005;</button></div>';
+    h += '<div class="modal-body va-detay-body" id="va-detay-body"></div>';
+    h += '<div class="modal-footer va-detay-footer">';
+    h += '<button type="button" class="btn-secondary" id="va-detay-sil">Sil</button>';
+    h += '<button type="button" class="btn-primary" id="va-detay-duzenle">Düzenle</button>';
+    h += "</div></div></div>";
+
     h += "</div>";
     c.innerHTML = h;
     bagla();
+  }
+
+  function detayKapat() {
+    var m = $("va-detay-modal");
+    if (m) m.classList.add("hidden");
+    _aktif = null;
+  }
+
+  function detayAc(k) {
+    if (!k) return;
+    _aktif = k;
+    var gr = kayitGram(k);
+    var adet = parseFloat(k.adet) || 1;
+    var satirGuncel = _gramFiyat > 0 ? gr * _gramFiyat : 0;
+    var gunD = parseFloat(k.gunDegerTl) || 0;
+    var bas = $("va-detay-baslik");
+    var body = $("va-detay-body");
+    if (bas) bas.textContent = k.kisi || "Kayıt";
+    if (body) {
+      var h = '<div class="va-detay-grid">';
+      h += '<div class="va-detay-item"><span class="va-detay-l">Kişi</span><span class="va-detay-v">' + esc(k.kisi || "—") + "</span></div>";
+      h += '<div class="va-detay-item"><span class="va-detay-l">Açıklama</span><span class="va-detay-v">' + esc(k.aciklama || "—") + "</span></div>";
+      h += '<div class="va-detay-item"><span class="va-detay-l">Altın</span><span class="va-detay-v va-detay-v--au">' + esc(turEtiket(k.tur));
+      if (adet !== 1) h += " ×" + agr(adet);
+      h += "</span></div>";
+      h += '<div class="va-detay-item"><span class="va-detay-l">Tarih</span><span class="va-detay-v">' + (k.tarih ? tarihFmt(k.tarih) : "—") + "</span></div>";
+      h += '<div class="va-detay-item"><span class="va-detay-l">Gram</span><span class="va-detay-v va-detay-v--au">' + agr(gr) + " gr</span></div>";
+      h += '<div class="va-detay-item"><span class="va-detay-l">O gün</span><span class="va-detay-v">' + (gunD > 0 ? para(gunD) + " TL" : "—") + "</span></div>";
+      h += '<div class="va-detay-item va-detay-item--full"><span class="va-detay-l">Güncel değer</span><span class="va-detay-v va-detay-v--ok">' + (_gramFiyat > 0 ? para(satirGuncel) + " TL" : "—") + "</span></div>";
+      h += "</div>";
+      body.innerHTML = h;
+    }
+    var m = $("va-detay-modal");
+    if (m) m.classList.remove("hidden");
   }
 
   function modalAc(k) {
@@ -317,6 +361,16 @@ var VerilenAltinlarModule = (function () {
       });
     }
 
+    document.querySelectorAll(".va-satir").forEach(function (tr) {
+      tr.addEventListener("click", function (e) {
+        if (e.target.closest && e.target.closest(".row-action-btn")) return;
+        var id = tr.getAttribute("data-id");
+        var k = _kayitlar.find(function (x) {
+          return x.id === id;
+        });
+        if (k) detayAc(k);
+      });
+    });
     document.querySelectorAll(".va-duz-btn").forEach(function (btn) {
       btn.addEventListener("click", function (e) {
         e.stopPropagation();
@@ -337,6 +391,39 @@ var VerilenAltinlarModule = (function () {
         render();
       });
     });
+
+    var detayM = $("va-detay-modal");
+    var detayKapatBtn = $("va-detay-kapat");
+    var detayDuz = $("va-detay-duzenle");
+    var detaySil = $("va-detay-sil");
+    if (detayKapatBtn) detayKapatBtn.addEventListener("click", detayKapat);
+    if (detayM) {
+      detayM.addEventListener("click", function (e) {
+        if (e.target === detayM) detayKapat();
+      });
+      var detayBox = detayM.querySelector(".va-detay-box");
+      if (detayBox) detayBox.addEventListener("click", function (e) { e.stopPropagation(); });
+    }
+    if (detayDuz) {
+      detayDuz.addEventListener("click", function () {
+        var k = _aktif;
+        detayKapat();
+        if (k) modalAc(k);
+      });
+    }
+    if (detaySil) {
+      detaySil.addEventListener("click", async function () {
+        if (!_aktif) return;
+        if (!confirm("Bu kaydı silmek istiyor musunuz?")) return;
+        var id = _aktif.id;
+        _kayitlar = _kayitlar.filter(function (x) {
+          return x.id !== id;
+        });
+        await fbKaydet();
+        detayKapat();
+        render();
+      });
+    }
   }
 
   async function kaydet() {

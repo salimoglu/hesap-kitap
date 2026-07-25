@@ -2041,8 +2041,27 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .va-ekle-btn:hover{opacity:0.88;}
 .va-bos{padding:40px 20px;text-align:center;color:var(--text-muted);font-size:13px;line-height:1.5;}
 .va-bos-ikon{font-size:36px;margin-bottom:10px;opacity:0.85;}
-.va-tablo-dis{flex:1;min-height:0;border:1px solid var(--border);border-radius:var(--radius-md);overflow:auto;-webkit-overflow-scrolling:touch;}
+.va-tablo-dis{flex:1;min-height:0;border:1px solid var(--border);border-radius:var(--radius-md);overflow:auto;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y;overscroll-behavior-x:contain;}
 .va-tablo{width:100%;border-collapse:collapse;min-width:720px;}
+.va-satir{cursor:pointer;}
+.va-satir:active{background:var(--bg-elevated);}
+.va-detay-box{max-width:420px;width:calc(100% - 24px);}
+.va-detay-body{padding:14px 16px 12px;}
+.va-detay-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.va-detay-item{display:flex;flex-direction:column;gap:3px;min-width:0;padding:8px 10px;border-radius:8px;background:var(--bg-elevated);border:1px solid var(--border);}
+.va-detay-item--full{grid-column:1 / -1;}
+.va-detay-l{font-size:9px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);}
+.va-detay-v{font-size:13px;font-weight:700;color:var(--text-primary);line-height:1.3;word-break:break-word;}
+.va-detay-v--au{color:var(--gold);}
+.va-detay-v--ok{color:var(--green);}
+.va-detay-footer{display:grid;grid-template-columns:1fr 1.35fr;gap:8px;}
+@media (max-width:640px){
+  #va-detay-modal.bk-modal-overlay{align-items:flex-start;padding:max(8px,env(safe-area-inset-top,0px)) 10px 12px;}
+  .va-detay-box{width:100%;max-width:100%;margin:0;border-radius:0 0 16px 16px;max-height:min(88dvh,calc(100dvh - 16px));overflow:auto;}
+  .va-detay-grid{gap:6px;}
+  .va-detay-item{padding:7px 8px;}
+  .va-detay-v{font-size:12px;}
+}
 .va-tablo thead{position:sticky;top:0;z-index:2;}
 .va-tablo thead th{font-size:10px;font-weight:800;letter-spacing:0.06em;color:var(--text-muted);padding:8px 12px;text-align:left;background:var(--bg-card);border-bottom:1px solid var(--border);white-space:nowrap;text-transform:uppercase;}
 .va-tablo tbody tr{border-bottom:1px solid var(--border);transition:background 0.08s;}
