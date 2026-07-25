@@ -656,13 +656,29 @@ function altTurTahmin(adet,gram){
   }
   return bestDiff<=0.2?best:"gram";
 }
+function altKusurluMu(n){
+  n=Number(n)||0;
+  return Math.abs(n-Math.round(n))>0.001;
+}
+function altTamSikkeKatiMi(gram){
+  var sikke=["ceyrek","yarim","tam","ata"],i,t,birim,a;
+  gram=parseFloat(gram)||0;
+  if(gram<=0)return false;
+  for(i=0;i<sikke.length;i++){
+    t=sikke[i];birim=ALTIN_GRAM[t]||1;
+    a=Math.round(gram/birim);
+    if(a>=1&&Math.abs(a*birim-gram)<=0.06)return true;
+  }
+  return false;
+}
 /* Eski kayit: adet 0 / yok → gramdan tur + adet cikar (adet asla 0 kalmaz) */
 function altAdetTurBul(gram){
   gram=parseFloat(gram)||0;
   if(gram<=0)return {tur:"gram",adet:1};
   var best=null,i,t,birim,raw,adetInt,diff;
-  for(i=0;i<ALTIN_SIRASI.length;i++){
-    t=ALTIN_SIRASI[i];birim=ALTIN_GRAM[t]||1;
+  var sikke=["ceyrek","yarim","tam","ata","gram"];
+  for(i=0;i<sikke.length;i++){
+    t=sikke[i];birim=ALTIN_GRAM[t]||1;
     raw=gram/birim;adetInt=Math.round(raw);
     if(adetInt<1)continue;
     diff=Math.abs(adetInt*birim-gram);
@@ -675,6 +691,8 @@ function altAdetTurBul(gram){
   if(best)return {tur:best.tur,adet:best.adet};
   var a=Math.round(gram*100)/100;
   if(a<0.01)a=1;
+  /* Tam sayı değilse (küsur gram) → bilezik */
+  if(altKusurluMu(a))return {tur:"bilezik",adet:a};
   return {tur:"gram",adet:a};
 }
 function altKayitNormalize(k){
@@ -693,7 +711,22 @@ function altKayitNormalize(k){
     degisti=true;
   }
   adet=parseFloat(k.adet)||0;
-  if(adet<=0){k.adet=1;degisti=true;}
+  if(adet<=0){k.adet=1;degisti=true;adet=1;}
+
+  /* Küsur gram görünenler (10,xx gr vb.) → Bilezik; adet = gram (tam sikke katı değilse) */
+  var tur=k.altinTur;
+  if(gram>0&&altKusurluMu(gram)&&!altTamSikkeKatiMi(gram)&&(tur==="gram"||tur==="bilezik"||!ALTIN_LABEL[tur])){
+    var yeniAdet=Math.round(gram*100)/100;
+    if(k.altinTur!=="bilezik"||Math.abs((parseFloat(k.adet)||0)-yeniAdet)>0.001){
+      k.altinTur="bilezik";
+      k.adet=yeniAdet;
+      degisti=true;
+    }
+  } else if(tur==="gram"&&adet>0&&altKusurluMu(adet)&&gram>0&&Math.abs(adet-gram)<=0.06&&!altTamSikkeKatiMi(gram)){
+    k.altinTur="bilezik";
+    k.adet=Math.round(gram*100)/100;
+    degisti=true;
+  }
   return degisti;
 }
 function altKayitlariNormalize(){
