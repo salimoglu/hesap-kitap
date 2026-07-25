@@ -7239,6 +7239,42 @@ html.theme-light #birikim-container .bk-yil-kart:hover {
     text-align-last: left;
   }
 
+  /* Liste satırı: bakiye gizle, kategori/tarih/tutar ekrana yayılsın */
+  #tab-islemler .islem-bakiye-col,
+  #tab-islemler .islem-row-actions {
+    display: none !important;
+  }
+  #tab-islemler .islem-row {
+    padding: 0 8px 0 6px;
+    gap: 4px;
+  }
+  #tab-islemler .islem-row-left {
+    flex: 1 1 0;
+    min-width: 0;
+    padding-left: 6px;
+  }
+  #tab-islemler .islem-kat-adi {
+    font-size: 12px;
+  }
+  #tab-islemler .islem-row-right {
+    flex: 0 0 auto;
+    min-width: 0;
+    gap: 2px;
+    margin-left: auto;
+  }
+  #tab-islemler .islem-tarih-col {
+    flex: 0 0 auto;
+    padding: 0 4px;
+    font-size: 11px;
+  }
+  #tab-islemler .islem-tutar-col {
+    flex: 0 0 auto;
+    min-width: 0;
+    width: auto;
+    padding: 0 2px 0 4px;
+    font-size: 13px !important;
+  }
+
   .ioz-ay-ust {
     grid-template-columns: 1fr;
     gap: 6px;
