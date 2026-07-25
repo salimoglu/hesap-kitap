@@ -306,7 +306,6 @@ var ArabamModule = (function () {
     var gBa = gunKaldi(snTar);
     var gMu = a.muayeneTarih ? gunKaldi(a.muayeneTarih) : null;
     var gSi = a.sigortaTarih ? gunKaldi(a.sigortaTarih) : null;
-    var gKa = a.kaskoTarih ? gunKaldi(a.kaskoTarih) : null;
 
     var bakimAna = "—";
     var bakimAlt = "";
@@ -346,15 +345,20 @@ var ArabamModule = (function () {
       ana: gSi !== null ? kalanGunMetni(gSi) : "—",
       alt: a.sigortaTarih ? mTarih(a.sigortaTarih) : ""
     }, a);
-    h += takipKartHtml({
+    h += "</div></div>";
+    return h;
+  }
+
+  function kaskoKartHtml(a) {
+    aracNormalize(a);
+    var gKa = a.kaskoTarih ? gunKaldi(a.kaskoTarih) : null;
+    return takipKartHtml({
       tip: "kasko",
       ad: "Kasko",
       gun: gKa,
       ana: gKa !== null ? kalanGunMetni(gKa) : "—",
       alt: a.kaskoTarih ? mTarih(a.kaskoTarih) : ""
     }, a);
-    h += "</div></div>";
-    return h;
   }
 
   function mp(n) {
@@ -723,18 +727,21 @@ var ArabamModule = (function () {
 
     h += '<div class="ar-yil-ozet" id="ar-d-yil-ozet"></div>';
 
-    h += '<div class="ar-bakim-ozet" id="ar-d-bakim-ozet"></div>';
-
-    h += '<div class="ar-kayit-panel">';
-    h += '<div class="ar-kayit-head"><span class="ar-kayit-baslik">Gider ekle</span></div>';
+    h += '<div class="ar-bakim-ozet">';
+    h += '<div id="ar-d-bakim-ozet"></div>';
+    h += '<div class="ar-takip-liste ar-takip-alt">';
+    h += '<div id="ar-d-kasko-host"></div>';
+    h += '<div class="ar-kayit-panel ar-kayit-panel--yan" id="ar-kayit-panel">';
+    h += '<div class="ar-kayit-head"><span class="ar-kayit-baslik">Gider</span></div>';
     h += '<div class="ar-kayit-alan-grid ar-kayit-gider-grid">';
     h += '<div class="field-group"><label class="field-label" for="ar-g-tarih">Tarih</label><input type="date" id="ar-g-tarih" class="field-input" value="' + bugun + '"/></div>';
-    h += '<div class="field-group"><label class="field-label" for="ar-g-tutar">Tutar (TL)</label><input type="number" id="ar-g-tutar" class="field-input" placeholder="0" min="0" step="0.01" inputmode="decimal"/></div>';
+    h += '<div class="field-group"><label class="field-label" for="ar-g-tutar">Tutar</label><input type="number" id="ar-g-tutar" class="field-input" placeholder="0" min="0" step="0.01" inputmode="decimal"/></div>';
     h += '<div class="field-group"><label class="field-label" for="ar-g-kalem">Kalem</label><select id="ar-g-kalem" class="field-select"></select></div>';
-    h += '<div class="field-group"><label class="field-label" for="ar-g-aciklama">Not</label><input type="text" id="ar-g-aciklama" class="field-input" placeholder="İsteğe bağlı" maxlength="120"/></div>';
+    h += '<div class="field-group"><label class="field-label" for="ar-g-aciklama">Not</label><input type="text" id="ar-g-aciklama" class="field-input" placeholder="Not" maxlength="120"/></div>';
     h += "</div>";
     h += '<div class="ar-kayit-aksiyon"><button type="button" class="ar-kayit-kaydet-btn" id="ar-kayit-kaydet">Kaydet</button></div>';
     h += "</div>";
+    h += "</div></div>";
 
     h += '<details class="ar-gider-liste-wrap" id="ar-gider-gecmis">';
     h += '<summary class="ar-gider-liste-baslik">Gider geçmişi <span class="ar-gecmis-adet" id="ar-gider-adet">0</span></summary>';
@@ -793,10 +800,10 @@ var ArabamModule = (function () {
     $("ar-d-toplam").textContent = mp(tt) + " TL";
 
     var ozBakim = $("ar-d-bakim-ozet");
-    if (ozBakim) {
-      ozBakim.innerHTML = bakimMuayeneOzetHtml(a);
-      wireTakipPaneli(aid);
-    }
+    if (ozBakim) ozBakim.innerHTML = bakimMuayeneOzetHtml(a);
+    var kaskoHost = $("ar-d-kasko-host");
+    if (kaskoHost) kaskoHost.innerHTML = kaskoKartHtml(a);
+    if (ozBakim || kaskoHost) wireTakipPaneli(aid);
 
     var ozYil = $("ar-d-yil-ozet");
     if (ozYil) ozYil.innerHTML = yillikOzetHtml(a);
@@ -939,47 +946,49 @@ var ArabamModule = (function () {
   }
 
   function wireTakipPaneli(aid) {
-    var oz = $("ar-d-bakim-ozet");
-    if (!oz) return;
-    oz.querySelectorAll(".ar-gecmis-sil").forEach(function (btn) {
-      btn.addEventListener("click", async function (e) {
-        e.stopPropagation();
-        var gid = btn.dataset.gid;
-        var ar = aracBul(aid);
-        if (!ar || !ar.belgeGecmisi) return;
-        ar.belgeGecmisi = ar.belgeGecmisi.filter(function (r) { return r.id !== gid; });
-        await fbKaydet();
-        render();
+    var roots = [$("ar-d-bakim-ozet"), $("ar-d-kasko-host")].filter(Boolean);
+    if (!roots.length) return;
+    roots.forEach(function (oz) {
+      oz.querySelectorAll(".ar-gecmis-sil").forEach(function (btn) {
+        btn.addEventListener("click", async function (e) {
+          e.stopPropagation();
+          var gid = btn.dataset.gid;
+          var ar = aracBul(aid);
+          if (!ar || !ar.belgeGecmisi) return;
+          ar.belgeGecmisi = ar.belgeGecmisi.filter(function (r) { return r.id !== gid; });
+          await fbKaydet();
+          render();
+        });
       });
-    });
-    oz.querySelectorAll(".ar-takip-kart-ozet").forEach(function (btn) {
-      btn.addEventListener("click", function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        takipTipAc(btn.dataset.tip || "bakim");
+      oz.querySelectorAll(".ar-takip-kart-ozet").forEach(function (btn) {
+        btn.addEventListener("click", function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          takipTipAc(btn.dataset.tip || "bakim");
+        });
       });
-    });
-    oz.querySelectorAll(".ar-kart-gecmis").forEach(function (det) {
-      det.addEventListener("click", function (e) { e.stopPropagation(); });
-    });
-    oz.querySelectorAll(".ar-takip-iptal").forEach(function (btn) {
-      btn.addEventListener("click", function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        _acikTakipTip = null;
-        detayGuncelle(aid);
+      oz.querySelectorAll(".ar-kart-gecmis").forEach(function (det) {
+        det.addEventListener("click", function (e) { e.stopPropagation(); });
       });
-    });
-    oz.querySelectorAll(".ar-takip-kaydet").forEach(function (btn) {
-      btn.addEventListener("click", async function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        var form = btn.closest(".ar-takip-form");
-        await takipKartKaydet(form);
+      oz.querySelectorAll(".ar-takip-iptal").forEach(function (btn) {
+        btn.addEventListener("click", function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          _acikTakipTip = null;
+          detayGuncelle(aid);
+        });
       });
-    });
-    oz.querySelectorAll(".ar-takip-form").forEach(function (form) {
-      form.addEventListener("click", function (e) { e.stopPropagation(); });
+      oz.querySelectorAll(".ar-takip-kaydet").forEach(function (btn) {
+        btn.addEventListener("click", async function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          var form = btn.closest(".ar-takip-form");
+          await takipKartKaydet(form);
+        });
+      });
+      oz.querySelectorAll(".ar-takip-form").forEach(function (form) {
+        form.addEventListener("click", function (e) { e.stopPropagation(); });
+      });
     });
   }
 
