@@ -248,37 +248,29 @@ var ArabamModule = (function () {
   function takipFormHtml(tip, a) {
     var bugun = new Date().toISOString().split("T")[0];
     var gKm = a && a.guncelKm != null && a.guncelKm !== "" ? String(a.guncelKm) : "";
-    var perKm = a && a.bakimPeriyodKm != null && a.bakimPeriyodKm !== "" ? String(a.bakimPeriyodKm) : "10000";
-    var perAy = a && a.bakimPeriyodAy != null && a.bakimPeriyodAy !== "" ? String(a.bakimPeriyodAy) : "12";
-    var basit = tip === "km" || tip === "muayene" || tip === "sigorta" || tip === "kasko";
-    var h = '<div class="ar-takip-form' + (basit ? " ar-takip-form--satir" : "") + '" data-tip="' + tip + '">';
+    var baslikMap = { km: "Km", bakim: "Bakım", muayene: "Muayene", sigorta: "Sigorta", kasko: "Kasko" };
+    var h = '<div class="ar-takip-form ar-takip-form--yerinde" data-tip="' + tip + '">';
+    h += '<span class="ar-takip-dot" aria-hidden="true"></span>';
+    h += '<div class="ar-takip-metin">';
+    h += '<span class="ar-takip-ad">' + (baslikMap[tip] || belgeTipLabel(tip)) + "</span>";
     if (tip === "bakim") {
-      h += '<div class="ar-takip-form-grid">';
-      h += '<input type="date" class="field-input ar-tf-tarih" value="' + bugun + '" aria-label="Bakım tarihi"/>';
-      h += '<input type="number" class="field-input ar-tf-km" value="' + gKm + '" placeholder="Km" min="0" step="1" inputmode="numeric" aria-label="Bakım km"/>';
-      h += '<input type="number" class="field-input ar-tf-per-km" value="' + perKm + '" placeholder="Her km" min="1000" step="500" inputmode="numeric" aria-label="Periyot km"/>';
-      h += '<input type="number" class="field-input ar-tf-per-ay" value="' + perAy + '" placeholder="Her ay" min="1" max="36" step="1" inputmode="numeric" aria-label="Periyot ay"/>';
+      h += '<div class="ar-takip-edit-cift">';
+      h += '<input type="date" class="field-input ar-tf-tarih ar-tf-yerinde" value="' + bugun + '" aria-label="Bakım tarihi"/>';
+      h += '<input type="number" class="field-input ar-tf-km ar-tf-yerinde" value="' + gKm + '" placeholder="Km" min="0" step="1" inputmode="numeric" aria-label="Bakım km"/>';
       h += "</div>";
-      h += '<div class="ar-takip-form-satir">';
-      h += '<button type="button" class="ar-takip-kaydet">Kaydet</button>';
-      h += tipBelgeGecmisHtml(a, tip, true);
-      h += '<button type="button" class="ar-takip-iptal" title="Vazgeç" aria-label="Vazgeç">&#10005;</button>';
-      h += "</div>";
+    } else if (tip === "km") {
+      h += '<input type="number" class="field-input ar-tf-km ar-tf-yerinde" value="' + gKm + '" placeholder="Güncel km" min="0" step="1" inputmode="numeric" aria-label="Güncel km"/>';
     } else {
-      if (tip === "km") {
-        h += '<input type="number" class="field-input ar-tf-km ar-tf-tek" value="' + gKm + '" placeholder="Güncel km" min="0" step="1" inputmode="numeric" aria-label="Güncel km"/>';
-      } else {
-        var mevcut =
-          tip === "muayene" ? (a && a.muayeneTarih) || "" :
-          tip === "sigorta" ? (a && a.sigortaTarih) || "" :
-          (a && a.kaskoTarih) || "";
-        h += '<input type="date" class="field-input ar-tf-tarih ar-tf-tek" value="' + mevcut + '" aria-label="Bitiş tarihi"/>';
-      }
-      h += '<button type="button" class="ar-takip-kaydet">Kaydet</button>';
-      h += tipBelgeGecmisHtml(a, tip, true);
-      h += '<button type="button" class="ar-takip-iptal" title="Vazgeç" aria-label="Vazgeç">&#10005;</button>';
+      var mevcut =
+        tip === "muayene" ? (a && a.muayeneTarih) || "" :
+        tip === "sigorta" ? (a && a.sigortaTarih) || "" :
+        (a && a.kaskoTarih) || "";
+      h += '<input type="date" class="field-input ar-tf-tarih ar-tf-yerinde" value="' + mevcut + '" aria-label="Bitiş tarihi"/>';
     }
-    h += "</div>";
+    h += '<div class="ar-takip-edit-ak">';
+    h += '<button type="button" class="ar-takip-kaydet" title="Kaydet" aria-label="Kaydet">✓</button>';
+    h += '<button type="button" class="ar-takip-iptal" title="Vazgeç" aria-label="Vazgeç">&#10005;</button>';
+    h += "</div></div></div>";
     return h;
   }
 
@@ -300,8 +292,8 @@ var ArabamModule = (function () {
       h += '<span class="ar-takip-ana">' + ana + "</span>";
       if (alt) h += '<span class="ar-takip-alt">' + alt + "</span>";
       h += "</span></button>";
-      h += tipBelgeGecmisHtml(a, opts.tip, false);
     }
+    h += tipBelgeGecmisHtml(a, opts.tip, false);
     h += "</div>";
     return h;
   }
@@ -904,10 +896,18 @@ var ArabamModule = (function () {
     if (tip === "bakim") {
       var perKmEl = formEl.querySelector(".ar-tf-per-km");
       var perAyEl = formEl.querySelector(".ar-tf-per-ay");
-      var perKm = perKmEl ? parseInt(perKmEl.value || "", 10) : NaN;
-      var perAy = perAyEl ? parseInt(perAyEl.value || "", 10) : NaN;
-      ar.bakimPeriyodKm = isNaN(perKm) || perKm < 1000 ? 10000 : perKm;
-      ar.bakimPeriyodAy = isNaN(perAy) || perAy < 1 ? 12 : Math.min(36, perAy);
+      if (perKmEl) {
+        var perKm = parseInt(perKmEl.value || "", 10);
+        ar.bakimPeriyodKm = isNaN(perKm) || perKm < 1000 ? 10000 : perKm;
+      } else if (!ar.bakimPeriyodKm) {
+        ar.bakimPeriyodKm = 10000;
+      }
+      if (perAyEl) {
+        var perAy = parseInt(perAyEl.value || "", 10);
+        ar.bakimPeriyodAy = isNaN(perAy) || perAy < 1 ? 12 : Math.min(36, perAy);
+      } else if (!ar.bakimPeriyodAy) {
+        ar.bakimPeriyodAy = 12;
+      }
       if (km !== "" && (ar.guncelKm === "" || ar.guncelKm == null || Number(km) >= Number(ar.guncelKm))) {
         ar.guncelKm = km;
       }
