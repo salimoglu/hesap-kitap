@@ -1629,7 +1629,7 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .vf-tablo tbody tr:hover{background:var(--bg-elevated);}
 .vf-tablo td{padding:6px 8px;font-size:12px;vertical-align:middle;}
 .vf-td-ay{font-size:12px;font-weight:600;color:var(--text-secondary);white-space:nowrap;}
-.vf-td-miktar{font-family:var(--font-brand);font-size:13px;white-space:nowrap;}
+.vf-td-miktar{font-family:var(--font-body);font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:0.02em;white-space:nowrap;}
 .vf-td-toplam{font-family:var(--font-brand);font-size:13px;color:var(--gold);font-weight:700;white-space:nowrap;}
 /* Ödeme butonları */
 .vf-odeme-btn{background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:12px;font-weight:600;padding:4px 10px;cursor:pointer;transition:all 0.1s;white-space:nowrap;min-width:80px;text-align:center;}
@@ -1728,10 +1728,54 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .vf2-td-ay{text-align:left !important;font-size:12px;font-weight:600;color:var(--text-secondary);padding-left:10px !important;}
 .vf2-td-top{font-family:var(--font-brand);font-size:13px;color:var(--gold);font-weight:600;font-variant-numeric:tabular-nums;}
 .vf2-td-gun{font-family:var(--font-brand);font-size:13px;color:var(--gold);font-weight:600;font-variant-numeric:tabular-nums;}
-.vf2-td-yat{font-family:var(--font-brand);font-size:13px;font-weight:600;color:var(--text-primary);font-variant-numeric:tabular-nums;}
-/* Altın adet / gram — tutarlarla aynı puntoda rakam */
-.vf2-td-alt-adet,.vf2-td-alt-gram{font-family:var(--font-body);font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--text-primary);}
-.vf2-tot-row .vf2-td-alt-adet,.vf2-tot-row .vf2-td-alt-gram{font-family:var(--font-body);font-weight:600;letter-spacing:0;}
+.vf2-td-yat{font-family:var(--font-body);font-size:13px;font-weight:700;color:var(--text-primary);font-variant-numeric:tabular-nums;letter-spacing:0.02em;}
+/* Altın adet — okunaklı gövde fontu */
+.vf2-td-adet,
+.vf2-td-alt-adet,
+.vf2-td-alt-gram{
+  font-family:var(--font-body);
+  font-size:14px;
+  font-weight:700;
+  font-variant-numeric:tabular-nums;
+  font-feature-settings:"tnum" 1;
+  color:var(--text-primary);
+  letter-spacing:0.02em;
+  white-space:nowrap;
+  text-align:center;
+}
+.vf2-adet-n{
+  font-family:var(--font-body);
+  font-size:15px;
+  font-weight:800;
+  font-variant-numeric:tabular-nums;
+  font-feature-settings:"tnum" 1;
+  letter-spacing:0.03em;
+  color:var(--text-primary);
+  font-style:normal;
+}
+.vf2-adet-l{
+  margin-left:4px;
+  font-size:11px;
+  font-weight:600;
+  color:var(--text-muted);
+  letter-spacing:0.02em;
+}
+.vf2-tip-tag .vf2-adet-n{
+  font-size:14px;
+  color:inherit;
+  margin-left:2px;
+}
+.vf2-tot-row .vf2-td-adet,
+.vf2-tot-row .vf2-td-alt-adet,
+.vf2-tot-row .vf2-td-alt-gram{font-family:var(--font-body);font-weight:800;letter-spacing:0.02em;}
+.vf2-k-adet{
+  font-family:var(--font-body) !important;
+  font-size:15px !important;
+  font-weight:800 !important;
+  font-variant-numeric:tabular-nums;
+  letter-spacing:0.03em;
+  text-align:center;
+}
 .vf2-td-nakit{color:var(--green) !important;}
 .vf2-td-bos{color:var(--text-muted);font-size:13px;}
 .vf2-td-aks{white-space:nowrap;}
@@ -1749,10 +1793,11 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .vf2-gr-row td{background:var(--bg-elevated);font-family:var(--font-body);font-size:13px;color:var(--text-muted);font-weight:600;font-variant-numeric:tabular-nums;border-top:1px solid var(--border);padding:6px 8px;}
 
 /* Tip tag */
-.vf2-tip-tag{border-radius:4px;padding:4px 10px;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;letter-spacing:0.02em;line-height:1.25;}
+.vf2-tip-tag{border-radius:8px;padding:5px 10px;font-family:var(--font-body);font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;letter-spacing:0.02em;line-height:1.3;display:inline-flex;align-items:baseline;gap:2px;}
 .vf2-tip-gram,.vf2-tip-ceyrek,.vf2-tip-yarim,.vf2-tip-tam{background:rgba(240,184,64,0.15);color:var(--gold);}
 .vf2-tip-nakit{background:rgba(52,211,153,0.12);color:var(--green);}
 .vf2-kolon-baslik{font-family:var(--font-brand);font-size:12px;font-weight:800;letter-spacing:1.5px;color:var(--gold);}
+.vf-td-miktar{font-family:var(--font-body);font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:0.02em;}
 
 /* Durum özeti */
 .vf2-durum-ozet{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 18px;display:flex;flex-direction:column;gap:8px;}
@@ -3692,7 +3737,7 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .vf-tablo tbody tr:hover{background:var(--bg-elevated);}
 .vf-tablo td{padding:6px 8px;font-size:12px;vertical-align:middle;}
 .vf-td-ay{font-size:12px;font-weight:600;color:var(--text-secondary);white-space:nowrap;}
-.vf-td-miktar{font-family:var(--font-brand);font-size:13px;white-space:nowrap;}
+.vf-td-miktar{font-family:var(--font-body);font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:0.02em;white-space:nowrap;}
 .vf-td-toplam{font-family:var(--font-brand);font-size:13px;color:var(--gold);font-weight:700;white-space:nowrap;}
 /* Ödeme butonları */
 .vf-odeme-btn{background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:12px;font-weight:600;padding:4px 10px;cursor:pointer;transition:all 0.1s;white-space:nowrap;min-width:80px;text-align:center;}
@@ -3791,10 +3836,54 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .vf2-td-ay{text-align:left !important;font-size:12px;font-weight:600;color:var(--text-secondary);padding-left:10px !important;}
 .vf2-td-top{font-family:var(--font-brand);font-size:13px;color:var(--gold);font-weight:600;font-variant-numeric:tabular-nums;}
 .vf2-td-gun{font-family:var(--font-brand);font-size:13px;color:var(--gold);font-weight:600;font-variant-numeric:tabular-nums;}
-.vf2-td-yat{font-family:var(--font-brand);font-size:13px;font-weight:600;color:var(--text-primary);font-variant-numeric:tabular-nums;}
-/* Altın adet / gram — tutarlarla aynı puntoda rakam */
-.vf2-td-alt-adet,.vf2-td-alt-gram{font-family:var(--font-body);font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--text-primary);}
-.vf2-tot-row .vf2-td-alt-adet,.vf2-tot-row .vf2-td-alt-gram{font-family:var(--font-body);font-weight:600;letter-spacing:0;}
+.vf2-td-yat{font-family:var(--font-body);font-size:13px;font-weight:700;color:var(--text-primary);font-variant-numeric:tabular-nums;letter-spacing:0.02em;}
+/* Altın adet — okunaklı gövde fontu */
+.vf2-td-adet,
+.vf2-td-alt-adet,
+.vf2-td-alt-gram{
+  font-family:var(--font-body);
+  font-size:14px;
+  font-weight:700;
+  font-variant-numeric:tabular-nums;
+  font-feature-settings:"tnum" 1;
+  color:var(--text-primary);
+  letter-spacing:0.02em;
+  white-space:nowrap;
+  text-align:center;
+}
+.vf2-adet-n{
+  font-family:var(--font-body);
+  font-size:15px;
+  font-weight:800;
+  font-variant-numeric:tabular-nums;
+  font-feature-settings:"tnum" 1;
+  letter-spacing:0.03em;
+  color:var(--text-primary);
+  font-style:normal;
+}
+.vf2-adet-l{
+  margin-left:4px;
+  font-size:11px;
+  font-weight:600;
+  color:var(--text-muted);
+  letter-spacing:0.02em;
+}
+.vf2-tip-tag .vf2-adet-n{
+  font-size:14px;
+  color:inherit;
+  margin-left:2px;
+}
+.vf2-tot-row .vf2-td-adet,
+.vf2-tot-row .vf2-td-alt-adet,
+.vf2-tot-row .vf2-td-alt-gram{font-family:var(--font-body);font-weight:800;letter-spacing:0.02em;}
+.vf2-k-adet{
+  font-family:var(--font-body) !important;
+  font-size:15px !important;
+  font-weight:800 !important;
+  font-variant-numeric:tabular-nums;
+  letter-spacing:0.03em;
+  text-align:center;
+}
 .vf2-td-nakit{color:var(--green) !important;}
 .vf2-td-bos{color:var(--text-muted);font-size:13px;}
 .vf2-td-aks{white-space:nowrap;}
@@ -3812,10 +3901,11 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .vf2-gr-row td{background:var(--bg-elevated);font-family:var(--font-body);font-size:13px;color:var(--text-muted);font-weight:600;font-variant-numeric:tabular-nums;border-top:1px solid var(--border);padding:6px 8px;}
 
 /* Tip tag */
-.vf2-tip-tag{border-radius:4px;padding:4px 10px;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;letter-spacing:0.02em;line-height:1.25;}
+.vf2-tip-tag{border-radius:8px;padding:5px 10px;font-family:var(--font-body);font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;letter-spacing:0.02em;line-height:1.3;display:inline-flex;align-items:baseline;gap:2px;}
 .vf2-tip-gram,.vf2-tip-ceyrek,.vf2-tip-yarim,.vf2-tip-tam{background:rgba(240,184,64,0.15);color:var(--gold);}
 .vf2-tip-nakit{background:rgba(52,211,153,0.12);color:var(--green);}
 .vf2-kolon-baslik{font-family:var(--font-brand);font-size:12px;font-weight:800;letter-spacing:1.5px;color:var(--gold);}
+.vf-td-miktar{font-family:var(--font-body);font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:0.02em;}
 
 /* Durum özeti */
 .vf2-durum-ozet{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 18px;display:flex;flex-direction:column;gap:8px;}
@@ -4417,9 +4507,12 @@ html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 42, 0.12); border-
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
   }
-  .vf2-tip-tag { font-size: 13px !important; padding: 4px 9px !important; }
-  .vf2-ozet-bar .vf2-tip-tag { font-size: 10px !important; padding: 2px 6px !important; }
-  .vf2-card-total .vf2-tip-tag { font-size: 14px !important; }
+  .vf2-tip-tag { font-size: 12px !important; padding: 5px 9px !important; }
+  .vf2-ozet-bar .vf2-tip-tag { font-size: 12px !important; padding: 4px 8px !important; }
+  .vf2-ozet-bar .vf2-adet-n,
+  .vf2-card-chips .vf2-adet-n { font-size: 14px !important; font-weight: 800 !important; }
+  .vf2-card-total .vf2-tip-tag { font-size: 13px !important; }
+  .vf2-td-adet .vf2-adet-n { font-size: 15px !important; }
   .vf2-card-total .vf2-card-uye-tot b,
   .vf2-card-total .vf2-card-info .vf2-card-row > b { font-size: 14px !important; }
   .vf2-oz-sep {
