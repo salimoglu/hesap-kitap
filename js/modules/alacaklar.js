@@ -5,6 +5,7 @@ var _gramAltinFiyatTL=0;
 var AYLAR=["Ocak","Subat","Mart","Nisan","Mayis","Haziran","Temmuz","Agustos","Eylul","Ekim","Kasim","Aralik"];
 var ALTIN_GRAM={gram:1,ceyrek:1.75,yarim:3.5,tam:7,ata:7.2};
 var ALTIN_LABEL={gram:"Gram",ceyrek:"Ceyrek",yarim:"Yarim",tam:"Tam",ata:"Ata"};
+var ALTIN_SIRASI=["gram","ceyrek","yarim","tam","ata"];
 var DOVIZLER=[
   {k:"TRY",label:"TL",sembol:"TL"},
   {k:"USD",label:"USD",sembol:"$"},
@@ -283,18 +284,32 @@ function modalHtml(p){
   h+='<input type="number" id="'+pid(p,"taksit-sayi")+'" class="field-input al-form-taksit-sayi" value="1" min="1" max="60" inputmode="numeric" aria-label="Taksit sayisi" title="Taksit sayisi"/>';
   h+='<input type="month" id="'+pid(p,"bas-tarih")+'" class="field-input" value="'+thisMonth+'" aria-label="1. taksit ayi" title="1. taksit ayi"/>';
   h+='</div></div>';
-  h+='<div id="'+pid(p,"altin-wrap")+'" class="al-form-satir" style="display:none">';
-  h+='<input type="hidden" id="'+pid(p,"altin-tur")+'" value=""/>';
-  h+='<button type="button" class="al-doviz-btn al-altin-btn" id="'+pid(p,"altin-tur-btn")+'" data-panel="'+p.key+'" title="Altin birimini degistir" aria-label="Altin birimini degistir">Gram</button>';
-  h+='<input type="number" id="'+pid(p,"altin-adet")+'" class="field-input al-form-tutar" value="1" min="0.01" step="0.01" inputmode="decimal" aria-label="Adet"/>';
-  h+='<input type="date" id="'+pid(p,"altin-tarih")+'" class="field-input al-form-tarih" value="'+today+'" aria-label="Tarih"/>';
+  h+='<div id="'+pid(p,"altin-wrap")+'" class="al-altin-alan" style="display:none">';
+  h+='<input type="hidden" id="'+pid(p,"altin-tur")+'" value="gram"/>';
+  h+='<div class="al-altin-birim-sec" id="'+pid(p,"altin-birim-sec")+'" role="group" aria-label="Altin birimi">';
+  ALTIN_SIRASI.forEach(function(tur){
+    h+='<button type="button" class="al-altin-birim-btn'+(tur==="gram"?" active":"")+'" data-panel="'+p.key+'" data-tur="'+tur+'">'+ALTIN_LABEL[tur]+'</button>';
+  });
   h+='</div>';
-  h+='<div id="'+pid(p,"altin-info")+'" class="al-altin-info" style="display:none"></div>';
+  h+='<div class="al-form-satir">';
+  h+='<div class="al-altin-miktar-wrap">';
+  h+='<label class="field-label" id="'+pid(p,"altin-miktar-lbl")+'" for="'+pid(p,"altin-adet")+'">Gram</label>';
+  h+='<input type="number" id="'+pid(p,"altin-adet")+'" class="field-input al-form-tutar" value="" placeholder="0" min="0.01" step="0.01" inputmode="decimal" aria-label="Miktar"/>';
+  h+='</div>';
+  h+='<div class="al-form-tarih-wrap"><label class="field-label" for="'+pid(p,"altin-tarih")+'">Tarih</label>';
+  h+='<input type="date" id="'+pid(p,"altin-tarih")+'" class="field-input" value="'+today+'" aria-label="Tarih"/></div>';
+  h+='</div>';
+  h+='<div id="'+pid(p,"altin-info")+'" class="al-altin-info"></div>';
+  h+='</div>';
   h+='</div><div class="modal-footer"><button class="btn-secondary" id="'+pid(p,"iptal")+'" data-panel="'+p.key+'">Iptal</button><button class="btn-primary" id="'+pid(p,"kaydet")+'" data-panel="'+p.key+'">Kaydet</button></div></div></div>';
   return h;
 }
 function panelBul(key){return key==="borc"?P_BORC:P_ALACAK;}
-var ALTIN_SIRASI=["gram","ceyrek","yarim","tam","ata"];
+function sayiOku(v){
+  if(v==null||v==="")return NaN;
+  var s=String(v).trim().replace(/\s/g,"").replace(",",".");
+  return parseFloat(s);
+}
 function dovizBtnGuncelle(p){
   var hid=$(pid(p,"doviz")),btn=$(pid(p,"doviz-btn"));
   if(!hid||!btn)return;
@@ -307,44 +322,57 @@ function dovizDegistir(p){
   hid.value=DOVIZLER[(idx+1)%DOVIZLER.length].k;
   dovizBtnGuncelle(p);
 }
-function altinTurBtnGuncelle(p){
-  var hid=$(pid(p,"altin-tur")),btn=$(pid(p,"altin-tur-btn"));
-  if(!hid||!btn)return;
-  var tur=hid.value||"gram";
-  if(!ALTIN_LABEL[tur])tur="gram";
-  if(!hid.value)hid.value=tur;
-  btn.textContent=ALTIN_LABEL[tur];
+function altinTurAl(p){
+  var hid=$(pid(p,"altin-tur"));
+  var tur=hid?(hid.value||"gram"):"gram";
+  return ALTIN_LABEL[tur]?tur:"gram";
 }
-function altinTurDegistir(p){
-  var hid=$(pid(p,"altin-tur"));if(!hid)return;
-  var cur=hid.value||"gram",idx=ALTIN_SIRASI.indexOf(cur);
-  if(idx<0)idx=0;
-  hid.value=ALTIN_SIRASI[(idx+1)%ALTIN_SIRASI.length];
-  altinTurBtnGuncelle(p);
+function altinTurSec(p,tur){
+  if(!ALTIN_LABEL[tur])tur="gram";
+  var hid=$(pid(p,"altin-tur"));
+  if(hid)hid.value=tur;
+  document.querySelectorAll('.al-altin-birim-btn[data-panel="'+p.key+'"]').forEach(function(b){
+    b.classList.toggle("active",b.dataset.tur===tur);
+  });
+  var lbl=$(pid(p,"altin-miktar-lbl")),inp=$(pid(p,"altin-adet"));
+  if(lbl)lbl.textContent=tur==="gram"?"Gram":"Adet";
+  if(inp){
+    inp.placeholder=tur==="gram"?"orn. 72":"orn. 1";
+    inp.setAttribute("aria-label",tur==="gram"?"Gram miktari":"Adet");
+  }
   altinInfoGuncelle(p);
 }
 function dovizLabelGuncelle(p){dovizBtnGuncelle(p);}
 function altinInfoGuncelle(p){
-  var tur=($(pid(p,"altin-tur"))||{value:""}).value||"gram";
-  var adet=parseFloat(($(pid(p,"altin-adet"))||{value:"1"}).value)||1;
   var info=$(pid(p,"altin-info"));if(!info)return;
   if(p.aktifTip!=="altin"){info.style.display="none";return;}
   info.style.display="";
-  info.textContent=adet+" × "+ALTIN_LABEL[tur]+" = "+((ALTIN_GRAM[tur]||1)*adet).toFixed(2)+" gr";
+  var tur=altinTurAl(p);
+  var adet=sayiOku(($(pid(p,"altin-adet"))||{value:""}).value);
+  if(!adet||adet<=0){
+    info.textContent=tur==="gram"
+      ? "Toplam gram miktarini girin."
+      : "Kac adet "+ALTIN_LABEL[tur].toLocaleLowerCase("tr-TR")+" oldugunu girin.";
+    return;
+  }
+  var gr=(ALTIN_GRAM[tur]||1)*adet;
+  var metin=tur==="gram"
+    ? (gr.toFixed(2)+" gr")
+    : (adet+" × "+ALTIN_LABEL[tur]+" = "+gr.toFixed(2)+" gr");
+  if(_gramAltinFiyatTL>0)metin+="  ·  ≈ "+para(gr*_gramAltinFiyatTL)+" TL";
+  info.textContent=metin;
 }
 function tipGoster(p,tip){
   p.aktifTip=tip;
   document.querySelectorAll('.al-tip-btn[data-panel="'+p.key+'"]').forEach(function(b){b.classList.toggle("active",b.dataset.tip===tip);});
-  var nw=$(pid(p,"nakit-wrap")),aw=$(pid(p,"altin-wrap")),pw=$(pid(p,"pesin-wrap")),tw=$(pid(p,"taksit-wrap")),ai=$(pid(p,"altin-info"));
+  var nw=$(pid(p,"nakit-wrap")),aw=$(pid(p,"altin-wrap")),pw=$(pid(p,"pesin-wrap")),tw=$(pid(p,"taksit-wrap"));
   if(tip==="altin"){
     if(nw)nw.style.display="none";
     if(aw)aw.style.display="";
-    if(ai)ai.style.display="";
-    altinTurBtnGuncelle(p);
+    altinTurSec(p,altinTurAl(p));
   }else{
     if(nw)nw.style.display="";
     if(aw)aw.style.display="none";
-    if(ai)ai.style.display="none";
     if(pw)pw.style.display=tip==="pesin"?"":"none";
     if(tw)tw.style.display=tip==="taksit"?"":"none";
     dovizLabelGuncelle(p);
@@ -406,10 +434,12 @@ function baglaPanel(p){
   $(pid(p,"modal")).onclick=function(e){if(e.target===$(pid(p,"modal")))modalKapat(p);};
   $(pid(p,"kaydet")).onclick=function(){kaydet(p);};
   document.querySelectorAll('.al-tip-btn[data-panel="'+p.key+'"]').forEach(function(btn){btn.onclick=function(){tipGoster(p,btn.dataset.tip);};});
-  var aa=$(pid(p,"altin-adet")),db=$(pid(p,"doviz-btn")),ab=$(pid(p,"altin-tur-btn"));
+  var aa=$(pid(p,"altin-adet")),db=$(pid(p,"doviz-btn"));
   if(aa)aa.oninput=function(){altinInfoGuncelle(p);};
   if(db)db.onclick=function(){dovizDegistir(p);};
-  if(ab)ab.onclick=function(){altinTurDegistir(p);};
+  document.querySelectorAll('.al-altin-birim-btn[data-panel="'+p.key+'"]').forEach(function(btn){
+    btn.onclick=function(){altinTurSec(p,btn.dataset.tur||"gram");};
+  });
   var kmk=$(pid(p,"kisi-modal-kapat"));if(kmk)kmk.onclick=function(){kisiModalKapat(p);};
   var kolon=document.querySelector(".al-kolon--"+p.key);
   if(kolon)baglaKartAksiyonlari(p,kolon);
@@ -421,7 +451,7 @@ function modalAc(p,id,kisiAdi){
   var today=todayStr(),thisMonth=today.substring(0,7);
   $(pid(p,"kisi")).value=kisiAdi||"";$(pid(p,"aciklama")).value="";$(pid(p,"tutar")).value="";
   $(pid(p,"tarih")).value=today;$(pid(p,"taksit-sayi")).value="1";$(pid(p,"bas-tarih")).value=thisMonth;
-  $(pid(p,"altin-adet")).value="1";$(pid(p,"altin-tur")).value="gram";
+  $(pid(p,"altin-adet")).value="";$(pid(p,"altin-tur")).value="gram";
   if($(pid(p,"doviz")))$(pid(p,"doviz")).value="TRY";
   if(id){
     var k=p.kayitlar.find(function(x){return x.id===id;});
@@ -429,7 +459,7 @@ function modalAc(p,id,kisiAdi){
       $(pid(p,"kisi")).value=k.kisi||"";$(pid(p,"aciklama")).value=k.aciklama||"";
       if(k.tip==="altin"){
         $(pid(p,"altin-tur")).value=k.altinTur||"gram";
-        $(pid(p,"altin-adet")).value=k.altinAdet||1;
+        $(pid(p,"altin-adet")).value=k.altinAdet!=null&&k.altinAdet!==""?k.altinAdet:"";
         var at2=$(pid(p,"altin-tarih"));if(at2)at2.value=k.tarih||today;
         tipGoster(p,"altin");
       }else{
@@ -439,13 +469,13 @@ function modalAc(p,id,kisiAdi){
         else{$(pid(p,"taksit-sayi")).value=k.taksitSayisi;$(pid(p,"bas-tarih")).value=k.basTarih;tipGoster(p,"taksit");}
       }
       $(pid(p,"modal")).classList.remove("hidden");
-      altinInfoGuncelle(p);dovizBtnGuncelle(p);altinTurBtnGuncelle(p);
+      altinInfoGuncelle(p);dovizBtnGuncelle(p);
       return;
     }
   }
   tipGoster(p,"pesin");
   $(pid(p,"modal")).classList.remove("hidden");
-  altinInfoGuncelle(p);dovizBtnGuncelle(p);altinTurBtnGuncelle(p);
+  altinInfoGuncelle(p);dovizBtnGuncelle(p);
 }
 function modalKapat(p){
   $(pid(p,"modal")).classList.add("hidden");p.aktif=null;
@@ -455,17 +485,18 @@ async function kaydet(p){
   var kisi=($(pid(p,"kisi")).value||"").trim();if(!kisi){$(pid(p,"kisi")).focus();return;}
   var aciklama=($(pid(p,"aciklama")).value||"").trim(),kayit,doviz=normalizeDoviz(($(pid(p,"doviz"))||{value:"TRY"}).value);
   if(p.aktifTip==="altin"){
-    var tur=$(pid(p,"altin-tur")).value||"gram",adet=parseFloat($(pid(p,"altin-adet")).value)||1;
+    var tur=altinTurAl(p),adet=sayiOku(($(pid(p,"altin-adet"))||{value:""}).value);
     var at3=$(pid(p,"altin-tarih")),tarih3=at3?at3.value:todayStr();
     if(!ALTIN_LABEL[tur]){alert("Altin birimi secin.");return;}
-    if(!adet||adet<=0)return;
+    if(!adet||adet<=0){$(pid(p,"altin-adet")).focus();return;}
+    if(!tarih3){alert("Tarih giriniz.");return;}
     kayit={tip:"altin",kisi:kisi,aciklama:aciklama,altinTur:tur,altinAdet:adet,tarih:tarih3,odendi:false};
   }else if(p.aktifTip==="pesin"){
-    var tutar=parseFloat($(pid(p,"tutar")).value)||0;if(!tutar||tutar<=0){$(pid(p,"tutar")).focus();return;}
+    var tutar=sayiOku(($(pid(p,"tutar"))||{value:""}).value)||0;if(!tutar||tutar<=0){$(pid(p,"tutar")).focus();return;}
     var tarih=$(pid(p,"tarih")).value;if(!tarih){alert("Tarih giriniz.");return;}
     kayit={tip:"pesin",kisi:kisi,tutar:tutar,doviz:doviz,aciklama:aciklama,tarih:tarih,odendi:false};
   }else{
-    var tutar2=parseFloat($(pid(p,"tutar")).value)||0;if(!tutar2||tutar2<=0){$(pid(p,"tutar")).focus();return;}
+    var tutar2=sayiOku(($(pid(p,"tutar"))||{value:""}).value)||0;if(!tutar2||tutar2<=0){$(pid(p,"tutar")).focus();return;}
     var ts=parseInt($(pid(p,"taksit-sayi")).value,10)||1,bt=$(pid(p,"bas-tarih")).value;
     if(!bt){alert("Baslangic ayi giriniz.");return;}
     kayit={tip:"taksit",kisi:kisi,tutar:tutar2,doviz:doviz,aciklama:aciklama,taksitSayisi:ts,basTarih:bt,odemeler:{}};
