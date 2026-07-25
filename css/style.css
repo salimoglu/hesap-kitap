@@ -1346,10 +1346,56 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .al-kart-bar { height:3px; background:var(--bg-input); margin:0 12px 2px; border-radius:999px; overflow:hidden; }
 .al-kart-bar-inner { height:100%; background:linear-gradient(90deg,var(--green),#22d977); border-radius:999px; transition:width 0.25s ease; }
 .al-plan { border-top:1px solid var(--border); }
-.al-tip-secici { display:flex; gap:8px; margin-top:4px; flex-wrap:wrap; }
-.al-tip-btn { flex:1; min-width:90px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text-muted); padding:8px; font-family:var(--font-body); font-size:12px; font-weight:700; cursor:pointer; transition:all 0.15s; }
+.al-tip-secici { display:flex; gap:6px; margin:0 0 8px; flex-wrap:nowrap; }
+.al-tip-btn { flex:1; min-width:0; background:var(--bg-elevated); border:1px solid var(--border); border-radius:8px; color:var(--text-muted); padding:7px 6px; font-family:var(--font-body); font-size:11px; font-weight:700; cursor:pointer; transition:all 0.15s; }
 .al-tip-btn.active { background:rgba(240,184,64,0.12); border-color:var(--gold); color:var(--gold); }
-.al-altin-info { padding:10px 12px; background:var(--bg-elevated); border-radius:8px; font-size:13px; color:var(--gold); border:1px solid rgba(240,184,64,0.2); }
+.al-form-modal { max-width:380px; width:calc(100% - 24px); }
+.al-form-body { display:flex; flex-direction:column; gap:8px; padding:12px 14px !important; }
+.al-form-cift { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.al-form-cift .field-group { margin:0; min-width:0; }
+.al-form-cift .field-label { font-size:10px; margin-bottom:3px; }
+.al-form-cift .field-input { min-height:36px; font-size:13px; border-radius:9px; }
+.al-form-satir { display:flex; align-items:center; gap:6px; flex-wrap:nowrap; }
+.al-doviz-btn,
+.al-altin-btn {
+  appearance:none; flex:0 0 auto; min-width:44px; height:36px; padding:0 8px;
+  border:1px solid rgba(240,184,64,0.45); border-radius:9px;
+  background:rgba(240,184,64,0.12); color:var(--gold);
+  font-family:var(--font-body); font-size:12px; font-weight:800;
+  cursor:pointer; white-space:nowrap; -webkit-tap-highlight-color:transparent;
+}
+.al-doviz-btn:active, .al-altin-btn:active { transform:scale(0.97); }
+.al-form-tutar { flex:1 1 0; min-width:0; min-height:36px; height:36px; font-size:14px; font-weight:700; border-radius:9px; -moz-appearance:textfield; appearance:textfield; }
+.al-form-tutar::-webkit-outer-spin-button,
+.al-form-tutar::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
+.al-form-tarih-wrap { flex:0 0 auto; width:132px; min-width:0; }
+.al-form-tarih-wrap .field-input,
+.al-form-tarih { min-height:36px; height:36px; font-size:12px; border-radius:9px; padding:0 6px; }
+.al-form-taksit-wrap { display:flex; gap:6px; flex:1 1 auto; min-width:0; }
+.al-form-taksit-sayi { flex:0 0 52px; min-width:0; min-height:36px; height:36px; text-align:center; border-radius:9px; -moz-appearance:textfield; appearance:textfield; }
+.al-form-taksit-sayi::-webkit-outer-spin-button,
+.al-form-taksit-sayi::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
+.al-form-taksit-wrap .field-input[type="month"] { flex:1 1 auto; min-width:0; min-height:36px; height:36px; font-size:12px; border-radius:9px; padding:0 6px; }
+.al-form-modal .modal-footer { padding:10px 14px; gap:8px; }
+.al-form-modal .modal-footer .btn-primary,
+.al-form-modal .modal-footer .btn-secondary { min-height:36px; padding:8px 14px; font-size:13px; }
+.al-altin-info { padding:6px 10px; background:var(--bg-elevated); border-radius:8px; font-size:11px; color:var(--gold); border:1px solid rgba(240,184,64,0.2); }
+.al-kisi-liste { gap:4px; }
+.al-kisi-satir { padding:8px 10px; gap:8px; border-radius:10px; }
+.al-kisi-avatar { width:30px; height:30px; font-size:14px; }
+.al-kisi-ad { font-size:13px; }
+.al-kisi-tutar { font-size:10px; }
+.al-kisi-meta { font-size:10px; }
+.al-kart-satir { padding:8px 10px; min-height:40px; gap:6px; }
+.al-kart-baslik-metin { font-size:12px; }
+.al-kart-ek { font-size:10px; }
+.al-kart-tutar { font-size:12px; }
+@media (max-width:380px){
+  .al-form-cift { grid-template-columns:1fr; }
+  .al-form-tarih-wrap { width:118px; }
+  .al-form-satir { flex-wrap:wrap; }
+  .al-form-tarih-wrap, .al-form-taksit-wrap, .al-form-tarih { flex:1 1 100%; width:auto; }
+}
 #al-kisi-modal { z-index:540; }
 #al-modal { z-index:560; }
 @keyframes al-sheet-in { from { opacity:0; transform:translateY(100%); } to { opacity:1; transform:translateY(0); } }
@@ -3316,10 +3362,56 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .al-kart-bar { height:3px; background:var(--bg-input); margin:0 12px 2px; border-radius:999px; overflow:hidden; }
 .al-kart-bar-inner { height:100%; background:linear-gradient(90deg,var(--green),#22d977); border-radius:999px; transition:width 0.25s ease; }
 .al-plan { border-top:1px solid var(--border); }
-.al-tip-secici { display:flex; gap:8px; margin-top:4px; flex-wrap:wrap; }
-.al-tip-btn { flex:1; min-width:90px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text-muted); padding:8px; font-family:var(--font-body); font-size:12px; font-weight:700; cursor:pointer; transition:all 0.15s; }
+.al-tip-secici { display:flex; gap:6px; margin:0 0 8px; flex-wrap:nowrap; }
+.al-tip-btn { flex:1; min-width:0; background:var(--bg-elevated); border:1px solid var(--border); border-radius:8px; color:var(--text-muted); padding:7px 6px; font-family:var(--font-body); font-size:11px; font-weight:700; cursor:pointer; transition:all 0.15s; }
 .al-tip-btn.active { background:rgba(240,184,64,0.12); border-color:var(--gold); color:var(--gold); }
-.al-altin-info { padding:10px 12px; background:var(--bg-elevated); border-radius:8px; font-size:13px; color:var(--gold); border:1px solid rgba(240,184,64,0.2); }
+.al-form-modal { max-width:380px; width:calc(100% - 24px); }
+.al-form-body { display:flex; flex-direction:column; gap:8px; padding:12px 14px !important; }
+.al-form-cift { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.al-form-cift .field-group { margin:0; min-width:0; }
+.al-form-cift .field-label { font-size:10px; margin-bottom:3px; }
+.al-form-cift .field-input { min-height:36px; font-size:13px; border-radius:9px; }
+.al-form-satir { display:flex; align-items:center; gap:6px; flex-wrap:nowrap; }
+.al-doviz-btn,
+.al-altin-btn {
+  appearance:none; flex:0 0 auto; min-width:44px; height:36px; padding:0 8px;
+  border:1px solid rgba(240,184,64,0.45); border-radius:9px;
+  background:rgba(240,184,64,0.12); color:var(--gold);
+  font-family:var(--font-body); font-size:12px; font-weight:800;
+  cursor:pointer; white-space:nowrap; -webkit-tap-highlight-color:transparent;
+}
+.al-doviz-btn:active, .al-altin-btn:active { transform:scale(0.97); }
+.al-form-tutar { flex:1 1 0; min-width:0; min-height:36px; height:36px; font-size:14px; font-weight:700; border-radius:9px; -moz-appearance:textfield; appearance:textfield; }
+.al-form-tutar::-webkit-outer-spin-button,
+.al-form-tutar::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
+.al-form-tarih-wrap { flex:0 0 auto; width:132px; min-width:0; }
+.al-form-tarih-wrap .field-input,
+.al-form-tarih { min-height:36px; height:36px; font-size:12px; border-radius:9px; padding:0 6px; }
+.al-form-taksit-wrap { display:flex; gap:6px; flex:1 1 auto; min-width:0; }
+.al-form-taksit-sayi { flex:0 0 52px; min-width:0; min-height:36px; height:36px; text-align:center; border-radius:9px; -moz-appearance:textfield; appearance:textfield; }
+.al-form-taksit-sayi::-webkit-outer-spin-button,
+.al-form-taksit-sayi::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
+.al-form-taksit-wrap .field-input[type="month"] { flex:1 1 auto; min-width:0; min-height:36px; height:36px; font-size:12px; border-radius:9px; padding:0 6px; }
+.al-form-modal .modal-footer { padding:10px 14px; gap:8px; }
+.al-form-modal .modal-footer .btn-primary,
+.al-form-modal .modal-footer .btn-secondary { min-height:36px; padding:8px 14px; font-size:13px; }
+.al-altin-info { padding:6px 10px; background:var(--bg-elevated); border-radius:8px; font-size:11px; color:var(--gold); border:1px solid rgba(240,184,64,0.2); }
+.al-kisi-liste { gap:4px; }
+.al-kisi-satir { padding:8px 10px; gap:8px; border-radius:10px; }
+.al-kisi-avatar { width:30px; height:30px; font-size:14px; }
+.al-kisi-ad { font-size:13px; }
+.al-kisi-tutar { font-size:10px; }
+.al-kisi-meta { font-size:10px; }
+.al-kart-satir { padding:8px 10px; min-height:40px; gap:6px; }
+.al-kart-baslik-metin { font-size:12px; }
+.al-kart-ek { font-size:10px; }
+.al-kart-tutar { font-size:12px; }
+@media (max-width:380px){
+  .al-form-cift { grid-template-columns:1fr; }
+  .al-form-tarih-wrap { width:118px; }
+  .al-form-satir { flex-wrap:wrap; }
+  .al-form-tarih-wrap, .al-form-taksit-wrap, .al-form-tarih { flex:1 1 100%; width:auto; }
+}
 #al-kisi-modal { z-index:540; }
 #al-modal { z-index:560; }
 @keyframes al-sheet-in { from { opacity:0; transform:translateY(100%); } to { opacity:1; transform:translateY(0); } }
