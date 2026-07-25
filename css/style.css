@@ -1674,10 +1674,12 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .alt-tablo td{padding:10px 14px;font-size:13px;vertical-align:middle;}
 .alt-satir-satildi{opacity:0.4;}
 .alt-td-tarih{color:var(--text-muted);white-space:nowrap;font-size:13px;}
+.alt-td-adet{text-align:center;color:var(--text-muted);}
 .alt-td-gram{font-weight:800;color:var(--gold);white-space:nowrap;font-size:14px;}
 .alt-td-tl{font-size:13px;font-weight:600;white-space:nowrap;}
 .alt-td-gf{color:var(--text-muted);font-size:12px;white-space:nowrap;}
 .alt-td-nasil{color:var(--text-muted);font-size:12px;max-width:150px;}
+.alt-td-nerde{white-space:nowrap;}
 .alt-td-aks{white-space:nowrap;}
 .alt-td-durum{white-space:nowrap;}
 .alt-tag{background:rgba(240,184,64,0.14);color:var(--gold);border-radius:4px;padding:3px 10px;font-size:12px;font-weight:800;white-space:nowrap;}
@@ -3880,10 +3882,12 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .alt-tablo td{padding:10px 14px;font-size:13px;vertical-align:middle;}
 .alt-satir-satildi{opacity:0.4;}
 .alt-td-tarih{color:var(--text-muted);white-space:nowrap;font-size:13px;}
+.alt-td-adet{text-align:center;color:var(--text-muted);}
 .alt-td-gram{font-weight:800;color:var(--gold);white-space:nowrap;font-size:14px;}
 .alt-td-tl{font-size:13px;font-weight:600;white-space:nowrap;}
 .alt-td-gf{color:var(--text-muted);font-size:12px;white-space:nowrap;}
 .alt-td-nasil{color:var(--text-muted);font-size:12px;max-width:150px;}
+.alt-td-nerde{white-space:nowrap;}
 .alt-td-aks{white-space:nowrap;}
 .alt-td-durum{white-space:nowrap;}
 .alt-tag{background:rgba(240,184,64,0.14);color:var(--gold);border-radius:4px;padding:3px 10px;font-size:12px;font-weight:800;white-space:nowrap;}
@@ -4304,37 +4308,38 @@ html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 42, 0.12); border-
   max-height: none !important;
 }
 
-/* === ALTIN: MOBIL DUZEN -- KOMPAKT OZET + KART LISTESI TABLO === */
+/* === ALTIN: MOBIL DUZEN -- VEFA TARZI INCE KART LISTESI === */
 @media (max-width: 600px) {
-  /* Genel padding daraltma */
-  .alt-wrap { padding: 8px 8px 14px; gap: 8px; }
+  .alt-wrap { padding: 6px 6px 12px; gap: 6px; }
 
-  /* OZET KOMPAKTLASTIRMA */
-  .alt-header { padding: 10px 12px; gap: 8px; border-radius: 10px; }
-  .alt-ozet-bolum { gap: 6px; }
-  .alt-ozet-baslik { font-size: 10px; letter-spacing: 1.2px; }
-  .alt-ozet { gap: 10px 14px; align-items: stretch; }
+  /* Ozet kompakt */
+  .alt-header { padding: 8px 10px; gap: 6px; border-radius: 8px; }
+  .alt-ozet-bolum { gap: 4px; }
+  .alt-ozet-baslik { font-size: 10px; letter-spacing: 0.06em; }
+  .alt-ozet { gap: 6px 10px; align-items: stretch; }
   .alt-oz-item { gap: 1px; flex: 1 1 calc(50% - 8px); min-width: 0; }
-  .alt-oz-label { font-size: 9px; letter-spacing: 0.4px; }
-  .alt-oz-val { font-size: 16px; line-height: 1.1; letter-spacing: 0; }
-  .alt-oz-val small { font-size: 11px; }
+  .alt-oz-label { font-size: 9px; letter-spacing: 0.25px; }
+  .alt-oz-val {
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: 0.02em;
+  }
+  .alt-oz-val small { font-size: 10px; }
 
-  /* Fiyat kutusu + buton tek satira sigsin */
-  .alt-fiyat-kutu { padding: 6px 10px; gap: 6px; align-self: stretch; justify-content: space-between; }
-  .alt-fiyat-label { font-size: 10px; letter-spacing: 0.5px; }
-  .alt-fiyat-val { font-size: 14px; }
-  .alt-fiyat-yas { font-size: 9px; }
-  .alt-yeni-btn { padding: 8px 14px; font-size: 13px; align-self: stretch; }
-  .alt-csv-btn { padding: 8px 14px; font-size: 12px; }
+  .alt-fiyat-kutu { padding: 5px 8px; gap: 6px; align-self: stretch; justify-content: space-between; }
+  .alt-fiyat-label { font-size: 10px; letter-spacing: 0.4px; }
+  .alt-fiyat-val { font-family: var(--font-body); font-size: 13px; font-weight: 700; }
+  .alt-yeni-btn { padding: 8px 12px; font-size: 12px; align-self: stretch; }
 
-  /* FILTRE */
-  .alt-filtre-satir { padding: 6px 10px; gap: 8px; border-radius: 8px; }
+  .alt-filtre-satir { padding: 6px 8px; gap: 6px; border-radius: 8px; }
   .alt-filtre-grup { width: 100%; gap: 6px; flex-wrap: wrap; }
   .alt-filtre-label { font-size: 10px; }
-  .alt-filtre-select { font-size: 12px; padding: 6px 8px; }
+  .alt-filtre-select { font-size: 12px; padding: 5px 8px; }
   .alt-filtre-ozet-inline { font-size: 11px; }
 
-  /* TABLO -> KART LISTESI */
+  /* Tablo -> ince kart listesi (Vefa kart mantigi) */
   .alt-tablo-dis {
     border: none !important;
     background: transparent;
@@ -4347,81 +4352,138 @@ html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 42, 0.12); border-
     min-width: 0 !important;
     width: 100%;
     border-collapse: separate;
-    border-spacing: 0 8px;
+    border-spacing: 0 6px;
   }
   .alt-tablo thead { display: none; }
   .alt-tablo tbody { display: block; }
   .alt-tablo tbody tr {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    column-gap: 8px;
-    row-gap: 4px;
-    background: var(--bg-card);
+    grid-template-columns: 1fr auto;
+    column-gap: 6px;
+    row-gap: 2px;
+    background: var(--bg-elevated);
     border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 10px 12px;
-    margin-bottom: 8px;
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin: 0;
   }
-  .alt-tablo tbody tr:hover { background: var(--bg-card); }
+  .alt-tablo tbody tr:hover { background: var(--bg-elevated); }
   .alt-tablo tbody tr:last-child { border-bottom: 1px solid var(--border); }
   .alt-tablo tbody td {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: flex-start;
-    padding: 4px 0 0;
-    font-size: 13px;
-    border: none;
-    line-height: 1.2;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .alt-tablo tbody td::before {
-    content: attr(data-l);
-    font-size: 9px;
-    font-weight: 800;
-    letter-spacing: 0.6px;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    margin-bottom: 2px;
-  }
-  .alt-tablo tbody td:not([data-l])::before { content: none; }
-  /* Durum hucresi tum satir genisliginde */
-  .alt-tablo tbody td.alt-td-durum {
     grid-column: 1 / -1;
+    display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 8px;
-    margin-bottom: 2px;
+    gap: 8px;
+    padding: 1px 0;
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+    color: var(--text-primary);
+    border: none;
+    line-height: 1.25;
+    min-width: 0;
+    text-align: right;
   }
-  .alt-tablo tbody td.alt-td-durum::before { margin-bottom: 0; }
-  .alt-tablo tbody td.alt-td-durum .alt-durum-btn { padding: 4px 12px; font-size: 11px; }
-  /* Aksiyon butonlari saga, full width */
+  .alt-tablo tbody td::before {
+    content: attr(data-l);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--text-muted);
+    text-transform: none;
+    margin: 0;
+    flex: 0 0 auto;
+    text-align: left;
+  }
+  .alt-tablo tbody td:not([data-l])::before { content: none; }
+
+  /* Ust satir: durum + aksiyon */
+  .alt-tablo tbody td.alt-td-durum {
+    grid-column: 1;
+    grid-row: 1;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    border-bottom: none;
+    padding: 0 0 4px;
+    margin: 0;
+    text-align: left;
+  }
+  .alt-tablo tbody td.alt-td-durum::before { display: none; }
+  .alt-tablo tbody td.alt-td-durum .alt-durum-btn {
+    padding: 3px 10px;
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 10px;
+  }
   .alt-tablo tbody td.alt-td-aks {
-    grid-column: 1 / -1;
+    grid-column: 2;
+    grid-row: 1;
     flex-direction: row;
     justify-content: flex-end;
-    gap: 8px;
-    border-top: 1px dashed var(--border);
-    padding-top: 8px;
-    margin-top: 2px;
+    align-items: center;
+    gap: 2px;
+    border: none;
+    padding: 0 0 4px;
+    margin: 0;
   }
   .alt-tablo tbody td.alt-td-aks::before { display: none; }
-  /* Hucre ic stillerini sadelestir */
-  .alt-tablo tbody td.alt-td-tarih { color: var(--text-secondary); font-size: 13px; }
-  .alt-tablo tbody td.alt-td-gram { font-size: 14px; font-weight: 800; color: var(--gold); }
-  .alt-tablo tbody td.alt-td-tl { font-size: 14px; font-weight: 700; }
-  .alt-tablo tbody td.alt-td-gf { color: var(--text-muted); font-size: 13px; }
-  .alt-tablo tbody td.alt-td-nasil { font-size: 12px; color: var(--text-secondary); max-width: none; white-space: normal; word-break: break-word; }
-  .alt-tablo tbody td .alt-tag { padding: 2px 8px; font-size: 11px; align-self: flex-start; }
-  /* Bos durumu */
+  .alt-tablo tbody td.alt-td-aks .row-action-btn {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    padding: 0;
+    font-size: 13px;
+  }
+
+  .alt-tablo tbody td.alt-td-tarih,
+  .alt-tablo tbody td.alt-td-adet,
+  .alt-tablo tbody td.alt-td-gram,
+  .alt-tablo tbody td.alt-td-tl,
+  .alt-tablo tbody td.alt-td-gf,
+  .alt-tablo tbody td.alt-td-nasil,
+  .alt-tablo tbody td.alt-td-nerde {
+    border-top: none;
+  }
+  .alt-tablo tbody td.alt-td-tarih { color: var(--text-primary); font-size: 12px; }
+  .alt-tablo tbody td.alt-td-adet { color: var(--text-primary); }
+  .alt-tablo tbody td.alt-td-gram {
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .alt-tablo tbody td.alt-td-tl { font-size: 12px; font-weight: 600; }
+  .alt-tablo tbody td.alt-td-gf { color: var(--text-primary); font-size: 12px; }
+  .alt-tablo tbody td.alt-td-nasil {
+    font-size: 12px;
+    color: var(--text-primary);
+    max-width: none;
+    white-space: normal;
+    word-break: break-word;
+  }
+  .alt-tablo tbody td.alt-td-nerde { align-items: center; }
+  .alt-tablo tbody td .alt-tag {
+    padding: 0;
+    font-size: 12px;
+    font-weight: 600;
+    background: transparent;
+    color: var(--text-primary);
+    border-radius: 0;
+    align-self: auto;
+  }
+
   .alt-tablo tbody tr td.alt-bos {
     grid-column: 1 / -1;
     text-align: center;
-    padding: 28px 12px;
+    justify-content: center;
+    padding: 18px 10px;
+    font-size: 12px;
+    color: var(--text-muted);
   }
   .alt-tablo tbody tr td.alt-bos::before { display: none; }
 }
