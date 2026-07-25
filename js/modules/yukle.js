@@ -628,9 +628,10 @@ return{init:kinit};
 var AltinModule=(function(){
 var $=function(id){return document.getElementById(id);};
 var _kayitlar=[],_aktif=null,_filtre="TUMU",_guncelGramFiyat=0;
-var ALTIN_GRAM={gram:1,ceyrek:1.75,yarim:3.5,tam:7,ata:7.2};
-var ALTIN_LABEL={gram:"Gram",ceyrek:"Çeyrek",yarim:"Yarım",tam:"Tam",ata:"Ata"};
-var ALTIN_SIRASI=["gram","ceyrek","yarim","tam","ata"];
+var ALTIN_GRAM={gram:1,ceyrek:1.75,yarim:3.5,tam:7,ata:7.2,bilezik:1};
+var ALTIN_LABEL={gram:"Gram",ceyrek:"Çeyrek",yarim:"Yarım",tam:"Tam",ata:"Ata",bilezik:"Bilezik"};
+var ALTIN_SIRASI=["gram","ceyrek","yarim","tam","ata","bilezik"];
+var _altModalKoruma=0;
 
 function apara(n){return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2});}
 function agr(n){return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2});}
@@ -712,7 +713,8 @@ function altTurBtnGuncelle(){
   if(hid)hid.value=tur;
   if(btn){
     btn.textContent=ALTIN_LABEL[tur];
-    btn.title=ALTIN_LABEL[tur]+" ("+(ALTIN_GRAM[tur]||1)+" gr) — tıkla, tür değiştir";
+    if(tur==="bilezik")btn.title="Bilezik — girilen adet = gram; tıkla, tür değiştir";
+    else btn.title=ALTIN_LABEL[tur]+" ("+(ALTIN_GRAM[tur]||1)+" gr) — tıkla, tür değiştir";
   }
   altGramGoster();
 }
@@ -731,12 +733,19 @@ function altGramGoster(){
   if(hid)hid.value=gr>0?String(Math.round(gr*100)/100):"";
   if(!info)return;
   if(!adet||adet<=0){
-    info.textContent=ALTIN_LABEL[tur]+" = "+birim+" gr / adet  ·  Adet girin";
+    if(tur==="bilezik")info.textContent="Bilezik: girilen adet doğrudan gram olur";
+    else info.textContent=ALTIN_LABEL[tur]+" = "+birim+" gr / adet  ·  Adet girin";
     return;
   }
-  var metin=adet+" × "+birim+" gr = "+agr(gr)+" gr";
+  var metin;
+  if(tur==="bilezik")metin=adet+" adet = "+agr(gr)+" gr";
+  else metin=adet+" × "+birim+" gr = "+agr(gr)+" gr";
   if(_guncelGramFiyat>0)metin+="  ·  ≈ "+apara(gr*_guncelGramFiyat)+" TL";
   info.textContent=metin;
+}
+function altModalAcikMi(){
+  var m=$("alt-modal");
+  return !!(m&&!m.classList.contains("hidden"));
 }
 function altDurumAl(){
   var hid=$("alt-durum-val");
@@ -965,10 +974,18 @@ function arender(){
 }
 
 function abagla(){
-  $("alt-yeni-btn").addEventListener("click",function(){amodalAc(null);});
+  $("alt-yeni-btn").addEventListener("click",function(e){
+    e.preventDefault();
+    e.stopPropagation();
+    amodalAc(null);
+  });
   $("alt-modal-kapat").addEventListener("click",amodalKapat);
   $("alt-iptal").addEventListener("click",amodalKapat);
-  $("alt-modal").addEventListener("click",function(e){if(e.target===$("alt-modal"))amodalKapat();});
+  $("alt-modal").addEventListener("click",function(e){
+    if(e.target!==$("alt-modal"))return;
+    if(Date.now()<_altModalKoruma)return;
+    amodalKapat();
+  });
   $("alt-kaydet").addEventListener("click",akaydet);
   var turBtn=$("alt-tur-btn"),adetEl=$("alt-adet"),durumBtn=$("alt-durum-btn");
   if(turBtn)turBtn.addEventListener("click",altTurDegistir);
@@ -1027,10 +1044,23 @@ function amodalAc(id){
   }
   altTurBtnGuncelle();
   altDurumBtnGuncelle();
-  $("alt-modal").classList.remove("hidden");
-  setTimeout(function(){var a=$("alt-adet");if(a)a.focus();},100);
+  _altModalKoruma=Date.now()+400;
+  var modal=$("alt-modal");
+  if(modal){
+    modal.classList.remove("hidden");
+    modal.style.pointerEvents="none";
+  }
+  setTimeout(function(){
+    var m=$("alt-modal");
+    if(m&&!m.classList.contains("hidden"))m.style.pointerEvents="";
+    var a=$("alt-adet");if(a)a.focus();
+  },350);
 }
-function amodalKapat(){$("alt-modal").classList.add("hidden");_aktif=null;}
+function amodalKapat(){
+  var m=$("alt-modal");
+  if(m){m.classList.add("hidden");m.style.pointerEvents="";}
+  _aktif=null;_altModalKoruma=0;
+}
 
 async function akaydet(){
   var tarih=$("alt-tarih").value;
@@ -1065,7 +1095,9 @@ async function ainit(){
     _guncelGramFiyat = f;
     var el = $("alt-fiyat-val");
     if (el) el.textContent = apara(f) + " TL";
-    arender();
+    /* Modal acikken tam yenileme formu kapatmasin */
+    if(!altModalAcikMi())arender();
+    else altGramGoster();
     if (!onceki || Math.abs(f - onceki) > 50) {
       afbFiyatKaydet(f);
     }
