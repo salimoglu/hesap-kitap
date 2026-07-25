@@ -1209,17 +1209,35 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .kr-oz-val { font-family:var(--font-brand); font-size:20px; letter-spacing:0.5px; }
 .kr-yeni-btn { background:var(--gold); color:#0f1923; border:none; border-radius:var(--radius-sm); padding:8px 16px; font-size:13px; font-weight:800; cursor:pointer; transition:opacity 0.15s; white-space:nowrap; }
 .kr-yeni-btn:hover { opacity:0.85; }
-#kr-modal .kr-modal-box { max-width:420px; max-height:min(90dvh,calc(100dvh - 24px)); }
-#kr-modal .kr-modal-body { gap:10px; padding:14px 16px 16px; }
-#kr-modal .field-group { gap:5px; margin:0; }
+#kr-modal .kr-modal-box { max-width:440px; max-height:min(90dvh,calc(100dvh - 24px)); }
+#kr-modal .kr-modal-body { gap:10px; padding:14px 16px 12px; }
+#kr-modal .field-group { gap:5px; margin:0; min-width:0; }
 #kr-modal .field-label { font-size:11px; line-height:1.35; letter-spacing:0.02em; }
-#kr-modal .field-input { padding:10px 12px; font-size:14px; }
+#kr-modal .field-input { padding:10px 12px; font-size:14px; min-width:0; width:100%; box-sizing:border-box; }
+.kr-form-cift{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:end;}
+.kr-form-uc{display:grid;grid-template-columns:1.15fr 0.65fr 1fr;gap:8px;align-items:end;}
+.kr-taksit-alanlari{display:contents;}
+.kr-form-cift .field-input,.kr-form-uc .field-input{min-height:40px;height:40px;font-size:14px;border-radius:9px;}
+.kr-form-uc input[type="month"]{padding-left:8px;padding-right:6px;font-size:12px;}
+#kr-modal .kr-modal-footer{display:grid;grid-template-columns:1fr 1.35fr;gap:8px;padding:12px 16px 16px;}
+#kr-modal .kr-modal-footer .btn-secondary,
+#kr-modal .kr-modal-footer .btn-primary{width:100%;min-height:42px;margin:0;}
 .kr-alt-alan { display:flex; flex-direction:column; gap:10px; }
 .kr-duzenli-hint { font-size:11px; color:var(--text-muted); line-height:1.4; margin:0; padding:8px 10px; background:var(--bg-elevated); border-radius:8px; border:1px solid rgba(46,64,89,0.45); }
 .kr-td-duzenli { color:var(--green); font-weight:700; font-size:11px; }
 .kr-tip-sec, .kr-sure-sec { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin:0; }
 .kr-tip-btn, .kr-sure-btn { min-width:0; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text-muted); padding:9px 8px; font-family:var(--font-body); font-size:11px; font-weight:700; line-height:1.25; text-align:center; cursor:pointer; transition:all 0.15s; }
 .kr-tip-btn.active, .kr-sure-btn.active { background:rgba(240,184,64,0.12); border-color:var(--gold); color:var(--gold); }
+@media (max-width:480px){
+  .kr-form-cift{grid-template-columns:1fr 1fr;gap:6px;}
+  .kr-form-uc{grid-template-columns:1.1fr 0.6fr 0.95fr;gap:6px;}
+  .kr-form-cift .field-input,.kr-form-uc .field-input{min-height:38px;height:38px;font-size:12px;}
+  .kr-form-uc input[type="month"]{font-size:11px;padding-left:6px;padding-right:4px;}
+  #kr-modal .field-label{font-size:10px;}
+  #kr-modal .kr-modal-footer{gap:6px;padding:10px 14px 14px;}
+  #kr-modal .kr-modal-footer .btn-secondary,
+  #kr-modal .kr-modal-footer .btn-primary{min-height:40px;font-size:13px;}
+}
 .kr-kart-ozet { width:100%; max-width:760px; display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
 .kr-kart-chip { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-md); padding:10px 14px; min-width:160px; flex:1; }
 .kr-chip-adi { font-size:11px; font-weight:800; letter-spacing:0.8px; color:var(--gold); text-transform:uppercase; margin-bottom:4px; }
@@ -3583,17 +3601,35 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .kr-oz-val { font-family:var(--font-brand); font-size:20px; letter-spacing:0.5px; }
 .kr-yeni-btn { background:var(--gold); color:#0f1923; border:none; border-radius:var(--radius-sm); padding:8px 16px; font-size:13px; font-weight:800; cursor:pointer; transition:opacity 0.15s; white-space:nowrap; }
 .kr-yeni-btn:hover { opacity:0.85; }
-#kr-modal .kr-modal-box { max-width:420px; max-height:min(90dvh,calc(100dvh - 24px)); }
-#kr-modal .kr-modal-body { gap:10px; padding:14px 16px 16px; }
-#kr-modal .field-group { gap:5px; margin:0; }
+#kr-modal .kr-modal-box { max-width:440px; max-height:min(90dvh,calc(100dvh - 24px)); }
+#kr-modal .kr-modal-body { gap:10px; padding:14px 16px 12px; }
+#kr-modal .field-group { gap:5px; margin:0; min-width:0; }
 #kr-modal .field-label { font-size:11px; line-height:1.35; letter-spacing:0.02em; }
-#kr-modal .field-input { padding:10px 12px; font-size:14px; }
+#kr-modal .field-input { padding:10px 12px; font-size:14px; min-width:0; width:100%; box-sizing:border-box; }
+.kr-form-cift{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:end;}
+.kr-form-uc{display:grid;grid-template-columns:1.15fr 0.65fr 1fr;gap:8px;align-items:end;}
+.kr-taksit-alanlari{display:contents;}
+.kr-form-cift .field-input,.kr-form-uc .field-input{min-height:40px;height:40px;font-size:14px;border-radius:9px;}
+.kr-form-uc input[type="month"]{padding-left:8px;padding-right:6px;font-size:12px;}
+#kr-modal .kr-modal-footer{display:grid;grid-template-columns:1fr 1.35fr;gap:8px;padding:12px 16px 16px;}
+#kr-modal .kr-modal-footer .btn-secondary,
+#kr-modal .kr-modal-footer .btn-primary{width:100%;min-height:42px;margin:0;}
 .kr-alt-alan { display:flex; flex-direction:column; gap:10px; }
 .kr-duzenli-hint { font-size:11px; color:var(--text-muted); line-height:1.4; margin:0; padding:8px 10px; background:var(--bg-elevated); border-radius:8px; border:1px solid rgba(46,64,89,0.45); }
 .kr-td-duzenli { color:var(--green); font-weight:700; font-size:11px; }
 .kr-tip-sec, .kr-sure-sec { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin:0; }
 .kr-tip-btn, .kr-sure-btn { min-width:0; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text-muted); padding:9px 8px; font-family:var(--font-body); font-size:11px; font-weight:700; line-height:1.25; text-align:center; cursor:pointer; transition:all 0.15s; }
 .kr-tip-btn.active, .kr-sure-btn.active { background:rgba(240,184,64,0.12); border-color:var(--gold); color:var(--gold); }
+@media (max-width:480px){
+  .kr-form-cift{grid-template-columns:1fr 1fr;gap:6px;}
+  .kr-form-uc{grid-template-columns:1.1fr 0.6fr 0.95fr;gap:6px;}
+  .kr-form-cift .field-input,.kr-form-uc .field-input{min-height:38px;height:38px;font-size:12px;}
+  .kr-form-uc input[type="month"]{font-size:11px;padding-left:6px;padding-right:4px;}
+  #kr-modal .field-label{font-size:10px;}
+  #kr-modal .kr-modal-footer{gap:6px;padding:10px 14px 14px;}
+  #kr-modal .kr-modal-footer .btn-secondary,
+  #kr-modal .kr-modal-footer .btn-primary{min-height:40px;font-size:13px;}
+}
 .kr-kart-ozet { width:100%; max-width:760px; display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
 .kr-kart-chip { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-md); padding:10px 14px; min-width:160px; flex:1; }
 .kr-chip-adi { font-size:11px; font-weight:800; letter-spacing:0.8px; color:var(--gold); text-transform:uppercase; margin-bottom:4px; }

@@ -486,10 +486,11 @@ function kTipGoster(tip){
   _aktifTip=tip;
   document.querySelectorAll(".kr-tip-btn[data-tip]").forEach(function(b){b.classList.toggle("active",b.dataset.tip===tip);});
   var tw=$("kr-taksit-wrap"),dw=$("kr-duzenli-wrap"),tl=$("kr-tutar-label"),hint=$("kr-duzenli-hint");
-  if(tw)tw.style.display=tip==="taksit"?"":"none";
+  /* display:contents → tutar|taksit|ay tek satır grid çocukları olur */
+  if(tw)tw.style.display=tip==="taksit"?"contents":"none";
   if(dw)dw.style.display=tip==="duzenli"?"":"none";
   if(hint)hint.style.display=tip==="duzenli"?"":"none";
-  if(tl)tl.textContent=tip==="duzenli"?"Aylik tutar (TL)":"Toplam tutar (TL)";
+  if(tl)tl.textContent=tip==="duzenli"?"Aylık tutar":"Toplam tutar";
   kDuzenliSureGoster(_duzenliSure);
 }
 function kDuzenliSureGoster(sure){
@@ -540,17 +541,26 @@ function krender(){
   else{h+='<table class="kr-tablo"><thead><tr><th>KART</th><th>AÇIKLAMA</th><th>TİP</th><th>TUTAR</th><th></th></tr></thead><tbody>';ayItems.forEach(function(r){h+='<tr><td class="kr-td-kart">'+r.kart+'</td><td class="kr-td-aciklama">'+r.aciklama+'</td><td class="kr-td-no'+(r.duzenli?" kr-td-duzenli":"")+'" style="text-align:center">'+taksitEtiket(r,r.har)+'</td><td class="kr-td-tutar">'+kpara(r.taksitTutar)+' TL</td><td><button class="kr-duz-btn row-action-btn duzenle" data-id="'+r.id+'">&#9998;</button> <button class="kr-sil-btn row-action-btn sil" data-id="'+r.id+'">&#10005;</button></td></tr>';});h+='</tbody></table>';}
   h+='</div></div>';
   h+='<div class="bk-modal-overlay hidden" id="kr-modal"><div class="modal-box kr-modal-box"><div class="modal-header"><h2 class="modal-title" id="kr-modal-baslik">Harcama Ekle</h2><button class="modal-close" id="kr-modal-kapat">&#10005;</button></div><div class="modal-body kr-modal-body">';
-  h+='<div class="field-group kr-field-tip"><label class="field-label">Odeme turu</label><div class="kr-tip-sec"><button type="button" class="kr-tip-btn active" data-tip="taksit">Taksitli</button><button type="button" class="kr-tip-btn" data-tip="duzenli">Duzenli</button></div></div>';
+  h+='<div class="field-group kr-field-tip"><label class="field-label">Ödeme türü</label><div class="kr-tip-sec"><button type="button" class="kr-tip-btn active" data-tip="taksit">Taksitli</button><button type="button" class="kr-tip-btn" data-tip="duzenli">Düzenli</button></div></div>';
+  h+='<div class="kr-form-cift">';
   h+='<div class="field-group"><label class="field-label">Kart</label><input type="text" id="kr-kart" class="field-input" placeholder="Garanti..." list="kr-dl" autocomplete="off"/><datalist id="kr-dl">'+ks.map(function(k){return'<option value="'+k+'"/>';}).join('')+'</datalist></div>';
-  h+='<div class="field-group"><label class="field-label">Aciklama</label><input type="text" id="kr-aciklama" class="field-input" placeholder="Market, Netflix..." maxlength="100"/></div>';
-  h+='<div class="field-group"><label class="field-label" id="kr-tutar-label">Toplam tutar (TL)</label><input type="number" id="kr-tutar" class="field-input" placeholder="0" min="0" step="0.01" inputmode="decimal"/></div>';
-  h+='<div id="kr-taksit-wrap" class="kr-alt-alan"><div class="field-group"><label class="field-label">Taksit sayisi</label><input type="number" id="kr-taksit" class="field-input" value="1" min="1" max="60"/></div>';
-  h+='<div class="field-group"><label class="field-label">1. taksit ayi</label><input type="month" id="kr-bastarihi" class="field-input" value="'+ayInput()+'"/></div></div>';
-  h+='<div id="kr-duzenli-wrap" class="kr-alt-alan" style="display:none"><div class="field-group"><label class="field-label">Baslangic ayi</label><input type="month" id="kr-duzenli-bas" class="field-input" value="'+ayInput()+'"/></div>';
-  h+='<div class="field-group"><label class="field-label">Sure</label><div class="kr-sure-sec"><button type="button" class="kr-sure-btn active" data-sure="devam">Devam ediyor</button><button type="button" class="kr-sure-btn" data-sure="sureli">Belirli sure</button></div></div>';
-  h+='<div id="kr-sure-wrap" style="display:none"><div class="field-group"><label class="field-label">Kac ay?</label><input type="number" id="kr-duzenli-ay" class="field-input" value="12" min="1" max="120"/></div></div>';
-  h+='<p class="kr-duzenli-hint" id="kr-duzenli-hint" style="display:none">Abonelik ve aylik sabit odemeler: tutar aylik olarak yansir.</p></div>';
-  h+='</div><div class="modal-footer"><button class="btn-secondary" id="kr-iptal">Iptal</button><button class="btn-primary" id="kr-kaydet">Kaydet</button></div></div></div>';
+  h+='<div class="field-group"><label class="field-label">Açıklama</label><input type="text" id="kr-aciklama" class="field-input" placeholder="Market, Netflix..." maxlength="100"/></div>';
+  h+='</div>';
+  /* Taksitli: tutar | taksit | ay — tek satır (taksit-wrap display:contents) */
+  h+='<div class="kr-form-uc" id="kr-miktar-satir">';
+  h+='<div class="field-group"><label class="field-label" id="kr-tutar-label">Toplam tutar</label><input type="number" id="kr-tutar" class="field-input" placeholder="0" min="0" step="0.01" inputmode="decimal"/></div>';
+  h+='<div id="kr-taksit-wrap" class="kr-taksit-alanlari" style="display:contents">';
+  h+='<div class="field-group"><label class="field-label">Taksit</label><input type="number" id="kr-taksit" class="field-input" value="1" min="1" max="60" inputmode="numeric"/></div>';
+  h+='<div class="field-group"><label class="field-label">Taksit ayı</label><input type="month" id="kr-bastarihi" class="field-input" value="'+ayInput()+'"/></div>';
+  h+='</div></div>';
+  h+='<div id="kr-duzenli-wrap" class="kr-alt-alan" style="display:none">';
+  h+='<div class="kr-form-cift">';
+  h+='<div class="field-group"><label class="field-label">Başlangıç ayı</label><input type="month" id="kr-duzenli-bas" class="field-input" value="'+ayInput()+'"/></div>';
+  h+='<div class="field-group"><label class="field-label">Süre</label><div class="kr-sure-sec"><button type="button" class="kr-sure-btn active" data-sure="devam">Devam</button><button type="button" class="kr-sure-btn" data-sure="sureli">Süreli</button></div></div>';
+  h+='</div>';
+  h+='<div id="kr-sure-wrap" style="display:none"><div class="field-group"><label class="field-label">Kaç ay?</label><input type="number" id="kr-duzenli-ay" class="field-input" value="12" min="1" max="120"/></div></div>';
+  h+='<p class="kr-duzenli-hint" id="kr-duzenli-hint" style="display:none">Abonelik ve aylık sabit ödemeler: tutar aylık olarak yansır.</p></div>';
+  h+='</div><div class="modal-footer kr-modal-footer"><button class="btn-secondary" id="kr-iptal">İptal</button><button class="btn-primary" id="kr-kaydet">Kaydet</button></div></div></div>';
   c.innerHTML=h;kbagla();
   if(taslak&&taslak.acik)kFormTaslakGeriYukle(taslak);
 }
