@@ -4,7 +4,7 @@ const BASE = self.location.pathname.replace(/\/?sw\.js$/i, "");
 const ASSETS = [
   BASE + "/",
   BASE + "/index.html",
-  BASE + "/css/style.css?v=20260725ar-sade",
+  BASE + "/css/style.css?v=20260725ar-2col",
   BASE + "/js/hk-erisim.js?v=20260531multi-final",
   BASE + "/js/hk-tanitim.js?v=20260531tanitim",
   BASE + "/js/hk-ayarlar.js?v=20260531temiz",
@@ -17,7 +17,7 @@ const ASSETS = [
   BASE + "/js/modules/yukle.js?v=20260615hizli-ac",
   BASE + "/js/modules/alacaklar.js?v=20260615alborc2",
   BASE + "/js/modules/urun.js?v=20260531kok-tasima",
-  BASE + "/js/modules/arabam.js?v=20260725ar-sade",
+  BASE + "/js/modules/arabam.js?v=20260725ar-2col",
   BASE + "/manifest.json?v=20260209desk",
   BASE + "/icons/favicon.ico?v=20260209desk",
   BASE + "/icons/icon-180.png?v=20260209desk",

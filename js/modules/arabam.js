@@ -218,33 +218,29 @@ var ArabamModule = (function () {
     var perKm = a && a.bakimPeriyodKm != null && a.bakimPeriyodKm !== "" ? String(a.bakimPeriyodKm) : "10000";
     var perAy = a && a.bakimPeriyodAy != null && a.bakimPeriyodAy !== "" ? String(a.bakimPeriyodAy) : "12";
     var h = '<div class="ar-takip-form" data-tip="' + tip + '">';
-    h += '<div class="ar-takip-form-grid">';
+    var baslikMap = { km: "Km", bakim: "Bakım", muayene: "Muayene", sigorta: "Sigorta", kasko: "Kasko" };
+    h += '<div class="ar-takip-form-ust">';
+    h += '<span class="ar-takip-ad">' + (baslikMap[tip] || belgeTipLabel(tip)) + "</span>";
+    h += '<button type="button" class="ar-takip-iptal" title="Vazgeç" aria-label="Vazgeç">&#10005;</button>';
+    h += "</div>";
     if (tip === "bakim") {
-      h += '<div class="field-group"><label class="field-label">Tarih</label>';
-      h += '<input type="date" class="field-input ar-tf-tarih" value="' + bugun + '"/></div>';
-      h += '<div class="field-group"><label class="field-label">Km</label>';
-      h += '<input type="number" class="field-input ar-tf-km" value="' + gKm + '" placeholder="125000" min="0" step="1" inputmode="numeric"/></div>';
-      h += '<div class="field-group"><label class="field-label">Her (km)</label>';
-      h += '<input type="number" class="field-input ar-tf-per-km" value="' + perKm + '" min="1000" step="500" inputmode="numeric"/></div>';
-      h += '<div class="field-group"><label class="field-label">Her (ay)</label>';
-      h += '<input type="number" class="field-input ar-tf-per-ay" value="' + perAy + '" min="1" max="36" step="1" inputmode="numeric"/></div>';
+      h += '<div class="ar-takip-form-grid">';
+      h += '<input type="date" class="field-input ar-tf-tarih" value="' + bugun + '" aria-label="Bakım tarihi"/>';
+      h += '<input type="number" class="field-input ar-tf-km" value="' + gKm + '" placeholder="Km" min="0" step="1" inputmode="numeric" aria-label="Bakım km"/>';
+      h += '<input type="number" class="field-input ar-tf-per-km" value="' + perKm + '" placeholder="Her km" min="1000" step="500" inputmode="numeric" aria-label="Periyot km"/>';
+      h += '<input type="number" class="field-input ar-tf-per-ay" value="' + perAy + '" placeholder="Her ay" min="1" max="36" step="1" inputmode="numeric" aria-label="Periyot ay"/>';
+      h += "</div>";
     } else if (tip === "km") {
-      h += '<div class="field-group ar-takip-form-full"><label class="field-label">Güncel km</label>';
-      h += '<input type="number" class="field-input ar-tf-km" value="' + gKm + '" placeholder="125000" min="0" step="1" inputmode="numeric"/></div>';
+      h += '<input type="number" class="field-input ar-tf-km ar-tf-tek" value="' + gKm + '" placeholder="Güncel km" min="0" step="1" inputmode="numeric" aria-label="Güncel km"/>';
     } else {
       var mevcut =
         tip === "muayene" ? (a && a.muayeneTarih) || "" :
         tip === "sigorta" ? (a && a.sigortaTarih) || "" :
         (a && a.kaskoTarih) || "";
-      var lbl = tip === "muayene" ? "Bitiş tarihi" : tip === "sigorta" ? "Bitiş tarihi" : "Bitiş tarihi";
-      h += '<div class="field-group ar-takip-form-full"><label class="field-label">' + lbl + "</label>";
-      h += '<input type="date" class="field-input ar-tf-tarih" value="' + mevcut + '"/></div>';
+      h += '<input type="date" class="field-input ar-tf-tarih ar-tf-tek" value="' + mevcut + '" aria-label="Bitiş tarihi"/>';
     }
-    h += "</div>";
-    h += '<div class="ar-takip-form-ak">';
-    h += '<button type="button" class="ar-takip-iptal">Vazgeç</button>';
     h += '<button type="button" class="ar-takip-kaydet">Kaydet</button>';
-    h += "</div></div>";
+    h += "</div>";
     return h;
   }
 
@@ -252,21 +248,21 @@ var ArabamModule = (function () {
     var rozet = opts.tip === "km"
       ? { sinif: opts.ana && opts.ana !== "—" ? "ar-durum--ok" : "ar-durum--bos", metin: "" }
       : durumRozetMetni({ gun: opts.gun, km: opts.km });
-    if (opts.bosRozet && rozet.sinif === "ar-durum--bos") rozet.metin = opts.bosRozet;
     var acik = _acikTakipTip === opts.tip;
     var ana = opts.ana || "—";
     var alt = opts.alt || "";
     var h = '<div class="ar-takip-kart ' + rozet.sinif + (acik ? " ar-takip-kart--acik" : "") + '" data-tip="' + opts.tip + '">';
-    h += '<button type="button" class="ar-takip-kart-ozet" data-tip="' + opts.tip + '" aria-expanded="' + (acik ? "true" : "false") + '">';
-    h += '<span class="ar-takip-dot" aria-hidden="true"></span>';
-    h += '<span class="ar-takip-ad">' + opts.ad + "</span>";
-    h += '<span class="ar-takip-deger">';
-    h += '<span class="ar-takip-ana">' + ana + "</span>";
-    if (alt) h += '<span class="ar-takip-alt">' + alt + "</span>";
-    h += "</span>";
-    h += '<span class="ar-takip-chev" aria-hidden="true">' + (acik ? "▾" : "›") + "</span>";
-    h += "</button>";
-    if (acik) h += takipFormHtml(opts.tip, a);
+    if (acik) {
+      h += takipFormHtml(opts.tip, a);
+    } else {
+      h += '<button type="button" class="ar-takip-kart-ozet" data-tip="' + opts.tip + '" aria-expanded="false">';
+      h += '<span class="ar-takip-dot" aria-hidden="true"></span>';
+      h += '<span class="ar-takip-metin">';
+      h += '<span class="ar-takip-ad">' + opts.ad + "</span>";
+      h += '<span class="ar-takip-ana">' + ana + "</span>";
+      if (alt) h += '<span class="ar-takip-alt">' + alt + "</span>";
+      h += "</span></button>";
+    }
     h += "</div>";
     return h;
   }
@@ -281,20 +277,6 @@ var ArabamModule = (function () {
     var gSi = a.sigortaTarih ? gunKaldi(a.sigortaTarih) : null;
     var gKa = a.kaskoTarih ? gunKaldi(a.kaskoTarih) : null;
 
-    var h = '<div class="ar-takip">';
-    h += '<div class="ar-takip-baslik">Takip</div>';
-    h += '<div class="ar-takip-liste">';
-
-    h += takipKartHtml({
-      tip: "km",
-      ad: "Km",
-      gun: null,
-      km: null,
-      ana: !isNaN(gKm) && gKm > 0 ? gKm.toLocaleString("tr-TR") : "—",
-      alt: "",
-      bosRozet: "—"
-    }, a);
-
     var bakimAna = "—";
     var bakimAlt = "";
     if (kmB !== null) bakimAna = kalanKmMetni(kmB);
@@ -303,6 +285,14 @@ var ArabamModule = (function () {
     if (kmB !== null && gBa !== null) bakimAlt = kalanGunMetni(gBa);
     else if (a.bakimSonTarih && (kmB !== null || gBa !== null)) bakimAlt = "Son " + mTarih(a.bakimSonTarih);
 
+    var h = '<div class="ar-takip">';
+    h += '<div class="ar-takip-baslik">Takip</div>';
+    h += '<div class="ar-takip-liste">';
+    h += takipKartHtml({
+      tip: "km",
+      ad: "Km",
+      ana: !isNaN(gKm) && gKm > 0 ? gKm.toLocaleString("tr-TR") : "—"
+    }, a);
     h += takipKartHtml({
       tip: "bakim",
       ad: "Bakım",
@@ -311,7 +301,6 @@ var ArabamModule = (function () {
       ana: bakimAna,
       alt: bakimAlt
     }, a);
-
     h += takipKartHtml({
       tip: "muayene",
       ad: "Muayene",
@@ -319,7 +308,6 @@ var ArabamModule = (function () {
       ana: gMu !== null ? kalanGunMetni(gMu) : "—",
       alt: a.muayeneTarih ? mTarih(a.muayeneTarih) : ""
     }, a);
-
     h += takipKartHtml({
       tip: "sigorta",
       ad: "Sigorta",
@@ -327,16 +315,13 @@ var ArabamModule = (function () {
       ana: gSi !== null ? kalanGunMetni(gSi) : "—",
       alt: a.sigortaTarih ? mTarih(a.sigortaTarih) : ""
     }, a);
-
     h += takipKartHtml({
       tip: "kasko",
       ad: "Kasko",
       gun: gKa,
       ana: gKa !== null ? kalanGunMetni(gKa) : "—",
-      alt: a.kaskoTarih ? mTarih(a.kaskoTarih) : "",
-      bosRozet: "—"
+      alt: a.kaskoTarih ? mTarih(a.kaskoTarih) : ""
     }, a);
-
     h += "</div>";
     h += belgeGecmisHtml(a);
     h += "</div>";
@@ -739,10 +724,10 @@ var ArabamModule = (function () {
     h += '<div class="ar-kayit-alan-grid ar-kayit-gider-grid">';
     h += '<div class="field-group"><label class="field-label" for="ar-g-tarih">Tarih</label><input type="date" id="ar-g-tarih" class="field-input" value="' + bugun + '"/></div>';
     h += '<div class="field-group"><label class="field-label" for="ar-g-tutar">Tutar (TL)</label><input type="number" id="ar-g-tutar" class="field-input" placeholder="0" min="0" step="0.01" inputmode="decimal"/></div>';
-    h += '<div class="field-group ar-kayit-span-2"><label class="field-label" for="ar-g-kalem">Kalem</label><select id="ar-g-kalem" class="field-select"></select></div>';
-    h += '<div class="field-group ar-kayit-span-2"><label class="field-label" for="ar-g-aciklama">Not</label><input type="text" id="ar-g-aciklama" class="field-input" placeholder="İsteğe bağlı" maxlength="120"/></div>';
+    h += '<div class="field-group"><label class="field-label" for="ar-g-kalem">Kalem</label><select id="ar-g-kalem" class="field-select"></select></div>';
+    h += '<div class="field-group"><label class="field-label" for="ar-g-aciklama">Not</label><input type="text" id="ar-g-aciklama" class="field-input" placeholder="İsteğe bağlı" maxlength="120"/></div>';
     h += "</div>";
-    h += '<button type="button" class="ar-kayit-kaydet-btn" id="ar-kayit-kaydet">Gideri kaydet</button>';
+    h += '<div class="ar-kayit-aksiyon"><button type="button" class="ar-kayit-kaydet-btn" id="ar-kayit-kaydet">Kaydet</button></div>';
     h += "</div>";
 
     h += '<div class="ar-gider-liste-wrap">';
