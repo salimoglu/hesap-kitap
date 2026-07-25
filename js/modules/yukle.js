@@ -1193,7 +1193,7 @@ function render(){
         var odedi=(ay.odemeler&&ay.odemeler[u.id])||false;
         var km=u.ad.split(" ");
         h+='<button type="button" class="vf2-card-uye-btn vf2-ode-btn '+(odedi?"vf2-odedi":"vf2-bek")+'" data-ay="'+ay.key+'" data-uid="'+u.id+'">';
-        h+='<span class="vf2-card-uye-ad">'+(km[0]||u.ad)+(km[1]?' '+km[1]:'')+'</span>';
+        h+='<span class="vf2-card-uye-ad">'+(km[0]||u.ad)+'</span>';
         h+='<span class="vf2-card-uye-deg">'+(odedi?p(kpM):'—')+'</span></button>';
       });
       h+='</div><div class="vf2-card-info">';
@@ -1215,7 +1215,7 @@ function render(){
     h+='<div class="vf2-card-uyeler vf2-card-uyeler-tot">';
     _uyeler.forEach(function(u){
       var pt=u.ad.split(" ");
-      h+='<div class="vf2-card-uye-tot"><span class="vf2-card-uye-ad">'+(pt[0]||u.ad)+(pt[1]?' '+pt[1]:'')+'</span><b>'+p(uyeToplam[u.id])+' TL</b></div>';
+      h+='<div class="vf2-card-uye-tot"><span class="vf2-card-uye-ad">'+(pt[0]||u.ad)+'</span><b>'+p(uyeToplam[u.id])+'</b></div>';
     });
     h+='</div><div class="vf2-card-info">';
     h+='<div class="vf2-card-row"><span>Toplam ödeme</span><b>'+p(cOdeme)+' TL</b></div>';

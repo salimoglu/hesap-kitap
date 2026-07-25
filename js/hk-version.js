@@ -1,6 +1,6 @@
 /* Uygulama sürümü: major.minor — minor 0..99, sonra major artar (1.99 → 2.0) */
 (function (global) {
-  var VERSION = { major: 1, minor: 8 };
+  var VERSION = { major: 1, minor: 9 };
 
   function formatVersion(v) {
     var maj = Math.max(0, parseInt(v.major, 10) || 0);

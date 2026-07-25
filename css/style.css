@@ -4600,26 +4600,32 @@ html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 42, 0.12); border-
     padding: 0;
     font-size: 13px;
   }
+  /* Uyeler + odemeler: tek yatay satir */
   .vf2-cards .vf2-card-uyeler {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 2px 8px;
-    overflow-x: visible;
-    padding-bottom: 0;
-  }
-  .vf2-cards .vf2-card-uye-btn {
+    display: flex;
     flex-direction: row;
+    flex-wrap: nowrap;
     align-items: baseline;
     justify-content: space-between;
     gap: 4px;
-    padding: 2px 0;
-    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0;
+  }
+  .vf2-cards .vf2-card-uye-btn {
+    flex: 1 1 0;
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: center;
+    gap: 3px;
+    padding: 1px 0;
+    width: auto;
     min-width: 0;
     background: transparent !important;
     border: none !important;
   }
   .vf2-cards .vf2-card-uye-ad {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 600;
     letter-spacing: 0;
     text-transform: none;
@@ -4628,19 +4634,21 @@ html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 42, 0.12); border-
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    flex: 1 1 auto;
+    flex: 0 1 auto;
     min-width: 0;
+    max-width: 46%;
   }
   .vf2-cards .vf2-card-uye-deg {
-    font-size: 12px !important;
+    font-size: 11px !important;
     font-weight: 600 !important;
     margin-top: 0;
     flex: 0 0 auto;
     color: var(--text-primary) !important;
+    white-space: nowrap;
   }
   .vf2-cards .vf2-bek .vf2-card-uye-deg {
     color: var(--text-muted) !important;
-    font-size: 12px !important;
+    font-size: 11px !important;
   }
   .vf2-cards .vf2-card-info {
     gap: 3px;
@@ -4663,11 +4671,18 @@ html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 42, 0.12); border-
     font-size: 12px;
     font-weight: 600;
   }
+  /* Yatirimlar satiri: deger sagda (ay toplami / guncel deger gibi) */
+  .vf2-cards .vf2-card-row-chips {
+    align-items: center;
+  }
   .vf2-cards .vf2-card-chips {
     gap: 0;
     padding: 0;
     flex-wrap: wrap;
     overflow-x: visible;
+    justify-content: flex-end;
+    text-align: right;
+    margin-left: auto;
   }
   .vf2-cards .vf2-tip-tag,
   .vf2-cards .vf2-tip-ayrac {
@@ -4678,21 +4693,30 @@ html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 42, 0.12); border-
     border-color: var(--border);
     margin-top: 2px;
   }
-  .vf2-cards .vf2-card-uye-tot {
+  .vf2-cards .vf2-card-uyeler-tot {
+    display: flex !important;
     flex-direction: row;
+    flex-wrap: nowrap;
     align-items: baseline;
     justify-content: space-between;
     gap: 4px;
-    padding: 2px 0;
+    overflow-x: auto;
+  }
+  .vf2-cards .vf2-card-uye-tot {
+    flex: 1 1 0;
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: center;
+    gap: 3px;
+    padding: 1px 0;
     border-radius: 0;
     background: transparent;
     border: none;
+    min-width: 0;
   }
   .vf2-cards .vf2-card-uye-tot b {
-    font-size: 12px !important;
-  }
-  .vf2-cards .vf2-card-uyeler-tot {
-    gap: 2px 8px;
+    font-size: 11px !important;
+    white-space: nowrap;
   }
   .vf2-cards .vf2-card-total .vf2-card-uye-tot b,
   .vf2-cards .vf2-card-total .vf2-card-info .vf2-card-row > b {
@@ -4753,34 +4777,20 @@ html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 42, 0.12); border-
     overflow-x: visible !important;
     padding: 2px 0 !important;
   }
-  /* Uye satirlari: ince 2 sutun (ustteki .vf2-cards kurallari) */
   .vf2-cards .vf2-card-uye-btn.vf2-ode-btn {
     white-space: nowrap;
     min-width: 0;
-    text-align: left;
-  }
-  .vf2-card-uyeler-tot {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 2px 8px;
-    overflow-x: visible;
-    padding-bottom: 0;
-  }
-  .vf2-card-uyeler-tot .vf2-card-uye-tot {
-    flex: none;
-    min-width: 0;
-    width: 100%;
-    box-sizing: border-box;
+    text-align: center;
   }
   .vf2-card-uyeler-tot .vf2-card-uye-ad {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     text-transform: none;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 600;
     min-width: 0;
-    flex: 1 1 auto;
+    max-width: 46%;
   }
   #vefa-container.module-host {
     overflow: hidden;
