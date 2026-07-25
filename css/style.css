@@ -4570,7 +4570,138 @@ html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 42, 0.12); border-
 /* Mobil: tabloyu gizle, kart listesini goster, ozeti kompaktlastir */
 @media (max-width: 600px) {
   .vf2-tablo-dis { display: none !important; }
-  .vf2-cards { display: flex; flex-direction: column; gap: 10px; }
+  .vf2-cards { display: flex; flex-direction: column; gap: 6px; }
+
+  /* Aylik bilgi kartlari — inceltilmis / sade */
+  .vf2-cards .vf2-card {
+    padding: 8px 10px;
+    gap: 6px;
+    border-radius: 8px;
+    background: var(--bg-elevated);
+  }
+  .vf2-cards .vf2-card-header {
+    border-bottom: none;
+    padding-bottom: 0;
+    gap: 6px;
+  }
+  .vf2-cards .vf2-card-ay {
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--text-primary);
+    text-transform: none;
+  }
+  .vf2-cards .vf2-card-aks { gap: 2px; }
+  .vf2-cards .vf2-card-aks .row-action-btn {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    padding: 0;
+    font-size: 13px;
+  }
+  .vf2-cards .vf2-card-uyeler {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2px 8px;
+    overflow-x: visible;
+    padding-bottom: 0;
+  }
+  .vf2-cards .vf2-card-uye-btn {
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 4px;
+    padding: 2px 0;
+    width: 100%;
+    min-width: 0;
+    background: transparent !important;
+    border: none !important;
+  }
+  .vf2-cards .vf2-card-uye-ad {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--text-secondary);
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .vf2-cards .vf2-card-uye-deg {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    margin-top: 0;
+    flex: 0 0 auto;
+    color: var(--text-primary) !important;
+  }
+  .vf2-cards .vf2-bek .vf2-card-uye-deg {
+    color: var(--text-muted) !important;
+    font-size: 12px !important;
+  }
+  .vf2-cards .vf2-card-info {
+    gap: 3px;
+    border-top: 1px solid var(--border);
+    padding-top: 6px;
+    margin-top: 2px;
+  }
+  .vf2-cards .vf2-card-row {
+    font-size: 12px;
+    gap: 6px;
+    min-height: 0;
+  }
+  .vf2-cards .vf2-card-row > span {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: none;
+  }
+  .vf2-cards .vf2-card-row > b {
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .vf2-cards .vf2-card-chips {
+    gap: 0;
+    padding: 0;
+    flex-wrap: wrap;
+    overflow-x: visible;
+  }
+  .vf2-cards .vf2-tip-tag,
+  .vf2-cards .vf2-tip-ayrac {
+    font-size: 11px !important;
+  }
+  .vf2-cards .vf2-card-total {
+    background: var(--bg-card);
+    border-color: var(--border);
+    margin-top: 2px;
+  }
+  .vf2-cards .vf2-card-uye-tot {
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 4px;
+    padding: 2px 0;
+    border-radius: 0;
+    background: transparent;
+    border: none;
+  }
+  .vf2-cards .vf2-card-uye-tot b {
+    font-size: 12px !important;
+  }
+  .vf2-cards .vf2-card-uyeler-tot {
+    gap: 2px 8px;
+  }
+  .vf2-cards .vf2-card-total .vf2-card-uye-tot b,
+  .vf2-cards .vf2-card-total .vf2-card-info .vf2-card-row > b {
+    font-size: 12px !important;
+  }
+  .vf2-cards .vf2-card-bos {
+    padding: 18px 10px;
+    font-size: 12px;
+  }
 
   .vf2-wrap { padding: 6px 6px 12px; gap: 8px; }
   /* ustteki ozet kutusu dar ekranda dikey ust uste uzadiyordu; satir-wrap + yarim-genislik bloklar */
@@ -4622,58 +4753,18 @@ html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 42, 0.12); border-
     overflow-x: visible !important;
     padding: 2px 0 !important;
   }
-  /* Uye kutulari: yatay scroll yerine 2 sutun, isimler satir kirilir */
-  .vf2-card-uyeler {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 6px;
-    overflow-x: visible;
-    padding-bottom: 0;
-    -webkit-overflow-scrolling: auto;
-  }
-  .vf2-card-uye-btn {
-    flex: none;
-    min-width: 0;
-    width: 100%;
-    box-sizing: border-box;
-    padding: 4px 2px;
-    align-items: stretch;
-    background: transparent !important;
-    border: none !important;
-  }
-  /* Tablo .vf2-ode-btn: nowrap + min-width — kartda ayni class; isimler satir kirilsin */
+  /* Uye satirlari: ince 2 sutun (ustteki .vf2-cards kurallari) */
   .vf2-cards .vf2-card-uye-btn.vf2-ode-btn {
-    white-space: normal;
+    white-space: nowrap;
     min-width: 0;
-    overflow-wrap: anywhere;
     text-align: left;
-  }
-  .vf2-card-uye-ad {
-    white-space: normal;
-    word-break: break-word;
-    overflow-wrap: anywhere;
-    line-height: 1.25;
-    letter-spacing: 0.02em;
-    text-transform: none;
-    font-size: 11px;
-    font-weight: 700;
-    max-width: 100%;
-    min-width: 0;
-    width: 100%;
-  }
-  .vf2-card-uye-deg {
-    align-self: flex-start;
-    margin-top: 2px;
-    min-width: 0;
-    max-width: 100%;
   }
   .vf2-card-uyeler-tot {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 6px;
+    gap: 2px 8px;
     overflow-x: visible;
     padding-bottom: 0;
-    -webkit-overflow-scrolling: auto;
   }
   .vf2-card-uyeler-tot .vf2-card-uye-tot {
     flex: none;
@@ -4682,15 +4773,14 @@ html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 42, 0.12); border-
     box-sizing: border-box;
   }
   .vf2-card-uyeler-tot .vf2-card-uye-ad {
-    white-space: normal;
-    word-break: break-word;
-    overflow-wrap: anywhere;
-    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     text-transform: none;
-    font-size: 10px;
-    font-weight: 700;
+    font-size: 11px;
+    font-weight: 600;
     min-width: 0;
-    width: 100%;
+    flex: 1 1 auto;
   }
   #vefa-container.module-host {
     overflow: hidden;
@@ -4702,16 +4792,13 @@ html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 42, 0.12); border-
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
   }
-  .vf2-tip-tag { font-size: 13px !important; padding: 0 !important; background: transparent !important; }
-  .vf2-ozet-bar .vf2-tip-tag { font-size: 13px !important; padding: 0 !important; }
+  .vf2-tip-tag { font-size: 12px !important; padding: 0 !important; background: transparent !important; }
+  .vf2-ozet-bar .vf2-tip-tag { font-size: 12px !important; padding: 0 !important; }
   .vf2-ozet-bar .vf2-adet-n,
-  .vf2-card-chips .vf2-adet-n { font-size: 13px !important; font-weight: 600 !important; color: var(--text-primary) !important; }
-  .vf2-card-total .vf2-tip-tag { font-size: 13px !important; }
+  .vf2-card-chips .vf2-adet-n { font-size: 12px !important; font-weight: 600 !important; color: var(--text-primary) !important; }
+  .vf2-card-total .vf2-tip-tag { font-size: 11px !important; }
   .vf2-td-adet .vf2-adet-n { font-size: 13px !important; font-weight: 600 !important; }
-  .vf2-card-uye-deg { font-size: 13px !important; font-weight: 600 !important; color: var(--text-primary) !important; }
   .vf2-odedi .vf2-card-uye-deg { color: var(--text-primary) !important; }
-  .vf2-card-total .vf2-card-uye-tot b,
-  .vf2-card-total .vf2-card-info .vf2-card-row > b { font-size: 13px !important; color: var(--text-primary) !important; }
   .vf2-oz-sep {
     flex-basis: 100%;
     width: 100% !important;
