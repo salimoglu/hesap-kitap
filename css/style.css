@@ -2061,10 +2061,80 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .va-form-iki{display:grid;grid-template-columns:1fr 0.7fr;gap:10px;}
 .va-gram-oniz-wrap{font-size:12px;color:var(--text-muted);padding:8px 12px;background:var(--bg-elevated);border-radius:8px;margin-bottom:4px;}
 .va-gram-oniz-wrap strong{color:var(--gold);font-variant-numeric:tabular-nums;}
-@media (max-width:520px){
+@media (max-width:640px){
+  .va-wrap{padding:8px;gap:8px;}
   .va-form-iki{grid-template-columns:1fr;}
-  .va-header{flex-direction:column;align-items:stretch;}
-  .va-ekle-btn{width:100%;text-align:center;}
+  /* Özet kartı: kompakt 2x2 + fiyat|ekle */
+  .va-header{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    grid-template-areas:
+      "ozet ozet"
+      "fiyat ekle";
+    align-items:stretch;
+    gap:6px;
+    padding:8px 10px;
+    border-radius:10px;
+  }
+  .va-ozet{
+    grid-area:ozet;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:5px;
+    flex:none;
+    width:100%;
+    align-items:stretch;
+  }
+  .va-oz-item{
+    flex-direction:row;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:4px 6px;
+    min-width:0;
+    padding:5px 7px;
+    border-radius:7px;
+    background:var(--bg-elevated);
+    border:1px solid var(--border);
+    box-sizing:border-box;
+  }
+  .va-oz-label{
+    font-size:8px;
+    letter-spacing:0.04em;
+    line-height:1.15;
+    flex-shrink:0;
+  }
+  .va-oz-val,
+  .va-oz-val.va-oz-sayi{
+    font-size:11px;
+    font-weight:700;
+    line-height:1.15;
+    text-align:right;
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .va-fiyat-satir{
+    grid-area:fiyat;
+    align-self:stretch;
+    justify-content:flex-start;
+    min-width:0;
+    padding:5px 8px;
+    gap:5px;
+  }
+  .va-fiyat-label{font-size:8px;}
+  .va-fiyat-val{font-size:11px;}
+  .va-fiyat-btn{font-size:14px;}
+  .va-ekle-btn{
+    grid-area:ekle;
+    width:auto;
+    align-self:stretch;
+    padding:0 12px;
+    font-size:12px;
+    min-height:32px;
+    text-align:center;
+    white-space:nowrap;
+  }
 }
 
 /* ══ MUHTAC & ZEKAT MODÜLİ ══ */

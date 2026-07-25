@@ -189,21 +189,21 @@ var VerilenAltinlarModule = (function () {
     var h = '<div class="va-wrap">';
     h += '<div class="va-header">';
     h += '<div class="va-ozet">';
-    h += '<div class="va-oz-item"><span class="va-oz-label">Toplam gram</span><span class="va-oz-val va-oz-au">' + agr(topGram) + " gr</span></div>";
-    h += '<div class="va-oz-item"><span class="va-oz-label">Güncel değer</span><span class="va-oz-val va-oz-guncel" id="va-guncel-deger">';
+    h += '<div class="va-oz-item"><span class="va-oz-label">Gram</span><span class="va-oz-val va-oz-au">' + agr(topGram) + " gr</span></div>";
+    h += '<div class="va-oz-item"><span class="va-oz-label">Güncel</span><span class="va-oz-val va-oz-guncel" id="va-guncel-deger">';
     h += _gramFiyat > 0 ? para(guncelDeger) + " TL" : "—";
     h += "</span></div>";
     if (topGunDeger > 0) {
-      h += '<div class="va-oz-item"><span class="va-oz-label">Kayıtlı gün değeri</span><span class="va-oz-val">' + para(topGunDeger) + " TL</span></div>";
+      h += '<div class="va-oz-item"><span class="va-oz-label">O gün</span><span class="va-oz-val">' + para(topGunDeger) + " TL</span></div>";
     }
     h += '<div class="va-oz-item"><span class="va-oz-label">Kayıt</span><span class="va-oz-val va-oz-sayi">' + _kayitlar.length + "</span></div>";
     h += "</div>";
     h += '<div class="va-fiyat-satir">';
-    h += '<span class="va-fiyat-label">Gram altın</span>';
-    h += '<span class="va-fiyat-val" id="va-fiyat-val">' + (_gramFiyat > 0 ? para(_gramFiyat) + " TL" : "Yükleniyor...") + "</span>";
+    h += '<span class="va-fiyat-label">Gram</span>';
+    h += '<span class="va-fiyat-val" id="va-fiyat-val">' + (_gramFiyat > 0 ? para(_gramFiyat) + " TL" : "…") + "</span>";
     h += '<button type="button" class="va-fiyat-btn" id="va-fiyat-guncelle" title="Fiyatı güncelle">&#8635;</button>';
     h += "</div>";
-    h += '<button type="button" class="va-ekle-btn" id="va-ekle-btn">+ Kayıt Ekle</button>';
+    h += '<button type="button" class="va-ekle-btn" id="va-ekle-btn">+ Ekle</button>';
     h += "</div>";
 
     if (!_kayitlar.length) {
