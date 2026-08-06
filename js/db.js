@@ -206,8 +206,14 @@ var IslemlerDB = {
   },
   update: async function(islem) {
     await openDB();
-    var result = await promisify(tx(STORES.ISLEMLER, "readwrite").put(islem));
-    if (typeof fbIslemGuncelle !== "undefined") fbIslemGuncelle(islem);
+    /* Mevcut kayitla birlestir: duzeltmede olusturma (sira) ve diger alanlar silinmesin */
+    var birlesik = islem;
+    if (islem && islem.id != null) {
+      var mevcut = await promisify(tx(STORES.ISLEMLER, "readonly").get(islem.id));
+      if (mevcut) birlesik = Object.assign({}, mevcut, islem);
+    }
+    var result = await promisify(tx(STORES.ISLEMLER, "readwrite").put(birlesik));
+    if (typeof fbIslemGuncelle !== "undefined") fbIslemGuncelle(birlesik);
     hkIslemlerBildir();
     hkIslemlerOnbellekTemizle();
     return result;

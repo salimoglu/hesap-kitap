@@ -222,7 +222,7 @@ const IslemlerModule = (() => {
       if(ozetCtx.tur==="yil")return i.tarih.startsWith(ozetCtx.key);
       return true;
     }).sort(function(a,b){
-      return a.tarih.localeCompare(b.tarih)||(a.olusturma||0)-(b.olusturma||0);
+      return a.tarih.localeCompare(b.tarih)||(a.olusturma||0)-(b.olusturma||0)||((a.id||0)-(b.id||0));
     });
   }
 
@@ -489,7 +489,7 @@ const IslemlerModule = (() => {
   }
 
   function veriHazirla(){
-    _islemler.sort(function(a,b){return a.tarih.localeCompare(b.tarih)||(a.olusturma||0)-(b.olusturma||0);});
+    _islemler.sort(function(a,b){return a.tarih.localeCompare(b.tarih)||(a.olusturma||0)-(b.olusturma||0)||((a.id||0)-(b.id||0));});
     _bakMap={};
     var bak=0;
     for(var i=0;i<_islemler.length;i++){
@@ -1317,7 +1317,13 @@ const IslemlerModule = (() => {
     if(!tarih){alert("Tarih secin.");return;}
     const islem={tip:_aktifTip,kategori,tutar,aciklama,tarih};
     var yeniKayit=!_duzenleId;
-    if(_duzenleId){islem.id=_duzenleId;await IslemlerDB.update(islem);}
+    if(_duzenleId){
+      islem.id=_duzenleId;
+      /* Duzeltmede liste sirasi degismesin: olusturma zaman damgasini koru */
+      var eski=_islemler.find(function(x){return x.id===_duzenleId;});
+      if(eski&&eski.olusturma!=null)islem.olusturma=eski.olusturma;
+      await IslemlerDB.update(islem);
+    }
     else await IslemlerDB.add(islem);
     modalKapat();await yukle({altaKaydir:yeniKayit});
   }
