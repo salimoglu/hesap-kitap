@@ -4,6 +4,9 @@ var VerilenAltinlarModule = (function () {
   var _kayitlar = [];
   var _aktif = null;
   var _gramFiyat = 0;
+  var _initPromise = null;
+  var VA_LS_KEY = "hk-verilen-altinlar";
+  var VA_TOHUM_FLAG = "hk-verilen-altin-tohum";
 
   var VA_GRAM = { gram: 1, ceyrek: 1.75, yarim: 3.5, tam: 7, ata: 7.2 };
   var VA_LABEL = { gram: "Gram", ceyrek: "Çeyrek", yarim: "Yarım", tam: "Tam", ata: "Ata" };
@@ -110,19 +113,119 @@ var VerilenAltinlarModule = (function () {
   async function gramFiyatKaydet(f) {
     if (!(f > 0) || typeof window._fbDb === "undefined" || !window._fbDb) return;
     try {
-      await fbRtdbRef("altin_guncel_fiyat").set(f);
+      var ref = typeof fbRtdbRef === "function" ? fbRtdbRef("altin_guncel_fiyat") : null;
+      if (ref) await ref.set(f);
     } catch (e) {}
   }
 
+  function kayitNormalize(row, key) {
+    if (!row || typeof row !== "object") return null;
+    var k = Object.assign({}, row);
+    if (!k.id) k.id = key || uid();
+    k.kisi = k.kisi || "";
+    k.aciklama = k.aciklama || "";
+    k.tur = VA_TURLER.indexOf(k.tur) >= 0 ? k.tur : "ceyrek";
+    k.adet = parseFloat(k.adet) || 1;
+    k.tarih = k.tarih || "";
+    if (k.gunDegerTl != null) {
+      var gd = parseFloat(k.gunDegerTl);
+      if (gd > 0) k.gunDegerTl = gd;
+      else delete k.gunDegerTl;
+    }
+    return k;
+  }
+
+  function listeyeCevir(v) {
+    var out = [];
+    if (!v) return out;
+    if (Array.isArray(v)) {
+      v.forEach(function (row, i) {
+        var n = kayitNormalize(row, row && row.id ? row.id : "va-arr-" + i);
+        if (n) out.push(n);
+      });
+      return out;
+    }
+    if (typeof v === "object") {
+      Object.keys(v).forEach(function (key) {
+        var n = kayitNormalize(v[key], key);
+        if (n) out.push(n);
+      });
+    }
+    return out;
+  }
+
+  function yerelOku() {
+    try {
+      var raw = localStorage.getItem(VA_LS_KEY);
+      if (!raw) return [];
+      return listeyeCevir(JSON.parse(raw));
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function yerelYaz() {
+    try {
+      localStorage.setItem(VA_LS_KEY, JSON.stringify(_kayitlar));
+    } catch (e) {
+      console.warn("[VerilenAltin] yerel yazılamadı", e);
+    }
+  }
+
+  function tohumBayrakOku() {
+    try {
+      return localStorage.getItem(VA_TOHUM_FLAG) === "1";
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function tohumBayrakYaz() {
+    try {
+      localStorage.setItem(VA_TOHUM_FLAG, "1");
+    } catch (e) {}
+  }
+
+  async function fbHazirBekle() {
+    if (typeof window._fbReady !== "undefined" && window._fbReady && typeof window._fbReady.then === "function") {
+      try {
+        await Promise.race([
+          window._fbReady,
+          new Promise(function (r) {
+            setTimeout(r, 2500);
+          })
+        ]);
+      } catch (e) {}
+    }
+  }
+
+  function fbKullaniciVarMi() {
+    try {
+      if (typeof fbMevcutKullanici === "function") {
+        var u = fbMevcutKullanici();
+        return !!(u && !u.isAnonymous);
+      }
+    } catch (e) {}
+    return false;
+  }
+
   async function fbYukle() {
-    if (!window._fbDb) return;
+    await fbHazirBekle();
+    if (!window._fbDb || typeof fbRtdbOku !== "function") return false;
     try {
       var v = await fbRtdbOku("verilen_altinlar");
-      _kayitlar = v ? Object.values(v) : [];
-      vaSirala();
+      var liste = listeyeCevir(v);
+      if (liste.length > 0) {
+        _kayitlar = liste;
+        vaSirala();
+        yerelYaz();
+        tohumBayrakYaz();
+        return true;
+      }
+      return false;
     } catch (e) {
-      _kayitlar = [];
       console.error("[VerilenAltin] yukle", e);
+      return false;
     }
   }
 
@@ -139,6 +242,7 @@ var VerilenAltinlarModule = (function () {
 
   async function tohumYukle() {
     if (_kayitlar.length > 0) return;
+    if (tohumBayrakOku()) return;
     VA_TOHUM.forEach(function (r) {
       _kayitlar.push({
         id: r.id,
@@ -151,19 +255,34 @@ var VerilenAltinlarModule = (function () {
       });
     });
     vaSirala();
+    tohumBayrakYaz();
     await fbKaydet();
   }
 
   async function fbKaydet() {
-    if (!window._fbDb) return;
+    yerelYaz();
+    await fbHazirBekle();
+    if (!window._fbDb || typeof fbRtdbRef !== "function") return false;
+    if (!fbKullaniciVarMi()) {
+      console.warn("[VerilenAltin] oturum yok; veri yerelde saklandı");
+      return false;
+    }
     try {
       var obj = {};
       _kayitlar.forEach(function (k) {
+        if (!k || !k.id) return;
         obj[k.id] = k;
       });
-      await fbRtdbRef("verilen_altinlar").set(obj);
+      var ref = fbRtdbRef("verilen_altinlar");
+      if (!ref) {
+        console.warn("[VerilenAltin] FB ref yok; veri yerelde saklandı");
+        return false;
+      }
+      await ref.set(obj);
+      return true;
     } catch (e) {
       console.error("[VerilenAltin] kaydet", e);
+      return false;
     }
   }
 
@@ -468,8 +587,18 @@ var VerilenAltinlarModule = (function () {
     render();
   }
 
-  async function init() {
-    await fbYukle();
+  async function initOnce() {
+    var fbOk = await fbYukle();
+    if (!fbOk) {
+      var yerel = yerelOku();
+      if (yerel.length > 0) {
+        _kayitlar = yerel;
+        vaSirala();
+        /* FB boş/erişilemezken yerelde kalan kayıtları geri yükle */
+        await fbKaydet();
+        tohumBayrakYaz();
+      }
+    }
     await tohumYukle();
     await gramFiyatYukle();
     render();
@@ -480,6 +609,16 @@ var VerilenAltinlarModule = (function () {
         gramFiyatKaydet(f);
       }
     });
+  }
+
+  async function init() {
+    if (_initPromise) return _initPromise;
+    _initPromise = initOnce().catch(function (e) {
+      console.error("[VerilenAltin] init", e);
+    }).then(function () {
+      _initPromise = null;
+    });
+    return _initPromise;
   }
 
   return { init: init };
