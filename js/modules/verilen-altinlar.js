@@ -354,25 +354,27 @@ var VerilenAltinlarModule = (function () {
       h += "</tbody></table></div>";
     }
 
-    h += '<div class="bk-modal-overlay hidden" id="va-modal"><div class="modal-box modal-sm">';
+    h += '<div class="bk-modal-overlay hidden" id="va-modal"><div class="modal-box va-form-modal">';
     h += '<div class="modal-header"><h2 class="modal-title" id="va-modal-baslik">Verilen Altın</h2>';
     h += '<button type="button" class="modal-close" id="va-modal-kapat">&#10005;</button></div>';
-    h += '<div class="modal-body">';
+    h += '<div class="modal-body va-form-body">';
+    h += '<div class="va-form-cift">';
     h += '<div class="field-group"><label class="field-label">Kime verildi</label>';
     h += '<input type="text" id="va-kisi" class="field-input" placeholder="Ad soyad..." maxlength="80"/></div>';
-    h += '<div class="field-group"><label class="field-label">Açıklama (düğün, çocuğu için…)</label>';
-    h += '<input type="text" id="va-aciklama" class="field-input" placeholder="İsteğe bağlı" maxlength="120"/></div>';
-    h += '<div class="field-group"><label class="field-label">Veriliş tarihi (isteğe bağlı)</label>';
+    h += '<div class="field-group"><label class="field-label">Açıklama</label>';
+    h += '<input type="text" id="va-aciklama" class="field-input" placeholder="Düğün, çocuğu için…" maxlength="120"/></div>';
+    h += "</div>";
+    h += '<div class="va-form-dort">';
+    h += '<div class="field-group va-fg-tarih"><label class="field-label">Tarih</label>';
     h += '<input type="date" id="va-tarih" class="field-input"/></div>';
-    h += '<div class="va-form-iki">';
-    h += '<div class="field-group"><label class="field-label">Altın türü</label>';
+    h += '<div class="field-group"><label class="field-label">Tür</label>';
     h += '<select id="va-tur" class="field-input">' + turSecenekHtml("ceyrek") + "</select></div>";
-    h += '<div class="field-group"><label class="field-label">Adet</label>';
+    h += '<div class="field-group va-fg-adet"><label class="field-label">Adet</label>';
     h += '<input type="number" id="va-adet" class="field-input" value="1" min="0.01" step="0.01" inputmode="decimal"/></div>';
+    h += '<div class="field-group"><label class="field-label">O gün (TL)</label>';
+    h += '<input type="number" id="va-gun-deger" class="field-input" placeholder="0" min="0" step="0.01" inputmode="decimal"/></div>';
     h += "</div>";
     h += '<div class="va-gram-oniz-wrap">Toplam: <strong id="va-gram-oniz">1,75 gr</strong></div>';
-    h += '<div class="field-group"><label class="field-label">O günkü değer (TL, isteğe bağlı)</label>';
-    h += '<input type="number" id="va-gun-deger" class="field-input" placeholder="0" min="0" step="0.01" inputmode="decimal"/></div>';
     h += "</div>";
     h += '<div class="modal-footer"><button type="button" class="btn-secondary" id="va-iptal">İptal</button>';
     h += '<button type="button" class="btn-primary" id="va-kaydet">Kaydet</button></div>';

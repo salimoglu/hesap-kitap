@@ -2269,12 +2269,47 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .va-td-gun{color:var(--text-secondary);white-space:nowrap;font-variant-numeric:tabular-nums;}
 .va-td-guncel{font-weight:600;color:var(--green);white-space:nowrap;font-variant-numeric:tabular-nums;}
 .va-td-aks{white-space:nowrap;text-align:right;}
-.va-form-iki{display:grid;grid-template-columns:1fr 0.7fr;gap:10px;}
-.va-gram-oniz-wrap{font-size:12px;color:var(--text-muted);padding:8px 12px;background:var(--bg-elevated);border-radius:8px;margin-bottom:4px;}
+.va-form-modal{max-width:560px;width:calc(100% - 24px);max-height:min(88dvh,calc(100dvh - 24px));}
+.va-form-body{display:flex;flex-direction:column;gap:10px;padding:14px 16px !important;}
+.va-form-body .field-group{margin:0;min-width:0;gap:4px;}
+.va-form-body .field-label{font-size:10px;margin-bottom:0;letter-spacing:0.04em;}
+.va-form-cift{
+  display:grid;
+  grid-template-columns:1fr 1.15fr;
+  gap:8px;
+  align-items:end;
+}
+.va-form-dort{
+  display:grid;
+  grid-template-columns:1.05fr 1.1fr 0.55fr 0.9fr;
+  gap:8px;
+  align-items:end;
+}
+.va-form-cift .field-input,
+.va-form-dort .field-input{
+  min-height:40px;
+  height:40px;
+  font-size:14px;
+  border-radius:9px;
+  box-sizing:border-box;
+  padding:0 10px;
+}
+.va-fg-tarih .field-input{font-size:12px;padding:0 6px;}
+.va-fg-adet .field-input{text-align:center;padding:0 6px;}
+.va-gram-oniz-wrap{font-size:12px;color:var(--text-muted);padding:7px 10px;background:rgba(240,184,64,0.08);border:1px solid rgba(240,184,64,0.22);border-radius:8px;margin:0;}
 .va-gram-oniz-wrap strong{color:var(--gold);font-variant-numeric:tabular-nums;}
+.va-form-modal .modal-footer{padding:10px 16px;gap:8px;}
+.va-form-modal .modal-footer .btn-primary,
+.va-form-modal .modal-footer .btn-secondary{min-height:38px;padding:8px 14px;font-size:13px;}
 @media (max-width:640px){
   .va-wrap{padding:8px;gap:8px;}
-  .va-form-iki{grid-template-columns:1fr;}
+  .va-form-modal{max-width:100%;width:100%;margin:0;border-radius:16px 16px 0 0;max-height:min(92dvh,calc(100dvh - 8px));}
+  .va-form-cift{grid-template-columns:1fr 1.1fr;gap:6px;}
+  .va-form-dort{grid-template-columns:minmax(0,1.05fr) minmax(0,1.05fr) minmax(0,0.5fr) minmax(0,0.85fr);gap:5px;}
+  .va-form-cift .field-input,
+  .va-form-dort .field-input{min-height:38px;height:38px;font-size:12px;padding:0 6px;}
+  .va-fg-tarih .field-input{font-size:11px;padding:0 4px;}
+  .va-form-body .field-label{font-size:9px;}
   /* Özet kartı: kompakt 2x2 + fiyat|ekle */
   .va-header{
     display:grid;
