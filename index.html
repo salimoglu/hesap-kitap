@@ -19,7 +19,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="dns-prefetch" href="https://hesap-kitap-234d1.firebaseapp.com" />
-  <link rel="stylesheet" href="css/style.css?v=20260809kat-ekle" />
+  <link rel="stylesheet" href="css/style.css?v=20260809kat-filtre" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800&display=swap" media="print" onload="this.media='all'" />
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800&display=swap" /></noscript>
   <style>
@@ -243,6 +243,7 @@
                 </div>
                 <button class="btn-yeni-kat-bar" id="btn-yeni-kat-bar" type="button" title="Kategoriler">&#9776; Kategoriler</button>
               </div>
+              <div id="filtre-kat-chip" class="filtre-kat-chip hidden" aria-live="polite"></div>
               <div class="islem-scroll" id="islem-list">
                 <div class="empty-state" id="empty-state">
                   <span class="empty-icon">&#128221;</span>
@@ -508,13 +509,13 @@
   <script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-  <script defer src="js/hk-version.js?v=1.42"></script>
+  <script defer src="js/hk-version.js?v=1.43"></script>
   <script defer src="js/hk-erisim.js?v=20260531multi-final"></script>
   <script defer src="js/hk-tanitim.js?v=20260531tanitim"></script>
   <script defer src="js/hk-ayarlar.js?v=20260531temiz"></script>
   <script defer src="js/firebase.js?v=20260615islemler-hizli"></script>
   <script defer src="js/db.js?v=20260806isl-sira"></script>
-  <script defer src="js/modules/islemler.js?v=20260806isl-sira"></script>
+  <script defer src="js/modules/islemler.js?v=20260809kat-filtre"></script>
   <script defer src="js/modules/yukle.js?v=20260725kr-form"></script>
   <script defer src="js/modules/alacaklar.js?v=20260725al-panel-gecis"></script>
   <script defer src="js/modules/urun.js?v=20260725ur-form"></script>

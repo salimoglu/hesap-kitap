@@ -7,6 +7,7 @@ const IslemlerModule = (() => {
   let _iozAy=new Date().getMonth(), _iozYil=new Date().getFullYear();
   let _iozSeciliGrup={gider:null,gelir:null};
   let _iozSeciliKatIslem={tip:null,kat:null};
+  let _listeKatFiltre=null; /* {tip,kat} — ozetten secilen kategori, sol listeyi daraltir */
   let _iozGunSeciliGrup={gider:null,gelir:null};
   let _iozGunSeciliKatIslem={tip:null,kat:null};
   let _iozYilSeciliGrup={gider:null,gelir:null};
@@ -128,7 +129,7 @@ const IslemlerModule = (() => {
     _iozAy--;
     if(_iozAy<0){_iozAy=11;_iozYil--;}
     _iozSeciliGrup={gider:null,gelir:null};
-    _iozSeciliKatIslem={tip:null,kat:null};
+    listeKatFiltreTemizle(false);
     renderKategoriOzeti();
   }
 
@@ -142,7 +143,7 @@ const IslemlerModule = (() => {
       _iozYil=d.getFullYear();
     }
     _iozSeciliGrup={gider:null,gelir:null};
-    _iozSeciliKatIslem={tip:null,kat:null};
+    listeKatFiltreTemizle(false);
     renderKategoriOzeti();
   }
 
@@ -245,11 +246,11 @@ const IslemlerModule = (() => {
     let h='<div class="ioz-kat-islem-liste">';
     liste.forEach(function(i){
       const bilgi=i.aciklama?esc(i.aciklama):esc(iozKatAdKisa(katAd));
-      h+='<div class="ioz-kat-islem-satir">';
+      h+='<button type="button" class="ioz-kat-islem-satir" data-id="'+i.id+'" title="D&#252;zenle">';
       h+='<span class="ioz-kat-islem-zaman">'+esc(iozIslemZamanEtiket(i, ozetCtx))+'</span>';
       h+='<span class="ioz-kat-islem-bilgi">'+bilgi+'</span>';
       h+='<span class="ioz-kat-islem-tutar '+(tip==="gelir"?"gelir":"gider")+'">'+(tip==="gelir"?"+":"-")+para(i.tutar)+'</span>';
-      h+='</div>';
+      h+='</button>';
     });
     h+='</div>';
     return h;
@@ -265,9 +266,60 @@ const IslemlerModule = (() => {
     yillikOzetIcerikGuncelle(false);
   }
 
+  function listeKatFiltreTemizle(rerender){
+    _listeKatFiltre=null;
+    _iozSeciliKatIslem={tip:null,kat:null};
+    guncelleKatFiltreChip();
+    if(rerender){
+      renderKategoriOzeti();
+      renderList();
+    }
+  }
+
+  function filterAySenkron(ayKey){
+    var aySel=$("filter-ay");
+    if(!aySel||!ayKey||ayKey==="hepsi")return;
+    if(![].some.call(aySel.options,function(o){return o.value===ayKey;})){
+      var p=ayKey.split("-");
+      var o=document.createElement("option");
+      o.value=ayKey;
+      o.textContent=AYLAR_TR[parseInt(p[1],10)-1]+" "+p[0];
+      aySel.appendChild(o);
+    }
+    aySel.value=ayKey;
+  }
+
+  function guncelleKatFiltreChip(){
+    var chip=$("filtre-kat-chip");
+    if(!chip)return;
+    if(!_listeKatFiltre||!_listeKatFiltre.kat){
+      chip.classList.add("hidden");
+      chip.innerHTML="";
+      return;
+    }
+    var ad=iozKatAdKisa(_listeKatFiltre.kat);
+    var tipLbl=_listeKatFiltre.tip==="gelir"?"Gelir":"Gider";
+    chip.classList.remove("hidden");
+    chip.innerHTML='<span class="filtre-kat-chip-txt">'+esc(tipLbl)+': '+esc(ad)+'</span>'+
+      '<button type="button" class="filtre-kat-chip-kapat" id="filtre-kat-chip-kapat" title="Filtreyi kaldir" aria-label="Filtreyi kaldir">&#10005;</button>';
+    var btn=$("filtre-kat-chip-kapat");
+    if(btn)btn.onclick=function(){listeKatFiltreTemizle(true);};
+  }
+
   function iozAyKatIslemSec(tip, kat){
     iozKatIslemToggle(_iozSeciliKatIslem, tip, kat);
+    if(_iozSeciliKatIslem.tip&&_iozSeciliKatIslem.kat){
+      _listeKatFiltre={tip:_iozSeciliKatIslem.tip,kat:_iozSeciliKatIslem.kat};
+      filterAySenkron(ozetAySecimi());
+    }else{
+      _listeKatFiltre=null;
+    }
     renderKategoriOzeti();
+    renderList();
+    guncelleKatFiltreChip();
+    var liste=$("islem-list");
+    if(liste)liste.scrollTop=0;
+    if(_listeKatFiltre&&mobilPanelAktifMi())mobilPanelSec("liste");
   }
 
   function iozGunGrupSec(tip, grup){
@@ -725,8 +777,9 @@ const IslemlerModule = (() => {
       _iozSeciliGrup[tip]=grup;
       _iozSeciliGrup[diger]=null;
     }
-    _iozSeciliKatIslem={tip:null,kat:null};
+    listeKatFiltreTemizle(false);
     renderKategoriOzeti();
+    renderList();
   }
 
   function iozDonutSegBul(node, root){
@@ -744,7 +797,18 @@ const IslemlerModule = (() => {
     if(!wrap._iozGrafikClickBound){
       wrap._iozGrafikClickBound=true;
       wrap.addEventListener("click",function(e){
+        var islemSatir=e.target.closest(".ioz-kat-islem-satir");
+        if(islemSatir){
+          e.preventDefault();
+          var islemId=parseInt(islemSatir.getAttribute("data-id"),10);
+          if(!isNaN(islemId))modalAc(islemId);
+          return;
+        }
         var adetBtn=e.target.closest(".ioz-kat-adet-btn");
+        if(!adetBtn){
+          var ust=e.target.closest(".ioz-kat-ust");
+          if(ust)adetBtn=ust.querySelector(".ioz-kat-adet-btn");
+        }
         if(adetBtn){
           e.preventDefault();
           var kt=adetBtn.getAttribute("data-ioz-tip");
@@ -947,6 +1011,10 @@ const IslemlerModule = (() => {
       if(grup!=="hepsi"){
         const g=islemGrupAdi(i);
         if(g!==grup)return false;
+      }
+      if(_listeKatFiltre){
+        if(i.tip!==_listeKatFiltre.tip)return false;
+        if(gorunumKategori(i.kategori)!==_listeKatFiltre.kat)return false;
       }
       return true;
     });
@@ -1407,9 +1475,14 @@ const IslemlerModule = (() => {
       if(wrap&&wrap.contains(e.target))return;
       closeHgDropdown();
     });
-    $("filter-type").addEventListener("change",listeVeOzetGuncelle);
-    $("filter-ay").addEventListener("change",listeVeOzetGuncelle);
-    $("filter-grup").addEventListener("change",listeVeOzetGuncelle);
+    function manuelFiltreDegisti(){
+      listeKatFiltreTemizle(false);
+      listeVeOzetGuncelle();
+      guncelleKatFiltreChip();
+    }
+    $("filter-type").addEventListener("change",manuelFiltreDegisti);
+    $("filter-ay").addEventListener("change",manuelFiltreDegisti);
+    $("filter-grup").addEventListener("change",manuelFiltreDegisti);
     var islemListe=$("islem-list");
     if(islemListe&&!islemListe._hkDelegasyon){
       islemListe._hkDelegasyon=true;
