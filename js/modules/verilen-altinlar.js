@@ -5,6 +5,7 @@ var VerilenAltinlarModule = (function () {
   var _aktif = null;
   var _gramFiyat = 0;
   var _initPromise = null;
+  var _vaModalKoruma = 0;
   var VA_LS_KEY = "hk-verilen-altinlar";
   var VA_TOHUM_FLAG = "hk-verilen-altin-tohum";
 
@@ -293,6 +294,40 @@ var VerilenAltinlarModule = (function () {
     if (el) el.textContent = agr((VA_GRAM[tur] || 0) * adet) + " gr";
   }
 
+  function vaModalAcikMi() {
+    var m = $("va-modal");
+    return !!(m && !m.classList.contains("hidden"));
+  }
+
+  function vaDetayAcikMi() {
+    var m = $("va-detay-modal");
+    return !!(m && !m.classList.contains("hidden"));
+  }
+
+  function vaHerhangiModalAcikMi() {
+    return vaModalAcikMi() || vaDetayAcikMi();
+  }
+
+  function fiyatGosterGuncelle() {
+    var topGram = _kayitlar.reduce(function (s, k) {
+      return s + kayitGram(k);
+    }, 0);
+    var guncelDeger = _gramFiyat > 0 ? topGram * _gramFiyat : 0;
+    var fiyatEl = $("va-fiyat-val");
+    if (fiyatEl) fiyatEl.textContent = _gramFiyat > 0 ? para(_gramFiyat) + " TL" : "…";
+    var guncelEl = $("va-guncel-deger");
+    if (guncelEl) guncelEl.textContent = _gramFiyat > 0 ? para(guncelDeger) + " TL" : "—";
+    formGramOnizleme();
+  }
+
+  function guvenliRender() {
+    if (vaHerhangiModalAcikMi()) {
+      fiyatGosterGuncelle();
+      return;
+    }
+    render();
+  }
+
   function render() {
     var c = $("verilen-altin-container");
     if (!c) return;
@@ -425,8 +460,26 @@ var VerilenAltinlarModule = (function () {
       h += "</div>";
       body.innerHTML = h;
     }
+    _vaModalKoruma = Date.now() + 450;
     var m = $("va-detay-modal");
-    if (m) m.classList.remove("hidden");
+    if (m) {
+      m.classList.remove("hidden");
+      m.style.pointerEvents = "none";
+      setTimeout(function () {
+        var dm = $("va-detay-modal");
+        if (dm && !dm.classList.contains("hidden")) dm.style.pointerEvents = "";
+      }, 350);
+    }
+  }
+
+  function modalKapat() {
+    var m = $("va-modal");
+    if (m) {
+      m.classList.add("hidden");
+      m.style.pointerEvents = "";
+    }
+    _aktif = null;
+    _vaModalKoruma = 0;
   }
 
   function modalAc(k) {
@@ -439,25 +492,39 @@ var VerilenAltinlarModule = (function () {
     $("va-adet").value = k ? String(k.adet || 1) : "1";
     $("va-gun-deger").value = k && k.gunDegerTl ? String(k.gunDegerTl) : "";
     formGramOnizleme();
-    $("va-modal").classList.remove("hidden");
+    _vaModalKoruma = Date.now() + 450;
+    var modal = $("va-modal");
+    if (modal) {
+      modal.classList.remove("hidden");
+      modal.style.pointerEvents = "none";
+    }
     setTimeout(function () {
-      $("va-kisi").focus();
-    }, 80);
+      var m = $("va-modal");
+      if (m && !m.classList.contains("hidden")) m.style.pointerEvents = "";
+      var kisi = $("va-kisi");
+      if (kisi) kisi.focus();
+    }, 350);
   }
 
   function bagla() {
-    $("va-ekle-btn").addEventListener("click", function () {
+    $("va-ekle-btn").addEventListener("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
       modalAc(null);
     });
-    $("va-modal-kapat").addEventListener("click", function () {
-      $("va-modal").classList.add("hidden");
-    });
-    $("va-iptal").addEventListener("click", function () {
-      $("va-modal").classList.add("hidden");
-    });
+    $("va-modal-kapat").addEventListener("click", modalKapat);
+    $("va-iptal").addEventListener("click", modalKapat);
     $("va-modal").addEventListener("click", function (e) {
-      if (e.target === $("va-modal")) $("va-modal").classList.add("hidden");
+      if (e.target !== $("va-modal")) return;
+      if (Date.now() < _vaModalKoruma) return;
+      modalKapat();
     });
+    var modalBox = $("va-modal") && $("va-modal").querySelector(".va-form-modal");
+    if (modalBox) {
+      modalBox.addEventListener("click", function (e) {
+        e.stopPropagation();
+      });
+    }
     $("va-kaydet").addEventListener("click", kaydet);
     $("va-tur").addEventListener("change", formGramOnizleme);
     $("va-adet").addEventListener("input", formGramOnizleme);
@@ -475,7 +542,7 @@ var VerilenAltinlarModule = (function () {
         fbtn._busy = false;
         if (f > 0) {
           await gramFiyatKaydet(f);
-          render();
+          guvenliRender();
         } else {
           alert("Fiyat alınamadı, lütfen tekrar deneyin.");
         }
@@ -494,6 +561,7 @@ var VerilenAltinlarModule = (function () {
     });
     document.querySelectorAll(".va-duz-btn").forEach(function (btn) {
       btn.addEventListener("click", function (e) {
+        e.preventDefault();
         e.stopPropagation();
         var k = _kayitlar.find(function (x) {
           return x.id === btn.dataset.id;
@@ -520,13 +588,17 @@ var VerilenAltinlarModule = (function () {
     if (detayKapatBtn) detayKapatBtn.addEventListener("click", detayKapat);
     if (detayM) {
       detayM.addEventListener("click", function (e) {
-        if (e.target === detayM) detayKapat();
+        if (e.target !== detayM) return;
+        if (Date.now() < _vaModalKoruma) return;
+        detayKapat();
       });
       var detayBox = detayM.querySelector(".va-detay-box");
       if (detayBox) detayBox.addEventListener("click", function (e) { e.stopPropagation(); });
     }
     if (detayDuz) {
-      detayDuz.addEventListener("click", function () {
+      detayDuz.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
         var k = _aktif;
         detayKapat();
         if (k) modalAc(k);
@@ -585,7 +657,7 @@ var VerilenAltinlarModule = (function () {
     }
     vaSirala();
     await fbKaydet();
-    $("va-modal").classList.add("hidden");
+    modalKapat();
     render();
   }
 
@@ -603,11 +675,12 @@ var VerilenAltinlarModule = (function () {
     }
     await tohumYukle();
     await gramFiyatYukle();
-    render();
+    guvenliRender();
     gramFiyatCek().then(function (f) {
       if (f > 0) {
         _gramFiyat = f;
-        render();
+        /* Modal açıkken tam yenileme formu kapatmasın */
+        guvenliRender();
         gramFiyatKaydet(f);
       }
     });
