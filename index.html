@@ -373,18 +373,18 @@
       <div class="kat-ekle-form">
         <div class="kat-ekle-baslik">+ Yeni Kategori Ekle</div>
         <div class="kat-ekle-row">
-          <div class="field-group" style="flex:1">
+          <div class="field-group kat-ekle-grup">
             <label class="field-label" for="sel-kat-grup">Grup</label>
             <select id="sel-kat-grup" class="field-select"></select>
+          </div>
+          <div class="field-group kat-ekle-ad">
+            <label class="field-label" for="inp-kat-ad">Kategori Ad&#305;</label>
+            <input type="text" id="inp-kat-ad" class="field-input" placeholder="orn: Dis Tedavisi" maxlength="50" />
           </div>
         </div>
         <div class="field-group" id="yeni-grup-wrap" style="display:none">
           <label class="field-label" for="inp-kat-grup-yeni">Yeni Grup Ad&#305;</label>
           <input type="text" id="inp-kat-grup-yeni" class="field-input" placeholder="orn: SAGLIK" maxlength="50" />
-        </div>
-        <div class="field-group">
-          <label class="field-label" for="inp-kat-ad">Kategori Ad&#305;</label>
-          <input type="text" id="inp-kat-ad" class="field-input" placeholder="orn: Dis Tedavisi" maxlength="50" />
         </div>
         <button class="btn-primary" id="kat-kaydet" style="width:100%;margin-top:4px">Ekle</button>
       </div>

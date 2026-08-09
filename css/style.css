@@ -751,7 +751,7 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .kat-grup-baslik {
   font-size: 10px; font-weight: 800; letter-spacing: 1px;
   text-transform: uppercase; color: var(--gold);
-  padding: 8px 14px 4px;
+  padding: 5px 14px 2px;
   background: var(--bg-card);
   position: sticky; top: 0;
   border-bottom: 1px solid var(--border);
@@ -769,7 +769,8 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 /* Kategori satırı */
 .kat-satir {
   display: flex; align-items: center;
-  padding: 9px 14px 9px 24px;
+  padding: 4px 14px 4px 20px;
+  min-height: 32px;
   border-bottom: 1px solid var(--border);
   gap: 8px;
   transition: background 0.1s;
@@ -778,6 +779,7 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .kat-satir-ad {
   flex: 1; font-size: 13px; font-weight: 600;
   color: var(--text-primary);
+  line-height: 1.25;
 }
 .kat-satir-actions {
   display: flex; gap: 4px;
@@ -786,8 +788,8 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .kat-satir:hover .kat-satir-actions { opacity: 1; }
 .kat-satir-btn {
   background: transparent; border: none;
-  font-size: 14px; cursor: pointer;
-  padding: 3px 6px; border-radius: 4px;
+  font-size: 13px; cursor: pointer;
+  padding: 2px 5px; border-radius: 4px;
   color: var(--text-muted); transition: all 0.1s;
 }
 .kat-satir-btn.duzenle:hover { color: var(--gold); background: var(--bg-input); }
@@ -797,18 +799,28 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .kat-ekle-form {
   flex-shrink: 0;
   border-top: 2px solid var(--border);
-  padding: 14px 16px;
+  padding: 12px 16px;
   background: var(--bg-base);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 .kat-ekle-baslik {
   font-size: 11px; font-weight: 800;
   text-transform: uppercase; letter-spacing: 0.8px;
   color: var(--gold);
 }
-.kat-ekle-row { display: flex; gap: 8px; }
+.kat-ekle-row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+.kat-ekle-row .field-group { min-width: 0; }
+.kat-ekle-grup { flex: 0 1 38%; }
+.kat-ekle-ad { flex: 1 1 62%; }
+.kat-ekle-form .field-group { gap: 4px; }
+.kat-ekle-form .field-input,
+.kat-ekle-form .field-select { padding: 9px 11px; font-size: 14px; }
 
 
 
@@ -3415,7 +3427,7 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .kat-grup-baslik {
   font-size: 10px; font-weight: 800; letter-spacing: 1px;
   text-transform: uppercase; color: var(--gold);
-  padding: 8px 14px 4px;
+  padding: 5px 14px 2px;
   background: var(--bg-card);
   position: sticky; top: 0;
   border-bottom: 1px solid var(--border);
@@ -3433,7 +3445,8 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 /* Kategori satırı */
 .kat-satir {
   display: flex; align-items: center;
-  padding: 9px 14px 9px 24px;
+  padding: 4px 14px 4px 20px;
+  min-height: 32px;
   border-bottom: 1px solid var(--border);
   gap: 8px;
   transition: background 0.1s;
@@ -3442,6 +3455,7 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .kat-satir-ad {
   flex: 1; font-size: 13px; font-weight: 600;
   color: var(--text-primary);
+  line-height: 1.25;
 }
 .kat-satir-actions {
   display: flex; gap: 4px;
@@ -3450,8 +3464,8 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .kat-satir:hover .kat-satir-actions { opacity: 1; }
 .kat-satir-btn {
   background: transparent; border: none;
-  font-size: 14px; cursor: pointer;
-  padding: 3px 6px; border-radius: 4px;
+  font-size: 13px; cursor: pointer;
+  padding: 2px 5px; border-radius: 4px;
   color: var(--text-muted); transition: all 0.1s;
 }
 .kat-satir-btn.duzenle:hover { color: var(--gold); background: var(--bg-input); }
@@ -3461,18 +3475,28 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .kat-ekle-form {
   flex-shrink: 0;
   border-top: 2px solid var(--border);
-  padding: 14px 16px;
+  padding: 12px 16px;
   background: var(--bg-base);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 .kat-ekle-baslik {
   font-size: 11px; font-weight: 800;
   text-transform: uppercase; letter-spacing: 0.8px;
   color: var(--gold);
 }
-.kat-ekle-row { display: flex; gap: 8px; }
+.kat-ekle-row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+.kat-ekle-row .field-group { min-width: 0; }
+.kat-ekle-grup { flex: 0 1 38%; }
+.kat-ekle-ad { flex: 1 1 62%; }
+.kat-ekle-form .field-group { gap: 4px; }
+.kat-ekle-form .field-input,
+.kat-ekle-form .field-select { padding: 9px 11px; font-size: 14px; }
 
 
 
