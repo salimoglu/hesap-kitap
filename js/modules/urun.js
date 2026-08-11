@@ -1,7 +1,7 @@
 /* urun.js - Urun Takip: tarih + ad + fiyat + gunluk maliyet; istege bagli son kullanim (omur) tarihi */
 var UrunModule=(function(){
 var $=function(id){return document.getElementById(id);};
-var _urunler=[],_aktif=null,_omurId=null,_detayId=null;
+var _urunler=[],_aktif=null,_omurId=null,_detayId=null,_modalKoruma=0;
 
 function para(n){return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2});}
 function uid(){return "u"+Date.now()+"_"+Math.random().toString(36).substr(2,5);}
@@ -206,13 +206,28 @@ function render(){
 }
 
 function bagla(){
-  $("ur-yeni-btn").addEventListener("click",function(){modalAc(null);});
+  $("ur-yeni-btn").addEventListener("click",function(e){
+    e.preventDefault();e.stopPropagation();
+    modalAc(null);
+  });
   $("ur-modal-kapat").addEventListener("click",modalKapat);
   $("ur-iptal").addEventListener("click",modalKapat);
-  $("ur-modal").addEventListener("click",function(e){if(e.target===$("ur-modal"))modalKapat();});
+  $("ur-modal").addEventListener("click",function(e){
+    if(e.target!==$("ur-modal"))return;
+    if(Date.now()<_modalKoruma)return;
+    modalKapat();
+  });
+  var urBox=$("ur-modal")&&$("ur-modal").querySelector(".modal-box");
+  if(urBox)urBox.addEventListener("click",function(e){e.stopPropagation();});
   $("ur-kaydet").addEventListener("click",kaydet);
   $("ur-omur-kapat").addEventListener("click",omurKapat);
-  $("ur-omur-modal").addEventListener("click",function(e){if(e.target===$("ur-omur-modal"))omurKapat();});
+  $("ur-omur-modal").addEventListener("click",function(e){
+    if(e.target!==$("ur-omur-modal"))return;
+    if(Date.now()<_modalKoruma)return;
+    omurKapat();
+  });
+  var omBox=$("ur-omur-modal")&&$("ur-omur-modal").querySelector(".modal-box");
+  if(omBox)omBox.addEventListener("click",function(e){e.stopPropagation();});
   $("ur-omur-kaydet").addEventListener("click",omurKaydet);
   $("ur-omur-temizle").addEventListener("click",omurTemizle);
   document.querySelectorAll(".ur-satir").forEach(function(tr){
@@ -293,19 +308,29 @@ function modalAc(id){
       $("ur-son-tarih").value=u.sonTarih&&String(u.sonTarih).trim()?String(u.sonTarih).trim():"";
     }
   }
-  $("ur-modal").classList.remove("hidden");
+  _modalKoruma=Date.now()+450;
+  var modal=$("ur-modal");
+  if(modal){
+    modal.classList.remove("hidden");
+    modal.style.pointerEvents="none";
+  }
   var tIn=$("ur-tarih"),fIn=$("ur-fiyat"),sIn=$("ur-son-tarih");
   if(tIn&&fIn&&sIn){
     var upd=function(){modalHesapGuncelle();};
     tIn.oninput=upd;fIn.oninput=upd;sIn.oninput=upd;
     modalHesapGuncelle();
   }
-  setTimeout(function(){$("ur-urun").focus();},100);
+  setTimeout(function(){
+    var m=$("ur-modal");
+    if(m&&!m.classList.contains("hidden"))m.style.pointerEvents="";
+    var urun=$("ur-urun");if(urun)urun.focus();
+  },350);
 }
 
 function modalKapat(){
-  $("ur-modal").classList.add("hidden");
-  _aktif=null;
+  var m=$("ur-modal");
+  if(m){m.classList.add("hidden");m.style.pointerEvents="";}
+  _aktif=null;_modalKoruma=0;
 }
 
 function omurModalAc(id){
@@ -314,13 +339,23 @@ function omurModalAc(id){
   var adEl=$("ur-omur-urun-ad");
   if(adEl)adEl.textContent=u?'"'+u.urun+'" için son kullanım günü':'';
   $("ur-omur-tarih").value=u&&u.sonTarih&&String(u.sonTarih).trim()?String(u.sonTarih).trim():"";
-  $("ur-omur-modal").classList.remove("hidden");
-  setTimeout(function(){$("ur-omur-tarih").focus();},80);
+  _modalKoruma=Date.now()+450;
+  var modal=$("ur-omur-modal");
+  if(modal){
+    modal.classList.remove("hidden");
+    modal.style.pointerEvents="none";
+  }
+  setTimeout(function(){
+    var m=$("ur-omur-modal");
+    if(m&&!m.classList.contains("hidden"))m.style.pointerEvents="";
+    var t=$("ur-omur-tarih");if(t)t.focus();
+  },350);
 }
 
 function omurKapat(){
-  $("ur-omur-modal").classList.add("hidden");
-  _omurId=null;
+  var m=$("ur-omur-modal");
+  if(m){m.classList.add("hidden");m.style.pointerEvents="";}
+  _omurId=null;_modalKoruma=0;
 }
 
 async function omurKaydet(){

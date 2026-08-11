@@ -5,6 +5,7 @@ var BirikimModule = (function() {
   var _kategoriler = [];
   var _manuelIslemler = {}; // { kalemAd: [{id,tarih,tutar,aciklama}] }
   var _aktifKalem = null;
+  var _modalKoruma = 0;
 
   function para(n){return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2});}
   function bugun(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
@@ -273,20 +274,41 @@ var BirikimModule = (function() {
     /* + Ekle butonları */
     document.querySelectorAll(".bk-ekle-btn").forEach(function(btn){
       btn.addEventListener("click",function(e){
+        e.preventDefault();
         e.stopPropagation();
         _aktifKalem = decodeURIComponent(btn.dataset.id);
         $("bk-modal-baslik").textContent = _aktifKalem+" - Manuel Ekle";
         $("bk-inp-tutar").value="";
         $("bk-inp-aciklama").value="";
         $("bk-inp-tarih").value=bugun();
-        $("bk-modal").classList.remove("hidden");
-        setTimeout(function(){$("bk-inp-tutar").focus();},100);
+        _modalKoruma = Date.now() + 450;
+        var modal = $("bk-modal");
+        if (modal) {
+          modal.classList.remove("hidden");
+          modal.style.pointerEvents = "none";
+        }
+        setTimeout(function(){
+          var m = $("bk-modal");
+          if (m && !m.classList.contains("hidden")) m.style.pointerEvents = "";
+          var t = $("bk-inp-tutar"); if (t) t.focus();
+        }, 350);
       });
     });
+    function bkModalKapat(){
+      var m = $("bk-modal");
+      if (m) { m.classList.add("hidden"); m.style.pointerEvents = ""; }
+      _aktifKalem = null; _modalKoruma = 0;
+    }
     /* Modal kapat */
-    $("bk-modal-kapat").addEventListener("click",function(){$("bk-modal").classList.add("hidden");});
-    $("bk-iptal").addEventListener("click",function(){$("bk-modal").classList.add("hidden");});
-    $("bk-modal").addEventListener("click",function(e){if(e.target===$("bk-modal"))$("bk-modal").classList.add("hidden");});
+    $("bk-modal-kapat").addEventListener("click",bkModalKapat);
+    $("bk-iptal").addEventListener("click",bkModalKapat);
+    $("bk-modal").addEventListener("click",function(e){
+      if(e.target!==$("bk-modal"))return;
+      if(Date.now()<_modalKoruma)return;
+      bkModalKapat();
+    });
+    var bkBox = $("bk-modal") && $("bk-modal").querySelector(".modal-box");
+    if (bkBox) bkBox.addEventListener("click", function(e){ e.stopPropagation(); });
     /* Kaydet */
     $("bk-kaydet").addEventListener("click",ekle);
     $("bk-inp-tutar").addEventListener("keydown",function(e){if(e.key==="Enter")ekle();});
@@ -317,7 +339,9 @@ var BirikimModule = (function() {
     if(!_manuelIslemler[_aktifKalem])_manuelIslemler[_aktifKalem]=[];
     _manuelIslemler[_aktifKalem].push({id:uid,tarih:tarih,tutar:tutar,aciklama:aciklama});
     await fbKaydet();
-    $("bk-modal").classList.add("hidden");
+    var m=$("bk-modal");
+    if(m){m.classList.add("hidden");m.style.pointerEvents="";}
+    _aktifKalem=null;_modalKoruma=0;
     render();
   }
 

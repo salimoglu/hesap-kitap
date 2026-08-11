@@ -48,6 +48,7 @@ var ArabamModule = (function () {
   var _aktifAracId = null;
   var _detayBackdropDown = false;
   var _detayModalGuardUntil = 0;
+  var _aracModalKoruma = 0;
   var _acikTakipTip = null;
 
   var BELGE_TIPLER = [
@@ -1007,15 +1008,42 @@ var ArabamModule = (function () {
       $("ar-arac-modal-baslik").textContent = "Araç ekle";
     }
     syncAracEmojiUI();
-    $("ar-arac-modal").classList.remove("hidden");
-    setTimeout(function () { $("ar-inp-plaka").focus(); }, 80);
+    _aracModalKoruma = Date.now() + 450;
+    var modal = $("ar-arac-modal");
+    if (modal) {
+      modal.classList.remove("hidden");
+      modal.style.pointerEvents = "none";
+    }
+    setTimeout(function () {
+      var m = $("ar-arac-modal");
+      if (m && !m.classList.contains("hidden")) m.style.pointerEvents = "";
+      var p = $("ar-inp-plaka"); if (p) p.focus();
+    }, 350);
+  }
+
+  function aracModalKapat() {
+    var m = $("ar-arac-modal");
+    if (m) { m.classList.add("hidden"); m.style.pointerEvents = ""; }
+    _aracModalKoruma = 0;
   }
 
   function bagla() {
-    $("ar-arac-ekle-btn") && $("ar-arac-ekle-btn").addEventListener("click", function () { aracModalAc(null); });
-    $("ar-arac-modal-kapat") && $("ar-arac-modal-kapat").addEventListener("click", function () { $("ar-arac-modal").classList.add("hidden"); });
-    $("ar-arac-iptal") && $("ar-arac-iptal").addEventListener("click", function () { $("ar-arac-modal").classList.add("hidden"); });
-    $("ar-arac-modal") && $("ar-arac-modal").addEventListener("click", function (e) { if (e.target === $("ar-arac-modal")) $("ar-arac-modal").classList.add("hidden"); });
+    $("ar-arac-ekle-btn") && $("ar-arac-ekle-btn").addEventListener("click", function (e) {
+      e.preventDefault(); e.stopPropagation();
+      aracModalAc(null);
+    });
+    $("ar-arac-modal-kapat") && $("ar-arac-modal-kapat").addEventListener("click", aracModalKapat);
+    $("ar-arac-iptal") && $("ar-arac-iptal").addEventListener("click", aracModalKapat);
+    var aracModal = $("ar-arac-modal");
+    if (aracModal) {
+      aracModal.addEventListener("click", function (e) {
+        if (e.target !== aracModal) return;
+        if (Date.now() < _aracModalKoruma) return;
+        aracModalKapat();
+      });
+      var aracBox = aracModal.querySelector(".modal-box");
+      if (aracBox) aracBox.addEventListener("click", function (e) { e.stopPropagation(); });
+    }
     $("ar-arac-kaydet") && $("ar-arac-kaydet").addEventListener("click", async function () {
       var kId = $("ar-arac-id").value;
       var f = aracFormOku();
@@ -1058,7 +1086,7 @@ var ArabamModule = (function () {
         geriDetay = yeni.id;
       }
       await fbKaydet();
-      $("ar-arac-modal").classList.add("hidden");
+      aracModalKapat();
       render();
       if (geriDetay) detayModalAc(geriDetay, false);
     });
