@@ -29,7 +29,24 @@ var L_BORC={
 var P_ALACAK={key:"alacak",fbPath:"alacaklar",pfx:"al-a-",lbl:L_ALACAK,kayitlar:[],aktif:null,aktifTip:"pesin",araMetni:"",aktifKisiAd:null};
 var P_BORC={key:"borc",fbPath:"borclar",pfx:"al-b-",lbl:L_BORC,kayitlar:[],aktif:null,aktifTip:"pesin",araMetni:"",aktifKisiAd:null};
 var _aktifPanel="alacak";
+var _modalKoruma=0;
 function pid(p,n){return p.pfx+n;}
+function formModalAcikMi(p){var m=$(pid(p,"modal"));return !!(m&&!m.classList.contains("hidden"));}
+function formModalHerhangiAcikMi(){return formModalAcikMi(P_ALACAK)||formModalAcikMi(P_BORC);}
+function overlayAc(modal){
+  if(!modal)return;
+  _modalKoruma=Date.now()+450;
+  modal.classList.remove("hidden");
+  modal.style.pointerEvents="none";
+  setTimeout(function(){
+    if(modal&&!modal.classList.contains("hidden"))modal.style.pointerEvents="";
+  },350);
+}
+function overlayKapat(modal){
+  if(!modal)return;
+  modal.classList.add("hidden");
+  modal.style.pointerEvents="";
+}
 function para(n){return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2});}
 function uid(){return "a"+Date.now()+"_"+Math.random().toString(36).substr(2,5);}
 function esc(v){return String(v==null?"":v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");}
@@ -297,7 +314,6 @@ function modalHtml(p){
   h+='</div><div class="modal-footer"><button class="btn-secondary" id="'+pid(p,"iptal")+'" data-panel="'+p.key+'">Iptal</button><button class="btn-primary" id="'+pid(p,"kaydet")+'" data-panel="'+p.key+'">Kaydet</button></div></div></div>';
   return h;
 }
-function panelBul(key){return key==="borc"?P_BORC:P_ALACAK;}
 function sayiOku(v){
   if(v==null||v==="")return NaN;
   var s=String(v).trim().replace(/\s/g,"").replace(",",".");
@@ -336,7 +352,6 @@ function altinTurDegistir(p){
   if(hid)hid.value=ALTIN_SIRASI[(idx+1)%ALTIN_SIRASI.length];
   altinTurBtnGuncelle(p);
 }
-function dovizLabelGuncelle(p){dovizBtnGuncelle(p);}
 function altinInfoGuncelle(p){
   var info=$(pid(p,"altin-info"));if(!info)return;
   if(p.aktifTip!=="altin"){info.style.display="none";return;}
@@ -365,7 +380,7 @@ function tipGoster(p,tip){
     if(aw)aw.style.display="none";
     if(pw)pw.style.display=tip==="pesin"?"":"none";
     if(tw)tw.style.display=tip==="taksit"?"":"none";
-    dovizLabelGuncelle(p);
+    dovizBtnGuncelle(p);
   }
   altinInfoGuncelle(p);
 }
@@ -376,11 +391,12 @@ function kisiModalAc(p,ad){
   if(!baslik||!govde||!modal)return;
   baslik.textContent=ad;
   govde.innerHTML='<div class="al-kisi-modal-ozet">'+kisiChipHtml(ks)+'</div>'+kisiListeHtml(p,ks);
-  modal.classList.remove("hidden");
+  overlayAc(modal);
   baglaKisiModal(p);
 }
 function kisiModalKapat(p){
-  p.aktifKisiAd=null;var modal=$(pid(p,"kisi-modal"));if(modal)modal.classList.add("hidden");
+  p.aktifKisiAd=null;
+  overlayKapat($(pid(p,"kisi-modal")));
 }
 function baglaKartAksiyonlari(p,root){
   if(!root)return;
@@ -407,34 +423,69 @@ function baglaKartAksiyonlari(p,root){
 function baglaKisiModal(p){
   baglaKartAksiyonlari(p,$(pid(p,"kisi-modal-body")));
   var kapat=$(pid(p,"kisi-modal-kapat")),modal=$(pid(p,"kisi-modal")),ekle=$(pid(p,"kisi-modal-ekle"));
-  if(kapat)kapat.onclick=function(){kisiModalKapat(p);};
-  if(modal)modal.onclick=function(e){if(e.target===modal)kisiModalKapat(p);};
-  if(ekle)ekle.onclick=function(){var ad=p.aktifKisiAd;kisiModalKapat(p);modalAc(p,null,ad);};
+  if(kapat)kapat.onclick=function(e){e.preventDefault();e.stopPropagation();kisiModalKapat(p);};
+  if(modal){
+    modal.onclick=function(e){
+      if(e.target!==modal)return;
+      if(Date.now()<_modalKoruma)return;
+      kisiModalKapat(p);
+    };
+    var box=modal.querySelector(".al-kisi-modal-box");
+    if(box)box.onclick=function(e){e.stopPropagation();};
+  }
+  if(ekle)ekle.onclick=function(e){
+    e.preventDefault();e.stopPropagation();
+    var ad=p.aktifKisiAd;
+    /* kisi modalini gizle ama aktifKisiAd korunsun (iptalde geri acilsin) */
+    overlayKapat($(pid(p,"kisi-modal")));
+    modalAc(p,null,ad);
+  };
 }
 function baglaPanel(p){
-  var yeni=$(pid(p,"yeni-btn"));if(yeni)yeni.onclick=function(){modalAc(p,null,null);};
+  var yeni=$(pid(p,"yeni-btn"));
+  if(yeni)yeni.onclick=function(e){
+    e.preventDefault();e.stopPropagation();
+    p.aktifKisiAd=null;
+    modalAc(p,null,null);
+  };
   var ara=$(pid(p,"ara"));
-  if(ara)ara.oninput=function(){p.araMetni=ara.value||"";render();};
+  if(ara)ara.oninput=function(){p.araMetni=ara.value||"";guvenliRender();};
   document.querySelectorAll('.al-kisi-satir[data-panel="'+p.key+'"]').forEach(function(row){
-    row.onclick=function(){kisiModalAc(p,decodeURIComponent(row.dataset.kisi||""));};
+    row.onclick=function(e){
+      e.preventDefault();e.stopPropagation();
+      kisiModalAc(p,decodeURIComponent(row.dataset.kisi||""));
+    };
     row.onkeydown=function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();row.click();}};
   });
-  $(pid(p,"modal-kapat")).onclick=function(){modalKapat(p);};
-  $(pid(p,"iptal")).onclick=function(){modalKapat(p);};
-  $(pid(p,"modal")).onclick=function(e){if(e.target===$(pid(p,"modal")))modalKapat(p);};
-  $(pid(p,"kaydet")).onclick=function(){kaydet(p);};
-  document.querySelectorAll('.al-tip-btn[data-panel="'+p.key+'"]').forEach(function(btn){btn.onclick=function(){tipGoster(p,btn.dataset.tip);};});
+  var modal=$(pid(p,"modal"));
+  var mk=$(pid(p,"modal-kapat")),ipt=$(pid(p,"iptal")),ky=$(pid(p,"kaydet"));
+  if(mk)mk.onclick=function(e){e.preventDefault();e.stopPropagation();modalKapat(p);};
+  if(ipt)ipt.onclick=function(e){e.preventDefault();e.stopPropagation();modalKapat(p);};
+  if(modal){
+    modal.onclick=function(e){
+      if(e.target!==modal)return;
+      if(Date.now()<_modalKoruma)return;
+      modalKapat(p);
+    };
+    var formBox=modal.querySelector(".al-form-modal");
+    if(formBox)formBox.onclick=function(e){e.stopPropagation();};
+  }
+  if(ky)ky.onclick=function(e){e.preventDefault();e.stopPropagation();kaydet(p);};
+  document.querySelectorAll('.al-tip-btn[data-panel="'+p.key+'"]').forEach(function(btn){
+    btn.onclick=function(e){e.preventDefault();e.stopPropagation();tipGoster(p,btn.dataset.tip);};
+  });
   var aa=$(pid(p,"altin-adet")),db=$(pid(p,"doviz-btn")),ab=$(pid(p,"altin-tur-btn"));
   if(aa)aa.oninput=function(){altinInfoGuncelle(p);};
-  if(db)db.onclick=function(){dovizDegistir(p);};
-  if(ab)ab.onclick=function(){altinTurDegistir(p);};
-  var kmk=$(pid(p,"kisi-modal-kapat"));if(kmk)kmk.onclick=function(){kisiModalKapat(p);};
+  if(db)db.onclick=function(e){e.preventDefault();e.stopPropagation();dovizDegistir(p);};
+  if(ab)ab.onclick=function(e){e.preventDefault();e.stopPropagation();altinTurDegistir(p);};
+  var kmk=$(pid(p,"kisi-modal-kapat"));if(kmk)kmk.onclick=function(e){e.preventDefault();e.stopPropagation();kisiModalKapat(p);};
   var kolon=document.querySelector(".al-kolon--"+p.key);
   if(kolon)baglaKartAksiyonlari(p,kolon);
 }
 function modalAc(p,id,kisiAdi){
   p.aktif=id;
-  kisiModalKapat(p);
+  /* kisi modalini gizle; aktifKisiAd'i silme (iptalde geri donus icin) */
+  overlayKapat($(pid(p,"kisi-modal")));
   $(pid(p,"modal-baslik")).textContent=id?p.lbl.modalDuzenle:p.lbl.modalYeni;
   var today=todayStr(),thisMonth=today.substring(0,7);
   $(pid(p,"kisi")).value=kisiAdi||"";$(pid(p,"aciklama")).value="";$(pid(p,"tutar")).value="";
@@ -456,17 +507,23 @@ function modalAc(p,id,kisiAdi){
         if(k.tip==="pesin"){$(pid(p,"tarih")).value=k.tarih||today;tipGoster(p,"pesin");}
         else{$(pid(p,"taksit-sayi")).value=k.taksitSayisi;$(pid(p,"bas-tarih")).value=k.basTarih;tipGoster(p,"taksit");}
       }
-      $(pid(p,"modal")).classList.remove("hidden");
+      overlayAc($(pid(p,"modal")));
       altinInfoGuncelle(p);dovizBtnGuncelle(p);
       return;
     }
   }
   tipGoster(p,"pesin");
-  $(pid(p,"modal")).classList.remove("hidden");
+  overlayAc($(pid(p,"modal")));
   altinInfoGuncelle(p);dovizBtnGuncelle(p);
+  setTimeout(function(){
+    var kisi=$(pid(p,"kisi"));
+    if(kisi&&!kisi.value)kisi.focus();
+  },350);
 }
 function modalKapat(p){
-  $(pid(p,"modal")).classList.add("hidden");p.aktif=null;
+  overlayKapat($(pid(p,"modal")));
+  p.aktif=null;
+  _modalKoruma=0;
   if(p.aktifKisiAd&&kisilerMap(p)[p.aktifKisiAd])kisiModalAc(p,p.aktifKisiAd);
 }
 async function kaydet(p){
@@ -528,12 +585,17 @@ function render(){
   if(P_BORC.aktifKisiAd&&kisilerMap(P_BORC)[P_BORC.aktifKisiAd])kisiModalAc(P_BORC,P_BORC.aktifKisiAd);
   else if(P_BORC.aktifKisiAd)kisiModalKapat(P_BORC);
 }
+function guvenliRender(){
+  /* Form modal acikken tam render formu kapatmasin */
+  if(formModalHerhangiAcikMi())return;
+  render();
+}
 async function init(){
   await altinGuncelFiyatYukle();
   await fbYukle(P_ALACAK);await fbYukle(P_BORC);
   P_ALACAK.kayitlar=P_ALACAK.kayitlar.map(normalizeKayit);
   P_BORC.kayitlar=P_BORC.kayitlar.map(normalizeKayit);
-  render();
+  guvenliRender();
 }
 return{init:init};
 })();

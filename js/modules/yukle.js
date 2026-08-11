@@ -449,7 +449,7 @@ return{init:binit,goster:bgoster,yukle:byukleVeCiz};
 /* ===== KREDİ MODULE ===== */
 var KrediModule=(function(){
 var $=function(id){return document.getElementById(id);};
-var _h=[],_k=[],_aktif=null,_aktifTip="taksit",_duzenliSure="devam",_formTaslak=null,_ay=new Date().getMonth(),_yil=new Date().getFullYear();
+var _h=[],_k=[],_aktif=null,_aktifTip="taksit",_duzenliSure="devam",_formTaslak=null,_ay=new Date().getMonth(),_yil=new Date().getFullYear(),_krModalKoruma=0;
 var AYLAR=["Ocak","Subat","Mart","Nisan","Mayis","Haziran","Temmuz","Agustos","Eylul","Ekim","Kasim","Aralik"];
 function kpara(n){return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2});}
 function uid(){return "k"+Date.now()+"_"+Math.random().toString(36).substr(2,5);}
@@ -565,11 +565,18 @@ function krender(){
   if(taslak&&taslak.acik)kFormTaslakGeriYukle(taslak);
 }
 function kbagla(){
-  $("kr-yeni-btn").addEventListener("click",function(){kmodalAc(null,"taksit");});
+  $("kr-yeni-btn").addEventListener("click",function(e){
+    e.preventDefault();e.stopPropagation();
+    kmodalAc(null,"taksit");
+  });
   var krModal=$("kr-modal"),krBox=krModal?krModal.querySelector(".kr-modal-box"):null;
   if(krBox)krBox.addEventListener("click",function(e){e.stopPropagation();});
   $("kr-modal-kapat").addEventListener("click",kmodalKapat);$("kr-iptal").addEventListener("click",kmodalKapat);
-  if(krModal)krModal.addEventListener("click",function(e){if(e.target===krModal)kmodalKapat();});
+  if(krModal)krModal.addEventListener("click",function(e){
+    if(e.target!==krModal)return;
+    if(Date.now()<_krModalKoruma)return;
+    kmodalKapat();
+  });
   $("kr-kaydet").addEventListener("click",kkaydet);
   $("kr-geri").addEventListener("click",function(){_ay--;if(_ay<0){_ay=11;_yil--;}krender();});
   $("kr-ileri").addEventListener("click",function(){_ay++;if(_ay>11){_ay=0;_yil++;}krender();});
@@ -578,7 +585,7 @@ function kbagla(){
   ["kr-kart","kr-aciklama","kr-tutar","kr-taksit","kr-bastarihi","kr-duzenli-bas","kr-duzenli-ay"].forEach(function(id){
     var el=$(id);if(el)el.addEventListener("input",kFormTaslakKaydet);
   });
-  document.querySelectorAll(".kr-duz-btn").forEach(function(btn){btn.addEventListener("click",function(){kmodalAc(btn.dataset.id);});});
+  document.querySelectorAll(".kr-duz-btn").forEach(function(btn){btn.addEventListener("click",function(e){e.preventDefault();e.stopPropagation();kmodalAc(btn.dataset.id);});});
   document.querySelectorAll(".kr-sil-btn").forEach(function(btn){btn.addEventListener("click",function(){if(!confirm("Silmek?"))return;_h=_h.filter(function(x){return x.id!==btn.dataset.id;});kfbKaydet();krender();});});
 }
 function kmodalAc(id,tipOpt){
@@ -602,10 +609,23 @@ function kmodalAc(id,tipOpt){
   }
   kTipGoster(tip);
   kFormTaslakKaydet();
-  $("kr-modal").classList.remove("hidden");
-  setTimeout(function(){var f=$("kr-kart");if(f)f.focus();},100);
+  _krModalKoruma=Date.now()+450;
+  var modal=$("kr-modal");
+  if(modal){
+    modal.classList.remove("hidden");
+    modal.style.pointerEvents="none";
+  }
+  setTimeout(function(){
+    var m=$("kr-modal");
+    if(m&&!m.classList.contains("hidden"))m.style.pointerEvents="";
+    var f=$("kr-kart");if(f)f.focus();
+  },350);
 }
-function kmodalKapat(){$("kr-modal").classList.add("hidden");_aktif=null;_formTaslak=null;}
+function kmodalKapat(){
+  var m=$("kr-modal");
+  if(m){m.classList.add("hidden");m.style.pointerEvents="";}
+  _aktif=null;_formTaslak=null;_krModalKoruma=0;
+}
 async function kkaydet(){
   var kart=($("kr-kart").value||"").trim(),aciklama=($("kr-aciklama").value||"").trim(),tutar=parseFloat($("kr-tutar").value)||0;
   if(!kart||!aciklama||!tutar)return;
@@ -1178,7 +1198,7 @@ return{init:ainit};
 /* ===== VEFA MODULE ===== */
 var VefaModule=(function(){
 var $=function(id){return document.getElementById(id);};
-var _uyeler=[],_aylar=[],_gramFiyat=0;
+var _uyeler=[],_aylar=[],_gramFiyat=0,_vfModalKoruma=0;
 var AY_TR=["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
 var TIP_GR={gram:1.00,ceyrek:1.75,yarim:3.50,tam:7.00};
 var TIP_AD={gram:"1 GRAM",ceyrek:"1 ÇEYREK",yarim:"1 YARIM",tam:"1 TAM",nakit:"NAKİT"};
@@ -1574,8 +1594,23 @@ function modalAc(ayKey){
   if(mevcut&&mevcut.yatirimlar&&mevcut.yatirimlar.length){
     mevcut.yatirimlar.forEach(function(y){yeniKalem(y);});
   }
-  $("vf2-modal").classList.remove("hidden");
-  setTimeout(function(){$("vf2-ay-top").focus();},100);
+  _vfModalKoruma=Date.now()+450;
+  var modal=$("vf2-modal");
+  if(modal){
+    modal.classList.remove("hidden");
+    modal.style.pointerEvents="none";
+  }
+  setTimeout(function(){
+    var m=$("vf2-modal");
+    if(m&&!m.classList.contains("hidden"))m.style.pointerEvents="";
+    var t=$("vf2-ay-top");if(t)t.focus();
+  },350);
+}
+
+function vfModalKapat(id){
+  var m=$(id||"vf2-modal");
+  if(m){m.classList.add("hidden");m.style.pointerEvents="";}
+  _vfModalKoruma=0;
 }
 
 function bagla(){
@@ -1587,7 +1622,7 @@ function bagla(){
       await fbKaydet();render();
     });
   });
-  document.querySelectorAll(".vf2-duz-btn").forEach(function(btn){btn.addEventListener("click",function(){modalAc(btn.dataset.ay);});});
+  document.querySelectorAll(".vf2-duz-btn").forEach(function(btn){btn.addEventListener("click",function(e){e.preventDefault();e.stopPropagation();modalAc(btn.dataset.ay);});});
   document.querySelectorAll(".vf2-sil-btn").forEach(function(btn){
     btn.addEventListener("click",async function(){
       if(!confirm("Bu ayı silmek istiyor musunuz?"))return;
@@ -1595,14 +1630,21 @@ function bagla(){
       await fbKaydet();render();
     });
   });
-  $("vf2-yatirim-btn").addEventListener("click",function(){
+  $("vf2-yatirim-btn").addEventListener("click",function(e){
+    e.preventDefault();e.stopPropagation();
     var buAy=new Date().getFullYear()+"-"+String(new Date().getMonth()+1).padStart(2,"0");
     modalAc(buAy);
     $("vf2-ay-key").onchange=function(){modalAc(this.value);};
   });
-  $("vf2-modal-kapat").addEventListener("click",function(){$("vf2-modal").classList.add("hidden");});
-  $("vf2-iptal").addEventListener("click",function(){$("vf2-modal").classList.add("hidden");});
-  $("vf2-modal").addEventListener("click",function(e){if(e.target===$("vf2-modal"))$("vf2-modal").classList.add("hidden");});
+  $("vf2-modal-kapat").addEventListener("click",function(){vfModalKapat("vf2-modal");});
+  $("vf2-iptal").addEventListener("click",function(){vfModalKapat("vf2-modal");});
+  $("vf2-modal").addEventListener("click",function(e){
+    if(e.target!==$("vf2-modal"))return;
+    if(Date.now()<_vfModalKoruma)return;
+    vfModalKapat("vf2-modal");
+  });
+  var vfBox=$("vf2-modal")&&$("vf2-modal").querySelector(".modal-box");
+  if(vfBox)vfBox.addEventListener("click",function(e){e.stopPropagation();});
   $("vf2-kalem-btn").addEventListener("click",function(){yeniKalem(null);});
   $("vf2-kaydet").addEventListener("click",async function(){
     var key=$("vf2-ay-key").value,top=parseFloat($("vf2-ay-top").value)||0;
@@ -1625,21 +1667,37 @@ function bagla(){
     var idx=_aylar.findIndex(function(a){return a.key===key;});
     var obj={key:key,toplamOdeme:top,odemeler:odemeler,yatirimlar:yatirimlar};
     if(idx>=0)_aylar[idx]=obj;else _aylar.push(obj);
-    await fbKaydet();$("vf2-modal").classList.add("hidden");render();
+    await fbKaydet();vfModalKapat("vf2-modal");render();
   });
-  $("vf2-uye-btn").addEventListener("click",function(){
+  $("vf2-uye-btn").addEventListener("click",function(e){
+    e.preventDefault();e.stopPropagation();
     $("vf2-uye-ad").value="";$("vf2-uye-rol").value="Üye";
-    $("vf2-uye-modal").classList.remove("hidden");
-    setTimeout(function(){$("vf2-uye-ad").focus();},100);
+    _vfModalKoruma=Date.now()+450;
+    var um=$("vf2-uye-modal");
+    if(um){
+      um.classList.remove("hidden");
+      um.style.pointerEvents="none";
+    }
+    setTimeout(function(){
+      var m=$("vf2-uye-modal");
+      if(m&&!m.classList.contains("hidden"))m.style.pointerEvents="";
+      var a=$("vf2-uye-ad");if(a)a.focus();
+    },350);
   });
-  $("vf2-uye-kapat").addEventListener("click",function(){$("vf2-uye-modal").classList.add("hidden");});
-  $("vf2-uye-iptal").addEventListener("click",function(){$("vf2-uye-modal").classList.add("hidden");});
-  $("vf2-uye-modal").addEventListener("click",function(e){if(e.target===$("vf2-uye-modal"))$("vf2-uye-modal").classList.add("hidden");});
+  $("vf2-uye-kapat").addEventListener("click",function(){vfModalKapat("vf2-uye-modal");});
+  $("vf2-uye-iptal").addEventListener("click",function(){vfModalKapat("vf2-uye-modal");});
+  $("vf2-uye-modal").addEventListener("click",function(e){
+    if(e.target!==$("vf2-uye-modal"))return;
+    if(Date.now()<_vfModalKoruma)return;
+    vfModalKapat("vf2-uye-modal");
+  });
+  var uyeBox=$("vf2-uye-modal")&&$("vf2-uye-modal").querySelector(".modal-box");
+  if(uyeBox)uyeBox.addEventListener("click",function(e){e.stopPropagation();});
   $("vf2-uye-kaydet").addEventListener("click",async function(){
     var ad=($("vf2-uye-ad").value||"").trim(),rol=($("vf2-uye-rol").value||"Üye").trim();
     if(!ad){$("vf2-uye-ad").focus();return;}
     _uyeler.push({id:uid(),ad:ad,rol:rol});
-    await fbKaydet();$("vf2-uye-modal").classList.add("hidden");render();
+    await fbKaydet();vfModalKapat("vf2-uye-modal");render();
   });
 }
 
@@ -1652,6 +1710,8 @@ return{init:vinit};
 var MuhtacModule=(function(){
 var $=function(id){return document.getElementById(id);};
 var _kisiler=[];
+var _mhModalKoruma=0;
+var _aktifKisi=null;
 var _islemler=[];
 
 function mp(n){return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2});}
@@ -1829,6 +1889,11 @@ function render(){
   h+='</div>';
   c.innerHTML=h;
   bagla();
+  if(_aktifKisi&&_kisiler.some(function(k){return k.id===_aktifKisi;})){
+    kisiDetayGuncelle(_aktifKisi);
+    var dm=$("mh-detay-modal");
+    if(dm)dm.classList.remove("hidden");
+  }
 }
 
 function kisiDetayGuncelle(kid){
@@ -1870,21 +1935,41 @@ function kisiDetayGuncelle(kid){
   });
 }
 
-var _aktifKisi=null;
-
 function bagla(){
   /* Kişi kartına tıkla — popup aç */
   document.querySelectorAll(".mh-kisi-kart").forEach(function(el){
     el.addEventListener("click",function(e){
       if(e.target.closest(".mh-sil-kisi-btn"))return;
+      e.preventDefault();e.stopPropagation();
       _aktifKisi=el.dataset.id;
       kisiDetayGuncelle(_aktifKisi);
-      $("mh-detay-modal").classList.remove("hidden");
+      _mhModalKoruma=Date.now()+450;
+      var dm=$("mh-detay-modal");
+      if(dm){
+        dm.classList.remove("hidden");
+        dm.style.pointerEvents="none";
+      }
+      setTimeout(function(){
+        var m=$("mh-detay-modal");
+        if(m&&!m.classList.contains("hidden"))m.style.pointerEvents="";
+      },350);
     });
   });
+  function mhKapat(id){
+    var m=$(id);
+    if(m){m.classList.add("hidden");m.style.pointerEvents="";}
+    if(id==="mh-detay-modal")_aktifKisi=null;
+    _mhModalKoruma=0;
+  }
   /* Detay kapat */
-  $("mh-detay-kapat").addEventListener("click",function(){$("mh-detay-modal").classList.add("hidden");_aktifKisi=null;});
-  $("mh-detay-modal").addEventListener("click",function(e){if(e.target===$("mh-detay-modal")){$("mh-detay-modal").classList.add("hidden");_aktifKisi=null;}});
+  $("mh-detay-kapat").addEventListener("click",function(){mhKapat("mh-detay-modal");});
+  $("mh-detay-modal").addEventListener("click",function(e){
+    if(e.target!==$("mh-detay-modal"))return;
+    if(Date.now()<_mhModalKoruma)return;
+    mhKapat("mh-detay-modal");
+  });
+  var detayBox=$("mh-detay-modal")&&$("mh-detay-modal").querySelector(".modal-box");
+  if(detayBox)detayBox.addEventListener("click",function(e){e.stopPropagation();});
   /* Zekat ekle */
   $("mh-zekat-kaydet-btn").addEventListener("click",async function(){
     if(!_aktifKisi)return;
@@ -1907,25 +1992,41 @@ function bagla(){
       e.stopPropagation();
       if(!confirm("Bu kişiyi ve tüm zekat kayıtlarını silmek istiyor musunuz?"))return;
       _kisiler=_kisiler.filter(function(k){return k.id!==btn.dataset.id;});
-      if(_aktifKisi===btn.dataset.id){$("mh-detay-modal").classList.add("hidden");_aktifKisi=null;}
+      if(_aktifKisi===btn.dataset.id){mhKapat("mh-detay-modal");}
       await fbKaydet();render();
     });
   });
   /* Kişi Ekle modal */
-  $("mh-kisi-ekle-btn").addEventListener("click",function(){
+  $("mh-kisi-ekle-btn").addEventListener("click",function(e){
+    e.preventDefault();e.stopPropagation();
     $("mh-kisi-ad").value="";$("mh-kisi-not").value="";
-    $("mh-modal").classList.remove("hidden");
-    setTimeout(function(){$("mh-kisi-ad").focus();},100);
+    _mhModalKoruma=Date.now()+450;
+    var modal=$("mh-modal");
+    if(modal){
+      modal.classList.remove("hidden");
+      modal.style.pointerEvents="none";
+    }
+    setTimeout(function(){
+      var m=$("mh-modal");
+      if(m&&!m.classList.contains("hidden"))m.style.pointerEvents="";
+      var a=$("mh-kisi-ad");if(a)a.focus();
+    },350);
   });
-  $("mh-modal-kapat").addEventListener("click",function(){$("mh-modal").classList.add("hidden");});
-  $("mh-modal-iptal").addEventListener("click",function(){$("mh-modal").classList.add("hidden");});
-  $("mh-modal").addEventListener("click",function(e){if(e.target===$("mh-modal"))$("mh-modal").classList.add("hidden");});
+  $("mh-modal-kapat").addEventListener("click",function(){mhKapat("mh-modal");});
+  $("mh-modal-iptal").addEventListener("click",function(){mhKapat("mh-modal");});
+  $("mh-modal").addEventListener("click",function(e){
+    if(e.target!==$("mh-modal"))return;
+    if(Date.now()<_mhModalKoruma)return;
+    mhKapat("mh-modal");
+  });
+  var mhBox=$("mh-modal")&&$("mh-modal").querySelector(".modal-box");
+  if(mhBox)mhBox.addEventListener("click",function(e){e.stopPropagation();});
   $("mh-modal-kaydet").addEventListener("click",async function(){
     var ad=($("mh-kisi-ad").value||"").trim();
     var not=($("mh-kisi-not").value||"").trim();
     if(!ad){$("mh-kisi-ad").focus();return;}
     _kisiler.push({id:muid(),ad:ad,not:not,zekatlar:[]});
-    await fbKaydet();$("mh-modal").classList.add("hidden");render();
+    await fbKaydet();mhKapat("mh-modal");render();
   });
 }
 
