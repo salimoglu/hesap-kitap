@@ -456,6 +456,22 @@ function uid(){return "k"+Date.now()+"_"+Math.random().toString(36).substr(2,5);
 function buAy(){return _yil+"-"+String(_ay+1).padStart(2,"0");}
 function ayEkle(bas,n){var d=new Date(bas+"-01");d.setMonth(d.getMonth()+n);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");}
 function ayInput(){return _yil+"-"+String(_ay+1).padStart(2,"0");}
+function ayOnceki(ay){return ayEkle(ay,-1);}
+function ayAdet(bas,bit){
+  if(!bas||!bit||bit<bas)return 0;
+  var a=bas.split("-").map(Number),b=bit.split("-").map(Number);
+  return (b[0]-a[0])*12+(b[1]-a[1])+1;
+}
+/** Duzenli kaydi bitis ayina kadar sureli hale getir (gecmis aylari koru). */
+function duzenliGecmisiKoruyarakBitir(eski,bitisAy){
+  if(!eski||!eski.basTarih||!bitisAy)return false;
+  var adet=ayAdet(eski.basTarih,bitisAy);
+  if(adet<1)return false;
+  eski.tip="duzenli";
+  eski.devam=false;
+  eski.taksit=adet;
+  return true;
+}
 function harTip(h){return h&&h.tip==="duzenli"?"duzenli":"taksit";}
 function duzenliBitisAy(h){
   if(h.devam)return ayEkle(buAy(),36);
@@ -559,7 +575,7 @@ function krender(){
   h+='<div class="field-group"><label class="field-label">Süre</label><div class="kr-sure-sec"><button type="button" class="kr-sure-btn active" data-sure="devam">Devam</button><button type="button" class="kr-sure-btn" data-sure="sureli">Süreli</button></div></div>';
   h+='</div>';
   h+='<div id="kr-sure-wrap" style="display:none"><div class="field-group"><label class="field-label">Kaç ay?</label><input type="number" id="kr-duzenli-ay" class="field-input" value="12" min="1" max="120"/></div></div>';
-  h+='<p class="kr-duzenli-hint" id="kr-duzenli-hint" style="display:none">Abonelik ve aylık sabit ödemeler: tutar aylık olarak yansır.</p></div>';
+  h+='<p class="kr-duzenli-hint" id="kr-duzenli-hint" style="display:none">Abonelik ve aylık sabit ödemeler: tutar aylık olarak yansır. Düzenlemede geçmiş aylar değişmez; yeni tutar başlangıç ayından itibaren geçerli olur.</p></div>';
   h+='</div><div class="modal-footer kr-modal-footer"><button class="btn-secondary" id="kr-iptal">İptal</button><button class="btn-primary" id="kr-kaydet">Kaydet</button></div></div></div>';
   c.innerHTML=h;kbagla();
   if(taslak&&taslak.acik)kFormTaslakGeriYukle(taslak);
@@ -586,7 +602,21 @@ function kbagla(){
     var el=$(id);if(el)el.addEventListener("input",kFormTaslakKaydet);
   });
   document.querySelectorAll(".kr-duz-btn").forEach(function(btn){btn.addEventListener("click",function(e){e.preventDefault();e.stopPropagation();kmodalAc(btn.dataset.id);});});
-  document.querySelectorAll(".kr-sil-btn").forEach(function(btn){btn.addEventListener("click",function(){if(!confirm("Silmek?"))return;_h=_h.filter(function(x){return x.id!==btn.dataset.id;});kfbKaydet();krender();});});
+  document.querySelectorAll(".kr-sil-btn").forEach(function(btn){btn.addEventListener("click",function(){
+    var eski=_h.find(function(x){return x.id===btn.dataset.id;});
+    if(!eski)return;
+    /* Duzenli: gorunen aydan itibaren bitir, gecmis aylar kalsin */
+    if(harTip(eski)==="duzenli"&&eski.basTarih&&eski.basTarih<buAy()){
+      if(!confirm("Bu aydan itibaren silinsin mi?\nGeçmiş aylardaki kayıtlar kalır."))return;
+      if(duzenliGecmisiKoruyarakBitir(eski,ayOnceki(buAy()))){
+        kfbKaydet();krender();
+        return;
+      }
+    }
+    if(!confirm("Silmek?"))return;
+    _h=_h.filter(function(x){return x.id!==btn.dataset.id;});
+    kfbKaydet();krender();
+  });});
 }
 function kmodalAc(id,tipOpt){
   _aktif=id;
@@ -601,8 +631,14 @@ function kmodalAc(id,tipOpt){
     $("kr-kart").value=x.kart;$("kr-aciklama").value=x.aciklama;$("kr-tutar").value=x.tutar;
     if(harTip(x)==="duzenli"){
       _duzenliSure=x.devam?"devam":"sureli";
-      $("kr-duzenli-bas").value=x.basTarih||ayInput();
-      if(!x.devam)$("kr-duzenli-ay").value=x.taksit||12;
+      /* Degisiklik gorunen aydan itibaren; gecmis aylar eski tutarda kalir */
+      var gAy=buAy();
+      $("kr-duzenli-bas").value=(x.basTarih&&x.basTarih>gAy)?x.basTarih:gAy;
+      if(!x.devam){
+        var eskiBitis=ayEkle(x.basTarih,(Math.max(1,parseInt(x.taksit,10)||1))-1);
+        var kalan=ayAdet($("kr-duzenli-bas").value,eskiBitis);
+        $("kr-duzenli-ay").value=kalan>0?String(kalan):String(x.taksit||12);
+      }
     }else{
       $("kr-taksit").value=x.taksit;$("kr-bastarihi").value=x.basTarih;
     }
@@ -630,9 +666,9 @@ async function kkaydet(){
   var kart=($("kr-kart").value||"").trim(),aciklama=($("kr-aciklama").value||"").trim(),tutar=parseFloat($("kr-tutar").value)||0;
   if(!kart||!aciklama||!tutar)return;
   if(_k.indexOf(kart)<0)_k.push(kart);
-  var kayit;
+  var kayit,bas="";
   if(_aktifTip==="duzenli"){
-    var bas=$("kr-duzenli-bas").value;
+    bas=$("kr-duzenli-bas").value;
     if(!bas){alert("Baslangic ayi secin.");return;}
     kayit={tip:"duzenli",kart:kart,aciklama:aciklama,tutar:tutar,basTarih:bas,devam:_duzenliSure==="devam"};
     if(_duzenliSure==="sureli"){
@@ -645,8 +681,25 @@ async function kkaydet(){
     if(!basTarih)return;
     kayit={tip:"taksit",kart:kart,aciklama:aciklama,tutar:tutar,taksit:taksit,basTarih:basTarih};
   }
-  if(_aktif){kayit.id=_aktif;var i=_h.findIndex(function(x){return x.id===_aktif;});if(i>=0)_h[i]=kayit;}
-  else{kayit.id=uid();_h.push(kayit);}
+  if(_aktif){
+    var i=_h.findIndex(function(x){return x.id===_aktif;});
+    var eski=i>=0?_h[i]:null;
+    /* Duzenli duzenleme: baslangic ileri alindiysa gecmis aylari eski kayitta koru */
+    if(eski&&harTip(eski)==="duzenli"&&_aktifTip==="duzenli"&&eski.basTarih&&bas&&eski.basTarih<bas){
+      if(duzenliGecmisiKoruyarakBitir(eski,ayOnceki(bas))){
+        kayit.id=uid();
+        _h.push(kayit);
+      }else{
+        kayit.id=_aktif;
+        _h[i]=kayit;
+      }
+    }else{
+      kayit.id=_aktif;
+      if(i>=0)_h[i]=kayit;
+    }
+  }else{
+    kayit.id=uid();_h.push(kayit);
+  }
   await kfbKaydet();kmodalKapat();krender();
 }
 async function kinit(){await kfbYukle();krender();}
