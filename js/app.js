@@ -179,7 +179,6 @@
       } else {
         if (typeof fbAuthEpostalariTopla === "function") await fbAuthEpostalariTopla(u);
         if (typeof fbEnsureUserDataScope === "function") await fbEnsureUserDataScope();
-        else if (typeof fbDetectRtdbScope === "function") await fbDetectRtdbScope();
         if (typeof fbVerileriYukle !== "undefined") await fbVerileriYukle();
       }
       if (window._hkKokOkumaKapali) {
@@ -477,15 +476,17 @@
         else if (!opt.atlaIslemler) await ButceModule.init();
       }
     }
-    if (modulIzinli("birikim") && typeof BirikimModule !== "undefined") await BirikimModule.init();
-    if (modulIzinli("kredi") && typeof KrediModule !== "undefined") await KrediModule.init();
-    if (modulIzinli("alacaklar") && typeof AlacaklarModule !== "undefined") await AlacaklarModule.init();
-    if (modulIzinli("urun") && typeof UrunModule !== "undefined") await UrunModule.init();
-    if (modulIzinli("altin") && typeof AltinModule !== "undefined") await AltinModule.init();
-    if (modulIzinli("vefa") && typeof VefaModule !== "undefined") await VefaModule.init();
-    if (modulIzinli("arabam") && typeof ArabamModule !== "undefined") await ArabamModule.init();
-    if (modulIzinli("muhtac") && typeof MuhtacModule !== "undefined") await MuhtacModule.init();
-    if (modulIzinli("verilen-altin") && typeof VerilenAltinlarModule !== "undefined") await VerilenAltinlarModule.init();
+    var jobs = [];
+    if (modulIzinli("birikim") && typeof BirikimModule !== "undefined") jobs.push(BirikimModule.init());
+    if (modulIzinli("kredi") && typeof KrediModule !== "undefined") jobs.push(KrediModule.init());
+    if (modulIzinli("alacaklar") && typeof AlacaklarModule !== "undefined") jobs.push(AlacaklarModule.init());
+    if (modulIzinli("urun") && typeof UrunModule !== "undefined") jobs.push(UrunModule.init());
+    if (modulIzinli("altin") && typeof AltinModule !== "undefined") jobs.push(AltinModule.init());
+    if (modulIzinli("vefa") && typeof VefaModule !== "undefined") jobs.push(VefaModule.init());
+    if (modulIzinli("arabam") && typeof ArabamModule !== "undefined") jobs.push(ArabamModule.init());
+    if (modulIzinli("muhtac") && typeof MuhtacModule !== "undefined") jobs.push(MuhtacModule.init());
+    if (modulIzinli("verilen-altin") && typeof VerilenAltinlarModule !== "undefined") jobs.push(VerilenAltinlarModule.init());
+    if (jobs.length) await Promise.all(jobs);
   }
 
   const tabBtnler = document.querySelectorAll(".tab-btn");
@@ -510,44 +511,7 @@
     if (tabId === "kredi" && typeof KrediModule !== "undefined") KrediModule.init();
     if (tabId === "alacaklar" && typeof AlacaklarModule !== "undefined") AlacaklarModule.init();
     if (tabId === "urun" && typeof UrunModule !== "undefined") UrunModule.init();
-    if (tabId === "altin" && typeof AltinModule !== "undefined") {
-      AltinModule.init();
-      if (typeof guncelAltinCek === "function") {
-        guncelAltinCek().then(function (f) {
-          if (f > 0) {
-            if (typeof _guncelGramFiyat !== "undefined") window._guncelGramFiyat = f;
-            if (typeof afbFiyatKaydet === "function") afbFiyatKaydet(f);
-            var el = document.getElementById("alt-fiyat-val");
-            if (el) el.textContent = f.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " TL";
-            if (typeof arender === "function") arender();
-          }
-        });
-      }
-      if (!window._altinBtnReady) {
-        window._altinBtnReady = true;
-        document.addEventListener("click", async function (e) {
-          var t = e.target;
-          if (!t || (t.id !== "alt-fiyat-guncelle" && !(t.closest && t.closest("#alt-fiyat-guncelle")))) return;
-          var btn2 = document.getElementById("alt-fiyat-guncelle");
-          if (!btn2 || btn2._busy) return;
-          btn2._busy = true;
-          btn2.style.animation = "spin 1s linear infinite";
-          btn2.disabled = true;
-          if (typeof guncelAltinCek === "function") {
-            var f2 = await guncelAltinCek();
-            var btn3 = document.getElementById("alt-fiyat-guncelle");
-            if (btn3) { btn3.style.animation = ""; btn3.disabled = false; btn3._busy = false; }
-            if (f2 > 0) {
-              if (typeof _guncelGramFiyat !== "undefined") window._guncelGramFiyat = f2;
-              if (typeof afbFiyatKaydet === "function") await afbFiyatKaydet(f2);
-              if (typeof arender === "function") arender();
-            } else {
-              alert("Fiyat alınamadı, lütfen tekrar deneyin.");
-            }
-          }
-        }, true);
-      }
-    }
+    if (tabId === "altin" && typeof AltinModule !== "undefined") AltinModule.init();
     if (tabId === "vefa" && typeof VefaModule !== "undefined") VefaModule.init();
     if (tabId === "arabam" && typeof ArabamModule !== "undefined") ArabamModule.init();
     if (tabId === "muhtac" && typeof MuhtacModule !== "undefined") MuhtacModule.init();

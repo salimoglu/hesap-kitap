@@ -294,7 +294,7 @@ function modalHesapGuncelle(){
 function modalAc(id){
   _aktif=id;
   $("ur-modal-baslik").textContent=id?"Ürünü Düzenle":"Ürün Ekle";
-  var today=new Date().toISOString().split("T")[0];
+  var today=(function(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");})();
   $("ur-tarih").value=today;
   $("ur-urun").value="";
   $("ur-fiyat").value="";

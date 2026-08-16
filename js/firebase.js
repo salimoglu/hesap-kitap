@@ -618,9 +618,46 @@ async function fbEnsureUserDataScope() {
   }
 }
 
-/** @deprecated fbEnsureUserDataScope kullanin */
+/** @deprecated fbEnsureUserDataScope kullanin — geriye uyumluluk */
 async function fbDetectRtdbScope() {
   return fbEnsureUserDataScope();
+}
+
+/** Ortak altın gram fiyatı okuma — init sırasında tekrarlı RTDB çağrılarını birleştirir */
+async function fbAltinFiyatOku(force) {
+  if (!force && typeof window._hkAltinFiyatCache === "number" && window._hkAltinFiyatCache > 0) {
+    return window._hkAltinFiyatCache;
+  }
+  if (!force && window._hkAltinFiyatPromise) return window._hkAltinFiyatPromise;
+  window._hkAltinFiyatPromise = (async function () {
+    try {
+      var v = parseFloat(await fbRtdbOku("altin_guncel_fiyat"));
+      if (v && v > 0) {
+        window._hkAltinFiyatCache = v;
+        return v;
+      }
+    } catch (e) {}
+    return window._hkAltinFiyatCache || 0;
+  })().then(
+    function (v) {
+      window._hkAltinFiyatPromise = null;
+      return v;
+    },
+    function (err) {
+      window._hkAltinFiyatPromise = null;
+      throw err;
+    }
+  );
+  return window._hkAltinFiyatPromise;
+}
+
+function fbAltinFiyatCacheYaz(f) {
+  if (f > 0) window._hkAltinFiyatCache = f;
+}
+
+function fbAltinFiyatCacheTemizle() {
+  window._hkAltinFiyatCache = null;
+  window._hkAltinFiyatPromise = null;
 }
 
 /** RTDB isteklerinden once cagirin; gereksiz token yenilemesi yapma. */
@@ -711,6 +748,7 @@ async function fbCikisBulut() {
     }
   } catch (eDom) {}
   window._fbAuthStateHazir = false;
+  if (typeof fbAltinFiyatCacheTemizle === "function") fbAltinFiyatCacheTemizle();
   await firebase.auth().signOut();
 }
 

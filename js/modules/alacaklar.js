@@ -53,7 +53,7 @@ function esc(v){return String(v==null?"":v).replace(/&/g,"&amp;").replace(/</g,"
 function tarihFmt(t){if(!t)return"";var p=t.split("-");return p[2]+"."+p[1]+"."+p[0];}
 function ayFmt(t){if(!t)return"";var p=t.split("-");return AYLAR[parseInt(p[1],10)-1]+" "+p[0];}
 function ayEkle(bas,n){var d=new Date(bas+"-01");d.setMonth(d.getMonth()+n);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");}
-function todayStr(){return new Date().toISOString().split("T")[0];}
+function todayStr(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
 function altinGram(k){return (ALTIN_GRAM[k.altinTur]||1)*(parseFloat(k.altinAdet)||1);}
 function normalizeDoviz(d){
   var x=String(d||"TRY").trim().toUpperCase();
@@ -98,7 +98,9 @@ async function fbKaydet(p){
 }
 async function altinGuncelFiyatYukle(){
   _gramAltinFiyatTL=0;
-  if(typeof window._fbDb!=="undefined"&&window._fbDb){
+  if(typeof fbAltinFiyatOku==="function"){
+    try{var cached=await fbAltinFiyatOku();if(cached&&cached>0)_gramAltinFiyatTL=cached;}catch(e){}
+  }else if(typeof window._fbDb!=="undefined"&&window._fbDb){
     try{var v=parseFloat(await fbRtdbOku("altin_guncel_fiyat"));if(v&&v>0)_gramAltinFiyatTL=v;}catch(e){}
   }
   if(_gramAltinFiyatTL<=0){
@@ -108,6 +110,7 @@ async function altinGuncelFiyatYukle(){
       try{r2=await fetch(URLs[j],{cache:"no-store"});if(!r2.ok)continue;d2=await r2.json();x2=d2&&d2.xau;oz=x2&&parseFloat(x2.try);if(isFinite(oz)&&oz>100){_gramAltinFiyatTL=oz/31.1034768;break;}}catch(e){}
     }
   }
+  if(_gramAltinFiyatTL>0&&typeof fbAltinFiyatCacheYaz==="function")fbAltinFiyatCacheYaz(_gramAltinFiyatTL);
 }
 function taksitPlan(k){
   if(k.tip==="pesin")return [{ay:k.tarih?k.tarih.substring(0,7):"",tutar:parseFloat(k.tutar)||0,no:1,odendi:k.odendi||false}];
@@ -407,7 +410,7 @@ function baglaKartAksiyonlari(p,root){
     btn.onclick=function(e){
       e.stopPropagation();if(!confirm("Silmek istiyor musunuz?"))return;
       p.kayitlar=p.kayitlar.filter(function(x){return x.id!==btn.dataset.id;});
-      fbKaydet(p);render();
+      fbKaydet(p);guvenliRender();
     };
   });
   root.querySelectorAll(".al-odeme-btn").forEach(function(btn){
@@ -416,7 +419,7 @@ function baglaKartAksiyonlari(p,root){
       var kid=btn.dataset.id,no=parseInt(btn.dataset.no,10),k=p.kayitlar.find(function(x){return x.id===kid;});if(!k)return;
       if(k.tip==="altin"||k.tip==="pesin")k.odendi=!k.odendi;
       else{if(!k.odemeler)k.odemeler={};k.odemeler[no]=!k.odemeler[no];}
-      fbKaydet(p);render();
+      fbKaydet(p);guvenliRender();
     };
   });
 }
@@ -592,7 +595,7 @@ function guvenliRender(){
 }
 async function init(){
   await altinGuncelFiyatYukle();
-  await fbYukle(P_ALACAK);await fbYukle(P_BORC);
+  await Promise.all([fbYukle(P_ALACAK),fbYukle(P_BORC)]);
   P_ALACAK.kayitlar=P_ALACAK.kayitlar.map(normalizeKayit);
   P_BORC.kayitlar=P_BORC.kayitlar.map(normalizeKayit);
   guvenliRender();
