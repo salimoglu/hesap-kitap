@@ -214,12 +214,12 @@ var BirikimModule = (function() {
       adlar.forEach(function(ad){
         var liste = kalemler[ad];
         var toplam = liste.reduce(function(s,i){return s+i.tutar;},0);
-        var buay = liste.filter(function(i){return i.tarih.startsWith(ay);}).reduce(function(s,i){return s+i.tutar;},0);
+        var buay = liste.filter(function(i){return i.tarih&&i.tarih.startsWith(ay);}).reduce(function(s,i){return s+i.tutar;},0);
 
         h+='<div class="bk-kart">';
         h+='<div class="bk-kart-ust">';
         h+='<div class="bk-kart-info">';
-        h+='<div class="bk-kart-label">'+ad+'</div>';
+        h+='<div class="bk-kart-label">'+esc(ad)+'</div>';
         h+='<div class="bk-kart-toplam">'+para(toplam)+' TL</div>';
         h+='</div>';
         h+='<button class="bk-ekle-btn" data-id="'+encodeURIComponent(ad)+'" title="Manuel ekle">+</button>';
@@ -232,10 +232,10 @@ var BirikimModule = (function() {
           liste.forEach(function(i){
             h+='<div class="bk-islem-row '+(i.kaynak==="manuel"?"bk-manuel":"bk-db")+'">';
             h+='<span class="bk-islem-tarih">'+tarihFmt(i.tarih)+'</span>';
-            h+='<span class="bk-islem-aciklama">'+(i.aciklama||"")+'</span>';
+            h+='<span class="bk-islem-aciklama">'+esc(i.aciklama||"")+'</span>';
             h+='<span class="bk-islem-tutar">'+para(i.tutar)+' TL</span>';
             if(i.kaynak==="manuel"){
-              h+='<button class="bk-sil-btn" data-kalem="'+encodeURIComponent(ad)+'" data-id="'+i.id+'" title="Sil">&#10005;</button>';
+              h+='<button class="bk-sil-btn" data-kalem="'+encodeURIComponent(ad)+'" data-id="'+esc(i.id)+'" title="Sil">&#10005;</button>';
             }
             h+='</div>';
           });
