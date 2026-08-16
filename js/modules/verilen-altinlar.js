@@ -81,13 +81,19 @@ var VerilenAltinlarModule = (function () {
 
   async function gramFiyatYukle() {
     _gramFiyat = 0;
-    if (typeof window._fbDb !== "undefined" && window._fbDb) {
+    if (typeof fbAltinFiyatOku === "function") {
+      try {
+        var cached = await fbAltinFiyatOku();
+        if (cached && cached > 0) _gramFiyat = cached;
+      } catch (e) {}
+    } else if (typeof window._fbDb !== "undefined" && window._fbDb) {
       try {
         var v = parseFloat(await fbRtdbOku("altin_guncel_fiyat"));
         if (v && v > 0) _gramFiyat = v;
       } catch (e) {}
     }
     if (_gramFiyat <= 0) _gramFiyat = await gramFiyatCek();
+    if (_gramFiyat > 0 && typeof fbAltinFiyatCacheYaz === "function") fbAltinFiyatCacheYaz(_gramFiyat);
     return _gramFiyat;
   }
 
@@ -116,6 +122,7 @@ var VerilenAltinlarModule = (function () {
     try {
       var ref = typeof fbRtdbRef === "function" ? fbRtdbRef("altin_guncel_fiyat") : null;
       if (ref) await ref.set(f);
+      if (typeof fbAltinFiyatCacheYaz === "function") fbAltinFiyatCacheYaz(f);
     } catch (e) {}
   }
 

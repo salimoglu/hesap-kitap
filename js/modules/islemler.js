@@ -488,34 +488,12 @@ const IslemlerModule = (() => {
     return d>=0?katTam.slice(0,d).trim():katTam;
   }
 
-  /** Tek satir tutar: gider veya gelir; ikisi varsa net (cift yazim yok). */
-  function katTekTutar(k){
-    if(k.gelir>0&&k.gider>0){
-      const net=k.gelir-k.gider;
-      return{cls:net>=0?"gelir":"gider",txt:(net>=0?"+":"-")+para(Math.abs(net))};
-    }
-    if(k.gider>0)return{cls:"gider",txt:"-"+para(k.gider)};
-    if(k.gelir>0)return{cls:"gelir",txt:"+"+para(k.gelir)};
-    return{cls:"",txt:""};
-  }
-
-  function grupToplamTutar(liste){
-    let gelir=0,gider=0;
-    for(const k of liste){gelir+=k.gelir;gider+=k.gider;}
-    if(gelir>0&&gider>0){
-      const net=gelir-gider;
-      return{cls:"net",txt:(net>=0?"+":"-")+para(Math.abs(net)),gider:gider,gelir:gelir};
-    }
-    if(gider>0)return{cls:"gider",txt:"-"+para(gider),gider:gider,gelir:gelir};
-    if(gelir>0)return{cls:"gelir",txt:"+"+para(gelir),gider:gider,gelir:gelir};
-    return{cls:"",txt:"",gider:0,gelir:0};
-  }
-
   function kategoriOzetiVeri(){
     if(_ozetCache)return _ozetCache;
     const byAy={};
     const byYil={};
     for(const i of _islemler){
+      if(!i.tarih||i.tarih.length<7)continue;
       const ay=i.tarih.substring(0,7);
       const yil=i.tarih.substring(0,4);
       const kat=gorunumKategori(i.kategori);
@@ -541,7 +519,11 @@ const IslemlerModule = (() => {
   }
 
   function veriHazirla(){
-    _islemler.sort(function(a,b){return a.tarih.localeCompare(b.tarih)||(a.olusturma||0)-(b.olusturma||0)||((a.id||0)-(b.id||0));});
+    _islemler.sort(function(a,b){
+      var ta=a&&a.tarih?a.tarih:"";
+      var tb=b&&b.tarih?b.tarih:"";
+      return ta.localeCompare(tb)||(a.olusturma||0)-(b.olusturma||0)||((a.id||0)-(b.id||0));
+    });
     _bakMap={};
     var bak=0;
     for(var i=0;i<_islemler.length;i++){
@@ -571,17 +553,6 @@ const IslemlerModule = (() => {
 
   var IOZ_GIDER_RENK=["#f05454","#e8884a","#f0b840","#c8952a","#8aadcc","#64748b","#a855f7","#94a3b8"];
   var IOZ_GELIR_RENK=["#34c97a","#2dd4bf","#4ade80","#22c55e","#86efac","#64748b","#10b981","#94a3b8"];
-
-  function iozConicOlustur(parcaList){
-    var acc=0,parts=[];
-    parcaList.forEach(function(p){
-      var bas=acc;
-      acc+=p.pct;
-      if(p.pct>0)parts.push(p.renk+" "+bas+"% "+acc+"%");
-    });
-    if(acc<100)parts.push("rgba(46,64,89,0.45) "+acc+"% 100%");
-    return parts.join(", ");
-  }
 
   function iozDonutPolar(cx,cy,r,deg){
     var rad=deg*Math.PI/180;
@@ -1007,7 +978,9 @@ const IslemlerModule = (() => {
     const tip=$("filter-type").value,ay=$("filter-ay").value,grup=$("filter-grup").value;
     return _islemler.filter(i=>{
       if(tip!=="hepsi"&&i.tip!==tip)return false;
-      if(ay!=="hepsi"&&!i.tarih.startsWith(ay))return false;
+      if(ay!=="hepsi"){
+        if(!i.tarih||!i.tarih.startsWith(ay))return false;
+      }
       if(grup!=="hepsi"){
         const g=islemGrupAdi(i);
         if(g!==grup)return false;
@@ -1045,6 +1018,7 @@ const IslemlerModule = (() => {
     const gruplar={};
     for(var i=0;i<items.length;i++){
       var it=items[i];
+      if(!it.tarih||it.tarih.length<7)continue;
       var k=it.tarih.substring(0,7);
       if(!gruplar[k])gruplar[k]=[];
       gruplar[k].push(it);
@@ -1071,14 +1045,10 @@ const IslemlerModule = (() => {
     liste.innerHTML=parts.join("");
   }
 
-  function rowOlustur(islem,bakiye){
-    return rowHtml(islem,bakiye);
-  }
-
   function doldurAyFilter(){
     const sel=$("filter-ay"),prev=sel.value;
     while(sel.options.length>1)sel.remove(1);
-    const aySet=new Set(_islemler.map(i=>i.tarih.substring(0,7)));
+    const aySet=new Set(_islemler.map(i=>i.tarih&&i.tarih.length>=7?i.tarih.substring(0,7):null).filter(Boolean));
     [...aySet].sort((a,b)=>b.localeCompare(a)).forEach(key=>{
       const[y,m]=key.split("-");
       const o=document.createElement("option");
@@ -1574,12 +1544,11 @@ const IslemlerModule = (() => {
     }
   }
 
-  var _eventsBound=false;
   var _initPromise=null;
   async function init(){
     if(_initPromise)return _initPromise;
     _initPromise=(async function(){
-      if(!_eventsBound){baglaEventler();_eventsBound=true;}
+      baglaEventler();
       await yukle({ilk:true});
     })().catch(function(e){
       _initPromise=null;
