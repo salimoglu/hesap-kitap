@@ -103,7 +103,7 @@ var CocugumModule = (function () {
       _aktifCocukId = id;
       return;
     }
-    _aktifCocukId = _cocuklar.length ? _cocuklar[0].id : "";
+    _aktifCocukId = "";
   }
   function atanmamisKayitlariIlkCocugaBagla(cocukId) {
     if (!cocukId) return;
@@ -467,18 +467,16 @@ var CocugumModule = (function () {
   function fiyatGosterGuncelle() {
     var fiyatEl = $("cg-fiyat-val");
     if (fiyatEl) fiyatEl.textContent = _gramFiyat > 0 ? para(_gramFiyat) + " TL" : "…";
-    document.querySelectorAll(".cg-ozet-satir").forEach(function (tr) {
-      var y = ozetDegerYazi(ozetHesapla(ozetListeForSatir(tr.getAttribute("data-cocuk-id"))));
-      var gram = tr.querySelector('[data-oz="gram"]');
-      var taki = tr.querySelector('[data-oz="taki"]');
-      var paraEl = tr.querySelector('[data-oz="para"]');
-      var toplam = tr.querySelector('[data-oz="toplam"]');
-      var kayit = tr.querySelector('[data-oz="kayit"]');
+    document.querySelectorAll(".cg-kart[data-cocuk-id]").forEach(function (kart) {
+      var y = ozetDegerYazi(ozetHesapla(ozetListeForSatir(kart.getAttribute("data-cocuk-id"))));
+      var gram = kart.querySelector('[data-oz="gram"]');
+      var taki = kart.querySelector('[data-oz="taki"]');
+      var paraEl = kart.querySelector('[data-oz="para"]');
+      var toplam = kart.querySelector('[data-oz="toplam"]');
       if (gram) gram.textContent = y.gram;
       if (taki) taki.textContent = y.taki;
       if (paraEl) paraEl.textContent = y.para;
       if (toplam) toplam.textContent = y.toplam;
-      if (kayit) kayit.textContent = y.kayit;
     });
     formGramOnizleme();
   }
@@ -545,58 +543,19 @@ var CocugumModule = (function () {
     var c = $("cocugum-container");
     if (!c) return;
 
-    var liste = filtrelenmis();
-
     var h = '<div class="va-wrap cg-wrap">';
-    h += cocukBarHtml();
     h += '<div class="cg-arac">';
     h += '<div class="va-fiyat-satir">';
     h += '<span class="va-fiyat-label">Gram</span>';
     h += '<span class="va-fiyat-val" id="cg-fiyat-val">' + (_gramFiyat > 0 ? para(_gramFiyat) + " TL" : "…") + "</span>";
     h += '<button type="button" class="va-fiyat-btn" id="cg-fiyat-guncelle" title="Fiyatı güncelle">&#8635;</button>';
     h += "</div>";
-    h += '<button type="button" class="va-ekle-btn" id="cg-ekle-btn">+ Ekle</button>';
-    h += "</div>";
-    h += ozetTabloHtml();
-
-    h += '<div class="cg-filtre">';
-    [["tumu", "Tümü"], ["altin", "Altın / Takı"], ["para", "Para"]].forEach(function (f) {
-      h += '<button type="button" class="cg-filtre-btn' + (_filtre === f[0] ? " active" : "") + '" data-filtre="' + f[0] + '">' + f[1] + "</button>";
-    });
-    h += "</div>";
-
-    if (!_cocuklar.length && !_kayitlar.length) {
-      h += '<div class="va-bos"><div class="va-bos-ikon">&#128118;</div><div>Önce çocuk ekleyin, sonra takı ve para kaydı girin</div>';
-      h += '<button type="button" class="va-ekle-btn cg-bos-cocuk-btn" id="cg-bos-cocuk">+ Çocuk ekle</button></div>';
-    } else if (!liste.length) {
-      var bosMetin = _kayitlar.length && (_filtre !== "tumu" || _cocuklar.length)
-        ? "Bu filtrede kayıt yok"
-        : "Henüz çocuk hediyesi kaydı yok";
-      h += '<div class="va-bos"><div class="va-bos-ikon">&#128118;</div><div>' + bosMetin + "</div></div>";
-    } else {
-      h += '<div class="va-tablo-dis"><table class="va-tablo"><thead><tr>';
-      h += "<th>KİŞİ</th><th>TARİH</th><th>TÜR</th><th>MİKTAR</th><th>GRAM</th><th>GÜNCEL</th><th></th>";
-      h += "</tr></thead><tbody>";
-      liste.forEach(function (k) {
-        var paraMi = k.cins === "para";
-        var gr = kayitGram(k);
-        var guncel = kayitGuncel(k);
-        h += '<tr class="va-satir cg-satir" data-id="' + k.id + '">';
-        h += '<td class="va-td-kisi">' + esc(k.kisi || "—") + "</td>";
-        h += '<td class="va-td-tarih">' + (k.tarih ? tarihFmt(k.tarih) : "—") + "</td>";
-        h += '<td class="' + (paraMi ? "va-td-para" : "va-td-tur") + '">' + esc(turGoster(k)) + "</td>";
-        h += '<td class="' + (paraMi ? "va-td-para" : "va-td-tur") + '">' + esc(miktarGoster(k)) + "</td>";
-        h += '<td class="va-td-gram">' + (paraMi ? "—" : agr(gr) + " gr") + "</td>";
-        h += '<td class="' + (paraMi ? "va-td-para" : "va-td-guncel") + '">';
-        h += paraMi || _gramFiyat > 0 ? para(guncel) + " TL" : "—";
-        h += "</td>";
-        h += '<td class="va-td-aks">';
-        h += '<button type="button" class="cg-duz-btn row-action-btn duzenle" data-id="' + k.id + '" title="Düzenle">&#9998;</button> ';
-        h += '<button type="button" class="cg-sil-btn row-action-btn sil" data-id="' + k.id + '" title="Sil">&#10005;</button>';
-        h += "</td></tr>";
-      });
-      h += "</tbody></table></div>";
-    }
+    h += '<div class="cg-arac-sag">';
+    h += '<button type="button" class="cg-cocuk-ekle" id="cg-cocuk-ekle">+ Çocuk</button>';
+    h += '<button type="button" class="va-ekle-btn" id="cg-ekle-btn">+ Hediye</button>';
+    h += "</div></div>";
+    h += ozetKartlarHtml();
+    h += detayPanelHtml();
 
     h += '<div class="bk-modal-overlay hidden" id="cg-modal"><div class="modal-box va-form-modal">';
     h += '<div class="modal-header"><h2 class="modal-title" id="cg-modal-baslik">Çocuğum</h2>';
@@ -649,94 +608,155 @@ var CocugumModule = (function () {
     bagla();
   }
 
-  function cocukBarHtml() {
-    var h = '<div class="cg-cocuk-bar">';
-    h += '<div class="cg-cocuk-list" role="tablist" aria-label="Çocuklar">';
-    if (!_cocuklar.length) {
-      h += '<div class="cg-cocuk-bos-not">Birden fazla çocuk ekleyebilirsiniz</div>';
-    } else {
-      if (_cocuklar.length > 1) {
-        h += '<button type="button" class="cg-cocuk-chip' + (_aktifCocukId === "tumu" ? " active" : "") + '" data-cocuk-id="tumu">Tümü</button>';
-      }
-      _cocuklar.forEach(function (c) {
-        var aktif = c.id === _aktifCocukId;
-        h += '<button type="button" class="cg-cocuk-chip' + (aktif ? " active" : "") + '" data-cocuk-id="' + esc(c.id) + '" title="' + esc(c.ad) + '">';
-        h += '<span class="cg-cocuk-emoji">' + cinsiyetBilgi(c.cinsiyet).emoji + "</span>";
-        h += '<span class="cg-cocuk-ad">' + esc(c.ad) + "</span>";
-        if (aktif) h += '<span class="cg-cocuk-duzen-ikon" data-cocuk-duzen="' + esc(c.id) + '" title="Düzenle">&#9998;</span>';
-        h += "</button>";
-      });
+  function kartMetrikHtml(oz, toplamGoster) {
+    var y = ozetDegerYazi(oz);
+    var h = '<div class="cg-kart-metrikler">';
+    h += '<div class="cg-kart-metrik">';
+    h += '<span class="cg-kart-lbl">Altın</span>';
+    h += '<span class="cg-kart-val cg-kart-val--au" data-oz="gram">' + y.gram + "</span>";
+    h += '<span class="cg-kart-alt" data-oz="taki">' + y.taki + "</span>";
+    h += "</div>";
+    h += '<div class="cg-kart-metrik">';
+    h += '<span class="cg-kart-lbl">Para</span>';
+    h += '<span class="cg-kart-val cg-kart-val--para" data-oz="para">' + y.para + "</span>";
+    h += "</div>";
+    if (toplamGoster) {
+      h += '<div class="cg-kart-metrik cg-kart-metrik--top">';
+      h += '<span class="cg-kart-lbl">Toplam</span>';
+      h += '<span class="cg-kart-val cg-kart-val--top" data-oz="toplam">' + y.toplam + "</span>";
+      h += "</div>";
     }
     h += "</div>";
-    h += '<button type="button" class="cg-cocuk-ekle" id="cg-cocuk-ekle">+ Çocuk</button>';
-    h += "</div>";
     return h;
   }
 
-  function ozetSatirHtml(opts) {
-    var y = ozetDegerYazi(opts.oz);
-    var cls = "cg-ozet-satir";
-    if (opts.toplamMi) cls += " cg-ozet-satir--toplam";
+  function ozetKartHtml(opts) {
+    var cls = "cg-kart";
+    if (opts.toplamMi) cls += " cg-kart--toplam";
     if (opts.aktif) cls += " active";
-    var h = '<tr class="' + cls + '" data-cocuk-id="' + esc(opts.id) + '">';
-    h += '<td class="cg-oz-cocuk">' + opts.etiket + "</td>";
-    h += '<td class="cg-oz-taki">';
-    h += '<span class="cg-oz-gram" data-oz="gram">' + y.gram + "</span>";
-    h += '<span class="cg-oz-taki-tl" data-oz="taki">' + y.taki + "</span>";
-    h += "</td>";
-    h += '<td class="cg-oz-para" data-oz="para">' + y.para + "</td>";
-    h += '<td class="cg-oz-toplam" data-oz="toplam">' + y.toplam + "</td>";
-    h += '<td class="cg-oz-kayit" data-oz="kayit">' + y.kayit + "</td>";
-    h += "</tr>";
+    var h = '<button type="button" class="' + cls + '" data-cocuk-id="' + esc(opts.id) + '">';
+    h += '<div class="cg-kart-ust">';
+    h += '<span class="cg-kart-ikon">' + (opts.ikon || "") + "</span>";
+    h += '<span class="cg-kart-ad">' + opts.ad + "</span>";
+    if (opts.duzenId) {
+      h += '<span class="cg-kart-duzen" data-cocuk-duzen="' + esc(opts.duzenId) + '" title="Düzenle">&#9998;</span>';
+    }
+    h += "</div>";
+    h += kartMetrikHtml(opts.oz, !!opts.toplamMi);
+    h += '<div class="cg-kart-not">' + (opts.kayit || 0) + " kayıt · detay için dokun</div>";
+    h += "</button>";
     return h;
   }
 
-  function ozetTabloHtml() {
-    var satirlar = [];
+  function ozetKartlarHtml() {
+    if (!_cocuklar.length && !_kayitlar.length) {
+      var bos = '<div class="va-bos"><div class="va-bos-ikon">&#128118;</div><div>Önce çocuk ekleyin, sonra takı ve para kaydı girin</div>';
+      bos += '<button type="button" class="va-ekle-btn cg-bos-cocuk-btn" id="cg-bos-cocuk">+ Çocuk ekle</button></div>';
+      return bos;
+    }
+    var genel = ozetHesapla(_kayitlar);
+    var h = '<div class="cg-kartlar">';
+    h += ozetKartHtml({
+      id: "tumu",
+      ikon: "&#128176;",
+      ad: "Tüm özet",
+      oz: genel,
+      kayit: genel.kayit,
+      toplamMi: true,
+      aktif: _aktifCocukId === "tumu"
+    });
+    h += '<div class="cg-kart-grid">';
     if (_cocuklar.length) {
       _cocuklar.forEach(function (c) {
-        satirlar.push({
+        var oz = ozetHesapla(cocukKayitlari(c.id));
+        h += ozetKartHtml({
           id: c.id,
-          etiket: '<span class="cg-oz-emoji">' + cinsiyetBilgi(c.cinsiyet).emoji + '</span><span>' + esc(c.ad) + "</span>",
-          oz: ozetHesapla(cocukKayitlari(c.id)),
+          ikon: cinsiyetBilgi(c.cinsiyet).emoji,
+          ad: esc(c.ad),
+          oz: oz,
+          kayit: oz.kayit,
+          duzenId: c.id,
           aktif: _aktifCocukId === c.id
         });
       });
       var atanmamis = cocukKayitlari("");
       if (atanmamis.length) {
-        satirlar.push({
+        var dOz = ozetHesapla(atanmamis);
+        h += ozetKartHtml({
           id: "diger",
-          etiket: esc("Diğer"),
-          oz: ozetHesapla(atanmamis),
+          ikon: "&#128118;",
+          ad: "Diğer",
+          oz: dOz,
+          kayit: dOz.kayit,
           aktif: _aktifCocukId === "diger"
         });
       }
-    } else if (_kayitlar.length) {
-      satirlar.push({
-        id: "tumu",
-        etiket: esc("Kayıtlar"),
-        oz: ozetHesapla(_kayitlar),
-        aktif: true
-      });
-    } else {
+    }
+    h += "</div></div>";
+    return h;
+  }
+
+  function detayBaslik() {
+    if (_aktifCocukId === "tumu") return "Tüm çocuklar";
+    if (_aktifCocukId === "diger") return "Diğer kayıtlar";
+    var c = cocukBul(_aktifCocukId);
+    return c ? cocukEtiket(c) : "Detay";
+  }
+
+  function hediyeKartHtml(k) {
+    var paraMi = k.cins === "para";
+    var gr = kayitGram(k);
+    var guncel = kayitGuncel(k);
+    var cocuk = cocukBul(k.cocukId);
+    var h = '<article class="cg-hediye cg-satir" data-id="' + k.id + '">';
+    h += '<div class="cg-hediye-ust">';
+    h += '<strong class="cg-hediye-kisi">' + esc(k.kisi || "—") + "</strong>";
+    h += '<span class="cg-hediye-tarih">' + (k.tarih ? tarihFmt(k.tarih) : "—") + "</span>";
+    h += "</div>";
+    if (_aktifCocukId === "tumu" && cocuk) {
+      h += '<div class="cg-hediye-cocuk">' + esc(cocukEtiket(cocuk)) + "</div>";
+    }
+    h += '<div class="cg-hediye-alt">';
+    h += '<span class="' + (paraMi ? "cg-hediye-para" : "cg-hediye-taki") + '">';
+    h += esc(miktarGoster(k));
+    if (!paraMi) h += " · " + agr(gr) + " gr";
+    h += "</span>";
+    h += '<span class="' + (paraMi ? "cg-hediye-para" : "cg-hediye-guncel") + '">';
+    h += paraMi || _gramFiyat > 0 ? para(guncel) + " TL" : "—";
+    h += "</span></div>";
+    h += '<div class="cg-hediye-aks">';
+    h += '<button type="button" class="cg-duz-btn row-action-btn duzenle" data-id="' + k.id + '" title="Düzenle">&#9998;</button>';
+    h += '<button type="button" class="cg-sil-btn row-action-btn sil" data-id="' + k.id + '" title="Sil">&#10005;</button>';
+    h += "</div></article>";
+    return h;
+  }
+
+  function detayPanelHtml() {
+    if (!_aktifCocukId) {
+      if (_cocuklar.length || _kayitlar.length) {
+        return '<div class="cg-detay-ipucu">Bir karta dokunarak kim, ne zaman, ne taktı detayını görün</div>';
+      }
       return "";
     }
-
-    var h = '<div class="cg-ozet-tablo-dis"><table class="cg-ozet-tablo">';
-    h += "<thead><tr><th>Çocuk</th><th>Takı</th><th>Para</th><th>Toplam</th><th>Kayıt</th></tr></thead><tbody>";
-    satirlar.forEach(function (s) {
-      h += ozetSatirHtml(s);
+    var liste = filtrelenmis();
+    var h = '<div class="cg-detay-panel">';
+    h += '<div class="cg-detay-head">';
+    h += '<div class="cg-detay-title">' + esc(detayBaslik()) + " — kim ne zaman ne taktı</div>";
+    h += '<div class="cg-filtre">';
+    [["tumu", "Tümü"], ["altin", "Altın / Takı"], ["para", "Para"]].forEach(function (f) {
+      h += '<button type="button" class="cg-filtre-btn' + (_filtre === f[0] ? " active" : "") + '" data-filtre="' + f[0] + '">' + f[1] + "</button>";
     });
-    if (satirlar.length > 1) {
-      h += ozetSatirHtml({
-        id: "tumu",
-        etiket: "Toplam",
-        oz: ozetHesapla(_kayitlar),
-        toplamMi: true,
-        aktif: _aktifCocukId === "tumu"
+    h += "</div></div>";
+    if (!liste.length) {
+      h += '<div class="va-bos cg-detay-bos">Bu seçimde kayıt yok</div>';
+    } else {
+      h += '<div class="cg-hediye-list">';
+      liste.forEach(function (k) {
+        h += hediyeKartHtml(k);
       });
+      h += "</div>";
     }
-    h += "</tbody></table></div>";
+    h += "</div>";
     return h;
   }
 
@@ -994,7 +1014,7 @@ var CocugumModule = (function () {
         cocukModalAc(null);
       });
     }
-    document.querySelectorAll(".cg-cocuk-chip").forEach(function (btn) {
+    document.querySelectorAll(".cg-kart[data-cocuk-id]").forEach(function (btn) {
       btn.addEventListener("click", function (e) {
         var duzen = e.target.closest && e.target.closest("[data-cocuk-duzen]");
         if (duzen) {
@@ -1004,20 +1024,13 @@ var CocugumModule = (function () {
           if (c) cocukModalAc(c);
           return;
         }
-        var id = btn.getAttribute("data-cocuk-id");
-        if (id === _aktifCocukId) return;
-        aktifCocukSec(id);
+        var id = btn.getAttribute("data-cocuk-id") || "tumu";
+        if (id === _aktifCocukId) aktifCocukSec("");
+        else aktifCocukSec(id);
         yerelYaz();
         render();
-      });
-    });
-    document.querySelectorAll(".cg-ozet-satir").forEach(function (tr) {
-      tr.addEventListener("click", function () {
-        var id = tr.getAttribute("data-cocuk-id") || "tumu";
-        if (id === _aktifCocukId) return;
-        aktifCocukSec(id);
-        yerelYaz();
-        render();
+        var panel = document.querySelector(".cg-detay-panel");
+        if (panel && panel.scrollIntoView) panel.scrollIntoView({ behavior: "smooth", block: "start" });
       });
     });
     var cocukModal = $("cg-cocuk-modal");
