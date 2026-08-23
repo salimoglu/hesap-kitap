@@ -99,7 +99,7 @@ var HK_TANITIM = (function () {
         "Birden fazla cocuk ekleyebilir, her birine isim ve emoji ile cinsiyet verebilirsiniz. Takilan taki ve verilen paraları kisi, tarih ve tur bazinda kaydedin.",
       ipuclari: [
         "+ Cocuk ile yeni cocuk ekleyin; cinsiyeti 👦 veya 👧 ile secin.",
-        "Kayit turu olarak Altin/Taki veya Para secin. Altin degeri gram fiyatina gore hesaplanir.",
+        "Ozet tabloda her cocugun taki ve para tutari ayri, altta genel toplam gorunur.",
       ],
     },
     altin: {

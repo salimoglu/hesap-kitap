@@ -95,6 +95,10 @@ var CocugumModule = (function () {
     });
   }
   function aktifCocukSec(id) {
+    if (id === "tumu" || id === "diger") {
+      _aktifCocukId = id;
+      return;
+    }
     if (id && cocukBul(id)) {
       _aktifCocukId = id;
       return;
@@ -443,17 +447,39 @@ var CocugumModule = (function () {
     return modalAcikMi() || detayAcikMi() || cocukModalAcikMi();
   }
 
+  function ozetDegerYazi(oz) {
+    var top = (oz && oz.altinGuncel || 0) + (oz && oz.para || 0);
+    return {
+      gram: agr(oz && oz.gram) + " gr",
+      taki: _gramFiyat > 0 ? para(oz && oz.altinGuncel) + " TL" : "—",
+      para: para(oz && oz.para) + " TL",
+      toplam: (_gramFiyat > 0 || (oz && oz.para > 0)) ? para(top) + " TL" : "—",
+      kayit: String(oz && oz.kayit || 0)
+    };
+  }
+
+  function ozetListeForSatir(id) {
+    if (id === "tumu") return _kayitlar;
+    if (id === "diger" || !id) return cocukKayitlari("");
+    return cocukKayitlari(id);
+  }
+
   function fiyatGosterGuncelle() {
-    var ozet = ozetHesapla(filtrelenmis());
     var fiyatEl = $("cg-fiyat-val");
     if (fiyatEl) fiyatEl.textContent = _gramFiyat > 0 ? para(_gramFiyat) + " TL" : "…";
-    var guncelEl = $("cg-guncel-deger");
-    if (guncelEl) guncelEl.textContent = _gramFiyat > 0 ? para(ozet.altinGuncel) + " TL" : "—";
-    var toplamEl = $("cg-toplam-deger");
-    if (toplamEl) {
-      var top = ozet.altinGuncel + ozet.para;
-      toplamEl.textContent = (_gramFiyat > 0 || ozet.para > 0) ? para(top) + " TL" : "—";
-    }
+    document.querySelectorAll(".cg-ozet-satir").forEach(function (tr) {
+      var y = ozetDegerYazi(ozetHesapla(ozetListeForSatir(tr.getAttribute("data-cocuk-id"))));
+      var gram = tr.querySelector('[data-oz="gram"]');
+      var taki = tr.querySelector('[data-oz="taki"]');
+      var paraEl = tr.querySelector('[data-oz="para"]');
+      var toplam = tr.querySelector('[data-oz="toplam"]');
+      var kayit = tr.querySelector('[data-oz="kayit"]');
+      if (gram) gram.textContent = y.gram;
+      if (taki) taki.textContent = y.taki;
+      if (paraEl) paraEl.textContent = y.para;
+      if (toplam) toplam.textContent = y.toplam;
+      if (kayit) kayit.textContent = y.kayit;
+    });
     formGramOnizleme();
   }
 
@@ -465,7 +491,10 @@ var CocugumModule = (function () {
   }
 
   function filtrelenmis() {
-    var kaynak = _cocuklar.length ? cocukKayitlari(_aktifCocukId) : _kayitlar.slice();
+    var kaynak;
+    if (!_cocuklar.length || _aktifCocukId === "tumu") kaynak = _kayitlar.slice();
+    else if (_aktifCocukId === "diger") kaynak = cocukKayitlari("");
+    else kaynak = cocukKayitlari(_aktifCocukId);
     if (_filtre === "altin") return kaynak.filter(function (k) { return k.cins !== "para"; });
     if (_filtre === "para") return kaynak.filter(function (k) { return k.cins === "para"; });
     return kaynak;
@@ -517,23 +546,10 @@ var CocugumModule = (function () {
     if (!c) return;
 
     var liste = filtrelenmis();
-    var oz = ozetHesapla(liste);
-    var genelToplam = oz.altinGuncel + oz.para;
 
     var h = '<div class="va-wrap cg-wrap">';
     h += cocukBarHtml();
-    h += '<div class="va-header">';
-    h += '<div class="va-ozet">';
-    h += '<div class="va-oz-item"><span class="va-oz-label">Gram</span><span class="va-oz-val va-oz-au">' + agr(oz.gram) + " gr</span></div>";
-    h += '<div class="va-oz-item"><span class="va-oz-label">Altın</span><span class="va-oz-val va-oz-guncel" id="cg-guncel-deger">';
-    h += _gramFiyat > 0 ? para(oz.altinGuncel) + " TL" : "—";
-    h += "</span></div>";
-    h += '<div class="va-oz-item"><span class="va-oz-label">Para</span><span class="va-oz-val va-oz-para">' + para(oz.para) + " TL</span></div>";
-    h += '<div class="va-oz-item"><span class="va-oz-label">Toplam</span><span class="va-oz-val" id="cg-toplam-deger" style="color:var(--gold)">';
-    h += (_gramFiyat > 0 || oz.para > 0) ? para(genelToplam) + " TL" : "—";
-    h += "</span></div>";
-    h += '<div class="va-oz-item"><span class="va-oz-label">Kayıt</span><span class="va-oz-val va-oz-sayi">' + oz.kayit + "</span></div>";
-    h += "</div>";
+    h += '<div class="cg-arac">';
     h += '<div class="va-fiyat-satir">';
     h += '<span class="va-fiyat-label">Gram</span>';
     h += '<span class="va-fiyat-val" id="cg-fiyat-val">' + (_gramFiyat > 0 ? para(_gramFiyat) + " TL" : "…") + "</span>";
@@ -541,6 +557,7 @@ var CocugumModule = (function () {
     h += "</div>";
     h += '<button type="button" class="va-ekle-btn" id="cg-ekle-btn">+ Ekle</button>';
     h += "</div>";
+    h += ozetTabloHtml();
 
     h += '<div class="cg-filtre">';
     [["tumu", "Tümü"], ["altin", "Altın / Takı"], ["para", "Para"]].forEach(function (f) {
@@ -638,6 +655,9 @@ var CocugumModule = (function () {
     if (!_cocuklar.length) {
       h += '<div class="cg-cocuk-bos-not">Birden fazla çocuk ekleyebilirsiniz</div>';
     } else {
+      if (_cocuklar.length > 1) {
+        h += '<button type="button" class="cg-cocuk-chip' + (_aktifCocukId === "tumu" ? " active" : "") + '" data-cocuk-id="tumu">Tümü</button>';
+      }
       _cocuklar.forEach(function (c) {
         var aktif = c.id === _aktifCocukId;
         h += '<button type="button" class="cg-cocuk-chip' + (aktif ? " active" : "") + '" data-cocuk-id="' + esc(c.id) + '" title="' + esc(c.ad) + '">';
@@ -653,12 +673,85 @@ var CocugumModule = (function () {
     return h;
   }
 
+  function ozetSatirHtml(opts) {
+    var y = ozetDegerYazi(opts.oz);
+    var cls = "cg-ozet-satir";
+    if (opts.toplamMi) cls += " cg-ozet-satir--toplam";
+    if (opts.aktif) cls += " active";
+    var h = '<tr class="' + cls + '" data-cocuk-id="' + esc(opts.id) + '">';
+    h += '<td class="cg-oz-cocuk">' + opts.etiket + "</td>";
+    h += '<td class="cg-oz-taki">';
+    h += '<span class="cg-oz-gram" data-oz="gram">' + y.gram + "</span>";
+    h += '<span class="cg-oz-taki-tl" data-oz="taki">' + y.taki + "</span>";
+    h += "</td>";
+    h += '<td class="cg-oz-para" data-oz="para">' + y.para + "</td>";
+    h += '<td class="cg-oz-toplam" data-oz="toplam">' + y.toplam + "</td>";
+    h += '<td class="cg-oz-kayit" data-oz="kayit">' + y.kayit + "</td>";
+    h += "</tr>";
+    return h;
+  }
+
+  function ozetTabloHtml() {
+    var satirlar = [];
+    if (_cocuklar.length) {
+      _cocuklar.forEach(function (c) {
+        satirlar.push({
+          id: c.id,
+          etiket: '<span class="cg-oz-emoji">' + cinsiyetBilgi(c.cinsiyet).emoji + '</span><span>' + esc(c.ad) + "</span>",
+          oz: ozetHesapla(cocukKayitlari(c.id)),
+          aktif: _aktifCocukId === c.id
+        });
+      });
+      var atanmamis = cocukKayitlari("");
+      if (atanmamis.length) {
+        satirlar.push({
+          id: "diger",
+          etiket: esc("Diğer"),
+          oz: ozetHesapla(atanmamis),
+          aktif: _aktifCocukId === "diger"
+        });
+      }
+    } else if (_kayitlar.length) {
+      satirlar.push({
+        id: "tumu",
+        etiket: esc("Kayıtlar"),
+        oz: ozetHesapla(_kayitlar),
+        aktif: true
+      });
+    } else {
+      return "";
+    }
+
+    var h = '<div class="cg-ozet-tablo-dis"><table class="cg-ozet-tablo">';
+    h += "<thead><tr><th>Çocuk</th><th>Takı</th><th>Para</th><th>Toplam</th><th>Kayıt</th></tr></thead><tbody>";
+    satirlar.forEach(function (s) {
+      h += ozetSatirHtml(s);
+    });
+    if (satirlar.length > 1) {
+      h += ozetSatirHtml({
+        id: "tumu",
+        etiket: "Toplam",
+        oz: ozetHesapla(_kayitlar),
+        toplamMi: true,
+        aktif: _aktifCocukId === "tumu"
+      });
+    }
+    h += "</tbody></table></div>";
+    return h;
+  }
+
+  function hediyeCocukSeciliId() {
+    if (_aktifCocukId && cocukBul(_aktifCocukId)) return _aktifCocukId;
+    return _cocuklar.length ? _cocuklar[0].id : "";
+  }
+
   function cocukFormSecimHtml() {
     if (_cocuklar.length < 2) return "";
+    var secili = hediyeCocukSeciliId();
     var h = '<div class="field-group"><label class="field-label">Çocuk</label>';
     h += '<select id="cg-hediye-cocuk" class="field-input">';
     _cocuklar.forEach(function (c) {
-      var sec = c.id === _aktifCocukId ? " selected" : "";
+      var sec = c.id === secili ? " selected" : "";
       h += '<option value="' + esc(c.id) + '"' + sec + ">" + esc(cocukEtiket(c)) + "</option>";
     });
     h += "</select></div>";
@@ -748,8 +841,8 @@ var CocugumModule = (function () {
   function formCocukId() {
     var sel = $("cg-hediye-cocuk");
     if (sel && sel.value) return sel.value;
-    if (_aktif && _aktif.cocukId) return _aktif.cocukId;
-    return _aktifCocukId || "";
+    if (_aktif && _aktif.cocukId && cocukBul(_aktif.cocukId)) return _aktif.cocukId;
+    return hediyeCocukSeciliId();
   }
 
   function cinsiyetSec(id) {
@@ -845,7 +938,7 @@ var CocugumModule = (function () {
     _aktif = k || null;
     $("cg-modal-baslik").textContent = k ? "Kaydı Düzenle" : "Hediye Ekle";
     var hediyeCocuk = $("cg-hediye-cocuk");
-    if (hediyeCocuk) hediyeCocuk.value = k && k.cocukId && cocukBul(k.cocukId) ? k.cocukId : (_aktifCocukId || "");
+    if (hediyeCocuk) hediyeCocuk.value = k && k.cocukId && cocukBul(k.cocukId) ? k.cocukId : hediyeCocukSeciliId();
     $("cg-kisi").value = k ? k.kisi || "" : "";
     $("cg-tarih").value = k ? k.tarih || bugun() : bugun();
     var cins = k && k.cins === "para" ? "para" : "altin";
@@ -912,6 +1005,15 @@ var CocugumModule = (function () {
           return;
         }
         var id = btn.getAttribute("data-cocuk-id");
+        if (id === _aktifCocukId) return;
+        aktifCocukSec(id);
+        yerelYaz();
+        render();
+      });
+    });
+    document.querySelectorAll(".cg-ozet-satir").forEach(function (tr) {
+      tr.addEventListener("click", function () {
+        var id = tr.getAttribute("data-cocuk-id") || "tumu";
         if (id === _aktifCocukId) return;
         aktifCocukSec(id);
         yerelYaz();
