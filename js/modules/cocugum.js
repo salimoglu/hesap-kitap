@@ -2,7 +2,10 @@
 var CocugumModule = (function () {
   var $ = function (id) { return document.getElementById(id); };
   var _kayitlar = [];
+  var _cocuklar = [];
+  var _aktifCocukId = "";
   var _aktif = null;
+  var _cocukDuzenle = null;
   var _gramFiyat = 0;
   var _initPromise = null;
   var _modalKoruma = 0;
@@ -12,6 +15,10 @@ var CocugumModule = (function () {
   var CG_GRAM = { gram: 1, ceyrek: 1.75, yarim: 3.5, tam: 7, ata: 7.2, bilezik: 1 };
   var CG_LABEL = { gram: "Gram", ceyrek: "Çeyrek", yarim: "Yarım", tam: "Tam", ata: "Ata", bilezik: "Bilezik" };
   var CG_TURLER = ["gram", "ceyrek", "yarim", "tam", "ata", "bilezik"];
+  var CG_CINSIYET = {
+    erkek: { id: "erkek", emoji: "\uD83D\uDC66", label: "Erkek" },
+    kiz: { id: "kiz", emoji: "\uD83D\uDC67", label: "Kız" }
+  };
 
   var ALTIN_FIYAT_URLS = [
     "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/xau.json",
@@ -34,6 +41,76 @@ var CocugumModule = (function () {
   }
   function uid() {
     return "cg" + Date.now() + "_" + Math.random().toString(36).substr(2, 5);
+  }
+  function cocukUid() {
+    return "cc" + Date.now() + "_" + Math.random().toString(36).substr(2, 5);
+  }
+  function cinsiyetNorm(v) {
+    return v === "kiz" ? "kiz" : "erkek";
+  }
+  function cinsiyetBilgi(v) {
+    return CG_CINSIYET[cinsiyetNorm(v)] || CG_CINSIYET.erkek;
+  }
+  function cocukBul(id) {
+    if (!id) return null;
+    return _cocuklar.find(function (c) { return c.id === id; }) || null;
+  }
+  function cocukEtiket(c) {
+    if (!c) return "—";
+    return cinsiyetBilgi(c.cinsiyet).emoji + " " + (c.ad || "Çocuk");
+  }
+  function cocukNormalize(row, key) {
+    if (!row || typeof row !== "object") return null;
+    var ad = String(row.ad || row.isim || row.adSoyad || "").trim();
+    if (!ad && row.kisi) ad = String(row.kisi).trim();
+    if (!ad) return null;
+    return {
+      id: row.id || key || cocukUid(),
+      ad: ad.slice(0, 40),
+      cinsiyet: cinsiyetNorm(row.cinsiyet || row.gender)
+    };
+  }
+  function cocukListeyeCevir(v) {
+    var out = [];
+    if (!v) return out;
+    if (Array.isArray(v)) {
+      v.forEach(function (row, i) {
+        var n = cocukNormalize(row, row && row.id ? row.id : "cc-arr-" + i);
+        if (n) out.push(n);
+      });
+      return out;
+    }
+    if (typeof v === "object") {
+      Object.keys(v).forEach(function (key) {
+        if (key === "kayitlar" || key === "v") return;
+        var n = cocukNormalize(v[key], key);
+        if (n) out.push(n);
+      });
+    }
+    return out;
+  }
+  function cocuklariSirala() {
+    _cocuklar.sort(function (a, b) {
+      return (a.ad || "").localeCompare(b.ad || "", "tr");
+    });
+  }
+  function aktifCocukSec(id) {
+    if (id && cocukBul(id)) {
+      _aktifCocukId = id;
+      return;
+    }
+    _aktifCocukId = _cocuklar.length ? _cocuklar[0].id : "";
+  }
+  function atanmamisKayitlariIlkCocugaBagla(cocukId) {
+    if (!cocukId) return;
+    var degisti = false;
+    _kayitlar.forEach(function (k) {
+      if (k && !k.cocukId) {
+        k.cocukId = cocukId;
+        degisti = true;
+      }
+    });
+    return degisti;
   }
   function bugun() {
     var d = new Date();
@@ -120,10 +197,12 @@ var CocugumModule = (function () {
 
   function kayitNormalize(row, key) {
     if (!row || typeof row !== "object") return null;
+    if ((row.ad || row.cinsiyet) && !row.kisi && !row.tarih && row.tutar == null && !row.tur && !row.cins) return null;
     var k = Object.assign({}, row);
     if (!k.id) k.id = key || uid();
     k.kisi = k.kisi || "";
     k.tarih = k.tarih || "";
+    k.cocukId = k.cocukId || k.cocuk || "";
     k.cins = k.cins === "para" ? "para" : "altin";
     if (k.cins === "para") {
       k.tutar = parseFloat(k.tutar) || 0;
@@ -144,9 +223,14 @@ var CocugumModule = (function () {
     return k;
   }
 
+  function sariliVeriMi(v) {
+    return !!(v && typeof v === "object" && !Array.isArray(v) && (v.kayitlar || v.cocuklar));
+  }
+
   function listeyeCevir(v) {
     var out = [];
     if (!v) return out;
+    if (sariliVeriMi(v)) return listeyeCevir(v.kayitlar);
     if (Array.isArray(v)) {
       v.forEach(function (row, i) {
         var n = kayitNormalize(row, row && row.id ? row.id : "cg-arr-" + i);
@@ -156,6 +240,7 @@ var CocugumModule = (function () {
     }
     if (typeof v === "object") {
       Object.keys(v).forEach(function (key) {
+        if (key === "cocuklar" || key === "kayitlar" || key === "v" || key === "aktifCocukId") return;
         var n = kayitNormalize(v[key], key);
         if (n) out.push(n);
       });
@@ -163,19 +248,32 @@ var CocugumModule = (function () {
     return out;
   }
 
-  function yerelOku() {
+  function yerelPaketOku() {
     try {
       var raw = localStorage.getItem(LS_KEY);
-      if (!raw) return [];
-      return listeyeCevir(JSON.parse(raw));
+      if (!raw) return { kayitlar: [], cocuklar: [], aktifCocukId: "" };
+      var parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        return { kayitlar: listeyeCevir(parsed), cocuklar: [], aktifCocukId: "" };
+      }
+      return {
+        kayitlar: listeyeCevir(parsed && parsed.kayitlar != null ? parsed.kayitlar : parsed),
+        cocuklar: cocukListeyeCevir(parsed && parsed.cocuklar),
+        aktifCocukId: parsed && parsed.aktifCocukId ? String(parsed.aktifCocukId) : ""
+      };
     } catch (e) {
-      return [];
+      return { kayitlar: [], cocuklar: [], aktifCocukId: "" };
     }
   }
 
   function yerelYaz() {
     try {
-      localStorage.setItem(LS_KEY, JSON.stringify(_kayitlar));
+      localStorage.setItem(LS_KEY, JSON.stringify({
+        v: 2,
+        kayitlar: _kayitlar,
+        cocuklar: _cocuklar,
+        aktifCocukId: _aktifCocukId
+      }));
     } catch (e) {
       console.warn("[Cocugum] yerel yazılamadı", e);
     }
@@ -209,10 +307,21 @@ var CocugumModule = (function () {
     if (!window._fbDb || typeof fbRtdbOku !== "function") return false;
     try {
       var v = await fbRtdbOku("cocugum");
+      var vCocuk = await fbRtdbOku("cocugum_cocuklar");
+      var yerel = yerelPaketOku();
       var liste = listeyeCevir(v);
-      if (liste.length > 0) {
+      var cocuklar = cocukListeyeCevir(vCocuk);
+      if (sariliVeriMi(v) && !cocuklar.length) {
+        cocuklar = cocukListeyeCevir(v.cocuklar);
+      }
+      if (!liste.length && yerel.kayitlar.length) liste = yerel.kayitlar;
+      if (!cocuklar.length && yerel.cocuklar.length) cocuklar = yerel.cocuklar;
+      if (liste.length > 0 || cocuklar.length > 0) {
         _kayitlar = liste;
+        _cocuklar = cocuklar;
         cgSirala();
+        cocuklariSirala();
+        aktifCocukSec(yerel.aktifCocukId);
         yerelYaz();
         return true;
       }
@@ -248,12 +357,19 @@ var CocugumModule = (function () {
         if (!k || !k.id) return;
         obj[k.id] = k;
       });
+      var cocukObj = {};
+      _cocuklar.forEach(function (c) {
+        if (!c || !c.id) return;
+        cocukObj[c.id] = { id: c.id, ad: c.ad, cinsiyet: c.cinsiyet };
+      });
       var ref = fbRtdbRef("cocugum");
+      var refCocuk = typeof fbRtdbRef === "function" ? fbRtdbRef("cocugum_cocuklar") : null;
       if (!ref) {
         console.warn("[Cocugum] FB ref yok; veri yerelde saklandı");
         return false;
       }
       await ref.set(obj);
+      if (refCocuk) await refCocuk.set(cocukObj);
       return true;
     } catch (e) {
       console.error("[Cocugum] kaydet", e);
@@ -318,8 +434,13 @@ var CocugumModule = (function () {
     return !!(m && !m.classList.contains("hidden"));
   }
 
+  function cocukModalAcikMi() {
+    var m = $("cg-cocuk-modal");
+    return !!(m && !m.classList.contains("hidden"));
+  }
+
   function herhangiModalAcikMi() {
-    return modalAcikMi() || detayAcikMi();
+    return modalAcikMi() || detayAcikMi() || cocukModalAcikMi();
   }
 
   function fiyatGosterGuncelle() {
@@ -336,10 +457,18 @@ var CocugumModule = (function () {
     formGramOnizleme();
   }
 
+  function cocukKayitlari(cocukId) {
+    if (!cocukId) {
+      return _kayitlar.filter(function (k) { return !k.cocukId || !cocukBul(k.cocukId); });
+    }
+    return _kayitlar.filter(function (k) { return k.cocukId === cocukId; });
+  }
+
   function filtrelenmis() {
-    if (_filtre === "altin") return _kayitlar.filter(function (k) { return k.cins !== "para"; });
-    if (_filtre === "para") return _kayitlar.filter(function (k) { return k.cins === "para"; });
-    return _kayitlar.slice();
+    var kaynak = _cocuklar.length ? cocukKayitlari(_aktifCocukId) : _kayitlar.slice();
+    if (_filtre === "altin") return kaynak.filter(function (k) { return k.cins !== "para"; });
+    if (_filtre === "para") return kaynak.filter(function (k) { return k.cins === "para"; });
+    return kaynak;
   }
 
   function ozetHesapla(liste) {
@@ -392,6 +521,7 @@ var CocugumModule = (function () {
     var genelToplam = oz.altinGuncel + oz.para;
 
     var h = '<div class="va-wrap cg-wrap">';
+    h += cocukBarHtml();
     h += '<div class="va-header">';
     h += '<div class="va-ozet">';
     h += '<div class="va-oz-item"><span class="va-oz-label">Gram</span><span class="va-oz-val va-oz-au">' + agr(oz.gram) + " gr</span></div>";
@@ -418,8 +548,11 @@ var CocugumModule = (function () {
     });
     h += "</div>";
 
-    if (!liste.length) {
-      var bosMetin = _kayitlar.length && _filtre !== "tumu"
+    if (!_cocuklar.length && !_kayitlar.length) {
+      h += '<div class="va-bos"><div class="va-bos-ikon">&#128118;</div><div>Önce çocuk ekleyin, sonra takı ve para kaydı girin</div>';
+      h += '<button type="button" class="va-ekle-btn cg-bos-cocuk-btn" id="cg-bos-cocuk">+ Çocuk ekle</button></div>';
+    } else if (!liste.length) {
+      var bosMetin = _kayitlar.length && (_filtre !== "tumu" || _cocuklar.length)
         ? "Bu filtrede kayıt yok"
         : "Henüz çocuk hediyesi kaydı yok";
       h += '<div class="va-bos"><div class="va-bos-ikon">&#128118;</div><div>' + bosMetin + "</div></div>";
@@ -452,6 +585,7 @@ var CocugumModule = (function () {
     h += '<div class="modal-header"><h2 class="modal-title" id="cg-modal-baslik">Çocuğum</h2>';
     h += '<button type="button" class="modal-close" id="cg-modal-kapat">&#10005;</button></div>';
     h += '<div class="modal-body va-form-body">';
+    h += cocukFormSecimHtml();
     h += '<div class="va-form-cift">';
     h += '<div class="field-group"><label class="field-label">Kişi</label>';
     h += '<input type="text" id="cg-kisi" class="field-input" placeholder="Kim taktı / verdi..." maxlength="80"/></div>';
@@ -491,9 +625,70 @@ var CocugumModule = (function () {
     h += '<button type="button" class="btn-primary" id="cg-detay-duzenle">Düzenle</button>';
     h += "</div></div></div>";
 
+    h += cocukModalHtml();
+
     h += "</div>";
     c.innerHTML = h;
     bagla();
+  }
+
+  function cocukBarHtml() {
+    var h = '<div class="cg-cocuk-bar">';
+    h += '<div class="cg-cocuk-list" role="tablist" aria-label="Çocuklar">';
+    if (!_cocuklar.length) {
+      h += '<div class="cg-cocuk-bos-not">Birden fazla çocuk ekleyebilirsiniz</div>';
+    } else {
+      _cocuklar.forEach(function (c) {
+        var aktif = c.id === _aktifCocukId;
+        h += '<button type="button" class="cg-cocuk-chip' + (aktif ? " active" : "") + '" data-cocuk-id="' + esc(c.id) + '" title="' + esc(c.ad) + '">';
+        h += '<span class="cg-cocuk-emoji">' + cinsiyetBilgi(c.cinsiyet).emoji + "</span>";
+        h += '<span class="cg-cocuk-ad">' + esc(c.ad) + "</span>";
+        if (aktif) h += '<span class="cg-cocuk-duzen-ikon" data-cocuk-duzen="' + esc(c.id) + '" title="Düzenle">&#9998;</span>';
+        h += "</button>";
+      });
+    }
+    h += "</div>";
+    h += '<button type="button" class="cg-cocuk-ekle" id="cg-cocuk-ekle">+ Çocuk</button>';
+    h += "</div>";
+    return h;
+  }
+
+  function cocukFormSecimHtml() {
+    if (_cocuklar.length < 2) return "";
+    var h = '<div class="field-group"><label class="field-label">Çocuk</label>';
+    h += '<select id="cg-hediye-cocuk" class="field-input">';
+    _cocuklar.forEach(function (c) {
+      var sec = c.id === _aktifCocukId ? " selected" : "";
+      h += '<option value="' + esc(c.id) + '"' + sec + ">" + esc(cocukEtiket(c)) + "</option>";
+    });
+    h += "</select></div>";
+    return h;
+  }
+
+  function cocukModalHtml() {
+    var h = '<div class="bk-modal-overlay hidden" id="cg-cocuk-modal"><div class="modal-box va-form-modal cg-cocuk-modal-box">';
+    h += '<div class="modal-header"><h2 class="modal-title" id="cg-cocuk-baslik">Çocuk Ekle</h2>';
+    h += '<button type="button" class="modal-close" id="cg-cocuk-kapat">&#10005;</button></div>';
+    h += '<div class="modal-body va-form-body">';
+    h += '<div class="field-group"><label class="field-label">İsim</label>';
+    h += '<input type="text" id="cg-cocuk-ad" class="field-input" placeholder="Çocuğun adı..." maxlength="40" autocomplete="off"/></div>';
+    h += '<div class="field-group"><label class="field-label">Cinsiyet</label>';
+    h += '<div class="cg-cinsiyet-sec" id="cg-cinsiyet-sec">';
+    ["erkek", "kiz"].forEach(function (id) {
+      var info = CG_CINSIYET[id];
+      h += '<button type="button" class="cg-cinsiyet-btn' + (id === "erkek" ? " active" : "") + '" data-cinsiyet="' + id + '">';
+      h += '<span class="cg-cinsiyet-emoji">' + info.emoji + "</span>";
+      h += '<span class="cg-cinsiyet-label">' + esc(info.label) + "</span>";
+      h += "</button>";
+    });
+    h += "</div></div>";
+    h += "</div>";
+    h += '<div class="modal-footer cg-cocuk-footer">';
+    h += '<button type="button" class="btn-secondary hidden" id="cg-cocuk-sil">Sil</button>';
+    h += '<button type="button" class="btn-secondary" id="cg-cocuk-iptal">İptal</button>';
+    h += '<button type="button" class="btn-primary" id="cg-cocuk-kaydet">Kaydet</button>';
+    h += "</div></div></div>";
+    return h;
   }
 
   function detayKapat() {
@@ -513,6 +708,10 @@ var CocugumModule = (function () {
     if (bas) bas.textContent = k.kisi || "Kayıt";
     if (body) {
       var h = '<div class="va-detay-grid">';
+      var cocuk = cocukBul(k.cocukId);
+      if (cocuk) {
+        h += '<div class="va-detay-item"><span class="va-detay-l">Çocuk</span><span class="va-detay-v">' + esc(cocukEtiket(cocuk)) + "</span></div>";
+      }
       h += '<div class="va-detay-item"><span class="va-detay-l">Kişi</span><span class="va-detay-v">' + esc(k.kisi || "—") + "</span></div>";
       h += '<div class="va-detay-item"><span class="va-detay-l">Tarih</span><span class="va-detay-v">' + (k.tarih ? tarihFmt(k.tarih) : "—") + "</span></div>";
       h += '<div class="va-detay-item"><span class="va-detay-l">Tür</span><span class="va-detay-v ' + (paraMi ? "va-detay-v--ok" : "va-detay-v--au") + '">' + esc(turGoster(k)) + "</span></div>";
@@ -546,9 +745,107 @@ var CocugumModule = (function () {
     _modalKoruma = 0;
   }
 
+  function formCocukId() {
+    var sel = $("cg-hediye-cocuk");
+    if (sel && sel.value) return sel.value;
+    if (_aktif && _aktif.cocukId) return _aktif.cocukId;
+    return _aktifCocukId || "";
+  }
+
+  function cinsiyetSec(id) {
+    document.querySelectorAll(".cg-cinsiyet-btn").forEach(function (b) {
+      b.classList.toggle("active", b.dataset.cinsiyet === id);
+    });
+  }
+
+  function formCinsiyet() {
+    var aktif = document.querySelector(".cg-cinsiyet-btn.active");
+    return cinsiyetNorm(aktif && aktif.dataset.cinsiyet);
+  }
+
+  function cocukModalKapat() {
+    var m = $("cg-cocuk-modal");
+    if (m) {
+      m.classList.add("hidden");
+      m.style.pointerEvents = "";
+    }
+    _cocukDuzenle = null;
+  }
+
+  function cocukModalAc(c) {
+    _cocukDuzenle = c || null;
+    var bas = $("cg-cocuk-baslik");
+    var ad = $("cg-cocuk-ad");
+    var sil = $("cg-cocuk-sil");
+    if (bas) bas.textContent = c ? "Çocuğu Düzenle" : "Çocuk Ekle";
+    if (ad) ad.value = c ? c.ad || "" : "";
+    cinsiyetSec(c ? cinsiyetNorm(c.cinsiyet) : "erkek");
+    if (sil) sil.classList.toggle("hidden", !c);
+    _modalKoruma = Date.now() + 450;
+    var modal = $("cg-cocuk-modal");
+    if (modal) {
+      modal.classList.remove("hidden");
+      modal.style.pointerEvents = "none";
+    }
+    setTimeout(function () {
+      var m = $("cg-cocuk-modal");
+      if (m && !m.classList.contains("hidden")) m.style.pointerEvents = "";
+      if (ad) ad.focus();
+    }, 350);
+  }
+
+  async function cocukKaydet() {
+    var adEl = $("cg-cocuk-ad");
+    var ad = (adEl && adEl.value || "").trim();
+    if (!ad) {
+      if (adEl) adEl.focus();
+      return;
+    }
+    var cinsiyet = formCinsiyet();
+    var ilkCocuk = !_cocuklar.length;
+    if (_cocukDuzenle) {
+      var i = _cocuklar.findIndex(function (x) { return x.id === _cocukDuzenle.id; });
+      if (i >= 0) {
+        _cocuklar[i] = { id: _cocukDuzenle.id, ad: ad.slice(0, 40), cinsiyet: cinsiyet };
+        _aktifCocukId = _cocukDuzenle.id;
+      }
+    } else {
+      var yeni = { id: cocukUid(), ad: ad.slice(0, 40), cinsiyet: cinsiyet };
+      _cocuklar.push(yeni);
+      _aktifCocukId = yeni.id;
+      if (ilkCocuk) atanmamisKayitlariIlkCocugaBagla(yeni.id);
+    }
+    cocuklariSirala();
+    await fbKaydet();
+    cocukModalKapat();
+    render();
+  }
+
+  async function cocukSil() {
+    if (!_cocukDuzenle) return;
+    var id = _cocukDuzenle.id;
+    var sayi = cocukKayitlari(id).length;
+    var mesaj = sayi
+      ? "Bu çocuğu silmek, ona ait " + sayi + " hediye kaydını da siler. Devam?"
+      : "Bu çocuğu silmek istiyor musunuz?";
+    if (!confirm(mesaj)) return;
+    _cocuklar = _cocuklar.filter(function (c) { return c.id !== id; });
+    _kayitlar = _kayitlar.filter(function (k) { return k.cocukId !== id; });
+    aktifCocukSec("");
+    await fbKaydet();
+    cocukModalKapat();
+    render();
+  }
+
   function modalAc(k) {
+    if (!k && !_cocuklar.length) {
+      cocukModalAc(null);
+      return;
+    }
     _aktif = k || null;
     $("cg-modal-baslik").textContent = k ? "Kaydı Düzenle" : "Hediye Ekle";
+    var hediyeCocuk = $("cg-hediye-cocuk");
+    if (hediyeCocuk) hediyeCocuk.value = k && k.cocukId && cocukBul(k.cocukId) ? k.cocukId : (_aktifCocukId || "");
     $("cg-kisi").value = k ? k.kisi || "" : "";
     $("cg-tarih").value = k ? k.tarih || bugun() : bugun();
     var cins = k && k.cins === "para" ? "para" : "altin";
@@ -580,11 +877,79 @@ var CocugumModule = (function () {
   }
 
   function bagla() {
-    $("cg-ekle-btn").addEventListener("click", function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-      modalAc(null);
+    var ekleBtn = $("cg-ekle-btn");
+    if (ekleBtn) {
+      ekleBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        modalAc(null);
+      });
+    }
+    var bosCocuk = $("cg-bos-cocuk");
+    if (bosCocuk) {
+      bosCocuk.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        cocukModalAc(null);
+      });
+    }
+    var cocukEkle = $("cg-cocuk-ekle");
+    if (cocukEkle) {
+      cocukEkle.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        cocukModalAc(null);
+      });
+    }
+    document.querySelectorAll(".cg-cocuk-chip").forEach(function (btn) {
+      btn.addEventListener("click", function (e) {
+        var duzen = e.target.closest && e.target.closest("[data-cocuk-duzen]");
+        if (duzen) {
+          e.preventDefault();
+          e.stopPropagation();
+          var c = cocukBul(duzen.getAttribute("data-cocuk-duzen"));
+          if (c) cocukModalAc(c);
+          return;
+        }
+        var id = btn.getAttribute("data-cocuk-id");
+        if (id === _aktifCocukId) return;
+        aktifCocukSec(id);
+        yerelYaz();
+        render();
+      });
     });
+    var cocukModal = $("cg-cocuk-modal");
+    var cocukKapat = $("cg-cocuk-kapat");
+    var cocukIptal = $("cg-cocuk-iptal");
+    var cocukKaydetBtn = $("cg-cocuk-kaydet");
+    var cocukSilBtn = $("cg-cocuk-sil");
+    if (cocukKapat) cocukKapat.addEventListener("click", cocukModalKapat);
+    if (cocukIptal) cocukIptal.addEventListener("click", cocukModalKapat);
+    if (cocukKaydetBtn) cocukKaydetBtn.addEventListener("click", cocukKaydet);
+    if (cocukSilBtn) cocukSilBtn.addEventListener("click", cocukSil);
+    if (cocukModal) {
+      cocukModal.addEventListener("click", function (e) {
+        if (e.target !== cocukModal) return;
+        if (Date.now() < _modalKoruma) return;
+        cocukModalKapat();
+      });
+      var cocukBox = cocukModal.querySelector(".cg-cocuk-modal-box");
+      if (cocukBox) cocukBox.addEventListener("click", function (e) { e.stopPropagation(); });
+    }
+    document.querySelectorAll(".cg-cinsiyet-btn").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        cinsiyetSec(btn.dataset.cinsiyet);
+      });
+    });
+    var adInput = $("cg-cocuk-ad");
+    if (adInput) {
+      adInput.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          cocukKaydet();
+        }
+      });
+    }
     $("cg-modal-kapat").addEventListener("click", modalKapat);
     $("cg-iptal").addEventListener("click", modalKapat);
     $("cg-modal").addEventListener("click", function (e) {
@@ -715,7 +1080,13 @@ var CocugumModule = (function () {
       $("cg-tarih").focus();
       return;
     }
-    var kayit = { id: _aktif ? _aktif.id : uid(), kisi: kisi, tarih: tarih, cins: cins };
+    var kayit = {
+      id: _aktif ? _aktif.id : uid(),
+      kisi: kisi,
+      tarih: tarih,
+      cins: cins,
+      cocukId: formCocukId() || _aktifCocukId || ""
+    };
     if (cins === "para") {
       var tutar = parseFloat($("cg-tutar").value) || 0;
       if (tutar <= 0) {
@@ -751,6 +1122,7 @@ var CocugumModule = (function () {
     } else {
       _kayitlar.push(kayit);
     }
+    if (kayit.cocukId) aktifCocukSec(kayit.cocukId);
     cgSirala();
     await fbKaydet();
     _filtre = "tumu";
@@ -761,10 +1133,13 @@ var CocugumModule = (function () {
   async function initOnce() {
     var fbOk = await fbYukle();
     if (!fbOk) {
-      var yerel = yerelOku();
-      if (yerel.length > 0) {
-        _kayitlar = yerel;
+      var yerel = yerelPaketOku();
+      if (yerel.kayitlar.length > 0 || yerel.cocuklar.length > 0) {
+        _kayitlar = yerel.kayitlar;
+        _cocuklar = yerel.cocuklar;
         cgSirala();
+        cocuklariSirala();
+        aktifCocukSec(yerel.aktifCocukId);
         await fbKaydet();
       }
     }

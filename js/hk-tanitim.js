@@ -96,10 +96,10 @@ var HK_TANITIM = (function () {
       ikon: "👶",
       baslik: "Cocugum",
       ozet:
-        "Dogan cocuga takilan taki ve verilen paraları kisi, tarih ve tur bazinda kaydedin. Altin (gram, ceyrek, yarim, tam, ata, bilezik) veya nakit girebilirsiniz.",
+        "Birden fazla cocuk ekleyebilir, her birine isim ve emoji ile cinsiyet verebilirsiniz. Takilan taki ve verilen paraları kisi, tarih ve tur bazinda kaydedin.",
       ipuclari: [
-        "Kayit turu olarak Altin/Taki veya Para secin.",
-        "Altin kayitlarinin guncel degeri gram fiyatina gore hesaplanir.",
+        "+ Cocuk ile yeni cocuk ekleyin; cinsiyeti 👦 veya 👧 ile secin.",
+        "Kayit turu olarak Altin/Taki veya Para secin. Altin degeri gram fiyatina gore hesaplanir.",
       ],
     },
     altin: {

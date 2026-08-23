@@ -2383,8 +2383,31 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .cg-cins-sec{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
 .cg-cins-btn{min-width:0;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-muted);padding:9px 8px;font-family:var(--font-body);font-size:12px;font-weight:700;line-height:1.25;text-align:center;cursor:pointer;}
 .cg-cins-btn.active{background:rgba(240,184,64,0.12);border-color:var(--gold);color:var(--gold);}
+.cg-cocuk-bar{display:flex;align-items:center;gap:8px;flex-shrink:0;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:8px 10px;}
+.cg-cocuk-list{display:flex;flex-wrap:wrap;gap:6px;flex:1;min-width:0;align-items:center;}
+.cg-cocuk-bos-not{font-size:12px;color:var(--text-muted);font-weight:600;}
+.cg-cocuk-chip{display:inline-flex;align-items:center;gap:6px;max-width:100%;background:var(--bg-elevated);border:1px solid var(--border);border-radius:999px;color:var(--text-secondary);padding:6px 10px;font-family:var(--font-body);font-size:13px;font-weight:700;cursor:pointer;line-height:1.2;}
+.cg-cocuk-chip.active{background:rgba(240,184,64,0.14);border-color:var(--gold);color:var(--gold);}
+.cg-cocuk-emoji{font-size:16px;line-height:1;}
+.cg-cocuk-ad{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.cg-cocuk-duzen-ikon{font-size:12px;opacity:0.8;padding:0 0 0 2px;}
+.cg-cocuk-ekle{background:transparent;border:1px dashed var(--border);border-radius:999px;color:var(--gold);padding:6px 12px;font-family:var(--font-body);font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+.cg-cocuk-ekle:hover{border-color:var(--gold);background:rgba(240,184,64,0.08);}
+.cg-cinsiyet-sec{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.cg-cinsiyet-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:88px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:12px;color:var(--text-muted);cursor:pointer;padding:12px 8px;}
+.cg-cinsiyet-btn.active{background:rgba(240,184,64,0.12);border-color:var(--gold);color:var(--gold);}
+.cg-cinsiyet-emoji{font-size:36px;line-height:1;}
+.cg-cinsiyet-label{font-size:13px;font-weight:800;}
+.cg-cocuk-footer{display:flex;gap:8px;flex-wrap:wrap;}
+.cg-cocuk-footer .btn-primary{margin-left:auto;}
+.cg-bos-cocuk-btn{display:inline-flex;margin-top:14px;align-self:center;}
 @media (max-width:640px){
   .cg-filtre-btn{font-size:11px;padding:5px 10px;}
+  .cg-cocuk-bar{padding:7px 8px;gap:6px;}
+  .cg-cocuk-chip{padding:5px 8px;font-size:12px;}
+  .cg-cocuk-ekle{padding:5px 9px;font-size:11px;}
+  .cg-cinsiyet-btn{min-height:76px;}
+  .cg-cinsiyet-emoji{font-size:30px;}
 }
 
 /* ══ MUHTAC & ZEKAT MODÜLİ ══ */
