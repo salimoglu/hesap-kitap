@@ -42,6 +42,13 @@ var CocugumModule = (function () {
   function uid() {
     return "cg" + Date.now() + "_" + Math.random().toString(36).substr(2, 5);
   }
+  function kayitSira(k) {
+    if (!k) return 0;
+    var n = Number(k.eklendi);
+    if (n > 0) return n;
+    var m = String(k.id || "").match(/^cg(\d+)/);
+    return m ? parseInt(m[1], 10) || 0 : 0;
+  }
   function cocukUid() {
     return "cc" + Date.now() + "_" + Math.random().toString(36).substr(2, 5);
   }
@@ -207,6 +214,7 @@ var CocugumModule = (function () {
     k.kisi = k.kisi || "";
     k.tarih = k.tarih || "";
     k.cocukId = k.cocukId || k.cocuk || "";
+    k.eklendi = kayitSira(k);
     k.cins = k.cins === "para" ? "para" : "altin";
     if (k.cins === "para") {
       k.tutar = parseFloat(k.tutar) || 0;
@@ -340,10 +348,12 @@ var CocugumModule = (function () {
     _kayitlar.sort(function (a, b) {
       var ta = a.tarih || "";
       var tb = b.tarih || "";
-      if (!ta && !tb) return (a.kisi || "").localeCompare(b.kisi || "", "tr");
-      if (!ta) return 1;
-      if (!tb) return -1;
-      return tb.localeCompare(ta);
+      if (ta !== tb) {
+        if (!ta) return 1;
+        if (!tb) return -1;
+        return tb.localeCompare(ta);
+      }
+      return kayitSira(b) - kayitSira(a);
     });
   }
 
@@ -1197,7 +1207,8 @@ var CocugumModule = (function () {
       kisi: kisi,
       tarih: tarih,
       cins: cins,
-      cocukId: formCocukId() || _aktifCocukId || ""
+      cocukId: formCocukId() || _aktifCocukId || "",
+      eklendi: _aktif && _aktif.eklendi ? _aktif.eklendi : Date.now()
     };
     if (cins === "para") {
       var tutar = parseFloat($("cg-tutar").value) || 0;
