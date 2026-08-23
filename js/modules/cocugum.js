@@ -419,7 +419,10 @@ var CocugumModule = (function () {
     h += "</div>";
 
     if (!liste.length) {
-      h += '<div class="va-bos"><div class="va-bos-ikon">&#128118;</div><div>Henüz çocuk hediyesi kaydı yok</div></div>';
+      var bosMetin = _kayitlar.length && _filtre !== "tumu"
+        ? "Bu filtrede kayıt yok"
+        : "Henüz çocuk hediyesi kaydı yok";
+      h += '<div class="va-bos"><div class="va-bos-ikon">&#128118;</div><div>' + bosMetin + "</div></div>";
     } else {
       h += '<div class="va-tablo-dis"><table class="va-tablo"><thead><tr>';
       h += "<th>KİŞİ</th><th>TARİH</th><th>TÜR</th><th>MİKTAR</th><th>GRAM</th><th>GÜNCEL</th><th></th>";
@@ -750,6 +753,7 @@ var CocugumModule = (function () {
     }
     cgSirala();
     await fbKaydet();
+    _filtre = "tumu";
     modalKapat();
     render();
   }
