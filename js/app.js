@@ -451,7 +451,7 @@
   }
 
   // Sekme yonetimi
-  const TAB_SIRA_TUM = ["islemler", "birikim", "arabam", "kredi", "alacaklar", "urun", "altin", "verilen-altin", "vefa", "muhtac"];
+  const TAB_SIRA_TUM = ["islemler", "birikim", "arabam", "kredi", "alacaklar", "urun", "cocugum", "altin", "verilen-altin", "vefa", "muhtac"];
 
   function getTabSira() {
     let u = null;
@@ -481,6 +481,7 @@
     if (modulIzinli("kredi") && typeof KrediModule !== "undefined") jobs.push(KrediModule.init());
     if (modulIzinli("alacaklar") && typeof AlacaklarModule !== "undefined") jobs.push(AlacaklarModule.init());
     if (modulIzinli("urun") && typeof UrunModule !== "undefined") jobs.push(UrunModule.init());
+    if (modulIzinli("cocugum") && typeof CocugumModule !== "undefined") jobs.push(CocugumModule.init());
     if (modulIzinli("altin") && typeof AltinModule !== "undefined") jobs.push(AltinModule.init());
     if (modulIzinli("vefa") && typeof VefaModule !== "undefined") jobs.push(VefaModule.init());
     if (modulIzinli("arabam") && typeof ArabamModule !== "undefined") jobs.push(ArabamModule.init());
@@ -511,6 +512,7 @@
     if (tabId === "kredi" && typeof KrediModule !== "undefined") KrediModule.init();
     if (tabId === "alacaklar" && typeof AlacaklarModule !== "undefined") AlacaklarModule.init();
     if (tabId === "urun" && typeof UrunModule !== "undefined") UrunModule.init();
+    if (tabId === "cocugum" && typeof CocugumModule !== "undefined") CocugumModule.init();
     if (tabId === "altin" && typeof AltinModule !== "undefined") AltinModule.init();
     if (tabId === "vefa" && typeof VefaModule !== "undefined") VefaModule.init();
     if (tabId === "arabam" && typeof ArabamModule !== "undefined") ArabamModule.init();
