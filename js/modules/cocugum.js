@@ -709,25 +709,22 @@ var CocugumModule = (function () {
     var guncel = kayitGuncel(k);
     var cocuk = cocukBul(k.cocukId);
     var h = '<article class="cg-hediye cg-satir" data-id="' + k.id + '">';
-    h += '<div class="cg-hediye-ust">';
-    h += '<strong class="cg-hediye-kisi">' + esc(k.kisi || "—") + "</strong>";
+    h += '<span class="cg-hediye-kisi">' + esc(k.kisi || "—") + "</span>";
     h += '<span class="cg-hediye-tarih">' + (k.tarih ? tarihFmt(k.tarih) : "—") + "</span>";
-    h += "</div>";
     if (_aktifCocukId === "tumu" && cocuk) {
-      h += '<div class="cg-hediye-cocuk">' + esc(cocukEtiket(cocuk)) + "</div>";
+      h += '<span class="cg-hediye-cocuk">' + esc(cocukEtiket(cocuk)) + "</span>";
     }
-    h += '<div class="cg-hediye-alt">';
     h += '<span class="' + (paraMi ? "cg-hediye-para" : "cg-hediye-taki") + '">';
     h += esc(miktarGoster(k));
     if (!paraMi) h += " · " + agr(gr) + " gr";
     h += "</span>";
     h += '<span class="' + (paraMi ? "cg-hediye-para" : "cg-hediye-guncel") + '">';
     h += paraMi || _gramFiyat > 0 ? para(guncel) + " TL" : "—";
-    h += "</span></div>";
-    h += '<div class="cg-hediye-aks">';
+    h += "</span>";
+    h += '<span class="cg-hediye-aks">';
     h += '<button type="button" class="cg-duz-btn row-action-btn duzenle" data-id="' + k.id + '" title="Düzenle">&#9998;</button>';
     h += '<button type="button" class="cg-sil-btn row-action-btn sil" data-id="' + k.id + '" title="Sil">&#10005;</button>';
-    h += "</div></article>";
+    h += "</span></article>";
     return h;
   }
 
