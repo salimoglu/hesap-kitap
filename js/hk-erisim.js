@@ -14,7 +14,7 @@ var HK_ERISIM = (function () {
    */
   var YONETICI_UIDS = [];
 
-  /** Diğer kullanıcılara açık modüller (kapalı: urun, verilen-altin, vefa, muhtac) */
+  /** Diğer kullanıcılara açık modüller (kapalı: urun, cocugum, verilen-altin, vefa, muhtac) */
   var MISAFIR_SEKMELER = [
     "islemler",
     "birikim",
@@ -32,11 +32,17 @@ var HK_ERISIM = (function () {
     "kredi",
     "alacaklar",
     "urun",
+    "cocugum",
     "altin",
     "verilen-altin",
     "vefa",
     "muhtac"
   ];
+
+  /** Yönetici olsa da yalnızca bu e-postalara açık modüller */
+  var OZEL_MODUL_EPOSTALAR = {
+    cocugum: ["salimoglu61@gmail.com"]
+  };
 
   function epostaNorm(em) {
     var s = String(em || "").trim().toLowerCase();
@@ -49,15 +55,25 @@ var HK_ERISIM = (function () {
     return local + "@" + domain;
   }
 
-  function epostaListesindeMi(emails) {
-    if (!emails || !emails.length) return false;
-    for (var i = 0; i < YONETICI_EPOSTALAR.length; i++) {
-      var hedef = epostaNorm(YONETICI_EPOSTALAR[i]);
+  function epostaHedefteMi(emails, hedefler) {
+    if (!emails || !emails.length || !hedefler || !hedefler.length) return false;
+    for (var i = 0; i < hedefler.length; i++) {
+      var hedef = epostaNorm(hedefler[i]);
       for (var j = 0; j < emails.length; j++) {
         if (emails[j] === hedef) return true;
       }
     }
     return false;
+  }
+
+  function epostaListesindeMi(emails) {
+    return epostaHedefteMi(emails, YONETICI_EPOSTALAR);
+  }
+
+  function ozelModulIzinli(tabId, user) {
+    var hedefler = OZEL_MODUL_EPOSTALAR[tabId];
+    if (!hedefler) return true;
+    return epostaHedefteMi(kullaniciEpostalari(user), hedefler);
   }
 
   function kullaniciEpostalari(user) {
@@ -109,9 +125,13 @@ var HK_ERISIM = (function () {
   }
 
   function izinliSekmeler(user) {
-    if (yoneticiMi(user)) return TUM_SEKMELER.slice();
-    return MISAFIR_SEKMELER.filter(function (id) {
-      return TUM_SEKMELER.indexOf(id) >= 0;
+    var base = yoneticiMi(user)
+      ? TUM_SEKMELER.slice()
+      : MISAFIR_SEKMELER.filter(function (id) {
+          return TUM_SEKMELER.indexOf(id) >= 0;
+        });
+    return base.filter(function (id) {
+      return ozelModulIzinli(id, user);
     });
   }
 

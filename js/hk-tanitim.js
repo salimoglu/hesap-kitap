@@ -92,6 +92,16 @@ var HK_TANITIM = (function () {
         "Arama ve filtre ile uzun listelerde hizli bulun.",
       ],
     },
+    cocugum: {
+      ikon: "👶",
+      baslik: "Cocugum",
+      ozet:
+        "Dogan cocuga takilan taki ve verilen paraları kisi, tarih ve tur bazinda kaydedin. Altin (gram, ceyrek, yarim, tam, ata, bilezik) veya nakit girebilirsiniz.",
+      ipuclari: [
+        "Kayit turu olarak Altin/Taki veya Para secin.",
+        "Altin kayitlarinin guncel degeri gram fiyatina gore hesaplanir.",
+      ],
+    },
     altin: {
       ikon: "🥇",
       baslik: "Altin",
@@ -141,6 +151,7 @@ var HK_TANITIM = (function () {
     "kredi",
     "alacaklar",
     "urun",
+    "cocugum",
     "altin",
     "verilen-altin",
     "vefa",
