@@ -4,7 +4,9 @@ var BirikimModule = (function() {
   var _islemler = [];
   var _kategoriler = [];
   var _manuelIslemler = {}; // { kalemAd: [{id,tarih,tutar,aciklama}] }
+  var _besKayitlar = []; // [{id, ad, aylik}] — sadece hatırlatma, alttaki birikime karışmaz
   var _aktifKalem = null;
+  var _aktifBesId = null;
   var _modalKoruma = 0;
 
   function para(n){return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2});}
@@ -58,16 +60,59 @@ var BirikimModule = (function() {
     return String(islem.kategori || "").trim();
   }
 
+  function besNormalize(v){
+    var out=[];
+    if(!v) return out;
+    var arr=Array.isArray(v)?v:Object.values(v);
+    arr.forEach(function(x){
+      if(!x||typeof x!=="object") return;
+      var ad=String(x.ad||x.isim||"").trim();
+      if(!ad) return;
+      out.push({
+        id:x.id||("bes"+Date.now()+"_"+Math.random().toString(36).slice(2,6)),
+        ad:ad.slice(0,40),
+        aylik:parseFloat(x.aylik!=null?x.aylik:x.tutar)||0
+      });
+    });
+    return out;
+  }
+
+  function besYerelOku(){
+    try { return besNormalize(JSON.parse(localStorage.getItem("hk-birikim-bes") || "null")); }
+    catch (e) { return []; }
+  }
+  function besYerelYaz(){
+    try { localStorage.setItem("hk-birikim-bes", JSON.stringify(_besKayitlar)); } catch (e) {}
+  }
+
   /* Firebase */
   async function fbYukle(){
+    var besFbOk = false;
     if(typeof window._fbDb!=="undefined"&&window._fbDb){
       try{var v=await fbRtdbOku("birikim_manuel");_manuelIslemler=v||{};}
       catch(e){_manuelIslemler={};console.error("[Birikim] yukle",(e&&e.code)||e.message||e);}
+      try{var b=await fbRtdbOku("birikim_bes");_besKayitlar=besNormalize(b);besFbOk=true;}
+      catch(e){_besKayitlar=[];console.error("[Birikim] bes yukle",(e&&e.code)||e.message||e);}
     }
+    if(!besFbOk || !_besKayitlar.length){
+      var yerel = besYerelOku();
+      if(yerel.length) _besKayitlar = yerel;
+    }
+    besYerelYaz();
   }
   async function fbKaydet(){
     if(typeof window._fbDb!=="undefined"&&window._fbDb){
       try{await fbRtdbRef("birikim_manuel").set(_manuelIslemler);}catch(e){console.error("[Birikim] kaydet",e);}
+    }
+  }
+  async function fbBesKaydet(){
+    besYerelYaz();
+    if(typeof window._fbDb!=="undefined"&&window._fbDb){
+      try{
+        var obj={};
+        _besKayitlar.forEach(function(x){if(x&&x.id)obj[x.id]=x;});
+        await fbRtdbRef("birikim_bes").set(obj);
+      }catch(e){console.error("[Birikim] bes kaydet",e);}
     }
   }
 
@@ -140,6 +185,34 @@ var BirikimModule = (function() {
     return { yToplam:yToplam,yillar:yillar,maxYearAmt:maxYearAmt };
   }
 
+  /** Üst özetin sağındaki BES hatırlatma kartı — alttaki birikim kartlarına eklenmez. */
+  function besKartHtml(){
+    var h='<aside class="bk-h-bes" aria-label="BES \u00f6demeleri">';
+    h+='<div class="bk-h-bes-ust">';
+    h+='<div class="bk-h-bes-title">BES</div>';
+    h+='<button type="button" class="bk-bes-ekle-btn" id="bk-bes-ekle" title="BES ki\u015fisi ekle">+</button>';
+    h+='</div>';
+    if(!_besKayitlar.length){
+      h+='<button type="button" class="bk-bes-bos" id="bk-bes-bos-ekle">\u0130sim ve ayl\u0131k \u00f6deme ekle</button>';
+    } else {
+      h+='<div class="bk-bes-liste">';
+      var aylikToplam=0;
+      _besKayitlar.forEach(function(k){
+        aylikToplam+=(parseFloat(k.aylik)||0);
+        h+='<button type="button" class="bk-bes-satir" data-id="'+esc(k.id)+'" title="D\u00fczenle">';
+        h+='<span class="bk-bes-ad">'+esc(k.ad)+'</span>';
+        h+='<span class="bk-bes-tutar">'+para(k.aylik)+' <span class="bk-bes-ay">TL/ay</span></span>';
+        h+='</button>';
+      });
+      h+='</div>';
+      if(_besKayitlar.length>1){
+        h+='<div class="bk-bes-toplam">Ayl\u0131k toplam <strong>'+para(aylikToplam)+' TL</strong></div>';
+      }
+    }
+    h+='</aside>';
+    return h;
+  }
+
   /* Manuel + İşlemler + tanımlı BIRIKIM kategorileri birleştir */
   function tumKalemler(){
     var islem = islemKalemleri();
@@ -178,6 +251,7 @@ var BirikimModule = (function() {
     h+='<div class="bk-gt-label">TOPLAM B\u0130R\u0130K\u0130M</div>';
     h+='<div class="bk-gt-val">'+para(toplamGenel)+' TL</div>';
     h+='</div>';
+    h+=besKartHtml();
     if(yOz.yillar.length>0){
       h+='<aside class="bk-h-yil" aria-label="Y\u0131ll\u0131k birikim \u00f6zeti">';
       h+='<div class="bk-h-yil-title">Y\u0131ll\u0131k \u00f6zet</div>';
@@ -267,6 +341,24 @@ var BirikimModule = (function() {
     h+='<button class="btn-primary" id="bk-kaydet">Ekle</button>';
     h+='</div></div></div>';
 
+    /* BES hatırlatma modalı */
+    h+='<div class="bk-modal-overlay hidden" id="bk-bes-modal">';
+    h+='<div class="modal-box modal-sm">';
+    h+='<div class="modal-header"><h2 class="modal-title" id="bk-bes-baslik">BES \u00f6demesi</h2>';
+    h+='<button class="modal-close" id="bk-bes-kapat">&#10005;</button></div>';
+    h+='<div class="modal-body">';
+    h+='<div class="field-group"><label class="field-label" for="bk-bes-ad">Kimin ad\u0131na</label>';
+    h+='<input type="text" id="bk-bes-ad" class="field-input" placeholder="\u0130sim" maxlength="40" autocomplete="name"/></div>';
+    h+='<div class="field-group"><label class="field-label" for="bk-bes-aylik">Ayl\u0131k \u00f6deme (TL)</label>';
+    h+='<input type="number" id="bk-bes-aylik" class="field-input" placeholder="0" min="0" step="0.01" inputmode="decimal"/></div>';
+    h+='<p class="bk-bes-not">Bu kay\u0131t yaln\u0131zca hat\u0131rlatma i\u00e7indir; alttaki birikim kartlar\u0131na eklenmez.</p>';
+    h+='</div>';
+    h+='<div class="modal-footer">';
+    h+='<button class="btn-danger hidden" id="bk-bes-sil">Sil</button>';
+    h+='<button class="btn-secondary" id="bk-bes-iptal">\u0130ptal</button>';
+    h+='<button class="btn-primary" id="bk-bes-kaydet">Kaydet</button>';
+    h+='</div></div></div>';
+
     c.innerHTML = h;
     bagla();
   }
@@ -327,6 +419,108 @@ var BirikimModule = (function() {
         fbKaydet();render();
       });
     });
+    baglaBes();
+  }
+
+  function besModalAc(kayit){
+    _aktifBesId = kayit && kayit.id ? kayit.id : null;
+    var baslik = $("bk-bes-baslik");
+    if (baslik) baslik.textContent = _aktifBesId ? "BES d\u00fczenle" : "BES \u00f6demesi";
+    var adEl = $("bk-bes-ad");
+    var tutEl = $("bk-bes-aylik");
+    var silBtn = $("bk-bes-sil");
+    if (adEl) adEl.value = kayit ? (kayit.ad || "") : "";
+    if (tutEl) tutEl.value = kayit && kayit.aylik ? String(kayit.aylik) : "";
+    if (silBtn) {
+      if (_aktifBesId) silBtn.classList.remove("hidden");
+      else silBtn.classList.add("hidden");
+    }
+    _modalKoruma = Date.now() + 450;
+    var modal = $("bk-bes-modal");
+    if (modal) {
+      modal.classList.remove("hidden");
+      modal.style.pointerEvents = "none";
+    }
+    setTimeout(function(){
+      var m = $("bk-bes-modal");
+      if (m && !m.classList.contains("hidden")) m.style.pointerEvents = "";
+      var t = $("bk-bes-ad"); if (t) t.focus();
+    }, 350);
+  }
+
+  function besModalKapat(){
+    var m = $("bk-bes-modal");
+    if (m) { m.classList.add("hidden"); m.style.pointerEvents = ""; }
+    _aktifBesId = null;
+  }
+
+  function baglaBes(){
+    function acYeni(){ besModalAc(null); }
+    var ekleBtn = $("bk-bes-ekle");
+    var bosBtn = $("bk-bes-bos-ekle");
+    if (ekleBtn) ekleBtn.addEventListener("click", acYeni);
+    if (bosBtn) bosBtn.addEventListener("click", acYeni);
+    document.querySelectorAll(".bk-bes-satir").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var id = btn.dataset.id;
+        var kayit = _besKayitlar.find(function(k){ return k.id === id; });
+        if (kayit) besModalAc(kayit);
+      });
+    });
+    function kapatClick(){ besModalKapat(); }
+    var kapat = $("bk-bes-kapat");
+    var iptal = $("bk-bes-iptal");
+    var overlay = $("bk-bes-modal");
+    if (kapat) kapat.addEventListener("click", kapatClick);
+    if (iptal) iptal.addEventListener("click", kapatClick);
+    if (overlay) {
+      overlay.addEventListener("click", function(e){
+        if (e.target !== overlay) return;
+        if (Date.now() < _modalKoruma) return;
+        besModalKapat();
+      });
+      var box = overlay.querySelector(".modal-box");
+      if (box) box.addEventListener("click", function(e){ e.stopPropagation(); });
+    }
+    var kaydet = $("bk-bes-kaydet");
+    var sil = $("bk-bes-sil");
+    var adInp = $("bk-bes-ad");
+    var tutInp = $("bk-bes-aylik");
+    if (kaydet) kaydet.addEventListener("click", besKaydet);
+    if (sil) sil.addEventListener("click", besSil);
+    if (adInp) adInp.addEventListener("keydown", function(e){ if (e.key === "Enter") besKaydet(); });
+    if (tutInp) tutInp.addEventListener("keydown", function(e){ if (e.key === "Enter") besKaydet(); });
+  }
+
+  async function besKaydet(){
+    var adEl = $("bk-bes-ad");
+    var tutEl = $("bk-bes-aylik");
+    var ad = adEl ? String(adEl.value || "").trim() : "";
+    var aylik = tutEl ? parseFloat(tutEl.value) : 0;
+    if (!ad) { if (adEl) adEl.focus(); return; }
+    if (!aylik || aylik < 0) { if (tutEl) tutEl.focus(); return; }
+    if (_aktifBesId) {
+      var mevcut = _besKayitlar.find(function(k){ return k.id === _aktifBesId; });
+      if (mevcut) { mevcut.ad = ad.slice(0, 40); mevcut.aylik = aylik; }
+    } else {
+      _besKayitlar.push({
+        id: "bes" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
+        ad: ad.slice(0, 40),
+        aylik: aylik
+      });
+    }
+    await fbBesKaydet();
+    besModalKapat();
+    render();
+  }
+
+  async function besSil(){
+    if (!_aktifBesId) return;
+    if (!confirm("Bu BES kayd\u0131n\u0131 silmek istiyor musunuz?")) return;
+    _besKayitlar = _besKayitlar.filter(function(k){ return k.id !== _aktifBesId; });
+    await fbBesKaydet();
+    besModalKapat();
+    render();
   }
 
   async function ekle(){
