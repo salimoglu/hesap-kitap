@@ -1832,6 +1832,8 @@ var _aktifKisi=null;
 var _islemler=[];
 
 function mp(n){return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2});}
+function mhKurus(n){return Math.round((parseFloat(n)||0)*100);}
+function mhKalan(gerekli,verilen){return Math.max(0,mhKurus(gerekli)-mhKurus(verilen))/100;}
 function muid(){return "mh"+Date.now()+"_"+Math.random().toString(36).substr(2,5);}
 function mTarih(t){if(!t)return"";var p=t.split("-");return p[2]+"."+p[1]+"."+p[0];}
 function kisiToplam(k){return (k.zekatlar||[]).reduce(function(s,z){return s+(parseFloat(z.miktar)||0);},0);}
@@ -1895,7 +1897,7 @@ function render(){
   var yZekat=mhYillaraGoreZekatVerilen();
   var topGelir=mhToplamGelir(yGel);
   var topGerekli=mhZekatGerekli(topGelir);
-  var topKalan=Math.max(0,topGerekli-genelToplam);
+  var topKalan=mhKalan(topGerekli,genelToplam);
   var yOz=mhYilListesi(yGel,yZekat);
   var buYil=String(new Date().getFullYear());
 
@@ -1920,7 +1922,7 @@ function render(){
       var gel=yGel[yy]||0;
       var gerekli=mhZekatGerekli(gel);
       var verilen=yZekat[yy]||0;
-      var kalan=Math.max(0,gerekli-verilen);
+      var kalan=mhKalan(gerekli,verilen);
       var barPct=gerekli>0?Math.min(100,Math.round((verilen/gerekli)*100)):0;
       var eksik=gerekli>0&&verilen<gerekli-0.005;
       h+='<div class="mh-yil-kart'+(yy===buYil?" mh-yil-bu-yil":"")+(eksik?" mh-yil-eksik":"")+'" style="--mh-yil-bar:'+barPct+'%" title="Verilen / gerekli zekat">';
