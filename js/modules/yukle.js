@@ -1895,6 +1895,7 @@ function render(){
   var yZekat=mhYillaraGoreZekatVerilen();
   var topGelir=mhToplamGelir(yGel);
   var topGerekli=mhZekatGerekli(topGelir);
+  var topKalan=Math.max(0,topGerekli-genelToplam);
   var yOz=mhYilListesi(yGel,yZekat);
   var buYil=String(new Date().getFullYear());
 
@@ -1908,6 +1909,7 @@ function render(){
   h+='<div class="mh-h-total-satir"><span class="mh-h-total-lbl">Gelir</span> '+mp(topGelir)+' TL</div>';
   h+='<div class="mh-h-total-satir mh-h-gerekli"><span class="mh-h-total-lbl">Gerekli (1/40)</span> '+mp(topGerekli)+' TL</div>';
   h+='<div class="mh-h-total-satir mh-h-verilen"><span class="mh-h-total-lbl">Verilen</span> '+mp(genelToplam)+' TL</div>';
+  h+='<div class="mh-h-total-satir mh-h-kalan'+(topKalan>0.005?"":" mh-h-kalan-ok")+'"><span class="mh-h-total-lbl">Kalan</span> '+mp(topKalan)+' TL</div>';
   h+='<div class="mh-h-total-meta">'+_kisiler.length+' kişi</div>';
   h+='</div>';
   if(yOz.yillar.length>0){
@@ -1918,6 +1920,7 @@ function render(){
       var gel=yGel[yy]||0;
       var gerekli=mhZekatGerekli(gel);
       var verilen=yZekat[yy]||0;
+      var kalan=Math.max(0,gerekli-verilen);
       var barPct=gerekli>0?Math.min(100,Math.round((verilen/gerekli)*100)):0;
       var eksik=gerekli>0&&verilen<gerekli-0.005;
       h+='<div class="mh-yil-kart'+(yy===buYil?" mh-yil-bu-yil":"")+(eksik?" mh-yil-eksik":"")+'" style="--mh-yil-bar:'+barPct+'%" title="Verilen / gerekli zekat">';
@@ -1925,6 +1928,7 @@ function render(){
       h+='<span class="mh-yil-satir"><span class="mh-yil-satir-lbl">Gelir</span> '+mp(gel)+' TL</span>';
       h+='<span class="mh-yil-satir mh-yil-gerekli"><span class="mh-yil-satir-lbl">Gerekli</span> '+mp(gerekli)+' TL</span>';
       h+='<span class="mh-yil-satir mh-yil-verilen"><span class="mh-yil-satir-lbl">Verilen</span> '+mp(verilen)+' TL</span>';
+      h+='<span class="mh-yil-satir mh-yil-kalan'+(eksik?"":" mh-yil-kalan-ok")+'"><span class="mh-yil-satir-lbl">Kalan</span> '+mp(kalan)+' TL</span>';
       if(gerekli>0){
         h+='<span class="mh-yil-oran">%'+barPct+' karşılandı</span>';
       }
