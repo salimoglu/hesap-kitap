@@ -241,7 +241,7 @@ var BirikimModule = (function() {
         satirlar.forEach(function(s,i){
           h+='<div class="bk-ay-satir">';
           h+='<span class="bk-ay-renk" style="background:'+AY_RENK[i%AY_RENK.length]+'" aria-hidden="true"></span>';
-          h+='<span class="bk-ay-ad">'+esc(s.ad)+'</span>';
+          h+='<span class="bk-ay-ad" title="'+esc(s.ad)+'">'+esc(s.ad)+'</span>';
           h+='<span class="bk-ay-tutar">'+para(s.amt)+' TL</span>';
           h+='<span class="bk-ay-pct">%'+s.pct+'</span>';
           h+='</div>';

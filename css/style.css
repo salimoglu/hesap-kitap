@@ -5965,6 +5965,10 @@ html.theme-light html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 4
   align-items: stretch;
   justify-content: space-between;
   gap: 16px;
+  max-width: 980px;
+}
+#birikim-container .bk-kartlar {
+  max-width: 980px;
 }
 #birikim-container .bk-h-total {
   flex: 1 1 160px;
@@ -6108,7 +6112,7 @@ html.theme-light html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 4
   gap: 0;
 }
 #birikim-container .bk-h-yil {
-  flex: 1 1 140px;
+  flex: 0.85 1 130px;
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -6229,7 +6233,7 @@ html.theme-light html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 4
   background: linear-gradient(90deg, rgba(240,184,64,0.85), rgba(52,211,153,0.55));
 }
 #birikim-container .bk-h-ay {
-  flex: 1 1 220px;
+  flex: 1.4 1 260px;
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -6258,12 +6262,12 @@ html.theme-light html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 4
   scrollbar-color: rgba(240,184,64,0.35) transparent;
   padding: 4px 2px 6px;
   margin: 0 -2px;
-  scroll-snap-type: x proximity;
+  scroll-snap-type: x mandatory;
 }
 #birikim-container .bk-ay-kart {
-  flex: 1 0 176px;
+  flex: 0 0 100%;
   scroll-snap-align: start;
-  min-width: 176px;
+  min-width: 100%;
   max-width: 100%;
   padding: 10px 11px;
   border-radius: 11px;
@@ -6523,8 +6527,8 @@ html.theme-light #birikim-container .bk-bes-satir:hover {
     margin: 0;
   }
   #birikim-container .bk-ay-kart {
-    min-width: 168px;
-    max-width: none;
+    min-width: 100%;
+    max-width: 100%;
     padding: 7px 8px;
     gap: 3px;
     border-radius: 8px;
