@@ -6142,8 +6142,9 @@ html.theme-light html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 4
   grid-template-rows: minmax(0, 1fr);
   align-items: stretch;
   gap: 8px;
-  overflow-x: auto;
+  overflow-x: scroll;
   overflow-y: hidden;
+  scrollbar-gutter: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
   scrollbar-color: rgba(240,184,64,0.35) transparent;
@@ -6425,13 +6426,11 @@ html.theme-light #birikim-container .bk-bes-satir:hover {
     mask-image: none;
     -webkit-mask-image: none;
     gap: 5px;
-    padding: 2px 0 3px;
+    padding: 0;
     margin: 0;
   }
   #birikim-container .bk-yil-kart,
   #birikim-container .bk-ay-kart {
-    min-width: 100%;
-    max-width: 100%;
     padding: 7px 8px;
     gap: 3px;
     border-radius: 8px;
