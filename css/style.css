@@ -6136,28 +6136,27 @@ html.theme-light html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 4
 #birikim-container .bk-ay-list {
   flex: 1;
   min-height: 0;
-  display: flex;
-  flex-wrap: nowrap;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 100%;
+  grid-template-rows: minmax(0, 1fr);
   align-items: stretch;
   gap: 8px;
   overflow-x: auto;
-  overflow-y: visible;
+  overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
   scrollbar-color: rgba(240,184,64,0.35) transparent;
-  padding: 4px 2px 6px;
-  margin: 0 -2px;
+  padding: 0;
+  margin: 0;
   scroll-snap-type: x mandatory;
 }
 #birikim-container .bk-yil-kart,
 #birikim-container .bk-ay-kart {
-  flex: 0 0 100%;
   scroll-snap-align: start;
-  width: 100%;
-  min-width: 100%;
-  max-width: 100%;
-  align-self: stretch;
-  height: 100%;
+  min-width: 0;
+  width: auto;
+  height: auto;
   min-height: 0;
   padding: 10px 11px;
   border-radius: 11px;
