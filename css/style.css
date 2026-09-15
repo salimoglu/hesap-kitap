@@ -6100,8 +6100,15 @@ html.theme-light html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 4
   line-height: 1.45;
   color: var(--text-muted);
 }
+#birikim-container .bk-h-ozetler {
+  flex: 2 1 360px;
+  min-width: 0;
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+}
 #birikim-container .bk-h-yil {
-  flex: 2 1 280px;
+  flex: 1 1 140px;
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -6221,8 +6228,145 @@ html.theme-light html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 4
   border-radius: inherit;
   background: linear-gradient(90deg, rgba(240,184,64,0.85), rgba(52,211,153,0.55));
 }
+#birikim-container .bk-h-ay {
+  flex: 1 1 220px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-left: 16px;
+  margin-left: 2px;
+  border-left: 1px solid var(--border);
+  box-sizing: border-box;
+}
+#birikim-container .bk-h-ay-title {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+#birikim-container .bk-ay-list {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(240,184,64,0.35) transparent;
+  padding: 4px 2px 6px;
+  margin: 0 -2px;
+  scroll-snap-type: x proximity;
+}
+#birikim-container .bk-ay-kart {
+  flex: 1 0 176px;
+  scroll-snap-align: start;
+  min-width: 176px;
+  max-width: 100%;
+  padding: 10px 11px;
+  border-radius: 11px;
+  border: 1px solid var(--border);
+  background: linear-gradient(165deg, var(--bg-elevated), var(--bg-card));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  box-sizing: border-box;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+#birikim-container .bk-ay-kart:hover {
+  border-color: rgba(240,184,64,0.35);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+}
+#birikim-container .bk-ay-bu-ay {
+  border-color: rgba(240,184,64,0.55);
+  background: linear-gradient(165deg, rgba(240,184,64,0.11), rgba(240,184,64,0.03));
+}
+#birikim-container .bk-ay-eti {
+  font-family: var(--font-brand);
+  font-size: 15px;
+  letter-spacing: 0.04em;
+  color: var(--gold);
+  line-height: 1.1;
+}
+#birikim-container .bk-ay-toplam {
+  font-family: var(--font-brand);
+  font-size: 13px;
+  letter-spacing: 0.03em;
+  color: var(--green);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+#birikim-container .bk-ay-stack {
+  display: flex;
+  height: 4px;
+  border-radius: 2px;
+  overflow: hidden;
+  background: rgba(240,184,64,0.12);
+  margin: 1px 0 2px;
+}
+#birikim-container .bk-ay-stack-dilim {
+  min-width: 2px;
+  height: 100%;
+}
+#birikim-container .bk-ay-kalemler {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+#birikim-container .bk-ay-satir {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.25;
+}
+#birikim-container .bk-ay-renk {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  align-self: center;
+}
+#birikim-container .bk-ay-ad {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+#birikim-container .bk-ay-tutar {
+  flex-shrink: 0;
+  font-family: var(--font-brand);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--green);
+}
+#birikim-container .bk-ay-pct {
+  flex-shrink: 0;
+  min-width: 2.4em;
+  text-align: right;
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--gold);
+}
+#birikim-container .bk-ay-bos {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
 
 html.theme-light #birikim-container .bk-yil-kart:hover {
+  box-shadow: 0 4px 14px rgba(80,60,30,0.12);
+}
+html.theme-light #birikim-container .bk-ay-kart:hover {
   box-shadow: 0 4px 14px rgba(80,60,30,0.12);
 }
 html.theme-light #birikim-container .bk-bes-satir:hover {
@@ -6306,8 +6450,14 @@ html.theme-light #birikim-container .bk-bes-satir:hover {
     line-height: 1.15;
     word-break: break-word;
   }
-  #birikim-container .bk-h-yil {
+  #birikim-container .bk-h-ozetler {
     flex: 1 1 100%;
+    width: 100%;
+    flex-direction: column;
+    gap: 6px;
+  }
+  #birikim-container .bk-h-yil {
+    flex: 1 1 auto;
     min-width: 0;
     width: 100%;
     padding: 6px 0 0;
@@ -6351,6 +6501,52 @@ html.theme-light #birikim-container .bk-bes-satir:hover {
   #birikim-container .bk-yil-bar-track {
     height: 2px;
     margin-top: 1px;
+  }
+  #birikim-container .bk-h-ay {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: 100%;
+    padding: 6px 0 0;
+    margin: 0;
+    border-left: none;
+    border-top: 1px solid var(--border);
+    gap: 4px;
+  }
+  #birikim-container .bk-h-ay-title {
+    font-size: 8px;
+    letter-spacing: 0.1em;
+    line-height: 1.1;
+  }
+  #birikim-container .bk-ay-list {
+    gap: 5px;
+    padding: 2px 0 3px;
+    margin: 0;
+  }
+  #birikim-container .bk-ay-kart {
+    min-width: 168px;
+    max-width: none;
+    padding: 7px 8px;
+    gap: 3px;
+    border-radius: 8px;
+  }
+  #birikim-container .bk-ay-eti {
+    font-size: 13px;
+  }
+  #birikim-container .bk-ay-toplam {
+    font-size: 12px;
+  }
+  #birikim-container .bk-ay-ad {
+    font-size: 10px;
+  }
+  #birikim-container .bk-ay-tutar {
+    font-size: 10px;
+  }
+  #birikim-container .bk-ay-pct {
+    font-size: 9px;
+    min-width: 2.2em;
+  }
+  #birikim-container .bk-ay-stack {
+    height: 3px;
   }
 
   /* Alt kalem kartları — telefonda inceltilmiş */
