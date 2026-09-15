@@ -51,6 +51,7 @@ var HK_TANITIM = (function () {
         "Birikim kalemi eklemek icin once Islemeler'den BIRIKIM kategorisine islem girin.",
         "Kategori yonetiminden yeni birikim turleri tanimlayabilirsiniz.",
         "Ustteki BES kartina kimin adina odediginizi ve aylik tutari yazin. Bu bilgi sadece hatirlatmadir; alttaki birikim kartlarina eklenmez.",
+        "Aylik ozet, her birikim turunun o aydaki tutarini ve ay toplamindaki payini yuzde olarak gosterir.",
       ],
     },
     arabam: {

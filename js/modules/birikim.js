@@ -157,6 +157,105 @@ var BirikimModule = (function() {
     return yy;
   }
 
+  /* Ay çıkar — YYYY-MM-DD veya YYYY-MM için ilk 7 hane */
+  function tarihtenAy(t){
+    if(!t)return null;
+    var s=String(t).trim();
+    if(s.length < 7) return null;
+    var ym=s.substr(0,7);
+    if(!/^\d{4}-\d{2}$/.test(ym)) return null;
+    var mm=parseInt(ym.substr(5,2),10);
+    if(mm < 1 || mm > 12) return null;
+    return ym;
+  }
+
+  var AY_ADLARI=["Ocak","\u015eubat","Mart","Nisan","May\u0131s","Haziran","Temmuz","A\u011fustos","Eyl\u00fcl","Ekim","Kas\u0131m","Aral\u0131k"];
+  var AY_RENK=["var(--green)","var(--gold)","#60a5fa","#c084fc","#fb923c","#2dd4bf","#f472b6"];
+
+  function ayEtiket(ym){
+    var p=String(ym||"").split("-");
+    var y=p[0]||"";
+    var m=parseInt(p[1],10)||0;
+    var ad=(m>=1&&m<=12)?AY_ADLARI[m-1]:(p[1]||"");
+    return ad+(y?" "+y:"");
+  }
+
+  /* Kalem tutarlarini o ayki toplama gore yuzdeye cevir (yuvarlama 100'e tamamlansin) */
+  function kalemYuzdeSatirlari(kalemler,toplam){
+    var satirlar=[];
+    Object.keys(kalemler||{}).forEach(function(ad){
+      var amt=parseFloat(kalemler[ad])||0;
+      if(amt===0) return;
+      satirlar.push({ad:ad,amt:amt});
+    });
+    satirlar.sort(function(a,b){return b.amt-a.amt;});
+    var kalan=100;
+    satirlar.forEach(function(s,i){
+      if(toplam<=0){s.pct=0;return;}
+      if(i===satirlar.length-1){
+        s.pct=Math.max(0,kalan);
+      }else{
+        s.pct=Math.round((s.amt/toplam)*100);
+        kalan-=s.pct;
+      }
+    });
+    return satirlar;
+  }
+
+  /* Tüm kalemlerde aya göre tür kırılımı (aylık özet) */
+  function aylaraGoreOzet(kmap){
+    var ayMap={};
+    Object.keys(kmap).forEach(function(ad){
+      (kmap[ad]||[]).forEach(function(i){
+        var ay=tarihtenAy(i.tarih);
+        if(!ay) return;
+        var tutar=parseFloat(i.tutar)||0;
+        if(!ayMap[ay]) ayMap[ay]={toplam:0,kalemler:{}};
+        ayMap[ay].toplam+=tutar;
+        ayMap[ay].kalemler[ad]=(ayMap[ay].kalemler[ad]||0)+tutar;
+      });
+    });
+    var aylar=Object.keys(ayMap).filter(function(a){return (ayMap[a].toplam||0)!==0;}).sort(function(a,b){return b.localeCompare(a);});
+    return {ayMap:ayMap,aylar:aylar};
+  }
+
+  function aylikOzetHtml(ayOz,buAyKey){
+    if(!ayOz||!ayOz.aylar.length) return "";
+    var h='<aside class="bk-h-ay" aria-label="Ayl\u0131k birikim \u00f6zeti">';
+    h+='<div class="bk-h-ay-title">Ayl\u0131k \u00f6zet</div>';
+    h+='<div class="bk-ay-list">';
+    ayOz.aylar.forEach(function(ym){
+      var kayit=ayOz.ayMap[ym]||{toplam:0,kalemler:{}};
+      var amt=kayit.toplam||0;
+      var satirlar=kalemYuzdeSatirlari(kayit.kalemler,amt);
+      h+='<div class="bk-ay-kart'+(ym===buAyKey?" bk-ay-bu-ay":"")+'" title="T\u00fcrlerin o ayki toplama oran\u0131">';
+      h+='<span class="bk-ay-eti">'+esc(ayEtiket(ym))+'</span>';
+      h+='<span class="bk-ay-toplam">'+para(amt)+' TL</span>';
+      if(satirlar.length){
+        h+='<span class="bk-ay-stack" aria-hidden="true">';
+        satirlar.forEach(function(s,i){
+          h+='<span class="bk-ay-stack-dilim" style="flex-grow:'+Math.max(s.pct,1)+';background:'+AY_RENK[i%AY_RENK.length]+'"></span>';
+        });
+        h+='</span>';
+        h+='<div class="bk-ay-kalemler">';
+        satirlar.forEach(function(s,i){
+          h+='<div class="bk-ay-satir">';
+          h+='<span class="bk-ay-renk" style="background:'+AY_RENK[i%AY_RENK.length]+'" aria-hidden="true"></span>';
+          h+='<span class="bk-ay-ad" title="'+esc(s.ad)+'">'+esc(s.ad)+'</span>';
+          h+='<span class="bk-ay-tutar">'+para(s.amt)+' TL</span>';
+          h+='<span class="bk-ay-pct">%'+s.pct+'</span>';
+          h+='</div>';
+        });
+        h+='</div>';
+      }else{
+        h+='<span class="bk-ay-bos">Bu ay i\u015flem yok</span>';
+      }
+      h+='</div>';
+    });
+    h+='</div></aside>';
+    return h;
+  }
+
   /* İşlemlerden yıla göre toplam gelir */
   function yillaraGoreGelir(){
     var yGelir={};
@@ -243,7 +342,9 @@ var BirikimModule = (function() {
 
     var yOz=yillaraGoreGenel(kalemler);
     var yGel=yillaraGoreGelir();
+    var ayOz=aylaraGoreOzet(kalemler);
     var buYil=String(new Date().getFullYear());
+    var buAyKey=buAy();
 
     var h='<div class="bk-wrap">';
     h+='<div class="bk-header">';
@@ -252,28 +353,33 @@ var BirikimModule = (function() {
     h+='<div class="bk-gt-val">'+para(toplamGenel)+' TL</div>';
     h+='</div>';
     h+=besKartHtml();
-    if(yOz.yillar.length>0){
-      h+='<aside class="bk-h-yil" aria-label="Y\u0131ll\u0131k birikim \u00f6zeti">';
-      h+='<div class="bk-h-yil-title">Y\u0131ll\u0131k \u00f6zet</div>';
-      h+='<div class="bk-yil-list">';
-      yOz.yillar.forEach(function(yy){
-        var amt=yOz.yToplam[yy]||0;
-        var pct=yOz.maxYearAmt>0?Math.round((amt/yOz.maxYearAmt)*100):100;
-        var gel=yGel[yy]||0;
-        var gelirOran=gel>0?Math.round((amt/gel)*100):null;
-        h+='<div class="bk-yil-kart'+(yy===buYil?" bk-yil-bu-yil":"")+'" style="--bk-yil-bar:'+pct+'%">';
-        h+='<span class="bk-yil-eti">'+yy+'</span>';
-        h+='<span class="bk-yil-satir bk-yil-birikim"><span class="bk-yil-satir-lbl">Birikim</span> '+para(amt)+' TL</span>';
-        h+='<span class="bk-yil-satir bk-yil-gelir"><span class="bk-yil-satir-lbl">Gelir</span> '+para(gel)+' TL</span>';
-        if(gelirOran!==null){
-          h+='<span class="bk-yil-oran" title="Birikim / o yıl toplam gelir">Gelirin %'+gelirOran+'</span>';
-        }else{
-          h+='<span class="bk-yil-oran bk-yil-oran-yok" title="Bu yıl gelir kaydı yok">Gelir yok</span>';
-        }
-        h+='<span class="bk-yil-bar-track" aria-hidden="true"><span class="bk-yil-bar-fill"></span></span>';
-        h+='</div>';
-      });
-      h+='</div></aside>';
+    if(yOz.yillar.length>0||ayOz.aylar.length>0){
+      h+='<div class="bk-h-ozetler">';
+      if(yOz.yillar.length>0){
+        h+='<aside class="bk-h-yil" aria-label="Y\u0131ll\u0131k birikim \u00f6zeti">';
+        h+='<div class="bk-h-yil-title">Y\u0131ll\u0131k \u00f6zet</div>';
+        h+='<div class="bk-yil-list">';
+        yOz.yillar.forEach(function(yy){
+          var amt=yOz.yToplam[yy]||0;
+          var pct=yOz.maxYearAmt>0?Math.round((amt/yOz.maxYearAmt)*100):100;
+          var gel=yGel[yy]||0;
+          var gelirOran=gel>0?Math.round((amt/gel)*100):null;
+          h+='<div class="bk-yil-kart'+(yy===buYil?" bk-yil-bu-yil":"")+'" style="--bk-yil-bar:'+pct+'%">';
+          h+='<span class="bk-yil-eti">'+yy+'</span>';
+          h+='<span class="bk-yil-satir bk-yil-birikim"><span class="bk-yil-satir-lbl">Birikim</span> '+para(amt)+' TL</span>';
+          h+='<span class="bk-yil-satir bk-yil-gelir"><span class="bk-yil-satir-lbl">Gelir</span> '+para(gel)+' TL</span>';
+          if(gelirOran!==null){
+            h+='<span class="bk-yil-oran" title="Birikim / o yıl toplam gelir">Gelirin %'+gelirOran+'</span>';
+          }else{
+            h+='<span class="bk-yil-oran bk-yil-oran-yok" title="Bu yıl gelir kaydı yok">Gelir yok</span>';
+          }
+          h+='<span class="bk-yil-bar-track" aria-hidden="true"><span class="bk-yil-bar-fill"></span></span>';
+          h+='</div>';
+        });
+        h+='</div></aside>';
+      }
+      h+=aylikOzetHtml(ayOz,buAyKey);
+      h+='</div>';
     }
     h+='</div>';
 
