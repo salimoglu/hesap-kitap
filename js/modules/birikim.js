@@ -210,7 +210,7 @@ var BirikimModule = (function() {
     return min;
   }
 
-  /* Kalem tutarlarini o ayki toplama gore yuzdeye cevir (yuvarlama 100'e tamamlansin) */
+  /* Kalem tutarlarini o donemin toplamina gore yuzdeye cevir (yuvarlama 100'e tamamlansin) */
   function kalemYuzdeSatirlari(kalemler,toplam){
     var satirlar=[];
     Object.keys(kalemler||{}).forEach(function(ad){
@@ -232,6 +232,45 @@ var BirikimModule = (function() {
     return satirlar;
   }
 
+  function kalemKirilimHtml(kalemler,toplam){
+    var satirlar=kalemYuzdeSatirlari(kalemler,toplam);
+    if(!satirlar.length) return "";
+    var h='<span class="bk-ay-stack" aria-hidden="true">';
+    satirlar.forEach(function(s,i){
+      h+='<span class="bk-ay-stack-dilim" style="flex-grow:'+Math.max(s.pct,1)+';background:'+AY_RENK[i%AY_RENK.length]+'"></span>';
+    });
+    h+='</span>';
+    h+='<div class="bk-ay-kalemler">';
+    satirlar.forEach(function(s,i){
+      h+='<div class="bk-ay-satir">';
+      h+='<span class="bk-ay-renk" style="background:'+AY_RENK[i%AY_RENK.length]+'" aria-hidden="true"></span>';
+      h+='<span class="bk-ay-ad" title="'+esc(s.ad)+'">'+esc(s.ad)+'</span>';
+      h+='<span class="bk-ay-tutar">'+para(s.amt)+' TL</span>';
+      h+='<span class="bk-ay-pct">%'+s.pct+'</span>';
+      h+='</div>';
+    });
+    h+='</div>';
+    return h;
+  }
+
+  function donemKartIcerik(etiket,birikim,gelir,kalemler,barPct,ipucu){
+    ipucu=ipucu||{};
+    var gelirOran=gelir>0?Math.round((birikim/gelir)*100):null;
+    var h='<span class="bk-yil-eti">'+esc(etiket)+'</span>';
+    h+='<span class="bk-yil-satir bk-yil-birikim"><span class="bk-yil-satir-lbl">Birikim</span> '+para(birikim)+' TL</span>';
+    h+='<span class="bk-yil-satir bk-yil-gelir" title="'+esc(ipucu.gelir||"Gelir")+'"><span class="bk-yil-satir-lbl">Gelir</span> '+para(gelir)+' TL</span>';
+    if(gelirOran!==null){
+      h+='<span class="bk-yil-oran" title="'+esc(ipucu.oran||"Birikimin gelire oran\u0131")+'">Gelirin %'+gelirOran+'</span>';
+    }else{
+      h+='<span class="bk-yil-oran bk-yil-oran-yok" title="'+esc(ipucu.yok||"Bu d\u00f6nem gelir kayd\u0131 yok")+'">Gelir yok</span>';
+    }
+    h+=kalemKirilimHtml(kalemler,birikim);
+    if(barPct!=null){
+      h+='<span class="bk-yil-bar-track" aria-hidden="true"><span class="bk-yil-bar-fill"></span></span>';
+    }
+    return h;
+  }
+
   /* Tüm kalemlerde aya göre tür kırılımı (aylık özet) */
   function aylaraGoreOzet(kmap){
     var ayMap={};
@@ -246,40 +285,39 @@ var BirikimModule = (function() {
       });
     });
     var aylar=Object.keys(ayMap).filter(function(a){return (ayMap[a].toplam||0)!==0;}).sort(function(a,b){return b.localeCompare(a);});
-    return {ayMap:ayMap,aylar:aylar};
+    var maxAyAmt=0;
+    aylar.forEach(function(a){if(ayMap[a].toplam>maxAyAmt)maxAyAmt=ayMap[a].toplam;});
+    return {ayMap:ayMap,aylar:aylar,maxAyAmt:maxAyAmt};
   }
 
-  function aylikOzetHtml(ayOz,buAyKey){
+  function aylaraGoreGelir(){
+    var aGelir={};
+    _islemler.forEach(function(i){
+      if(i.tip!=="gelir") return;
+      var ay=tarihtenAy(i.tarih);
+      if(!ay) return;
+      aGelir[ay]=(aGelir[ay]||0)+(parseFloat(i.tutar)||0);
+    });
+    return aGelir;
+  }
+
+  function aylikOzetHtml(ayOz,aGel,buAyKey){
     if(!ayOz||!ayOz.aylar.length) return "";
+    aGel=aGel||{};
     var h='<aside class="bk-h-ay" aria-label="Ayl\u0131k birikim \u00f6zeti">';
     h+='<div class="bk-h-ay-title">Ayl\u0131k \u00f6zet</div>';
     h+='<div class="bk-ay-list">';
     ayOz.aylar.forEach(function(ym){
       var kayit=ayOz.ayMap[ym]||{toplam:0,kalemler:{}};
       var amt=kayit.toplam||0;
-      var satirlar=kalemYuzdeSatirlari(kayit.kalemler,amt);
-      h+='<div class="bk-ay-kart'+(ym===buAyKey?" bk-ay-bu-ay":"")+'" title="T\u00fcrlerin o ayki toplama oran\u0131">';
-      h+='<span class="bk-ay-eti">'+esc(ayEtiket(ym))+'</span>';
-      h+='<span class="bk-ay-toplam">'+para(amt)+' TL</span>';
-      if(satirlar.length){
-        h+='<span class="bk-ay-stack" aria-hidden="true">';
-        satirlar.forEach(function(s,i){
-          h+='<span class="bk-ay-stack-dilim" style="flex-grow:'+Math.max(s.pct,1)+';background:'+AY_RENK[i%AY_RENK.length]+'"></span>';
-        });
-        h+='</span>';
-        h+='<div class="bk-ay-kalemler">';
-        satirlar.forEach(function(s,i){
-          h+='<div class="bk-ay-satir">';
-          h+='<span class="bk-ay-renk" style="background:'+AY_RENK[i%AY_RENK.length]+'" aria-hidden="true"></span>';
-          h+='<span class="bk-ay-ad" title="'+esc(s.ad)+'">'+esc(s.ad)+'</span>';
-          h+='<span class="bk-ay-tutar">'+para(s.amt)+' TL</span>';
-          h+='<span class="bk-ay-pct">%'+s.pct+'</span>';
-          h+='</div>';
-        });
-        h+='</div>';
-      }else{
-        h+='<span class="bk-ay-bos">Bu ay i\u015flem yok</span>';
-      }
+      var gel=aGel[ym]||0;
+      var pct=ayOz.maxAyAmt>0?Math.round((amt/ayOz.maxAyAmt)*100):100;
+      h+='<div class="bk-ay-kart'+(ym===buAyKey?" bk-ay-bu-ay":"")+'" style="--bk-yil-bar:'+pct+'%">';
+      h+=donemKartIcerik(ayEtiket(ym),amt,gel,kayit.kalemler,pct,{
+        gelir:"O ayki maa\u015f / gelir",
+        oran:"Birikimin o ayki gelire oran\u0131",
+        yok:"Bu ay gelir kayd\u0131 yok"
+      });
       h+='</div>';
     });
     h+='</div></aside>';
@@ -298,20 +336,45 @@ var BirikimModule = (function() {
     return yGelir;
   }
 
-  /* Tüm kalemlerde yıla göre toplam TL (geçmiş yıllar özeti) */
+  /* Tüm kalemlerde yıla göre toplam TL ve tür kırılımı */
   function yillaraGoreGenel(kmap){
-    var yToplam={}, y;
+    var yToplam={}, yKalem={}, y;
     Object.keys(kmap).forEach(function(ad){
       kmap[ad].forEach(function(i){
         y=tarihtenYil(i.tarih);
         if(!y) return;
-        yToplam[y]=(yToplam[y]||0)+(parseFloat(i.tutar)||0);
+        var tutar=parseFloat(i.tutar)||0;
+        yToplam[y]=(yToplam[y]||0)+tutar;
+        if(!yKalem[y]) yKalem[y]={};
+        yKalem[y][ad]=(yKalem[y][ad]||0)+tutar;
       });
     });
     var yillar=Object.keys(yToplam).filter(function(yy){return (yToplam[yy]||0)!==0;}).sort(function(a,b){return b.localeCompare(a);});
     var maxYearAmt=0;
     yillar.forEach(function(yy){if(yToplam[yy]>maxYearAmt)maxYearAmt=yToplam[yy];});
-    return { yToplam:yToplam,yillar:yillar,maxYearAmt:maxYearAmt };
+    return { yToplam:yToplam,yKalem:yKalem,yillar:yillar,maxYearAmt:maxYearAmt };
+  }
+
+  function yillikOzetHtml(yOz,yGel,buYil){
+    if(!yOz||!yOz.yillar.length) return "";
+    yGel=yGel||{};
+    var h='<aside class="bk-h-yil" aria-label="Y\u0131ll\u0131k birikim \u00f6zeti">';
+    h+='<div class="bk-h-yil-title">Y\u0131ll\u0131k \u00f6zet</div>';
+    h+='<div class="bk-yil-list">';
+    yOz.yillar.forEach(function(yy){
+      var amt=yOz.yToplam[yy]||0;
+      var pct=yOz.maxYearAmt>0?Math.round((amt/yOz.maxYearAmt)*100):100;
+      var gel=yGel[yy]||0;
+      h+='<div class="bk-yil-kart'+(yy===buYil?" bk-yil-bu-yil":"")+'" style="--bk-yil-bar:'+pct+'%">';
+      h+=donemKartIcerik(yy,amt,gel,yOz.yKalem[yy]||{},pct,{
+        gelir:"O y\u0131l toplam gelir",
+        oran:"Birikimin o y\u0131lki gelire oran\u0131",
+        yok:"Bu y\u0131l gelir kayd\u0131 yok"
+      });
+      h+='</div>';
+    });
+    h+='</div></aside>';
+    return h;
   }
 
   /** Üst özetin sağındaki BES hatırlatma kartı — alttaki birikim kartlarına eklenmez. */
@@ -373,6 +436,7 @@ var BirikimModule = (function() {
     var yOz=yillaraGoreGenel(kalemler);
     var yGel=yillaraGoreGelir();
     var ayOz=aylaraGoreOzet(kalemler);
+    var aGel=aylaraGoreGelir();
     var buYil=String(new Date().getFullYear());
     var buAyKey=buAy();
     var baslangic=ilkBirikimTarihi(kalemler);
@@ -389,30 +453,8 @@ var BirikimModule = (function() {
     h+=besKartHtml();
     if(yOz.yillar.length>0||ayOz.aylar.length>0){
       h+='<div class="bk-h-ozetler">';
-      if(yOz.yillar.length>0){
-        h+='<aside class="bk-h-yil" aria-label="Y\u0131ll\u0131k birikim \u00f6zeti">';
-        h+='<div class="bk-h-yil-title">Y\u0131ll\u0131k \u00f6zet</div>';
-        h+='<div class="bk-yil-list">';
-        yOz.yillar.forEach(function(yy){
-          var amt=yOz.yToplam[yy]||0;
-          var pct=yOz.maxYearAmt>0?Math.round((amt/yOz.maxYearAmt)*100):100;
-          var gel=yGel[yy]||0;
-          var gelirOran=gel>0?Math.round((amt/gel)*100):null;
-          h+='<div class="bk-yil-kart'+(yy===buYil?" bk-yil-bu-yil":"")+'" style="--bk-yil-bar:'+pct+'%">';
-          h+='<span class="bk-yil-eti">'+yy+'</span>';
-          h+='<span class="bk-yil-satir bk-yil-birikim"><span class="bk-yil-satir-lbl">Birikim</span> '+para(amt)+' TL</span>';
-          h+='<span class="bk-yil-satir bk-yil-gelir"><span class="bk-yil-satir-lbl">Gelir</span> '+para(gel)+' TL</span>';
-          if(gelirOran!==null){
-            h+='<span class="bk-yil-oran" title="Birikim / o yıl toplam gelir">Gelirin %'+gelirOran+'</span>';
-          }else{
-            h+='<span class="bk-yil-oran bk-yil-oran-yok" title="Bu yıl gelir kaydı yok">Gelir yok</span>';
-          }
-          h+='<span class="bk-yil-bar-track" aria-hidden="true"><span class="bk-yil-bar-fill"></span></span>';
-          h+='</div>';
-        });
-        h+='</div></aside>';
-      }
-      h+=aylikOzetHtml(ayOz,buAyKey);
+      h+=yillikOzetHtml(yOz,yGel,buYil);
+      h+=aylikOzetHtml(ayOz,aGel,buAyKey);
       h+='</div>';
     }
     h+='</div>';
