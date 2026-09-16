@@ -6227,6 +6227,7 @@ html.theme-light html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 4
   color: var(--gold);
   font-variant-numeric: tabular-nums;
   line-height: 1.2;
+  margin-bottom: 2px;
 }
 #birikim-container .bk-yil-oran-yok {
   color: var(--text-muted);

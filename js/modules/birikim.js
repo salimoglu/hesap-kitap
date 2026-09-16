@@ -210,7 +210,7 @@ var BirikimModule = (function() {
     return min;
   }
 
-  /* Kalem tutarlarini o ayki toplama gore yuzdeye cevir (yuvarlama 100'e tamamlansin) */
+  /* Kalem tutarlarini o donemin toplamina gore yuzdeye cevir (yuvarlama 100'e tamamlansin) */
   function kalemYuzdeSatirlari(kalemler,toplam){
     var satirlar=[];
     Object.keys(kalemler||{}).forEach(function(ad){
@@ -230,6 +230,27 @@ var BirikimModule = (function() {
       }
     });
     return satirlar;
+  }
+
+  function kalemKirilimHtml(kalemler,toplam){
+    var satirlar=kalemYuzdeSatirlari(kalemler,toplam);
+    if(!satirlar.length) return "";
+    var h='<span class="bk-ay-stack" aria-hidden="true">';
+    satirlar.forEach(function(s,i){
+      h+='<span class="bk-ay-stack-dilim" style="flex-grow:'+Math.max(s.pct,1)+';background:'+AY_RENK[i%AY_RENK.length]+'"></span>';
+    });
+    h+='</span>';
+    h+='<div class="bk-ay-kalemler">';
+    satirlar.forEach(function(s,i){
+      h+='<div class="bk-ay-satir">';
+      h+='<span class="bk-ay-renk" style="background:'+AY_RENK[i%AY_RENK.length]+'" aria-hidden="true"></span>';
+      h+='<span class="bk-ay-ad" title="'+esc(s.ad)+'">'+esc(s.ad)+'</span>';
+      h+='<span class="bk-ay-tutar">'+para(s.amt)+' TL</span>';
+      h+='<span class="bk-ay-pct">%'+s.pct+'</span>';
+      h+='</div>';
+    });
+    h+='</div>';
+    return h;
   }
 
   /* Tüm kalemlerde aya göre tür kırılımı (aylık özet) */
@@ -257,27 +278,12 @@ var BirikimModule = (function() {
     ayOz.aylar.forEach(function(ym){
       var kayit=ayOz.ayMap[ym]||{toplam:0,kalemler:{}};
       var amt=kayit.toplam||0;
-      var satirlar=kalemYuzdeSatirlari(kayit.kalemler,amt);
       h+='<div class="bk-ay-kart'+(ym===buAyKey?" bk-ay-bu-ay":"")+'" title="T\u00fcrlerin o ayki toplama oran\u0131">';
       h+='<span class="bk-ay-eti">'+esc(ayEtiket(ym))+'</span>';
       h+='<span class="bk-ay-toplam">'+para(amt)+' TL</span>';
-      if(satirlar.length){
-        h+='<span class="bk-ay-stack" aria-hidden="true">';
-        satirlar.forEach(function(s,i){
-          h+='<span class="bk-ay-stack-dilim" style="flex-grow:'+Math.max(s.pct,1)+';background:'+AY_RENK[i%AY_RENK.length]+'"></span>';
-        });
-        h+='</span>';
-        h+='<div class="bk-ay-kalemler">';
-        satirlar.forEach(function(s,i){
-          h+='<div class="bk-ay-satir">';
-          h+='<span class="bk-ay-renk" style="background:'+AY_RENK[i%AY_RENK.length]+'" aria-hidden="true"></span>';
-          h+='<span class="bk-ay-ad" title="'+esc(s.ad)+'">'+esc(s.ad)+'</span>';
-          h+='<span class="bk-ay-tutar">'+para(s.amt)+' TL</span>';
-          h+='<span class="bk-ay-pct">%'+s.pct+'</span>';
-          h+='</div>';
-        });
-        h+='</div>';
-      }else{
+      var kirilim=kalemKirilimHtml(kayit.kalemler,amt);
+      h+=kirilim;
+      if(!kirilim){
         h+='<span class="bk-ay-bos">Bu ay i\u015flem yok</span>';
       }
       h+='</div>';
@@ -298,20 +304,23 @@ var BirikimModule = (function() {
     return yGelir;
   }
 
-  /* Tüm kalemlerde yıla göre toplam TL (geçmiş yıllar özeti) */
+  /* Tüm kalemlerde yıla göre toplam TL ve tür kırılımı */
   function yillaraGoreGenel(kmap){
-    var yToplam={}, y;
+    var yToplam={}, yKalem={}, y;
     Object.keys(kmap).forEach(function(ad){
       kmap[ad].forEach(function(i){
         y=tarihtenYil(i.tarih);
         if(!y) return;
-        yToplam[y]=(yToplam[y]||0)+(parseFloat(i.tutar)||0);
+        var tutar=parseFloat(i.tutar)||0;
+        yToplam[y]=(yToplam[y]||0)+tutar;
+        if(!yKalem[y]) yKalem[y]={};
+        yKalem[y][ad]=(yKalem[y][ad]||0)+tutar;
       });
     });
     var yillar=Object.keys(yToplam).filter(function(yy){return (yToplam[yy]||0)!==0;}).sort(function(a,b){return b.localeCompare(a);});
     var maxYearAmt=0;
     yillar.forEach(function(yy){if(yToplam[yy]>maxYearAmt)maxYearAmt=yToplam[yy];});
-    return { yToplam:yToplam,yillar:yillar,maxYearAmt:maxYearAmt };
+    return { yToplam:yToplam,yKalem:yKalem,yillar:yillar,maxYearAmt:maxYearAmt };
   }
 
   /** Üst özetin sağındaki BES hatırlatma kartı — alttaki birikim kartlarına eklenmez. */
@@ -407,6 +416,7 @@ var BirikimModule = (function() {
           }else{
             h+='<span class="bk-yil-oran bk-yil-oran-yok" title="Bu yıl gelir kaydı yok">Gelir yok</span>';
           }
+          h+=kalemKirilimHtml(yOz.yKalem[yy]||{},amt);
           h+='<span class="bk-yil-bar-track" aria-hidden="true"><span class="bk-yil-bar-fill"></span></span>';
           h+='</div>';
         });
