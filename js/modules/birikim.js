@@ -383,7 +383,7 @@ var BirikimModule = (function() {
     h+='<div class="bk-gt-label">TOPLAM B\u0130R\u0130K\u0130M</div>';
     h+='<div class="bk-gt-val">'+para(toplamGenel)+' TL</div>';
     if(baslangic){
-      h+='<div class="bk-gt-baslangic" title="\u0130lk birikim kayd\u0131">'+esc(tarihGunEtiket(baslangic))+'\u2019ten beri</div>';
+      h+='<div class="bk-gt-baslangic" title="\u0130lk birikim kayd\u0131">Ba\u015flang\u0131\u00e7: '+esc(tarihGunEtiket(baslangic))+'</div>';
     }
     h+='</div>';
     h+=besKartHtml();
