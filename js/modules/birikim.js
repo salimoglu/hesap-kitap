@@ -180,6 +180,36 @@ var BirikimModule = (function() {
     return ad+(y?" "+y:"");
   }
 
+  function tarihGunEtiket(t){
+    var s=String(t||"").trim();
+    var p=s.split("-");
+    var y=p[0]||"";
+    var m=parseInt(p[1],10)||0;
+    var d=p[2]?parseInt(p[2],10):0;
+    var ad=(m>=1&&m<=12)?AY_ADLARI[m-1]:(p[1]||"");
+    if(d) return d+" "+ad+" "+y;
+    return ad+(y?" "+y:"");
+  }
+
+  function tarihKey(t){
+    var s=String(t||"").trim();
+    if(/^\d{4}-\d{2}-\d{2}/.test(s)) return s.substr(0,10);
+    if(/^\d{4}-\d{2}$/.test(s)) return s+"-01";
+    return null;
+  }
+
+  function ilkBirikimTarihi(kmap){
+    var min=null;
+    Object.keys(kmap||{}).forEach(function(ad){
+      (kmap[ad]||[]).forEach(function(i){
+        var k=tarihKey(i&&i.tarih);
+        if(!k) return;
+        if(!min||k<min) min=k;
+      });
+    });
+    return min;
+  }
+
   /* Kalem tutarlarini o ayki toplama gore yuzdeye cevir (yuvarlama 100'e tamamlansin) */
   function kalemYuzdeSatirlari(kalemler,toplam){
     var satirlar=[];
@@ -345,12 +375,16 @@ var BirikimModule = (function() {
     var ayOz=aylaraGoreOzet(kalemler);
     var buYil=String(new Date().getFullYear());
     var buAyKey=buAy();
+    var baslangic=ilkBirikimTarihi(kalemler);
 
     var h='<div class="bk-wrap">';
     h+='<div class="bk-header">';
     h+='<div class="bk-h-total">';
     h+='<div class="bk-gt-label">TOPLAM B\u0130R\u0130K\u0130M</div>';
     h+='<div class="bk-gt-val">'+para(toplamGenel)+' TL</div>';
+    if(baslangic){
+      h+='<div class="bk-gt-baslangic" title="\u0130lk birikim kayd\u0131">Ba\u015flang\u0131\u00e7: '+esc(tarihGunEtiket(baslangic))+'</div>';
+    }
     h+='</div>';
     h+=besKartHtml();
     if(yOz.yillar.length>0||ayOz.aylar.length>0){
