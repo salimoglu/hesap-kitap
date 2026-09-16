@@ -52,7 +52,7 @@ var HK_TANITIM = (function () {
         "Kategori yonetiminden yeni birikim turleri tanimlayabilirsiniz.",
         "Ustteki BES kartina kimin adina odediginizi ve aylik tutari yazin. Bu bilgi sadece hatirlatmadir; alttaki birikim kartlarina eklenmez.",
         "Yillik ozet, o yilin birikim/gelir oranini ve her birikim turunun yil icindeki payini gosterir.",
-        "Aylik ozet, her birikim turunun o aydaki tutarini ve ay toplamindaki payini yuzde olarak gosterir.",
+        "Aylik ozet, o ayin birikim/gelir oranini ve her birikim turunun ay icindeki payini gosterir.",
         "Sol ustteki toplam, ilk birikim kaydindan bu yana biriken tutari gosterir.",
       ],
     },
