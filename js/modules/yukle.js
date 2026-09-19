@@ -667,7 +667,7 @@ async function byukleVeCiz(){
   brender();
 }
 async function binit(){bgoster();await byukleVeCiz();}
-return{init:binit,goster:bgoster,yukle:byukleVeCiz};
+return{init:binit,goster:bgoster,yukle:byukleVeCiz,excelIndir:butceExcelIndir};
 })();
 
 /* ===== KREDİ MODULE ===== */
