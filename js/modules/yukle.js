@@ -472,7 +472,9 @@ function butceExcelIndir(){
   });
   var veriRef="A1:E"+(veriSatir.length+1);
 
-  var bytes=HK_XLSX.build({
+  var ayNo=String(_ay+1).padStart(2,"0");
+  var dosya="HesapKitap_Butce_"+_yil+"-"+ayNo+".xlsx";
+  Promise.resolve(HK_XLSX.build({
     title:"Aylık Bütçe Raporu — "+donem,
     creator:"Hesap Kitap",
     now:simdi,
@@ -483,7 +485,7 @@ function butceExcelIndir(){
         tabSelected:true,
         hideGrid:true,
         freezeRow:headRow,
-        footer:"&LHesap Kitap&CAylık Bütçe / "+donem+"&R&P / &N",
+        footer:"&LHesap Kitap&CAylik Butce / "+donem+"&RSayfa &P / &N",
         cols:[{min:1,max:1,width:38},{min:2,max:2,width:18},{min:3,max:3,width:12}],
         rows:raporRows,
         merges:merges
@@ -492,15 +494,15 @@ function butceExcelIndir(){
         name:"Veri",
         hideGrid:false,
         freezeRow:1,
-        footer:"&LHesap Kitap&CBütçe verisi&R&P / &N",
+        footer:"&LHesap Kitap&CButce verisi&RSayfa &P / &N",
         cols:[{min:1,max:1,width:22},{min:2,max:2,width:32},{min:3,max:3,width:16},{min:4,max:4,width:12},{min:5,max:5,width:14}],
         rows:veriRows,
         table:{name:"ButceVeri",ref:veriRef,columns:["Bölüm","Kategori","Tutar","Pay","Tür"],style:"TableStyleMedium2"}
       }
     ]
-  });
-  var ayNo=String(_ay+1).padStart(2,"0");
-  HK_XLSX.download(bytes,"HesapKitap_Butce_"+_yil+"-"+ayNo+".xlsx");
+  })).then(function(bytes){
+    HK_XLSX.download(bytes,dosya);
+  }).catch(function(){});
 }
 function brender(){
   hesapla();var c=$("butce-container");if(!c)return;

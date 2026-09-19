@@ -1,4 +1,4 @@
-/* hk-xlsx.js — bagimsiz, stil destekli .xlsx uretici (dis kutuphane yok) */
+/* hk-xlsx.js — Excel uyumlu .xlsx (OOXML sira + deflate + shared strings) */
 (function (global) {
   var ENC = typeof TextEncoder !== "undefined" ? new TextEncoder() : null;
   var CRC_TAB = null;
@@ -57,32 +57,69 @@
     };
   }
 
-  function zipStore(files, now) {
-    var dt = dosDateTime(now);
-    var locals = [], centrals = [], offset = 0, i;
-    for (i = 0; i < files.length; i++) {
-      var name = utf8(files[i].name);
-      var data = files[i].data instanceof Uint8Array ? files[i].data : utf8(files[i].data);
-      var crc = crc32(data);
-      var local = concatU8([
-        u32(0x04034b50), u16(20), u16(0x0800), u16(0),
-        u16(dt.time), u16(dt.date), u32(crc), u32(data.length), u32(data.length),
-        u16(name.length), u16(0), name, data
-      ]);
-      locals.push(local);
-      centrals.push(concatU8([
-        u32(0x02014b50), u16(20), u16(20), u16(0x0800), u16(0),
-        u16(dt.time), u16(dt.date), u32(crc), u32(data.length), u32(data.length),
-        u16(name.length), u16(0), u16(0), u16(0), u16(0), u32(0), u32(offset), name
-      ]));
-      offset += local.length;
+  function deflateRaw(bytes) {
+    try {
+      if (typeof process !== "undefined" && typeof require === "function") {
+        var zlib = require("zlib");
+        var buf = zlib.deflateRawSync(Buffer.from(bytes));
+        return Promise.resolve(new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength));
+      }
+    } catch (e) {}
+    if (typeof CompressionStream === "function") {
+      var cs = new CompressionStream("deflate-raw");
+      var writer = cs.writable.getWriter();
+      writer.write(bytes);
+      writer.close();
+      if (typeof Response === "function") {
+        return new Response(cs.readable).arrayBuffer().then(function (ab) { return new Uint8Array(ab); });
+      }
     }
-    var central = concatU8(centrals);
-    var eocd = concatU8([
-      u32(0x06054b50), u16(0), u16(0), u16(files.length), u16(files.length),
-      u32(central.length), u32(offset), u16(0)
-    ]);
-    return concatU8(locals.concat([central, eocd]));
+    return Promise.resolve(null);
+  }
+
+  function zipPack(files, now) {
+    var dt = dosDateTime(now);
+    var chain = Promise.resolve();
+    var packed = [];
+    files.forEach(function (f) {
+      chain = chain.then(function () {
+        var name = utf8(f.name);
+        var data = f.data instanceof Uint8Array ? f.data : utf8(f.data);
+        var crc = crc32(data);
+        return deflateRaw(data).then(function (compressed) {
+          var method = 0, payload = data;
+          if (compressed && compressed.length && compressed.length < data.length) {
+            method = 8;
+            payload = compressed;
+          }
+          packed.push({ name: name, data: data, payload: payload, crc: crc, method: method });
+        });
+      });
+    });
+    return chain.then(function () {
+      var locals = [], centrals = [], offset = 0, i;
+      for (i = 0; i < packed.length; i++) {
+        var p = packed[i];
+        var local = concatU8([
+          u32(0x04034b50), u16(20), u16(0x0800), u16(p.method),
+          u16(dt.time), u16(dt.date), u32(p.crc), u32(p.payload.length), u32(p.data.length),
+          u16(p.name.length), u16(0), p.name, p.payload
+        ]);
+        locals.push(local);
+        centrals.push(concatU8([
+          u32(0x02014b50), u16(20), u16(20), u16(0x0800), u16(p.method),
+          u16(dt.time), u16(dt.date), u32(p.crc), u32(p.payload.length), u32(p.data.length),
+          u16(p.name.length), u16(0), u16(0), u16(0), u16(0), u32(0), u32(offset), p.name
+        ]));
+        offset += local.length;
+      }
+      var central = concatU8(centrals);
+      var eocd = concatU8([
+        u32(0x06054b50), u16(0), u16(0), u16(packed.length), u16(packed.length),
+        u32(central.length), u32(offset), u16(0)
+      ]);
+      return concatU8(locals.concat([central, eocd]));
+    });
   }
 
   function xmlEsc(s) {
@@ -118,6 +155,10 @@
     return s.length > 31 ? s.slice(0, 31) : s;
   }
 
+  function needsPreserve(s) {
+    return /^\s|\s$/.test(s) || /  /.test(s);
+  }
+
   function stylesXml(styles) {
     styles = styles || {};
     var fonts = styles.fonts || [{ sz: 11, name: "Calibri", color: "FF1F2933" }];
@@ -147,6 +188,7 @@
       parts.push('<sz val="' + (f.sz || 11) + '"/>');
       if (f.color) parts.push('<color rgb="' + f.color + '"/>');
       parts.push('<name val="' + xmlEsc(f.name || "Calibri") + '"/>');
+      parts.push('<family val="2"/>');
       parts.push("</font>");
     }
     parts.push("</fonts>");
@@ -197,8 +239,48 @@
       }
       parts.push("</xf>");
     }
-    parts.push("</cellXfs></styleSheet>");
+    parts.push("</cellXfs>");
+    parts.push('<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>');
+    parts.push("</styleSheet>");
     return parts.join("");
+  }
+
+  function sharedStringsXml(list) {
+    var parts = [
+      '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
+      '<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="' + list.length + '" uniqueCount="' + list.length + '">'
+    ];
+    var i, t;
+    for (i = 0; i < list.length; i++) {
+      t = String(list[i]);
+      parts.push("<si><t" + (needsPreserve(t) ? ' xml:space="preserve"' : "") + ">" + xmlEsc(t) + "</t></si>");
+    }
+    parts.push("</sst>");
+    return parts.join("");
+  }
+
+  function collectSharedStrings(sheets) {
+    var map = Object.create(null);
+    var list = [];
+    function idx(s) {
+      s = String(s == null ? "" : s);
+      if (Object.prototype.hasOwnProperty.call(map, s)) return map[s];
+      map[s] = list.length;
+      list.push(s);
+      return map[s];
+    }
+    var i, j, k, row, cell;
+    for (i = 0; i < sheets.length; i++) {
+      var rows = sheets[i].rows || [];
+      for (j = 0; j < rows.length; j++) {
+        row = rows[j];
+        for (k = 0; k < (row.cells || []).length; k++) {
+          cell = row.cells[k];
+          if (cell.t === "s" || cell.t === "inlineStr") cell._si = idx(cell.v);
+        }
+      }
+    }
+    return list;
   }
 
   function sheetXml(sheet) {
@@ -224,10 +306,12 @@
       "<sheetViews><sheetView workbookViewId=\"0\"" + (sheet.tabSelected ? ' tabSelected="1"' : "") + (sheet.hideGrid ? ' showGridLines="0"' : "") + ">"
     ];
     if (sheet.freezeRow) {
-      parts.push('<pane ySplit="' + sheet.freezeRow + '" topLeftCell="A' + (sheet.freezeRow + 1) + '" activePane="bottomLeft" state="frozen"/>');
+      var top = "A" + (sheet.freezeRow + 1);
+      parts.push('<pane ySplit="' + sheet.freezeRow + '" topLeftCell="' + top + '" activePane="bottomLeft" state="frozen"/>');
+      parts.push('<selection pane="bottomLeft" activeCell="' + top + '" sqref="' + top + '"/>');
     }
     parts.push("</sheetView></sheetViews>");
-    parts.push('<sheetFormatPr defaultRowHeight="' + (sheet.rowH || 16) + '"/>');
+    parts.push('<sheetFormatPr defaultRowHeight="' + (sheet.rowH || 15) + '"/>');
     if (cols.length) {
       parts.push("<cols>");
       for (i = 0; i < cols.length; i++) {
@@ -238,7 +322,7 @@
     parts.push("<sheetData>");
     for (i = 0; i < rows.length; i++) {
       r = rows[i];
-      var rowAttrs = 'r="' + r.r + '"';
+      var rowAttrs = 'r="' + r.r + '" spans="1:' + (lastCol + 1) + '"';
       if (r.ht) rowAttrs += ' ht="' + r.ht + '" customHeight="1"';
       parts.push("<row " + rowAttrs + ">");
       for (j = 0; j < (r.cells || []).length; j++) {
@@ -247,26 +331,26 @@
         var ca = 'r="' + ref + '"';
         if (c.s != null) ca += ' s="' + c.s + '"';
         if (c.t === "s" || c.t === "inlineStr") {
-          parts.push('<c ' + ca + ' t="inlineStr"><is><t xml:space="preserve">' + xmlEsc(c.v) + "</t></is></c>");
+          parts.push("<c " + ca + ' t="s"><v>' + (c._si || 0) + "</v></c>");
         } else {
-          parts.push("<c " + ca + "><v>" + numStr(c.v, c.digits) + "</v></c>");
+          parts.push("<c " + ca + ' t="n"><v>' + numStr(c.v, c.digits) + "</v></c>");
         }
       }
       parts.push("</row>");
     }
     parts.push("</sheetData>");
+    if (sheet.autoFilter && !sheet.tableRid) parts.push('<autoFilter ref="' + sheet.autoFilter + '"/>');
     if (merges.length) {
       parts.push('<mergeCells count="' + merges.length + '">');
       for (i = 0; i < merges.length; i++) parts.push('<mergeCell ref="' + merges[i] + '"/>');
       parts.push("</mergeCells>");
     }
-    if (sheet.autoFilter) parts.push('<autoFilter ref="' + sheet.autoFilter + '"/>');
+    parts.push('<printOptions horizontalCentered="1"/>');
     parts.push('<pageMargins left="0.5" right="0.5" top="0.6" bottom="0.55" header="0.3" footer="0.3"/>');
-    parts.push('<pageSetup paperSize="9" orientation="portrait" fitToWidth="1" fitToHeight="0"/>');
+    parts.push('<pageSetup paperSize="9" orientation="portrait" fitToWidth="1" fitToHeight="1"/>');
     if (sheet.footer) {
       parts.push("<headerFooter><oddFooter>" + xmlEsc(sheet.footer) + "</oddFooter></headerFooter>");
     }
-    parts.push('<printOptions horizontalCentered="1"/>');
     if (sheet.tableRid) {
       parts.push('<tableParts count="1"><tablePart r:id="' + sheet.tableRid + '"/></tableParts>');
     }
@@ -299,18 +383,19 @@
     var creator = spec.creator || "Hesap Kitap";
     var title = spec.title || "Rapor";
     var files = [];
-    var i, sheet, sheetPath, rels;
+    var i, sheet, sheetPath, rels, sst = collectSharedStrings(sheets);
 
     var sheetEls = [];
     var wbRels = ['<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
       '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'];
     var overrides = [];
     var tableSeq = 0;
+    var nextRel = 1;
 
     for (i = 0; i < sheets.length; i++) {
       sheet = sheets[i];
       sheetPath = "xl/worksheets/sheet" + (i + 1) + ".xml";
-      var rid = "rId" + (i + 1);
+      var rid = "rId" + nextRel++;
       sheetEls.push('<sheet name="' + xmlEsc(sheetSafeName(sheet.name)) + '" sheetId="' + (i + 1) + '" r:id="' + rid + '"/>');
       wbRels.push('<Relationship Id="' + rid + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet' + (i + 1) + '.xml"/>');
       overrides.push('<Override PartName="/' + sheetPath + '" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>');
@@ -331,12 +416,17 @@
       files.push({ name: sheetPath, data: sheetXml(sheet) });
     }
 
-    wbRels.push('<Relationship Id="rIdStyles" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>');
+    var stylesRid = "rId" + nextRel++;
+    var sstRid = "rId" + nextRel++;
+    wbRels.push('<Relationship Id="' + stylesRid + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>');
+    wbRels.push('<Relationship Id="' + sstRid + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings" Target="sharedStrings.xml"/>');
     wbRels.push("</Relationships>");
 
     var workbook = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
       '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">' +
-      "<bookViews><workbookView/></bookViews>" +
+      '<fileVersion appName="xl" lastEdited="7" lowestEdited="7" rupBuild="22228"/>' +
+      '<workbookPr/>' +
+      "<bookViews><workbookView xWindow=\"0\" yWindow=\"0\" windowWidth=\"24000\" windowHeight=\"15000\"/></bookViews>" +
       "<sheets>" + sheetEls.join("") + "</sheets>" +
       "</workbook>";
 
@@ -346,6 +436,7 @@
       '<Default Extension="xml" ContentType="application/xml"/>' +
       '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>' +
       '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>' +
+      '<Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/>' +
       '<Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>' +
       '<Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/>' +
       overrides.join("") +
@@ -371,11 +462,19 @@
     var sheetNames = sheets.map(function (s) { return xmlEsc(sheetSafeName(s.name)); });
     var app = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
       '<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">' +
-      "<Application>Hesap Kitap</Application>" +
+      "<Application>Microsoft Excel</Application>" +
+      "<DocSecurity>0</DocSecurity>" +
+      "<ScaleCrop>false</ScaleCrop>" +
       "<HeadingPairs><vt:vector size=\"2\" baseType=\"variant\"><vt:variant><vt:lpstr>Worksheets</vt:lpstr></vt:variant><vt:variant><vt:i4>" + sheets.length + "</vt:i4></vt:variant></vt:vector></HeadingPairs>" +
       "<TitlesOfParts><vt:vector size=\"" + sheets.length + "\" baseType=\"lpstr\">" +
       sheetNames.map(function (n) { return "<vt:lpstr>" + n + "</vt:lpstr>"; }).join("") +
-      "</vt:vector></TitlesOfParts></Properties>";
+      "</vt:vector></TitlesOfParts>" +
+      "<Company>Hesap Kitap</Company>" +
+      "<LinksUpToDate>false</LinksUpToDate>" +
+      "<SharedDoc>false</SharedDoc>" +
+      "<HyperlinksChanged>false</HyperlinksChanged>" +
+      "<AppVersion>16.0300</AppVersion>" +
+      "</Properties>";
 
     files.push({ name: "[Content_Types].xml", data: contentTypes });
     files.push({ name: "_rels/.rels", data: rootRels });
@@ -384,24 +483,27 @@
     files.push({ name: "xl/workbook.xml", data: workbook });
     files.push({ name: "xl/_rels/workbook.xml.rels", data: wbRels.join("") });
     files.push({ name: "xl/styles.xml", data: stylesXml(styles) });
+    files.push({ name: "xl/sharedStrings.xml", data: sharedStringsXml(sst) });
 
-    return zipStore(files, now);
+    return zipPack(files, now);
   }
 
   function download(bytes, filename) {
-    var blob = new Blob([bytes], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    var copy = new Uint8Array(bytes.byteLength || bytes.length);
+    copy.set(bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes));
+    var blob = new Blob([copy], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
     var a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
     a.download = filename || "rapor.xlsx";
+    a.rel = "noopener";
     document.body.appendChild(a);
     a.click();
-    setTimeout(function () { URL.revokeObjectURL(a.href); if (a.parentNode) a.parentNode.removeChild(a); }, 800);
+    setTimeout(function () { URL.revokeObjectURL(a.href); if (a.parentNode) a.parentNode.removeChild(a); }, 20000);
   }
 
   var api = {
     build: build,
     download: download,
-    zipStore: zipStore,
     xmlEsc: xmlEsc,
     colLetter: colLetter,
     cellRef: cellRef,
