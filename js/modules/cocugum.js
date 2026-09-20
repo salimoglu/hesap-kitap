@@ -652,7 +652,7 @@ var CocugumModule = (function () {
       h += '<span class="cg-kart-duzen" data-cocuk-duzen="' + esc(opts.duzenId) + '" title="Düzenle">&#9998;</span>';
     }
     h += "</div>";
-    h += kartMetrikHtml(opts.oz, !!opts.toplamMi);
+    h += kartMetrikHtml(opts.oz, true);
     h += '<div class="cg-kart-not">' + (opts.kayit || 0) + " kayıt · detay için dokun</div>";
     h += "</button>";
     return h;
