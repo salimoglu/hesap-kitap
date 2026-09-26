@@ -728,6 +728,23 @@ function taksitEtiket(r,h){
   return r.no+"/"+r.toplamTaksit;
 }
 function kartlar(){var s={};_h.forEach(function(h){s[h.kart]=1;});_k.forEach(function(k){s[k]=1;});return Object.keys(s).sort();}
+function kartSirasi(k){return String(k||"").trim().toLocaleLowerCase("tr-TR");}
+/** Ekleme anı: kayıtlı zaman, yoksa id içindeki zaman damgası, o da yoksa başlangıç ayı. */
+function harcamaZamani(h){
+  if(!h)return 0;
+  var o=Number(h.olusturma);
+  if(o)return o;
+  var m=String(h.id||"").match(/^k(\d+)/);
+  if(m)return parseInt(m[1],10)||0;
+  if(h.basTarih){
+    var p=String(h.basTarih).split("-");
+    if(p.length>=2){
+      var y=parseInt(p[0],10)||0,ay=parseInt(p[1],10)||1;
+      return Date.UTC(y,ay-1,1);
+    }
+  }
+  return 0;
+}
 /** Tek geciste bu ay / kalan borc ozeti — kart sayisi kadar tekrar taksit uretimini onler */
 function krediOzetHesapla(aktifAy){
   var byKart={},topAy=0,topKalan=0,bugun=buAy();
@@ -741,7 +758,24 @@ function krediOzetHesapla(aktifAy){
   });
   return{topAy:topAy,topKalan:topKalan,byKart:byKart};
 }
-function ayDetay(ay){var liste=[];_h.forEach(function(h){taksitler(h).forEach(function(x){if(x.ay===ay)liste.push({id:h.id,kart:h.kart,aciklama:h.aciklama,taksitTutar:x.tutar,no:x.no,toplamTaksit:x.toplamTaksit,duzenli:!!x.duzenli,devam:!!h.devam,har:h});});});return liste.sort(function(a,b){return a.kart.localeCompare(b.kart);});}
+function ayDetay(ay){
+  var liste=[];
+  _h.forEach(function(h,idx){
+    taksitler(h).forEach(function(x){
+      if(x.ay===ay)liste.push({id:h.id,kart:h.kart,aciklama:h.aciklama,taksitTutar:x.tutar,no:x.no,toplamTaksit:x.toplamTaksit,duzenli:!!x.duzenli,devam:!!h.devam,har:h,sira:idx});
+    });
+  });
+  /* Her banka kendi bloğunda; blok içinde ekleme sırası eskiden yeniye (yeni altta). */
+  return liste.sort(function(a,b){
+    var ka=kartSirasi(a.kart).localeCompare(kartSirasi(b.kart),"tr");
+    if(ka)return ka;
+    var za=harcamaZamani(a.har),zb=harcamaZamani(b.har);
+    if(za!==zb)return za-zb;
+    var ia=String(a.id||"").localeCompare(String(b.id||""));
+    if(ia)return ia;
+    return a.sira-b.sira;
+  });
+}
 function kTipGoster(tip){
   _aktifTip=tip;
   document.querySelectorAll(".kr-tip-btn[data-tip]").forEach(function(b){b.classList.toggle("active",b.dataset.tip===tip);});
@@ -932,17 +966,22 @@ async function kkaydet(){
     if(eski&&harTip(eski)==="duzenli"&&_aktifTip==="duzenli"&&eski.basTarih&&bas&&eski.basTarih<bas){
       if(duzenliGecmisiKoruyarakBitir(eski,ayOnceki(bas))){
         kayit.id=uid();
+        kayit.olusturma=Date.now();
         _h.push(kayit);
       }else{
         kayit.id=_aktif;
+        if(eski.olusturma)kayit.olusturma=eski.olusturma;
         _h[i]=kayit;
       }
     }else{
       kayit.id=_aktif;
+      if(eski&&eski.olusturma)kayit.olusturma=eski.olusturma;
       if(i>=0)_h[i]=kayit;
     }
   }else{
-    kayit.id=uid();_h.push(kayit);
+    kayit.id=uid();
+    kayit.olusturma=Date.now();
+    _h.push(kayit);
   }
   await kfbKaydet();kmodalKapat();krender();
 }
