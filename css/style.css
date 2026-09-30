@@ -9498,6 +9498,28 @@ html.theme-light #birikim-container .bk-bes-satir:hover {
 }
 html.theme-light .alt-gunde-btn,
 html.theme-light .alt-durum-cycle.alt-durum-btn--gunde{color:#1d4ed8;background:rgba(37,99,235,0.12);border-color:rgba(37,99,235,0.35);}
+.alt-hediye-btn{background:rgba(192,132,252,0.16);color:#d8b4fe;}
+.alt-hediye-btn:hover{background:rgba(192,132,252,0.32);}
+.alt-satir-hediye{background:rgba(192,132,252,0.07);}
+.alt-satir-hediye:hover{background:rgba(192,132,252,0.12);}
+.alt-durum-cycle.alt-durum-btn--hediye{
+  background:rgba(192,132,252,0.14);border-color:rgba(192,132,252,0.45);color:#d8b4fe;
+}
+html.theme-light .alt-hediye-btn,
+html.theme-light .alt-durum-cycle.alt-durum-btn--hediye{color:#7e22ce;background:rgba(126,34,206,0.1);border-color:rgba(126,34,206,0.35);}
+.alt-elden-btn{background:rgba(251,146,60,0.16);color:#fdba74;letter-spacing:0.2px;padding:5px 8px;font-size:11px;}
+.alt-elden-btn:hover{background:rgba(251,146,60,0.32);}
+.alt-satir-elden{background:rgba(251,146,60,0.07);}
+.alt-satir-elden:hover{background:rgba(251,146,60,0.12);}
+.alt-durum-cycle.alt-durum-btn--elden{
+  background:rgba(251,146,60,0.14);border-color:rgba(251,146,60,0.45);color:#fdba74;letter-spacing:0;font-size:12px;
+}
+html.theme-light .alt-elden-btn,
+html.theme-light .alt-durum-cycle.alt-durum-btn--elden{color:#c2410c;background:rgba(234,88,12,0.1);border-color:rgba(234,88,12,0.35);}
+.alt-filtre-guncel{color:var(--gold);}
+@media (max-width:600px){
+  .alt-tablo tbody td.alt-td-durum .alt-elden-btn{font-size:8px;letter-spacing:0;padding:2px 5px;}
+}
 .alt-th-ic{display:inline-flex;align-items:center;gap:6px;}
 .alt-xl-btn,.alt-xl-ac{
   display:inline-flex;align-items:center;justify-content:center;gap:6px;
