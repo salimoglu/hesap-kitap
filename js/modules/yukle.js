@@ -1003,7 +1003,7 @@ return{init:kinit};
 /* ===== ALTIN MODULE ===== */
 var AltinModule=(function(){
 var $=function(id){return document.getElementById(id);};
-var _kayitlar=[],_aktif=null,_filtreAdet=null,_filtreNerde=null,_xlKolon=null,_xlTaslak=null,_xlAra="",_xlDisBagli=false,_guncelGramFiyat=0;
+var _kayitlar=[],_aktif=null,_filtreAdet=null,_filtreNerde=null,_filtreDurum=null,_xlKolon=null,_xlTaslak=null,_xlAra="",_xlDisBagli=false,_guncelGramFiyat=0;
 var ALTIN_GRAM={gram:1,ceyrek:1.75,yarim:3.5,tam:7,ata:7.2,bilezik:1};
 var ALTIN_LABEL={gram:"Gram",ceyrek:"Çeyrek",yarim:"Yarım",tam:"Tam",ata:"Ata",bilezik:"Bilezik"};
 var ALTIN_SIRASI=["gram","ceyrek","yarim","tam","ata","bilezik"];
@@ -1270,26 +1270,37 @@ function altNerdeMetin(k){
   var s=(k.nerdeKullanildi||"").trim();
   return s||"—";
 }
-function altFiltreUygun(k,adetHaric,nerdeHaric){
-  if(!adetHaric&&_filtreAdet&&!_filtreAdet[altAdetMetin(k)])return false;
-  if(!nerdeHaric&&_filtreNerde&&!_filtreNerde[altNerdeMetin(k)])return false;
+function altDurumMetin(k){return ALTIN_DURUM_KISA[altDurumNorm(k&&k.durum)];}
+function altFiltreUygun(k,haric){
+  if(haric!=="adet"&&_filtreAdet&&!_filtreAdet[altAdetMetin(k)])return false;
+  if(haric!=="nerde"&&_filtreNerde&&!_filtreNerde[altNerdeMetin(k)])return false;
+  if(haric!=="durum"&&_filtreDurum&&!_filtreDurum[altDurumMetin(k)])return false;
   return true;
 }
 function filtreliListe(){
-  return _kayitlar.filter(function(k){return altFiltreUygun(k,false,false);});
+  return _kayitlar.filter(function(k){return altFiltreUygun(k);});
 }
 function kullanımSecenekleri(){
   var set={};
   _kayitlar.forEach(function(k){if(k.nerdeKullanildi)set[k.nerdeKullanildi]=1;});
   return Object.keys(set).sort(function(a,b){return a.localeCompare(b,"tr");});
 }
-function xlAktifMi(kolon){return kolon==="adet"?!!_filtreAdet:!!_filtreNerde;}
+function xlFiltreAl(kolon){
+  if(kolon==="adet")return _filtreAdet;
+  if(kolon==="durum")return _filtreDurum;
+  return _filtreNerde;
+}
+function xlAktifMi(kolon){return !!xlFiltreAl(kolon);}
+function xlKolonDeger(k,kolon){
+  if(kolon==="adet")return altAdetMetin(k);
+  if(kolon==="durum")return altDurumMetin(k);
+  return altNerdeMetin(k);
+}
 function xlSecenekler(kolon){
   var harita={},liste=[];
   _kayitlar.forEach(function(k){
-    if(kolon==="adet"&&!altFiltreUygun(k,true,false))return;
-    if(kolon==="nerde"&&!altFiltreUygun(k,false,true))return;
-    var deger=kolon==="adet"?altAdetMetin(k):altNerdeMetin(k);
+    if(!altFiltreUygun(k,kolon))return;
+    var deger=xlKolonDeger(k,kolon);
     if(!harita[deger]){harita[deger]={deger:deger,sayi:0};liste.push(harita[deger]);}
     harita[deger].sayi++;
   });
@@ -1297,10 +1308,18 @@ function xlSecenekler(kolon){
     if(kolon==="adet"){
       var as=altAdetSira(a.deger),bs=altAdetSira(b.deger);
       if(as!==bs)return as-bs;
+    } else if(kolon==="durum"){
+      var ds=altDurumSira(a.deger)-altDurumSira(b.deger);
+      if(ds)return ds;
     }
     return a.deger.localeCompare(b.deger,"tr");
   });
   return liste;
+}
+function altDurumSira(metin){
+  var i;
+  for(i=0;i<ALTIN_DURUM_SIRA.length;i++){if(ALTIN_DURUM_KISA[ALTIN_DURUM_SIRA[i]]===metin)return i;}
+  return 99;
 }
 function altAdetSira(metin){
   var p=String(metin).split(" × ");
@@ -1311,6 +1330,7 @@ function altAdetSira(metin){
 }
 function xlFiltreYaz(kolon,filtre){
   if(kolon==="adet")_filtreAdet=filtre;
+  else if(kolon==="durum")_filtreDurum=filtre;
   else _filtreNerde=filtre;
 }
 function xlTaslakFiltre(){
@@ -1335,7 +1355,7 @@ function xlAcButon(kolon,etiket){
 function xlPanelHtml(){
   if(!_xlKolon||!_xlTaslak)return "";
   var tum=xlSecenekler(_xlKolon);
-  var baslik=_xlKolon==="adet"?"Adet":"Nerede kullanıldı";
+  var baslik=_xlKolon==="adet"?"Adet":_xlKolon==="durum"?"Durum":"Nerede kullanıldı";
   var h='<div class="alt-xl-panel" id="alt-xl-panel" role="dialog" aria-label="'+baslik+' filtresi">';
   h+='<div class="alt-xl-bas">'+baslik+'</div>';
   h+='<input type="search" class="alt-xl-ara" id="alt-xl-ara" placeholder="Ara..." value="'+hkEsc(_xlAra)+'" autocomplete="off"/>';
@@ -1402,7 +1422,7 @@ function xlAc(kolon){
   _xlAra="";
   _xlTaslak={};
   xlSecenekler(kolon).forEach(function(s){
-    var filtre=kolon==="adet"?_filtreAdet:_filtreNerde;
+    var filtre=xlFiltreAl(kolon);
     _xlTaslak[s.deger]=!filtre||!!filtre[s.deger];
   });
   arender();
@@ -1425,7 +1445,7 @@ function xlTemizleKolon(){
   arender();
 }
 function xlFiltreleriTemizle(){
-  _filtreAdet=null;_filtreNerde=null;
+  _filtreAdet=null;_filtreNerde=null;_filtreDurum=null;
   _xlKolon=null;_xlTaslak=null;_xlAra="";
   arender();
 }
@@ -1513,13 +1533,14 @@ function arender(){
 
   /* Filtre — masaüstünde sütun başlığı, telefonda bu çubuk */
   var secenekler=kullanımSecenekleri();
-  var filtreVar=_filtreAdet||_filtreNerde;
+  var filtreVar=_filtreAdet||_filtreNerde||_filtreDurum;
   h+='<div class="alt-filtre-satir'+(filtreVar?"":" alt-filtre-satir--bos")+'">';
-  h+='<div class="alt-xl-mobil">'+xlAcButon("adet","Adet")+xlAcButon("nerde","Nerede kullanıldı")+'</div>';
+  h+='<div class="alt-xl-mobil">'+xlAcButon("durum","Durum")+xlAcButon("adet","Adet")+xlAcButon("nerde","Nerede kullanıldı")+'</div>';
   if(filtreVar){
     var fGram=liste.reduce(function(s,k){return s+(parseFloat(k.gram)||0);},0);
     var fTL=liste.reduce(function(s,k){return s+(parseFloat(k.tlKarsiligi)||0);},0);
     var parca=[];
+    if(_filtreDurum)parca.push("Durum: "+Object.keys(_filtreDurum).map(hkEsc).join(", "));
     if(_filtreAdet)parca.push("Adet: "+Object.keys(_filtreAdet).length);
     if(_filtreNerde){
       var nerdeSec=Object.keys(_filtreNerde);
@@ -1532,7 +1553,7 @@ function arender(){
 
   /* Tablo */
   h+='<div class="alt-tablo-dis"><table class="alt-tablo"><thead><tr>';
-  h+='<th>DURUM</th><th>TARİH</th>'+xlTh("ADET","adet")+'<th>GRAM</th><th>TL KARŞILIĞI</th><th>GRAM FİYATI</th><th>NASIL ALINDI</th>'+xlTh("NEREDE KULLANILDI","nerde")+'<th></th>';
+  h+=xlTh("DURUM","durum")+'<th>TARİH</th>'+xlTh("ADET","adet")+'<th>GRAM</th><th>TL KARŞILIĞI</th><th>GRAM FİYATI</th><th>NASIL ALINDI</th>'+xlTh("NEREDE KULLANILDI","nerde")+'<th></th>';
   h+='</tr></thead><tbody>';
   if(!liste.length){
     h+='<tr><td colspan="9" class="alt-bos">Kayıt bulunamadı</td></tr>';
