@@ -1003,7 +1003,7 @@ return{init:kinit};
 /* ===== ALTIN MODULE ===== */
 var AltinModule=(function(){
 var $=function(id){return document.getElementById(id);};
-var _kayitlar=[],_aktif=null,_filtre="TUMU",_guncelGramFiyat=0;
+var _kayitlar=[],_aktif=null,_filtreAdet=null,_filtreNerde=null,_xlKolon=null,_xlTaslak=null,_xlAra="",_xlDisBagli=false,_guncelGramFiyat=0;
 var ALTIN_GRAM={gram:1,ceyrek:1.75,yarim:3.5,tam:7,ata:7.2,bilezik:1};
 var ALTIN_LABEL={gram:"Gram",ceyrek:"Çeyrek",yarim:"Yarım",tam:"Tam",ata:"Ata",bilezik:"Bilezik"};
 var ALTIN_SIRASI=["gram","ceyrek","yarim","tam","ata","bilezik"];
@@ -1170,24 +1170,38 @@ function altModalAcikMi(){
   var m=$("alt-modal");
   return !!(m&&!m.classList.contains("hidden"));
 }
+var ALTIN_DURUM_SIRA=["elimde","satildi","gunde"];
+var ALTIN_DURUM_KISA={elimde:"ELİMDE",satildi:"SATILDI",gunde:"GÜNDE"};
+var ALTIN_DURUM_FORM={elimde:"Elimde",satildi:"Satıldı",gunde:"Günde"};
+var ALTIN_DURUM_IPUCU={elimde:"Elimde",satildi:"Satıldı",gunde:"Gün grubunda"};
+function altDurumNorm(d){
+  if(d==="satildi"||d==="gunde")return d;
+  return "elimde";
+}
+function altDurumSonraki(d){
+  var i=ALTIN_DURUM_SIRA.indexOf(altDurumNorm(d));
+  if(i<0)i=0;
+  return ALTIN_DURUM_SIRA[(i+1)%ALTIN_DURUM_SIRA.length];
+}
+function altElimdeMi(k){return altDurumNorm(k&&k.durum)==="elimde";}
 function altDurumAl(){
   var hid=$("alt-durum-val");
-  var d=hid?(hid.value||"elimde"):"elimde";
-  return d==="satildi"?"satildi":"elimde";
+  return altDurumNorm(hid?(hid.value||"elimde"):"elimde");
 }
 function altDurumBtnGuncelle(){
   var d=altDurumAl(),hid=$("alt-durum-val"),btn=$("alt-durum-btn");
   if(hid)hid.value=d;
   if(!btn)return;
-  btn.textContent=d==="satildi"?"Satıldı":"Elimde";
+  btn.textContent=ALTIN_DURUM_FORM[d];
   btn.classList.toggle("alt-durum-btn--satildi",d==="satildi");
-  btn.classList.toggle("alt-durum-btn--elimde",d!=="satildi");
-  btn.title=d==="satildi"?"Satıldı — tıkla: Elimde":"Elimde — tıkla: Satıldı";
+  btn.classList.toggle("alt-durum-btn--gunde",d==="gunde");
+  btn.classList.toggle("alt-durum-btn--elimde",d==="elimde");
+  btn.title=ALTIN_DURUM_IPUCU[d]+" — tıkla: "+ALTIN_DURUM_IPUCU[altDurumSonraki(d)];
 }
 function altDurumDegistir(){
   var hid=$("alt-durum-val");
   if(!hid)return;
-  hid.value=altDurumAl()==="elimde"?"satildi":"elimde";
+  hid.value=altDurumSonraki(altDurumAl());
   altDurumBtnGuncelle();
 }
 
@@ -1247,25 +1261,191 @@ async function afbFiyatKaydet(f){
   }catch(e){}
 }
 
+function altAdetMetin(k){
+  var sayi=k.altinTur==="bilezik"?1:(k.adet||0);
+  if(k.altinTur&&ALTIN_LABEL[k.altinTur])return sayi+" × "+ALTIN_LABEL[k.altinTur];
+  return String(sayi);
+}
+function altNerdeMetin(k){
+  var s=(k.nerdeKullanildi||"").trim();
+  return s||"—";
+}
+function altFiltreUygun(k,adetHaric,nerdeHaric){
+  if(!adetHaric&&_filtreAdet&&!_filtreAdet[altAdetMetin(k)])return false;
+  if(!nerdeHaric&&_filtreNerde&&!_filtreNerde[altNerdeMetin(k)])return false;
+  return true;
+}
 function filtreliListe(){
-  if(_filtre==="TUMU")return _kayitlar;
-  return _kayitlar.filter(function(k){return k.nerdeKullanildi===_filtre;});
+  return _kayitlar.filter(function(k){return altFiltreUygun(k,false,false);});
 }
 function kullanımSecenekleri(){
   var set={};
   _kayitlar.forEach(function(k){if(k.nerdeKullanildi)set[k.nerdeKullanildi]=1;});
-  return Object.keys(set).sort();
+  return Object.keys(set).sort(function(a,b){return a.localeCompare(b,"tr");});
+}
+function xlAktifMi(kolon){return kolon==="adet"?!!_filtreAdet:!!_filtreNerde;}
+function xlSecenekler(kolon){
+  var harita={},liste=[];
+  _kayitlar.forEach(function(k){
+    if(kolon==="adet"&&!altFiltreUygun(k,true,false))return;
+    if(kolon==="nerde"&&!altFiltreUygun(k,false,true))return;
+    var deger=kolon==="adet"?altAdetMetin(k):altNerdeMetin(k);
+    if(!harita[deger]){harita[deger]={deger:deger,sayi:0};liste.push(harita[deger]);}
+    harita[deger].sayi++;
+  });
+  liste.sort(function(a,b){
+    if(kolon==="adet"){
+      var as=altAdetSira(a.deger),bs=altAdetSira(b.deger);
+      if(as!==bs)return as-bs;
+    }
+    return a.deger.localeCompare(b.deger,"tr");
+  });
+  return liste;
+}
+function altAdetSira(metin){
+  var p=String(metin).split(" × ");
+  var adet=parseFloat(p[0])||0;
+  var ti=99,i;
+  for(i=0;i<ALTIN_SIRASI.length;i++){if(ALTIN_LABEL[ALTIN_SIRASI[i]]===p[1]){ti=i;break;}}
+  return ti*10000+adet;
+}
+function xlFiltreYaz(kolon,filtre){
+  if(kolon==="adet")_filtreAdet=filtre;
+  else _filtreNerde=filtre;
+}
+function xlTaslakFiltre(){
+  var tum=xlSecenekler(_xlKolon),secilen=[],i;
+  for(i=0;i<tum.length;i++){if(_xlTaslak&&_xlTaslak[tum[i].deger])secilen.push(tum[i].deger);}
+  if(!tum.length||secilen.length===tum.length)return null;
+  var filtre={};
+  secilen.forEach(function(d){filtre[d]=true;});
+  return filtre;
+}
+function xlIkon(){
+  return '<svg class="alt-xl-ikon" viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path fill="currentColor" d="M1.5 2.2h13l-5 6.1v4.4l-3 1.4V8.3z"/></svg>';
+}
+function xlTh(etiket,kolon){
+  var aktif=xlAktifMi(kolon);
+  return '<th><span class="alt-th-ic">'+etiket+'<button type="button" class="alt-xl-btn'+(aktif?" alt-xl-btn--aktif":"")+'" data-xl="'+kolon+'" title="'+etiket+' filtresi" aria-label="'+etiket+' filtresi" aria-expanded="'+(_xlKolon===kolon?"true":"false")+'">'+xlIkon()+'</button></span></th>';
+}
+function xlAcButon(kolon,etiket){
+  var aktif=xlAktifMi(kolon);
+  return '<button type="button" class="alt-xl-ac'+(aktif?" alt-xl-btn--aktif":"")+'" data-xl="'+kolon+'">'+xlIkon()+'<span>'+etiket+'</span></button>';
+}
+function xlPanelHtml(){
+  if(!_xlKolon||!_xlTaslak)return "";
+  var tum=xlSecenekler(_xlKolon);
+  var baslik=_xlKolon==="adet"?"Adet":"Nerede kullanıldı";
+  var h='<div class="alt-xl-panel" id="alt-xl-panel" role="dialog" aria-label="'+baslik+' filtresi">';
+  h+='<div class="alt-xl-bas">'+baslik+'</div>';
+  h+='<input type="search" class="alt-xl-ara" id="alt-xl-ara" placeholder="Ara..." value="'+hkEsc(_xlAra)+'" autocomplete="off"/>';
+  h+='<label class="alt-xl-tum"><input type="checkbox" id="alt-xl-tum"/> <span>Tümünü seç</span></label>';
+  h+='<div class="alt-xl-liste" id="alt-xl-liste">';
+  if(!tum.length)h+='<div class="alt-xl-bos">Seçenek yok</div>';
+  tum.forEach(function(s){
+    var sec=!!_xlTaslak[s.deger];
+    h+='<label class="alt-xl-item" data-deger="'+hkEsc(s.deger)+'"><input type="checkbox" class="alt-xl-cb"'+(sec?" checked":"")+'> <span class="alt-xl-ad">'+hkEsc(s.deger)+'</span><span class="alt-xl-sayi">'+s.sayi+'</span></label>';
+  });
+  h+='</div>';
+  h+='<div class="alt-xl-alt"><button type="button" class="alt-xl-temiz" id="alt-xl-temiz">Temizle</button><span class="alt-xl-alt-sag"><button type="button" class="alt-xl-iptal" id="alt-xl-iptal">İptal</button><button type="button" class="alt-xl-tamam" id="alt-xl-tamam">Tamam</button></span></div>';
+  h+='</div>';
+  return h;
+}
+function xlButonBul(kolon){
+  var list=document.querySelectorAll('[data-xl="'+kolon+'"]'),i,r,el;
+  for(i=0;i<list.length;i++){
+    el=list[i];
+    if(el.offsetParent===null)continue;
+    r=el.getBoundingClientRect();
+    if(r.width>0&&r.height>0)return el;
+  }
+  return null;
+}
+function xlYerlestir(){
+  var panel=$("alt-xl-panel"),btn=_xlKolon?xlButonBul(_xlKolon):null;
+  if(!panel||!btn)return;
+  var r=btn.getBoundingClientRect();
+  var w=panel.offsetWidth||300;
+  var h=panel.offsetHeight||320;
+  var left=Math.max(8,Math.min(r.left,window.innerWidth-w-8));
+  var top=r.bottom+6;
+  if(top+h>window.innerHeight-8)top=Math.max(8,r.top-h-6);
+  panel.style.left=left+"px";
+  panel.style.top=top+"px";
+}
+function xlAraUygula(){
+  var q=(_xlAra||"").toLocaleLowerCase("tr-TR");
+  document.querySelectorAll(".alt-xl-item").forEach(function(el){
+    var t=(el.dataset.deger||"").toLocaleLowerCase("tr-TR");
+    el.hidden=!!(q&&t.indexOf(q)<0);
+  });
+  xlTumGuncelle();
+}
+function xlGorunenler(){
+  var list=[],nodes=document.querySelectorAll(".alt-xl-item"),i;
+  for(i=0;i<nodes.length;i++){if(!nodes[i].hidden)list.push(nodes[i]);}
+  return list;
+}
+function xlTumGuncelle(){
+  var tum=$("alt-xl-tum");if(!tum)return;
+  var gor=xlGorunenler(),sec=0,i,cb;
+  for(i=0;i<gor.length;i++){
+    cb=gor[i].querySelector(".alt-xl-cb");
+    if(cb&&cb.checked)sec++;
+  }
+  tum.checked=gor.length>0&&sec===gor.length;
+  tum.indeterminate=sec>0&&sec<gor.length;
+}
+function xlAc(kolon){
+  if(_xlKolon===kolon){xlKapat();return;}
+  _xlKolon=kolon;
+  _xlAra="";
+  _xlTaslak={};
+  xlSecenekler(kolon).forEach(function(s){
+    var filtre=kolon==="adet"?_filtreAdet:_filtreNerde;
+    _xlTaslak[s.deger]=!filtre||!!filtre[s.deger];
+  });
+  arender();
+  setTimeout(function(){var i=$("alt-xl-ara");if(i)i.focus();},30);
+}
+function xlKapat(){
+  _xlKolon=null;_xlTaslak=null;_xlAra="";
+  arender();
+}
+function xlTamam(){
+  if(!_xlKolon)return;
+  xlFiltreYaz(_xlKolon,xlTaslakFiltre());
+  _xlKolon=null;_xlTaslak=null;_xlAra="";
+  arender();
+}
+function xlTemizleKolon(){
+  if(!_xlKolon)return;
+  xlFiltreYaz(_xlKolon,null);
+  _xlKolon=null;_xlTaslak=null;_xlAra="";
+  arender();
+}
+function xlFiltreleriTemizle(){
+  _filtreAdet=null;_filtreNerde=null;
+  _xlKolon=null;_xlTaslak=null;_xlAra="";
+  arender();
 }
 
 async function durumToggle(id){
   var k=_kayitlar.find(function(x){return x.id===id;});
   if(!k)return;
-  k.durum=(k.durum==="satildi")?"elimde":"satildi";
+  k.durum=altDurumSonraki(k.durum);
   await afbKaydet();arender();
 }
 
 function arender(){
+  var eskiPanel=document.getElementById("alt-xl-panel");
+  if(eskiPanel&&eskiPanel.parentNode===document.body)eskiPanel.remove();
   var c=$("altin-container");if(!c)return;
+  var eskiDis=c.querySelector(".alt-tablo-dis");
+  var eskiTop=eskiDis?eskiDis.scrollTop:0;
+  var eskiLeft=eskiDis?eskiDis.scrollLeft:0;
+  var eskiListe=c.querySelector(".alt-xl-liste");
+  var eskiListeTop=eskiListe?eskiListe.scrollTop:0;
   var liste=filtreliListe();
 
   /* Tüm kayıtlar özeti */
@@ -1274,8 +1454,8 @@ function arender(){
   var genelTL=_kayitlar.reduce(function(s,k){return s+(parseFloat(k.tlKarsiligi)||0);},0);
   var genelOrt=genelGram>0?(genelTL/genelGram):0;
 
-  /* Elimdeki özeti */
-  var elimde=_kayitlar.filter(function(k){return !k.durum||k.durum==="elimde";});
+  /* Elimdeki özeti — gün grubu ve satılanlar dahil değil */
+  var elimde=_kayitlar.filter(altElimdeMi);
   var elimdeAdet=elimde.reduce(function(s,k){return s+(parseFloat(k.adet)||0);},0);
   var elimdeGram=elimde.reduce(function(s,k){return s+(parseFloat(k.gram)||0);},0);
   var elimdeMaliyet=elimde.reduce(function(s,k){return s+(parseFloat(k.tlKarsiligi)||0);},0);
@@ -1304,7 +1484,7 @@ function arender(){
 
   /* Bölüm 2: Elimdeki — 6 metrik */
   h+='<div class="alt-ozet-bolum alt-ozet-bolum--elimde">';
-  h+='<div class="alt-ozet-baslik alt-elimde-baslik">ELİMDEKİ ALTIN</div>';
+  h+='<div class="alt-ozet-baslik alt-elimde-baslik" title="Gün grubundaki ve satılan altın bu hesaba girmez">ELİMDEKİ ALTIN</div>';
   h+='<div class="alt-ozet alt-ozet--elimde">';
   h+='<div class="alt-oz-item"><span class="alt-oz-label">ADET</span><span class="alt-oz-val">'+elimdeAdet+'</span></div>';
   h+='<div class="alt-oz-item"><span class="alt-oz-label">GRAM</span><span class="alt-oz-val alt-oz-gold">'+agr(elimdeGram)+'</span></div>';
@@ -1331,38 +1511,41 @@ function arender(){
   h+='</div>';
   h+='</div>';
 
-  /* Filtre */
+  /* Filtre — masaüstünde sütun başlığı, telefonda bu çubuk */
   var secenekler=kullanımSecenekleri();
-  h+='<div class="alt-filtre-satir">';
-  h+='<div class="alt-filtre-grup"><label class="alt-filtre-label">NEREDE KULLANILDI</label>';
-  h+='<select class="alt-filtre-select" id="alt-filtre-nerde">';
-  h+='<option value="TUMU">Tümü ('+_kayitlar.length+')</option>';
-  secenekler.forEach(function(s){
-    var sayi=_kayitlar.filter(function(k){return k.nerdeKullanildi===s;}).length;
-    h+='<option value="'+s+'"'+(_filtre===s?" selected":"")+'>'+s+' ('+sayi+')</option>';
-  });
-  h+='</select></div>';
-  if(_filtre!=="TUMU"){
+  var filtreVar=_filtreAdet||_filtreNerde;
+  h+='<div class="alt-filtre-satir'+(filtreVar?"":" alt-filtre-satir--bos")+'">';
+  h+='<div class="alt-xl-mobil">'+xlAcButon("adet","Adet")+xlAcButon("nerde","Nerede kullanıldı")+'</div>';
+  if(filtreVar){
     var fGram=liste.reduce(function(s,k){return s+(parseFloat(k.gram)||0);},0);
     var fTL=liste.reduce(function(s,k){return s+(parseFloat(k.tlKarsiligi)||0);},0);
-    h+='<div class="alt-filtre-ozet-inline">'+liste.length+' kayıt &nbsp;·&nbsp; <b>'+agr(fGram)+' gr</b> &nbsp;·&nbsp; <b>'+apara(fTL)+' TL</b></div>';
+    var parca=[];
+    if(_filtreAdet)parca.push("Adet: "+Object.keys(_filtreAdet).length);
+    if(_filtreNerde){
+      var nerdeSec=Object.keys(_filtreNerde);
+      parca.push("Nerede: "+(nerdeSec.length<=2?nerdeSec.map(hkEsc).join(", "):nerdeSec.length+" seçim"));
+    }
+    h+='<div class="alt-filtre-ozet-inline">'+parca.join(" · ")+' &nbsp;·&nbsp; '+liste.length+' kayıt &nbsp;·&nbsp; <b>'+agr(fGram)+' gr</b> &nbsp;·&nbsp; <b>'+apara(fTL)+' TL</b></div>';
+    h+='<button type="button" class="alt-filtre-temiz" id="alt-filtre-temizle">Temizle</button>';
   }
   h+='</div>';
 
   /* Tablo */
   h+='<div class="alt-tablo-dis"><table class="alt-tablo"><thead><tr>';
-  h+='<th>DURUM</th><th>TARİH</th><th>ADET</th><th>GRAM</th><th>TL KARŞILIĞI</th><th>GRAM FİYATI</th><th>NASIL ALINDI</th><th>NEREDE KULLANILDI</th><th></th>';
+  h+='<th>DURUM</th><th>TARİH</th>'+xlTh("ADET","adet")+'<th>GRAM</th><th>TL KARŞILIĞI</th><th>GRAM FİYATI</th><th>NASIL ALINDI</th>'+xlTh("NEREDE KULLANILDI","nerde")+'<th></th>';
   h+='</tr></thead><tbody>';
   if(!liste.length){
     h+='<tr><td colspan="9" class="alt-bos">Kayıt bulunamadı</td></tr>';
   } else {
     liste.forEach(function(k){
       var gF=k.gram>0?(k.tlKarsiligi/k.gram):0;
-      var satildi=k.durum==="satildi";
-      h+='<tr class="alt-satir'+(satildi?" alt-satir-satildi":"")+'">';
-      h+='<td class="alt-td-durum"><button class="alt-durum-btn '+(satildi?"alt-satildi-btn":"alt-elimde-btn")+'" data-id="'+k.id+'">'+(satildi?"SATILDI":"ELİMDE")+'</button></td>';
+      var durum=altDurumNorm(k.durum);
+      var durumSinif=durum==="satildi"?"alt-satildi-btn":durum==="gunde"?"alt-gunde-btn":"alt-elimde-btn";
+      var satirSinif=durum==="satildi"?" alt-satir-satildi":durum==="gunde"?" alt-satir-gunde":"";
+      h+='<tr class="alt-satir'+satirSinif+'">';
+      h+='<td class="alt-td-durum"><button type="button" class="alt-durum-btn '+durumSinif+'" data-id="'+k.id+'" title="'+ALTIN_DURUM_IPUCU[durum]+' — tıkla: '+ALTIN_DURUM_IPUCU[altDurumSonraki(durum)]+'">'+ALTIN_DURUM_KISA[durum]+'</button></td>';
       h+='<td class="alt-td-tarih" data-l="Tarih">'+atarihFmt(k.tarih)+'</td>';
-      h+='<td class="alt-td-adet" data-l="Adet">'+(k.altinTur==="bilezik"?1:(k.adet||0))+(k.altinTur&&ALTIN_LABEL[k.altinTur]?' × '+ALTIN_LABEL[k.altinTur]:'')+'</td>';
+      h+='<td class="alt-td-adet" data-l="Adet">'+hkEsc(altAdetMetin(k))+'</td>';
       h+='<td class="alt-td-gram" data-l="Gram">'+agr(k.gram)+' gr</td>';
       h+='<td class="alt-td-tl" data-l="TL">'+apara(k.tlKarsiligi)+' TL</td>';
       h+='<td class="alt-td-gf" data-l="Gr. fiyat">'+apara(gF)+' TL</td>';
@@ -1372,7 +1555,9 @@ function arender(){
       h+='</tr>';
     });
   }
-  h+='</tbody></table></div></div>';
+  h+='</tbody></table></div>';
+  h+=xlPanelHtml();
+  h+='</div>';
 
   /* Modal — tek satir: tarih|adet|tur , TL|durum(tikla) , nasil|nerede */
   var bugun=hkBugun();
@@ -1407,6 +1592,14 @@ function arender(){
 
   c.innerHTML=h;
   abagla();
+  var yeniDis=c.querySelector(".alt-tablo-dis");
+  if(yeniDis){yeniDis.scrollTop=eskiTop;yeniDis.scrollLeft=eskiLeft;}
+  var yeniListe=c.querySelector(".alt-xl-liste");
+  if(yeniListe)yeniListe.scrollTop=eskiListeTop;
+  var panel=$("alt-xl-panel");
+  if(panel)document.body.appendChild(panel);
+  xlAraUygula();
+  xlYerlestir();
 }
 
 function abagla(){
@@ -1442,9 +1635,64 @@ function abagla(){
       arender();
     } else alert("Fiyat alınamadı, lütfen tekrar deneyin.");
   });
-  /* Filtre */
-  var sel=$("alt-filtre-nerde");
-  if(sel){sel.value=_filtre;sel.addEventListener("change",function(){_filtre=this.value;arender();});}
+  /* Sütun filtreleri */
+  var kok=$("altin-container");
+  if(kok){
+    kok.querySelectorAll("[data-xl]").forEach(function(btn){
+      btn.addEventListener("click",function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        xlAc(btn.getAttribute("data-xl"));
+      });
+    });
+  }
+  var filtreTemiz=$("alt-filtre-temizle");
+  if(filtreTemiz)filtreTemiz.addEventListener("click",function(e){e.preventDefault();e.stopPropagation();xlFiltreleriTemizle();});
+  var panel=$("alt-xl-panel");
+  if(panel){
+    panel.addEventListener("mousedown",function(e){e.stopPropagation();});
+    panel.addEventListener("click",function(e){e.stopPropagation();});
+    var ara=$("alt-xl-ara");
+    if(ara)ara.addEventListener("input",function(){_xlAra=ara.value;xlAraUygula();});
+    var tum=$("alt-xl-tum");
+    if(tum)tum.addEventListener("change",function(){
+      var istenen=tum.checked;
+      xlGorunenler().forEach(function(el){
+        var cb=el.querySelector(".alt-xl-cb");
+        if(cb)cb.checked=istenen;
+        if(!_xlTaslak)return;
+        if(istenen)_xlTaslak[el.dataset.deger]=true;
+        else delete _xlTaslak[el.dataset.deger];
+      });
+      xlTumGuncelle();
+    });
+    panel.querySelectorAll(".alt-xl-cb").forEach(function(cb){
+      cb.addEventListener("change",function(){
+        var item=cb.closest(".alt-xl-item");
+        if(!_xlTaslak||!item)return;
+        if(cb.checked)_xlTaslak[item.dataset.deger]=true;
+        else delete _xlTaslak[item.dataset.deger];
+        xlTumGuncelle();
+      });
+    });
+    var temiz=$("alt-xl-temiz");if(temiz)temiz.addEventListener("click",function(e){e.preventDefault();xlTemizleKolon();});
+    var iptal=$("alt-xl-iptal");if(iptal)iptal.addEventListener("click",function(e){e.preventDefault();xlKapat();});
+    var tamam=$("alt-xl-tamam");if(tamam)tamam.addEventListener("click",function(e){e.preventDefault();xlTamam();});
+  }
+  if(!_xlDisBagli){
+    _xlDisBagli=true;
+    document.addEventListener("mousedown",function(e){
+      if(!_xlKolon)return;
+      if(e.target.closest&&(e.target.closest("#alt-xl-panel")||e.target.closest("[data-xl]")))return;
+      xlKapat();
+    });
+    document.addEventListener("keydown",function(e){
+      if(e.key==="Escape"&&_xlKolon){e.preventDefault();xlKapat();}
+    });
+    window.addEventListener("resize",xlYerlestir);
+  }
+  var dis=document.querySelector("#altin-container .alt-tablo-dis");
+  if(dis)dis.addEventListener("scroll",xlYerlestir,{passive:true});
   /* Durum toggle */
   document.querySelectorAll(".alt-durum-btn").forEach(function(btn){
     btn.addEventListener("click",function(){durumToggle(btn.dataset.id);});
@@ -1477,7 +1725,7 @@ function amodalAc(id){
       if(tur==="bilezik")$("alt-adet").value=k.gram!=null&&k.gram!==""?k.gram:"";
       else $("alt-adet").value=k.adet!=null&&k.adet!==""?k.adet:"";
       $("alt-tl").value=k.tlKarsiligi;$("alt-nasil").value=k.nasilAlindi||"";$("alt-nerde").value=k.nerdeKullanildi||"";
-      $("alt-durum-val").value=(k.durum==="satildi")?"satildi":"elimde";
+      $("alt-durum-val").value=altDurumNorm(k.durum);
     }
   }
   altTurBtnGuncelle();
@@ -1508,7 +1756,7 @@ async function akaydet(){
   var adet=tur==="bilezik"?1:girilen;
   var tl=asayiOku(($("alt-tl")||{}).value)||0;
   var nasil=($("alt-nasil").value||"").trim(),nerde=($("alt-nerde").value||"").trim();
-  var durum=$("alt-durum-val").value||"elimde";
+  var durum=altDurumNorm(($("alt-durum-val")||{}).value);
   if(!tarih){alert("Tarih giriniz.");return;}
   if(!girilen||girilen<=0){$("alt-adet").focus();return;}
   if(!gram||gram<=0){$("alt-adet").focus();return;}
