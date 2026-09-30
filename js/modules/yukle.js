@@ -532,14 +532,14 @@ function brender(){
     });
     bolumHesapSatirlari(bKey).forEach(function(s){
       var hv=_veri[s.id]||0;
-      h+='<tr class="bt-hesap-row"><td></td><td class="bt-col-label">'+s.l+'</td><td class="bt-col-tutar" data-hesap="'+s.id+'">'+bpara(hv)+'</td><td class="bt-col-pct">'+bpct(hv,g)+'</td><td></td></tr>';
+      h+='<tr class="bt-hesap-row"><td></td><td class="bt-col-label">'+s.l+'</td><td class="bt-col-tutar" data-hesap="'+s.id+'">'+bpara(hv)+'</td><td class="bt-col-pct" data-pct="'+s.id+'">'+bpct(hv,g)+'</td><td></td></tr>';
     });
     h+='<tr class="bt-ekle-row"><td colspan="5"><button type="button" class="bt-ekle-btn" data-bolum="'+bKey+'">+ Satır Ekle</button></td></tr>';
     var top=bolumTopSatir(bKey);
-    if(top){var tv=_veri[top.id]||0;h+='<tr class="bt-toplam-row"><td></td><td class="bt-col-label">'+top.l+'</td><td class="bt-col-tutar" data-hesap="'+top.id+'">'+bpara(tv)+'</td><td class="bt-col-pct">'+bpct(tv,g)+'</td><td></td></tr>';}
+    if(top){var tv=_veri[top.id]||0;h+='<tr class="bt-toplam-row"><td></td><td class="bt-col-label">'+top.l+'</td><td class="bt-col-tutar" data-hesap="'+top.id+'">'+bpara(tv)+'</td><td class="bt-col-pct" data-pct="'+top.id+'">'+bpct(tv,g)+'</td><td></td></tr>';}
   });
   h+='<tr class="bt-bolum-baslik"><td colspan="5">SONUÇ</td></tr>';
-  h+='<tr class="bt-hesap-row"><td></td><td class="bt-col-label">TOPLAM HARCANAN</td><td class="bt-col-tutar" id="bt-harcanan">'+bpara(hr)+'</td><td class="bt-col-pct">'+bpct(hr,g)+'</td><td></td></tr>';
+  h+='<tr class="bt-hesap-row"><td></td><td class="bt-col-label">TOPLAM HARCANAN</td><td class="bt-col-tutar" id="bt-harcanan">'+bpara(hr)+'</td><td class="bt-col-pct" id="bt-harcanan-pct">'+bpct(hr,g)+'</td><td></td></tr>';
   h+='<tr class="'+(kalan>=0?"bt-kalan-row":"bt-kalan-negatif-row")+'"><td></td><td class="bt-col-label">KALAN</td><td class="bt-col-tutar" id="bt-kalan">'+bpara(kalan)+'</td><td class="bt-col-pct" id="bt-kalan-pct">'+bpct(kalan,g)+'</td><td></td></tr>';
   h+='</tbody></table></div>';
   var headEl=$("butce-panel-head");
@@ -547,7 +547,7 @@ function brender(){
   else{c.innerHTML=hHead+h;}
   bbagla();
 }
-function bguncelle(){hesapla();var g=gelirTaban(),hr=harcanan(),kalan=g-hr;document.querySelectorAll("[data-hesap]").forEach(function(el){el.textContent=bpara(_veri[el.dataset.hesap]||0);});document.querySelectorAll("[data-pct]").forEach(function(el){el.textContent=bpct(_veri[el.dataset.pct]||0,g);});var hEl=$("bt-harcanan");if(hEl)hEl.textContent=bpara(hr);var kEl=$("bt-kalan");if(kEl)kEl.textContent=bpara(kalan);var kPct=$("bt-kalan-pct");if(kPct)kPct.textContent=bpct(kalan,g);var hg=$("bt-head-gelir");if(hg)hg.textContent=bpara(g);var hh=$("bt-head-harcanan");if(hh)hh.textContent=bpara(hr);var hk=$("bt-head-kalan");if(hk){hk.textContent=bpara(kalan);hk.className="ozet-val "+(kalan>=0?"net":"gider");}}
+function bguncelle(){hesapla();var g=gelirTaban(),hr=harcanan(),kalan=g-hr;document.querySelectorAll("[data-hesap]").forEach(function(el){el.textContent=bpara(_veri[el.dataset.hesap]||0);});document.querySelectorAll("[data-pct]").forEach(function(el){el.textContent=bpct(_veri[el.dataset.pct]||0,g);});var hEl=$("bt-harcanan");if(hEl)hEl.textContent=bpara(hr);var hPct=$("bt-harcanan-pct");if(hPct)hPct.textContent=bpct(hr,g);var kEl=$("bt-kalan");if(kEl)kEl.textContent=bpara(kalan);var kPct=$("bt-kalan-pct");if(kPct)kPct.textContent=bpct(kalan,g);var hg=$("bt-head-gelir");if(hg)hg.textContent=bpara(g);var hh=$("bt-head-harcanan");if(hh)hh.textContent=bpara(hr);var hk=$("bt-head-kalan");if(hk){hk.textContent=bpara(kalan);hk.className="ozet-val "+(kalan>=0?"net":"gider");}}
 function bayDegistir(dir){
   if(dir<0){_ay--;if(_ay<0){_ay=11;_yil--;}}
   else{_ay++;if(_ay>11){_ay=0;_yil++;}}
@@ -617,6 +617,14 @@ function btModalBagla(){
   modal.addEventListener("click",function(e){if(e.target===modal)btSatirModalKapat();});
   if(box)box.addEventListener("click",function(e){e.stopPropagation();});
 }
+function butceAlanUygula(inp,kaydet){
+  if(!inp||!inp.dataset||!inp.dataset.id)return;
+  _butceVeriKirli=true;
+  _veri[inp.dataset.id]=parseFloat(inp.value)||0;
+  bguncelle();
+  if(!kaydet)return;
+  Promise.resolve(bkaydet()).finally(function(){_butceVeriKirli=false;});
+}
 function bbaglaKok(){
   if(_btKokBagli)return;
   _btKokBagli=true;
@@ -629,13 +637,15 @@ function bbaglaKok(){
       var sil=e.target.closest(".bt-sil-btn");
       if(sil&&root.contains(sil)){e.preventDefault();satirSil(sil.dataset.bolum,sil.dataset.id);return;}
     });
+    root.addEventListener("input",function(e){
+      var inp=e.target.closest(".bt-input");
+      if(!inp||!root.contains(inp))return;
+      butceAlanUygula(inp,false);
+    });
     root.addEventListener("change",function(e){
       var inp=e.target.closest(".bt-input");
       if(!inp||!root.contains(inp))return;
-      _butceVeriKirli=true;
-      _veri[inp.dataset.id]=parseFloat(inp.value)||0;
-      bguncelle();
-      Promise.resolve(bkaydet()).finally(function(){_butceVeriKirli=false;});
+      butceAlanUygula(inp,true);
     });
     root.addEventListener("keydown",function(e){
       var inp=e.target.closest(".bt-input");
