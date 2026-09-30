@@ -1170,12 +1170,13 @@ function altModalAcikMi(){
   var m=$("alt-modal");
   return !!(m&&!m.classList.contains("hidden"));
 }
-var ALTIN_DURUM_SIRA=["elimde","satildi","gunde"];
-var ALTIN_DURUM_KISA={elimde:"ELİMDE",satildi:"SATILDI",gunde:"GÜNDE"};
-var ALTIN_DURUM_FORM={elimde:"Elimde",satildi:"Satıldı",gunde:"Günde"};
-var ALTIN_DURUM_IPUCU={elimde:"Elimde",satildi:"Satıldı",gunde:"Gün grubunda"};
+var ALTIN_DURUM_SIRA=["elimde","satildi","gunde","hediye","elden"];
+var ALTIN_DURUM_KISA={elimde:"ELİMDE",satildi:"SATILDI",gunde:"GÜNDE",hediye:"HEDİYE",elden:"ELDEN ÇIKARILDI"};
+var ALTIN_DURUM_FORM={elimde:"Elimde",satildi:"Satıldı",gunde:"Günde",hediye:"Hediye",elden:"Elden çıkarıldı"};
+var ALTIN_DURUM_IPUCU={elimde:"Elimde",satildi:"Satıldı",gunde:"Gün grubunda",hediye:"Hediye",elden:"Elden çıkarıldı"};
+var ALTIN_DURUM_SINIF={elimde:"alt-elimde-btn",satildi:"alt-satildi-btn",gunde:"alt-gunde-btn",hediye:"alt-hediye-btn",elden:"alt-elden-btn"};
 function altDurumNorm(d){
-  if(d==="satildi"||d==="gunde")return d;
+  if(ALTIN_DURUM_KISA[d])return d;
   return "elimde";
 }
 function altDurumSonraki(d){
@@ -1193,9 +1194,7 @@ function altDurumBtnGuncelle(){
   if(hid)hid.value=d;
   if(!btn)return;
   btn.textContent=ALTIN_DURUM_FORM[d];
-  btn.classList.toggle("alt-durum-btn--satildi",d==="satildi");
-  btn.classList.toggle("alt-durum-btn--gunde",d==="gunde");
-  btn.classList.toggle("alt-durum-btn--elimde",d==="elimde");
+  ALTIN_DURUM_SIRA.forEach(function(k){btn.classList.toggle("alt-durum-btn--"+k,d===k);});
   btn.title=ALTIN_DURUM_IPUCU[d]+" — tıkla: "+ALTIN_DURUM_IPUCU[altDurumSonraki(d)];
 }
 function altDurumDegistir(){
@@ -1474,7 +1473,7 @@ function arender(){
   var genelTL=_kayitlar.reduce(function(s,k){return s+(parseFloat(k.tlKarsiligi)||0);},0);
   var genelOrt=genelGram>0?(genelTL/genelGram):0;
 
-  /* Elimdeki özeti — gün grubu ve satılanlar dahil değil */
+  /* Elimdeki özeti — yalnızca durum=elimde; gün, satıldı, hediye ve elden çıkarıldı dahil değil */
   var elimde=_kayitlar.filter(altElimdeMi);
   var elimdeAdet=elimde.reduce(function(s,k){return s+(parseFloat(k.adet)||0);},0);
   var elimdeGram=elimde.reduce(function(s,k){return s+(parseFloat(k.gram)||0);},0);
@@ -1504,7 +1503,7 @@ function arender(){
 
   /* Bölüm 2: Elimdeki — 6 metrik */
   h+='<div class="alt-ozet-bolum alt-ozet-bolum--elimde">';
-  h+='<div class="alt-ozet-baslik alt-elimde-baslik" title="Gün grubundaki ve satılan altın bu hesaba girmez">ELİMDEKİ ALTIN</div>';
+  h+='<div class="alt-ozet-baslik alt-elimde-baslik" title="Gün grubu, satılan, hediye ve elden çıkarılan altın bu hesaba girmez">ELİMDEKİ ALTIN</div>';
   h+='<div class="alt-ozet alt-ozet--elimde">';
   h+='<div class="alt-oz-item"><span class="alt-oz-label">ADET</span><span class="alt-oz-val">'+elimdeAdet+'</span></div>';
   h+='<div class="alt-oz-item"><span class="alt-oz-label">GRAM</span><span class="alt-oz-val alt-oz-gold">'+agr(elimdeGram)+'</span></div>';
@@ -1539,6 +1538,7 @@ function arender(){
   if(filtreVar){
     var fGram=liste.reduce(function(s,k){return s+(parseFloat(k.gram)||0);},0);
     var fTL=liste.reduce(function(s,k){return s+(parseFloat(k.tlKarsiligi)||0);},0);
+    var fGuncel=_guncelGramFiyat>0?fGram*_guncelGramFiyat:0;
     var parca=[];
     if(_filtreDurum)parca.push("Durum: "+Object.keys(_filtreDurum).map(hkEsc).join(", "));
     if(_filtreAdet)parca.push("Adet: "+Object.keys(_filtreAdet).length);
@@ -1546,7 +1546,7 @@ function arender(){
       var nerdeSec=Object.keys(_filtreNerde);
       parca.push("Nerede: "+(nerdeSec.length<=2?nerdeSec.map(hkEsc).join(", "):nerdeSec.length+" seçim"));
     }
-    h+='<div class="alt-filtre-ozet-inline">'+parca.join(" · ")+' &nbsp;·&nbsp; '+liste.length+' kayıt &nbsp;·&nbsp; <b>'+agr(fGram)+' gr</b> &nbsp;·&nbsp; <b>'+apara(fTL)+' TL</b></div>';
+    h+='<div class="alt-filtre-ozet-inline">'+parca.join(" · ")+' &nbsp;·&nbsp; '+liste.length+' kayıt &nbsp;·&nbsp; <b>'+agr(fGram)+' gr</b> &nbsp;·&nbsp; <b>'+apara(fTL)+' TL</b> &nbsp;·&nbsp; <b class="alt-filtre-guncel">güncel '+(_guncelGramFiyat>0?apara(fGuncel):"—")+'</b></div>';
     h+='<button type="button" class="alt-filtre-temiz" id="alt-filtre-temizle">Temizle</button>';
   }
   h+='</div>';
@@ -1561,8 +1561,8 @@ function arender(){
     liste.forEach(function(k){
       var gF=k.gram>0?(k.tlKarsiligi/k.gram):0;
       var durum=altDurumNorm(k.durum);
-      var durumSinif=durum==="satildi"?"alt-satildi-btn":durum==="gunde"?"alt-gunde-btn":"alt-elimde-btn";
-      var satirSinif=durum==="satildi"?" alt-satir-satildi":durum==="gunde"?" alt-satir-gunde":"";
+      var durumSinif=ALTIN_DURUM_SINIF[durum]||"alt-elimde-btn";
+      var satirSinif=durum==="elimde"?"":" alt-satir-"+durum;
       h+='<tr class="alt-satir'+satirSinif+'">';
       h+='<td class="alt-td-durum"><button type="button" class="alt-durum-btn '+durumSinif+'" data-id="'+k.id+'" title="'+ALTIN_DURUM_IPUCU[durum]+' — tıkla: '+ALTIN_DURUM_IPUCU[altDurumSonraki(durum)]+'">'+ALTIN_DURUM_KISA[durum]+'</button></td>';
       h+='<td class="alt-td-tarih" data-l="Tarih">'+atarihFmt(k.tarih)+'</td>';
