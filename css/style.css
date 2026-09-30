@@ -9574,3 +9574,35 @@ html.theme-light .alt-durum-cycle.alt-durum-btn--elden{color:#c2410c;background:
   .alt-filtre-satir--bos{display:flex;}
 }
 
+/* Altın üst bilgi satırı — %30 büyük */
+.alt-header{
+  gap:7.8px 13px;
+  padding:10.4px 13px;
+}
+.alt-ozet-bolum{gap:7.8px 10.4px;}
+.alt-ozet-baslik{font-size:11.7px;}
+.alt-ozet,.alt-ozet--tum,.alt-ozet--elimde{gap:2.6px 13px;}
+.alt-oz-item{gap:5.2px;}
+.alt-oz-label{font-size:11.7px;}
+.alt-oz-val{font-size:15.6px;}
+.alt-oz-val small{font-size:11.7px;}
+.alt-fiyat-kutu{gap:6.5px;padding:5.2px 10.4px;}
+.alt-fiyat-label{font-size:11.7px;}
+.alt-fiyat-val{font-size:15.6px;}
+.alt-fiyat-guncelle{font-size:18.2px;}
+.alt-yeni-btn{padding:7.8px 15.6px;font-size:15.6px;border-radius:10px;}
+@media (max-width:600px){
+  .alt-header{padding:7.8px 10.4px !important;gap:6.5px !important;}
+  .alt-ozet-bolum{gap:3.9px !important;}
+  .alt-ozet-baslik{font-size:10.4px !important;}
+  .alt-ozet--tum,.alt-ozet--elimde{gap:3.9px 10.4px !important;}
+  .alt-oz-item{gap:3.9px !important;}
+  .alt-oz-label{font-size:10.4px !important;}
+  .alt-oz-val{font-size:14.3px !important;}
+  .alt-oz-val small{font-size:10.4px !important;}
+  .alt-fiyat-kutu{padding:5.2px 9.1px !important;}
+  .alt-fiyat-label{font-size:10.4px !important;}
+  .alt-fiyat-val{font-size:14.3px !important;}
+  .alt-yeni-btn{padding:7.8px 13px !important;font-size:14.3px !important;}
+}
+
