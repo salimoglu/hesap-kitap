@@ -5086,8 +5086,11 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .vf2-parca-altin span{font-size:11px;color:var(--text-muted);font-variant-numeric:tabular-nums;}
 .vf2-parca-borc{background:rgba(240,184,64,0.16);color:var(--gold);}
 .vf2-parca-borc:hover{background:rgba(240,184,64,0.28);}
-.vf2-kisi-sec{width:100%;min-width:0;height:32px;padding:0 8px;border-radius:8px;border:1px solid var(--border);background:var(--bg-elevated);color:var(--text-primary);font-size:12px;font-weight:700;}
+.vf2-kime{display:flex;flex-direction:column;gap:4px;min-width:0;}
+.vf2-kisi-sec,.vf2-dis-ad{width:100%;min-width:0;height:32px;padding:0 8px;border-radius:8px;border:1px solid var(--border);background:var(--bg-elevated);color:var(--text-primary);font-size:12px;font-weight:700;font-family:inherit;}
 .vf2-kisi-sec:disabled{opacity:0.45;}
+.vf2-dis-ad{border-color:var(--gold);}
+.vf2-dis-ad::placeholder{color:var(--text-muted);font-weight:600;}
 .vf2-parca-ozet{width:280px;flex:0 0 280px;display:flex;flex-direction:column;gap:8px;position:sticky;top:0;}
 .vf2-yan-kart{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:12px;}
 .vf2-yan-bas{font-size:10px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);}
@@ -5104,7 +5107,7 @@ body.hk-kat-alt-modal-acik #modal-kategori {
   .vf2-parca-yerlesim{flex-direction:column;}
   .vf2-parca-ozet{width:100%;flex-basis:auto;position:static;}
   .vf2-parca-baslik,.vf2-parca-satir{grid-template-columns:minmax(0,1.1fr) 92px minmax(0,1fr);gap:6px;padding:8px;}
-  .vf2-kisi-sec{font-size:11px;padding:0 4px;}
+  .vf2-kisi-sec,.vf2-dis-ad{font-size:11px;padding:0 4px;}
 }
 
 /* === ISLEMLER -- AY NAVIGATORU === */
