@@ -133,7 +133,7 @@ var HK_TANITIM = (function () {
         "Grup halinde birikim ve vefa odemelerini yonetin. Uye bazli paylasim ve altin veya nakit katkilari takip edilir.",
       ipuclari: [
         "Uyeleri ekleyip aylik odeme plani olusturun.",
-        "Altinlarin durumu sekmesinde her altin kucukten buyuge listelenir. Elimde veya Borc durumuna tiklayin ve gruptan kime verildigini secin. Sagda ozet olusur.",
+        "Altinlarin durumu sekmesinde her altin kucukten buyuge listelenir. Elimde veya Borc durumuna tiklayin ve kime verildigini secin. Listenin sonunda Grup disi vardir; secince isim elle yazilir. Sagda ozet olusur.",
       ],
     },
     muhtac: {
