@@ -5073,6 +5073,39 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .vf2-kapsam{display:flex;gap:6px;}
 .vf2-kapsam-btn{flex:1;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-secondary);font-size:12px;font-weight:800;padding:8px 10px;cursor:pointer;}
 .vf2-kapsam-aktif{border-color:var(--gold);color:var(--gold);background:rgba(240,184,64,0.1);}
+.vf2-parca-yerlesim{display:flex;gap:12px;align-items:flex-start;flex:0 0 auto;width:100%;}
+.vf2-parca-liste-wrap{flex:1 1 auto;min-width:0;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;}
+.vf2-parca-baslik,.vf2-parca-satir{display:grid;grid-template-columns:minmax(140px,1.3fr) 108px minmax(150px,1fr);gap:8px;align-items:center;padding:8px 12px;}
+.vf2-parca-baslik{font-size:9px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);background:var(--bg-elevated);border-bottom:1px solid var(--border);}
+.vf2-parca-liste{display:flex;flex-direction:column;}
+.vf2-parca-satir{border-bottom:1px solid var(--border);}
+.vf2-parca-satir:last-child{border-bottom:none;}
+.vf2-parca-satir-borc{background:rgba(240,184,64,0.05);}
+.vf2-parca-altin{display:flex;flex-direction:column;gap:2px;min-width:0;}
+.vf2-parca-altin b{font-size:13px;font-weight:700;color:var(--text-primary);}
+.vf2-parca-altin span{font-size:11px;color:var(--text-muted);font-variant-numeric:tabular-nums;}
+.vf2-parca-borc{background:rgba(240,184,64,0.16);color:var(--gold);}
+.vf2-parca-borc:hover{background:rgba(240,184,64,0.28);}
+.vf2-kisi-sec{width:100%;min-width:0;height:32px;padding:0 8px;border-radius:8px;border:1px solid var(--border);background:var(--bg-elevated);color:var(--text-primary);font-size:12px;font-weight:700;}
+.vf2-kisi-sec:disabled{opacity:0.45;}
+.vf2-parca-ozet{width:280px;flex:0 0 280px;display:flex;flex-direction:column;gap:8px;position:sticky;top:0;}
+.vf2-yan-kart{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:12px;}
+.vf2-yan-bas{font-size:10px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);}
+.vf2-yan-gram{margin-top:4px;font-size:18px;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums;}
+.vf2-yan-kart-borc .vf2-yan-gram{color:var(--gold);}
+.vf2-yan-kart:first-child .vf2-yan-gram{color:var(--green);}
+.vf2-yan-tl{margin-top:4px;font-size:12px;font-weight:700;color:var(--text-secondary);font-variant-numeric:tabular-nums;}
+.vf2-yan-chips{margin-top:6px;}
+.vf2-yan-bos{margin-top:6px;font-size:12px;color:var(--text-muted);}
+.vf2-yan-kisi{margin-top:10px;padding-top:8px;border-top:1px solid var(--border);}
+.vf2-yan-kisi-ad{font-size:13px;font-weight:800;color:var(--text-primary);}
+.vf2-yan-kisi-gr{margin-top:2px;font-size:12px;font-weight:700;color:var(--text-secondary);font-variant-numeric:tabular-nums;}
+@media (max-width:720px){
+  .vf2-parca-yerlesim{flex-direction:column;}
+  .vf2-parca-ozet{width:100%;flex-basis:auto;position:static;}
+  .vf2-parca-baslik,.vf2-parca-satir{grid-template-columns:minmax(0,1.1fr) 92px minmax(0,1fr);gap:6px;padding:8px;}
+  .vf2-kisi-sec{font-size:11px;padding:0 4px;}
+}
 
 /* === ISLEMLER -- AY NAVIGATORU === */
 .ay-nav { display:flex; align-items:stretch; gap:4px; flex:1 1 auto; min-width:0; }
