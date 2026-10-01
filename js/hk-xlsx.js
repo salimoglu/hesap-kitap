@@ -346,7 +346,9 @@
       parts.push("</mergeCells>");
     }
     parts.push('<printOptions horizontalCentered="1"/>');
-    parts.push('<pageMargins left="0.5" right="0.5" top="0.6" bottom="0.55" header="0.3" footer="0.3"/>');
+    var mg = sheet.margins || {};
+    function mgv(k, d) { return mg[k] == null ? d : mg[k]; }
+    parts.push('<pageMargins left="' + mgv("left", 0.5) + '" right="' + mgv("right", 0.5) + '" top="' + mgv("top", 0.6) + '" bottom="' + mgv("bottom", 0.55) + '" header="' + mgv("header", 0.3) + '" footer="' + mgv("footer", 0.3) + '"/>');
     parts.push('<pageSetup paperSize="9" orientation="portrait" fitToWidth="1" fitToHeight="1"/>');
     if (sheet.footer) {
       parts.push("<headerFooter><oddFooter>" + xmlEsc(sheet.footer) + "</oddFooter></headerFooter>");

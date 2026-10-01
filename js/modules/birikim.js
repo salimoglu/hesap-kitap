@@ -5,6 +5,7 @@ var BirikimModule = (function() {
   var _kategoriler = [];
   var _manuelIslemler = {}; // { kalemAd: [{id,tarih,tutar,aciklama}] }
   var _besKayitlar = []; // [{id, ad, aylik}] — sadece hatırlatma, alttaki birikime karışmaz
+  var _besYuklendi = false;
   var _aktifKalem = null;
   var _aktifBesId = null;
   var _modalKoruma = 0;
@@ -99,6 +100,27 @@ var BirikimModule = (function() {
       if(yerel.length) _besKayitlar = yerel;
     }
     besYerelYaz();
+    _besYuklendi = true;
+  }
+  function besRapor(){
+    var kayitlar = _besKayitlar.map(function(k){
+      return { ad: k.ad, tutar: parseFloat(k.aylik) || 0 };
+    });
+    var toplam = 0;
+    kayitlar.forEach(function(k){ toplam += k.tutar; });
+    return { kayitlar: kayitlar, toplam: toplam };
+  }
+  async function besRaporGetir(){
+    if(!_besYuklendi){
+      if(typeof window._fbDb !== "undefined" && window._fbDb){
+        try { await fbYukle(); } catch (e) {}
+      }
+      if(!_besKayitlar.length){
+        var yerel = besYerelOku();
+        if(yerel.length) _besKayitlar = yerel;
+      }
+    }
+    return besRapor();
   }
   async function fbKaydet(){
     if(typeof window._fbDb!=="undefined"&&window._fbDb){
@@ -748,5 +770,5 @@ var BirikimModule = (function() {
     window.addEventListener("hk-islemler-degisti", birikimCanliYenile);
   }
 
-  return{init:init};
+  return{init:init, besRaporGetir:besRaporGetir};
 })();
