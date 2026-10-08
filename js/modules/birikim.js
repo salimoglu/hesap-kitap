@@ -8,6 +8,7 @@ var BirikimModule = (function() {
   var _donusumler = []; // [{id,tarih,hedef,not,bozulan:[{kalem,tutar}],eklenen:[{aciklama,tutar}]}]
   var _besYuklendi = false;
   var _dnKaydediyor = false;
+  var _dnKilitHedef = "";
   var _dnNesil = 0;
   var _yukleNesil = 0;
   var _aktifKalem = null;
@@ -748,6 +749,7 @@ var BirikimModule = (function() {
       h+='<button type="button" class="bk-hikaye-geri" data-id="'+esc(d.id)+'">Bu dönüşümü geri al</button>';
       h+='</div>';
     });
+    h+='<button type="button" class="bk-hikaye-ekle" data-hedef="'+esc(ad)+'">Başka birikimden ekle</button>';
     h+='</div>';
     return h;
   }
@@ -925,10 +927,10 @@ var BirikimModule = (function() {
     /* Birikimi başka birikime dönüştürme */
     h+='<div class="bk-modal-overlay hidden" id="bk-donusum-modal">';
     h+='<div class="modal-box bk-donusum-kutu">';
-    h+='<div class="modal-header"><h2 class="modal-title">Birikimi d\u00f6n\u00fc\u015ft\u00fcr</h2>';
+    h+='<div class="modal-header"><h2 class="modal-title" id="bk-dn-baslik">Birikimi d\u00f6n\u00fc\u015ft\u00fcr</h2>';
     h+='<button class="modal-close" id="bk-dn-kapat" type="button">&#10005;</button></div>';
     h+='<div class="modal-body">';
-    h+='<p class="bk-dn-giris">Birikimleri bozup yeni bir birikime aktar\u0131n. Kayıtlardaki tutardan fazlasını da yazabilirsiniz; fark, programdan önce yatırdığınız ve değerlenen kısım sayılır. Eve eklediğiniz parayı da yazın.</p>';
+    h+='<p class="bk-dn-giris" id="bk-dn-giris">Birikimleri bozup yeni bir birikime aktar\u0131n. Kayıtlardaki tutardan fazlasını da yazabilirsiniz; fark, programdan önce yatırdığınız ve değerlenen kısım sayılır. Eve eklediğiniz parayı da yazın.</p>';
     h+='<div class="field-group"><label class="field-label" for="bk-dn-tarih">Tarih</label>';
     h+='<input type="date" id="bk-dn-tarih" class="field-input" value="'+bugun()+'"/></div>';
     h+='<div class="field-group"><label class="field-label" for="bk-dn-hedef">Neye d\u00f6n\u00fc\u015fs\u00fcn</label>';
@@ -1246,7 +1248,8 @@ var BirikimModule = (function() {
       '<div class="bk-dn-ozet-satir bk-dn-ozet-son"><span>'+esc(ad)+'</span><strong>'+para(kurus(boz+ek))+' TL</strong></div>';
   }
 
-  function donusumModalDoldur(){
+  function donusumModalDoldur(kilitHedef){
+    _dnKilitHedef=String(kilitHedef||"").trim();
     var kalemler=tumKalemler();
     var adlar=Object.keys(kalemler).sort(function(a,b){return a.localeCompare(b,"tr");});
     var kutu=$("bk-dn-kaynaklar");
@@ -1257,6 +1260,7 @@ var BirikimModule = (function() {
       (kalemler[ad]||[]).forEach(function(i){bakiye+=parseFloat(i.tutar)||0;});
       bakiye=kurus(bakiye);
       if(bakiye<=0.009) return;
+      if(_dnKilitHedef&&kalemEsit(ad,_dnKilitHedef)) return;
       say++;
       h+='<div class="bk-dn-kaynak" data-kalem="'+encodeURIComponent(ad)+'" data-bakiye="'+bakiye+'">';
       h+='<div class="bk-dn-kaynak-ust">';
@@ -1269,7 +1273,11 @@ var BirikimModule = (function() {
       h+='</div>';
       h+='<div class="bk-dn-fazla hidden"></div></div>';
     });
-    if(!say) h='<p class="bk-dn-yok">Bozulacak bakiyesi olan birikim yok.</p>';
+    if(!say){
+      h=_dnKilitHedef
+        ? '<p class="bk-dn-yok">Eklenecek bakiyesi olan başka birikim yok.</p>'
+        : '<p class="bk-dn-yok">Bozulacak bakiyesi olan birikim yok.</p>';
+    }
     if(kutu) kutu.innerHTML=h;
     var ek=$("bk-dn-eklenen");
     if(ek) ek.innerHTML=eklenenSatirHtml();
@@ -1277,15 +1285,29 @@ var BirikimModule = (function() {
     var notEl=$("bk-dn-not");
     var tarih=$("bk-dn-tarih");
     var hata=$("bk-dn-hata");
-    if(hedef) hedef.value="";
+    var baslik=$("bk-dn-baslik");
+    var giris=$("bk-dn-giris");
+    var kaydetBtn=$("bk-dn-kaydet");
+    if(hedef){
+      hedef.value=_dnKilitHedef||"";
+      hedef.readOnly=!!_dnKilitHedef;
+      hedef.classList.toggle("bk-dn-kilit",!!_dnKilitHedef);
+    }
     if(notEl) notEl.value="";
     if(tarih) tarih.value=bugun();
     if(hata){ hata.textContent=""; hata.classList.add("hidden"); }
+    if(baslik) baslik.textContent=_dnKilitHedef?(_dnKilitHedef+" birikimine ekle"):"Birikimi dönüştür";
+    if(giris){
+      giris.textContent=_dnKilitHedef
+        ? "Bu dönüşüme sonradan başka birikim bozup ekleyebilirsin. Tutar, bugünün tarihiyle aynı kartın hikayesine yazılır. Kayıttan fazlasını da yazabilirsin."
+        : "Birikimleri bozup yeni bir birikime aktarın. Kayıtlardaki tutardan fazlasını da yazabilirsiniz; fark, programdan önce yatırdığınız ve değerlenen kısım sayılır. Eve eklediğiniz parayı da yazın.";
+    }
+    if(kaydetBtn) kaydetBtn.textContent=_dnKilitHedef?"Ekle":"Dönüştür";
     donusumOzetGuncelle();
   }
 
-  function donusumModalAc(){
-    donusumModalDoldur();
+  function donusumModalAc(kilitHedef){
+    donusumModalDoldur(typeof kilitHedef==="string"?kilitHedef:"");
     _modalKoruma=Date.now()+450;
     var modal=$("bk-donusum-modal");
     if(modal){
@@ -1295,7 +1317,8 @@ var BirikimModule = (function() {
     setTimeout(function(){
       var m=$("bk-donusum-modal");
       if(m&&!m.classList.contains("hidden")) m.style.pointerEvents="";
-      var t=$("bk-dn-hedef"); if(t) t.focus();
+      var t=_dnKilitHedef?m&&m.querySelector(".bk-dn-tutar:not([disabled])"):$("bk-dn-hedef");
+      if(t) t.focus();
     },350);
   }
 
@@ -1319,13 +1342,16 @@ var BirikimModule = (function() {
     var hataEl=$("bk-dn-hata");
     if(hataEl){ hataEl.textContent=""; hataEl.classList.add("hidden"); }
     if(!o.tarih||!/^\d{4}-\d{2}-\d{2}$/.test(o.tarih)){ donusumHata("Tarih girin."); return; }
+    if(_dnKilitHedef) o.hedef=_dnKilitHedef;
     if(!o.hedef){
       donusumHata("Neye d\u00f6n\u00fc\u015fece\u011fini yaz\u0131n. \u00d6rne\u011fin Ev.");
       var hedefEl=$("bk-dn-hedef"); if(hedefEl) hedefEl.focus();
       return;
     }
     if(!o.bozulan.length){
-      donusumHata("En az bir birikimden tutar bozun. T\u00fcm\u00fcn\u00fc aktarmak i\u00e7in T\u00fcm birikimi boz d\u00fc\u011fmesini kullan\u0131n.");
+      donusumHata(_dnKilitHedef
+        ? "Eklenecek birikimden tutar yazın."
+        : "En az bir birikimden tutar bozun. T\u00fcm\u00fcn\u00fc aktarmak i\u00e7in T\u00fcm birikimi boz d\u00fc\u011fmesini kullan\u0131n.");
       return;
     }
     for(var i=0;i<o.bozulan.length;i++){
@@ -1379,6 +1405,13 @@ var BirikimModule = (function() {
         e.preventDefault();
         e.stopPropagation();
         donusumGeriAl(btn.getAttribute("data-id"));
+      });
+    });
+    document.querySelectorAll(".bk-hikaye-ekle").forEach(function(btn){
+      btn.addEventListener("click",function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        donusumModalAc(btn.getAttribute("data-hedef")||"");
       });
     });
     var modal=$("bk-donusum-modal");
