@@ -54,6 +54,7 @@ var HK_TANITIM = (function () {
         "Yillik ozet, o yilin birikim/gelir oranini ve her birikim turunun yil icindeki payini gosterir.",
         "Aylik ozet, o ayin birikim/gelir oranini ve her birikim turunun ay icindeki payini gosterir.",
         "Sol ustteki toplam, ilk birikim kaydindan bu yana biriken tutari gosterir.",
+        "Donustur ile birikimleri baska bir birikime aktarin. Ornegin altin, nakit ve fonu bozup ev alirsaniz ev kartinda neyi bozdugunuz ve ne eklediginiz durur. Bozulan kartta da nereye donustugu yazilir.",
       ],
     },
     arabam: {

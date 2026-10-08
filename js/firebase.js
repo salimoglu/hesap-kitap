@@ -242,7 +242,7 @@ function fbKokRef(path) {
 var HK_KOK_MODUL_KEYS = [
   "islemler", "kategoriler", "arabam", "alacaklar", "borclar", "kredi_harcamalar", "kredi_kartlar",
   "urunler", "urun", "cocugum", "cocugum_cocuklar", "altin_kayitlar", "altin_guncel_fiyat", "altin_guncel_fiyat_tarih",
-  "vefa2", "vefa", "muhtac", "verilen_altinlar", "birikim_manuel", "birikim_bes", "butce_sablon"
+  "vefa2", "vefa", "muhtac", "verilen_altinlar", "birikim_manuel", "birikim_bes", "birikim_donusum", "butce_sablon"
 ];
 
 /**
@@ -421,6 +421,13 @@ function fbVeriGecerli(key, val) {
     var bvals = Array.isArray(val) ? val : Object.values(val || {});
     for (var b = 0; b < bvals.length; b++) {
       if (bvals[b] && typeof bvals[b] === "object" && (bvals[b].ad || bvals[b].isim || bvals[b].aylik != null)) return true;
+    }
+    return false;
+  }
+  if (k === "birikim_donusum") {
+    var dvals = Array.isArray(val) ? val : Object.values(val || {});
+    for (var dn = 0; dn < dvals.length; dn++) {
+      if (dvals[dn] && typeof dvals[dn] === "object" && (dvals[dn].hedef || dvals[dn].tarih)) return true;
     }
     return false;
   }
