@@ -6516,9 +6516,17 @@ html.theme-light #birikim-container .bk-bes-satir:hover {
     margin-top: 2px;
     font-size: 10px;
   }
+  #birikim-container .bk-donustur-btn {
+    flex: 1 1 100%;
+    width: 100%;
+    order: 3;
+    margin-top: 0;
+    padding: 8px 12px;
+  }
   #birikim-container .bk-h-ozetler {
     flex: 1 1 100%;
     width: 100%;
+    order: 4;
     grid-template-columns: 1fr;
     gap: 6px;
   }
@@ -6796,7 +6804,8 @@ html.theme-light #birikim-container .bk-bes-satir:hover {
 
 /* Birikim dönüşümü — bozulan kaynak ve oluşan hedef */
 #birikim-container .bk-donustur-btn {
-  margin-top: 8px;
+  align-self: center;
+  margin-top: 0;
   background: transparent;
   border: 1px solid var(--gold);
   color: var(--gold);
@@ -6805,7 +6814,7 @@ html.theme-light #birikim-container .bk-bes-satir:hover {
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.02em;
-  padding: 5px 12px;
+  padding: 6px 14px;
   cursor: pointer;
 }
 #birikim-container .bk-donustur-btn:hover {
@@ -6821,8 +6830,19 @@ html.theme-light #birikim-container .bk-bes-satir:hover {
 #birikim-container .bk-ay-tutar-eksi {
   color: var(--red);
 }
-#birikim-container .bk-kart-toplam-bitti {
-  color: var(--text-muted);
+#birikim-container .bk-kart-toplam-bitti,
+#birikim-container .bk-kart-toplam-donustu {
+  color: var(--gold);
+}
+#birikim-container .bk-kart-donustu-not {
+  margin-top: 2px;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.35;
+  color: var(--text-secondary);
+}
+#birikim-container .bk-kart-donustu {
+  border-color: rgba(240,184,64,0.4);
 }
 #birikim-container .bk-islem-row.bk-donusum-cikis {
   border-left: 2px solid var(--red);
