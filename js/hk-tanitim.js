@@ -54,7 +54,7 @@ var HK_TANITIM = (function () {
         "Yillik ozet, o yilin birikim/gelir oranini ve her birikim turunun yil icindeki payini gosterir.",
         "Aylik ozet, o ayin birikim/gelir oranini ve her birikim turunun ay icindeki payini gosterir.",
         "Sol ustteki toplam, ilk birikim kaydindan bu yana biriken tutari gosterir.",
-        "Donustur ile birikimleri baska bir birikime aktarin. Kayittaki tutardan fazlasini da yazabilirsiniz; fark program oncesi yatirim ve deger artisi sayilir, kart eksiye dusmez. Ev kartinda neyi bozdugunuz ve ne eklediginiz durur.",
+        "Donustur ile birikimleri baska bir birikime aktarin. Kayittaki tutardan fazlasini da yazabilirsiniz. Donusum olustuktan sonra ev kartindaki Baska birikimden ekle ile eski birikimden tutar ekleyebilirsiniz; ilk seferde hepsini girmek zorunda degilsiniz.",
       ],
     },
     arabam: {

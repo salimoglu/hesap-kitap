@@ -6958,6 +6958,26 @@ html.theme-light #birikim-container .bk-bes-satir:hover {
   text-decoration: underline;
 }
 #birikim-container .bk-hikaye-geri:hover { color: var(--red); }
+#birikim-container .bk-hikaye-ekle {
+  align-self: flex-start;
+  margin-top: 2px;
+  background: transparent;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  border-radius: 999px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 800;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+#birikim-container .bk-hikaye-ekle:hover {
+  background: var(--gold);
+  color: #0f1923;
+}
+#bk-donusum-modal .bk-dn-kilit {
+  opacity: 0.85;
+}
 #birikim-container .bk-gitti {
   display: flex;
   flex-direction: column;
