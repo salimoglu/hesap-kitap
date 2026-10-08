@@ -8,6 +8,8 @@ var BirikimModule = (function() {
   var _donusumler = []; // [{id,tarih,hedef,not,bozulan:[{kalem,tutar}],eklenen:[{aciklama,tutar}]}]
   var _besYuklendi = false;
   var _dnKaydediyor = false;
+  var _dnNesil = 0;
+  var _yukleNesil = 0;
   var _aktifKalem = null;
   var _aktifBesId = null;
   var _modalKoruma = 0;
@@ -17,6 +19,22 @@ var BirikimModule = (function() {
     var x=parseFloat(n);
     if(!isFinite(x)) return 0;
     return Math.round(x*100)/100;
+  }
+  /** 1.500,50 / 1,500.50 / 1500 — Türkçe tutar yazımı. */
+  function tutarMetinOku(v){
+    var s=String(v==null?"":v).trim().replace(/\s/g,"");
+    if(!s) return 0;
+    var sonVirgul=s.lastIndexOf(",");
+    var sonNokta=s.lastIndexOf(".");
+    if(sonVirgul>=0 && sonNokta>=0){
+      if(sonVirgul>sonNokta) s=s.replace(/\./g,"").replace(",",".");
+      else s=s.replace(/,/g,"");
+    }else if(sonVirgul>=0){
+      s=s.replace(",",".");
+    }else if(/^\d{1,3}(\.\d{3})+$/.test(s)){
+      s=s.replace(/\./g,"");
+    }
+    return kurus(s);
   }
   function kalemEsit(a,b){
     return String(a||"").trim().toLocaleLowerCase("tr")===String(b||"").trim().toLocaleLowerCase("tr");
@@ -179,28 +197,58 @@ var BirikimModule = (function() {
       return (d.bozulan||[]).some(function(b){return kalemEsit(b.kalem,ad);});
     });
   }
+  function donusenTutar(ad){
+    var t=0;
+    donusumlerKaynak(ad).forEach(function(d){
+      (d.bozulan||[]).forEach(function(b){
+        if(kalemEsit(b.kalem,ad)) t+=kurus(b.tutar);
+      });
+    });
+    return kurus(t);
+  }
+  function donusumHedefAdlari(ad){
+    var adlar=[];
+    donusumlerKaynak(ad).forEach(function(d){
+      if(d.hedef && adlar.indexOf(d.hedef)<0) adlar.push(d.hedef);
+    });
+    return adlar;
+  }
 
   async function fbYukle(){
+    var nesil = _dnNesil;
     var besFbOk = false;
     var dnFbOk = false;
+    var gelenDn = [];
     if(typeof window._fbDb!=="undefined"&&window._fbDb){
       try{var v=await fbRtdbOku("birikim_manuel");_manuelIslemler=v||{};}
       catch(e){_manuelIslemler={};console.error("[Birikim] yukle",(e&&e.code)||e.message||e);}
       try{var b=await fbRtdbOku("birikim_bes");_besKayitlar=besNormalize(b);besFbOk=true;}
       catch(e){_besKayitlar=[];console.error("[Birikim] bes yukle",(e&&e.code)||e.message||e);}
-      try{var dn=await fbRtdbOku("birikim_donusum");_donusumler=donusumNormalize(dn);dnFbOk=true;}
-      catch(e){_donusumler=[];console.error("[Birikim] donusum yukle",(e&&e.code)||e.message||e);}
+      try{var dn=await fbRtdbOku("birikim_donusum");gelenDn=donusumNormalize(dn);dnFbOk=true;}
+      catch(e){gelenDn=[];console.error("[Birikim] donusum yukle",(e&&e.code)||e.message||e);}
     }
+    if(nesil!==_dnNesil) return;
     if(!besFbOk || !_besKayitlar.length){
       var yerel = besYerelOku();
       if(yerel.length) _besKayitlar = yerel;
     }
     besYerelYaz();
-    if(!dnFbOk){
+    if(dnFbOk && gelenDn.length){
+      _donusumler = gelenDn;
+      donusumYerelYaz();
+    }else{
       var yerelDn = donusumYerelOku();
-      if(yerelDn.length) _donusumler = yerelDn;
+      if(nesil!==_dnNesil) return;
+      if(yerelDn.length){
+        _donusumler = yerelDn;
+        if(dnFbOk){
+          try { await fbDonusumKaydet(); } catch (eDn) {}
+        }
+      }else if(dnFbOk){
+        _donusumler = [];
+        donusumYerelYaz();
+      }
     }
-    donusumYerelYaz();
     _besYuklendi = true;
   }
   function besRapor(){
@@ -239,6 +287,7 @@ var BirikimModule = (function() {
     }
   }
   async function fbDonusumKaydet(){
+    _dnNesil++;
     donusumYerelYaz();
     if(typeof window._fbDb!=="undefined"&&window._fbDb){
       try{
@@ -431,7 +480,11 @@ var BirikimModule = (function() {
         ayMap[ay].kalemler[ad]=(ayMap[ay].kalemler[ad]||0)+tutar;
       });
     });
-    var aylar=Object.keys(ayMap).filter(function(a){return (ayMap[a].toplam||0)!==0;}).sort(function(a,b){return b.localeCompare(a);});
+    var aylar=Object.keys(ayMap).filter(function(a){
+      var kayit=ayMap[a]||{toplam:0,kalemler:{}};
+      if((kayit.toplam||0)!==0) return true;
+      return Object.keys(kayit.kalemler||{}).some(function(ad){return (parseFloat(kayit.kalemler[ad])||0)!==0;});
+    }).sort(function(a,b){return b.localeCompare(a);});
     var maxAyAmt=0;
     aylar.forEach(function(a){if(ayMap[a].toplam>maxAyAmt)maxAyAmt=ayMap[a].toplam;});
     return {ayMap:ayMap,aylar:aylar,maxAyAmt:maxAyAmt};
@@ -496,7 +549,11 @@ var BirikimModule = (function() {
         yKalem[y][ad]=(yKalem[y][ad]||0)+tutar;
       });
     });
-    var yillar=Object.keys(yToplam).filter(function(yy){return (yToplam[yy]||0)!==0;}).sort(function(a,b){return b.localeCompare(a);});
+    var yillar=Object.keys(yKalem).filter(function(yy){
+      if((yToplam[yy]||0)!==0) return true;
+      var kalem=yKalem[yy]||{};
+      return Object.keys(kalem).some(function(ad){return (parseFloat(kalem[ad])||0)!==0;});
+    }).sort(function(a,b){return b.localeCompare(a);});
     var maxYearAmt=0;
     yillar.forEach(function(yy){if(yToplam[yy]>maxYearAmt)maxYearAmt=yToplam[yy];});
     return { yToplam:yToplam,yKalem:yKalem,yillar:yillar,maxYearAmt:maxYearAmt };
@@ -683,9 +740,14 @@ var BirikimModule = (function() {
       if(bakiye>0.009) donusturulebilir=true;
     });
     adlar.sort(function(a,b){
-      var ah=donusumlerHedef(a).length?0:1;
-      var bh=donusumlerHedef(b).length?0:1;
-      if(ah!==bh) return ah-bh;
+      function sira(ad){
+        if(donusumlerHedef(ad).length) return 0;
+        if((bakiyeler[ad]||0)>0.009) return 1;
+        if(donusumlerKaynak(ad).length) return 2;
+        return 1;
+      }
+      var d=sira(a)-sira(b);
+      if(d) return d;
       return a.localeCompare(b,"tr");
     });
 
@@ -705,10 +767,10 @@ var BirikimModule = (function() {
     if(baslangic){
       h+='<div class="bk-gt-baslangic" title="\u0130lk birikim kayd\u0131">Ba\u015flang\u0131\u00e7: '+esc(tarihGunEtiket(baslangic))+'</div>';
     }
+    h+='</div>';
     if(donusturulebilir){
       h+='<button type="button" class="bk-donustur-btn" id="bk-donustur-ac">D\u00f6n\u00fc\u015ft\u00fcr</button>';
     }
-    h+='</div>';
     h+=besKartHtml();
     if(yOz.yillar.length>0||ayOz.aylar.length>0){
       h+='<div class="bk-h-ozetler">';
@@ -732,15 +794,28 @@ var BirikimModule = (function() {
         var buay = liste.filter(function(i){return i.tarih&&i.tarih.startsWith(ay);}).reduce(function(s,i){return s+i.tutar;},0);
         var hikayeVar = donusumlerHedef(ad).length>0;
         var gittiVar = donusumlerKaynak(ad).length>0;
+        var donusen = gittiVar ? donusenTutar(ad) : 0;
+        var tamamiGitti = gittiVar && Math.abs(toplam)<0.009 && donusen>0.009;
+        var hedefler = gittiVar ? donusumHedefAdlari(ad) : [];
+        var hedefYazi = hedefler.join(", ");
         var toplamSinif = "bk-kart-toplam";
+        var kartTutar = toplam;
         if(toplam<-0.009) toplamSinif += " bk-kart-toplam-eksi";
-        else if(Math.abs(toplam)<0.009 && gittiVar) toplamSinif += " bk-kart-toplam-bitti";
+        else if(tamamiGitti){
+          toplamSinif += " bk-kart-toplam-donustu";
+          kartTutar = donusen;
+        }
 
-        h+='<div class="bk-kart'+(hikayeVar?" bk-kart-hikaye":"")+'">';
+        h+='<div class="bk-kart'+(hikayeVar?" bk-kart-hikaye":"")+(tamamiGitti?" bk-kart-donustu":"")+'">';
         h+='<div class="bk-kart-ust">';
         h+='<div class="bk-kart-info">';
         h+='<div class="bk-kart-label">'+esc(ad)+'</div>';
-        h+='<div class="'+toplamSinif+'">'+para(toplam)+' TL</div>';
+        h+='<div class="'+toplamSinif+'">'+para(kartTutar)+' TL</div>';
+        if(tamamiGitti){
+          h+='<div class="bk-kart-donustu-not">Tamam\u0131 '+esc(hedefYazi)+' birikimine d\u00f6n\u00fc\u015ft\u00fc</div>';
+        }else if(gittiVar){
+          h+='<div class="bk-kart-donustu-not">'+para(donusen)+' TL '+esc(hedefYazi)+' birikimine d\u00f6n\u00fc\u015ft\u00fc</div>';
+        }
         h+='</div>';
         h+='<button class="bk-ekle-btn" data-id="'+encodeURIComponent(ad)+'" title="Manuel ekle">+</button>';
         h+='</div>';
@@ -1014,7 +1089,7 @@ var BirikimModule = (function() {
   function eklenenSatirHtml(){
     return '<div class="bk-dn-ek">'+
       '<input type="text" class="field-input bk-dn-ek-ad" placeholder="Kredi, elden, maa\u015f..." maxlength="80"/>'+
-      '<input type="number" class="field-input bk-dn-ek-tutar" placeholder="0" min="0" step="0.01" inputmode="decimal"/>'+
+      '<input type="text" class="field-input bk-dn-ek-tutar" placeholder="0" inputmode="decimal" autocomplete="off"/>'+
       '<button type="button" class="bk-dn-ek-sil" title="Sat\u0131r\u0131 sil">&#10005;</button>'+
       '</div>';
   }
@@ -1034,7 +1109,7 @@ var BirikimModule = (function() {
     document.querySelectorAll("#bk-donusum-modal .bk-dn-kaynak").forEach(function(row){
       var inp=row.querySelector(".bk-dn-tutar");
       if(!inp||inp.disabled) return;
-      var tutar=kurus(inp.value);
+      var tutar=tutarMetinOku(inp.value);
       if(tutar<=0) return;
       bozulan.push({
         kalem:decodeURIComponent(row.getAttribute("data-kalem")||""),
@@ -1046,7 +1121,7 @@ var BirikimModule = (function() {
     document.querySelectorAll("#bk-donusum-modal .bk-dn-ek").forEach(function(row){
       var tutEl=row.querySelector(".bk-dn-ek-tutar");
       var adEl=row.querySelector(".bk-dn-ek-ad");
-      var tutar=kurus(tutEl?tutEl.value:0);
+      var tutar=tutarMetinOku(tutEl?tutEl.value:0);
       if(tutar<=0) return;
       eklenen.push({aciklama:String(adEl?adEl.value:"").trim(),tutar:tutar});
     });
@@ -1113,7 +1188,7 @@ var BirikimModule = (function() {
       h+='<span class="bk-dn-kaynak-bak">Bakiye '+para(bakiye)+' TL</span>';
       h+='</div>';
       h+='<div class="bk-dn-kaynak-alt">';
-      h+='<input type="number" class="field-input bk-dn-tutar" min="0" step="0.01" inputmode="decimal" placeholder="Bozulacak tutar" aria-label="'+esc(ad)+' bozulacak tutar"/>';
+      h+='<input type="text" class="field-input bk-dn-tutar" inputmode="decimal" placeholder="Bozulacak tutar" aria-label="'+esc(ad)+' bozulacak tutar" autocomplete="off"/>';
       h+='<button type="button" class="bk-dn-tumu">T\u00fcm\u00fc</button>';
       h+='</div></div>';
     });
@@ -1314,8 +1389,11 @@ var BirikimModule = (function() {
   }
 
   async function init(){
+    var nesil=++_yukleNesil;
     await birikimVeriYenile();
+    if(nesil!==_yukleNesil) return;
     await fbYukle();
+    if(nesil!==_yukleNesil) return;
     render();
   }
 
