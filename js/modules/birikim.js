@@ -139,14 +139,19 @@ var BirikimModule = (function() {
         var kalem=String(b.kalem||b.ad||"").trim().replace(/\s+/g," ");
         var tutar=kurus(b.tutar);
         if(!kalem||tutar<=0||kalemEsit(kalem,hedef)) return;
+        var kayitli=(b.kayitli!=null&&b.kayitli!=="")?kurus(b.kayitli):tutar;
+        if(kayitli<0) kayitli=0;
+        if(kayitli>tutar) kayitli=tutar;
         var key=kalem.toLocaleLowerCase("tr");
         if(!birlesik[key]){
-          birlesik[key]={kalem:kalem.slice(0,60),tutar:0};
+          birlesik[key]={kalem:kalem.slice(0,60),tutar:0,kayitli:0};
           sira.push(key);
         }
         birlesik[key].tutar=kurus(birlesik[key].tutar+tutar);
+        birlesik[key].kayitli=kurus(birlesik[key].kayitli+kayitli);
       });
       var bozulan=sira.map(function(key){return birlesik[key];}).filter(function(b){return b.tutar>0;});
+      bozulan.forEach(function(b){ if(b.kayitli>b.tutar) b.kayitli=b.tutar; });
       var eklenen=[];
       (Array.isArray(x.eklenen)?x.eklenen:[]).forEach(function(e){
         if(!e||typeof e!=="object") return;
@@ -202,6 +207,27 @@ var BirikimModule = (function() {
     donusumlerKaynak(ad).forEach(function(d){
       (d.bozulan||[]).forEach(function(b){
         if(kalemEsit(b.kalem,ad)) t+=kurus(b.tutar);
+      });
+    });
+    return kurus(t);
+  }
+  /** Kayıtlarda duran kısım. Eski kayıtlarda alan yoksa tutarın tamamı kayıtlı sayılır. */
+  function bozulanKayitli(b){
+    var tutar=kurus(b&&b.tutar);
+    if(!b||(b.kayitli==null||b.kayitli==="")) return tutar;
+    var k=kurus(b.kayitli);
+    if(k<0) k=0;
+    if(k>tutar) k=tutar;
+    return k;
+  }
+  function bozulanFark(b){
+    return kurus(kurus(b&&b.tutar)-bozulanKayitli(b));
+  }
+  function donusenFark(ad){
+    var t=0;
+    donusumlerKaynak(ad).forEach(function(d){
+      (d.bozulan||[]).forEach(function(b){
+        if(kalemEsit(b.kalem,ad)) t+=bozulanFark(b);
       });
     });
     return kurus(t);
@@ -614,10 +640,24 @@ var BirikimModule = (function() {
     _donusumler.forEach(function(d){
       (d.bozulan||[]).forEach(function(b){
         if(!sonuc[b.kalem]) sonuc[b.kalem]=[];
+        var tutar=kurus(b.tutar);
+        var fark=bozulanFark(b);
+        if(fark>0.009){
+          sonuc[b.kalem].push({
+            id:d.id+"_deger_"+b.kalem,
+            tarih:d.tarih,
+            tutar:fark,
+            aciklama:"Kayıtlarda yoktu · program öncesi ve değer artışı",
+            kaynak:"donusum",
+            yon:"deger",
+            donusumId:d.id,
+            hedef:d.hedef
+          });
+        }
         sonuc[b.kalem].push({
           id:d.id+"_boz_"+b.kalem,
           tarih:d.tarih,
-          tutar:-kurus(b.tutar),
+          tutar:-tutar,
           aciklama:d.hedef+" için bozuldu",
           kaynak:"donusum",
           yon:"bozulan",
@@ -683,7 +723,12 @@ var BirikimModule = (function() {
       h+='<div class="bk-hikaye-grup">';
       h+='<div class="bk-hikaye-eti">Bozulan birikimler</div>';
       d.bozulan.forEach(function(b){
+        var fark=bozulanFark(b);
         h+='<div class="bk-hikaye-satir"><span>'+esc(b.kalem)+'</span><span>'+para(b.tutar)+' TL</span></div>';
+        if(fark>0.009){
+          h+='<div class="bk-hikaye-satir bk-hikaye-alt"><span>Kayıtlarda vardı</span><span>'+para(bozulanKayitli(b))+' TL</span></div>';
+          h+='<div class="bk-hikaye-satir bk-hikaye-alt"><span>Program öncesi ve değer artışı</span><span>'+para(fark)+' TL</span></div>';
+        }
       });
       h+='<div class="bk-hikaye-satir bk-hikaye-ara"><span>Bozulan toplam</span><span>'+para(bozT)+' TL</span></div>';
       h+='</div>';
@@ -715,9 +760,13 @@ var BirikimModule = (function() {
       var parca=null;
       (d.bozulan||[]).forEach(function(b){ if(kalemEsit(b.kalem,ad)) parca=b; });
       if(!parca) return;
+      var fark=bozulanFark(parca);
       h+='<div class="bk-gitti-satir">';
       h+='<span class="bk-gitti-eti">Dönüştü</span>';
       h+='<span class="bk-gitti-metin">'+esc(tarihGunEtiket(d.tarih))+' · '+para(parca.tutar)+' TL → '+esc(d.hedef)+'</span>';
+      if(fark>0.009){
+        h+='<span class="bk-gitti-alt">Kayıtlarda '+para(bozulanKayitli(parca))+' TL vardı. '+para(fark)+' TL program öncesi yatırım ve değer artışı.</span>';
+      }
       h+='</div>';
     });
     h+='</div>';
@@ -791,10 +840,13 @@ var BirikimModule = (function() {
       adlar.forEach(function(ad){
         var liste = kalemler[ad];
         var toplam = bakiyeler[ad]||0;
-        var buay = liste.filter(function(i){return i.tarih&&i.tarih.startsWith(ay);}).reduce(function(s,i){return s+i.tutar;},0);
+        var buay = liste.filter(function(i){
+          return i.tarih&&i.tarih.startsWith(ay)&&i.yon!=="deger";
+        }).reduce(function(s,i){return s+i.tutar;},0);
         var hikayeVar = donusumlerHedef(ad).length>0;
         var gittiVar = donusumlerKaynak(ad).length>0;
         var donusen = gittiVar ? donusenTutar(ad) : 0;
+        var farkTutar = gittiVar ? donusenFark(ad) : 0;
         var tamamiGitti = gittiVar && Math.abs(toplam)<0.009 && donusen>0.009;
         var hedefler = gittiVar ? donusumHedefAdlari(ad) : [];
         var hedefYazi = hedefler.join(", ");
@@ -816,6 +868,9 @@ var BirikimModule = (function() {
         }else if(gittiVar){
           h+='<div class="bk-kart-donustu-not">'+para(donusen)+' TL '+esc(hedefYazi)+' birikimine d\u00f6n\u00fc\u015ft\u00fc</div>';
         }
+        if(gittiVar&&farkTutar>0.009){
+          h+='<div class="bk-kart-donustu-not">Kayıtlarda '+para(kurus(donusen-farkTutar))+' TL vardı. '+para(farkTutar)+' TL program öncesi yatırım ve değer artışı.</div>';
+        }
         h+='</div>';
         h+='<button class="bk-ekle-btn" data-id="'+encodeURIComponent(ad)+'" title="Manuel ekle">+</button>';
         h+='</div>';
@@ -829,7 +884,7 @@ var BirikimModule = (function() {
           liste.forEach(function(i){
             var sinif="bk-db";
             if(i.kaynak==="manuel") sinif="bk-manuel";
-            else if(i.kaynak==="donusum") sinif=i.yon==="bozulan"?"bk-donusum-cikis":"bk-donusum-giris";
+            else if(i.kaynak==="donusum") sinif=i.yon==="bozulan"?"bk-donusum-cikis":(i.yon==="deger"?"bk-donusum-deger":"bk-donusum-giris");
             h+='<div class="bk-islem-row '+sinif+'">';
             h+='<span class="bk-islem-tarih">'+tarihFmt(i.tarih)+'</span>';
             h+='<span class="bk-islem-aciklama">'+esc(i.aciklama||"")+'</span>';
@@ -873,7 +928,7 @@ var BirikimModule = (function() {
     h+='<div class="modal-header"><h2 class="modal-title">Birikimi d\u00f6n\u00fc\u015ft\u00fcr</h2>';
     h+='<button class="modal-close" id="bk-dn-kapat" type="button">&#10005;</button></div>';
     h+='<div class="modal-body">';
-    h+='<p class="bk-dn-giris">Birikimleri bozup yeni bir birikime aktar\u0131n. Eve ekledi\u011finiz paray\u0131 da yaz\u0131n; sonra neyi bozdu\u011funuzu ve ne ekledi\u011finizi kart\u0131nda g\u00f6r\u00fcrs\u00fcn\u00fcz.</p>';
+    h+='<p class="bk-dn-giris">Birikimleri bozup yeni bir birikime aktar\u0131n. Kayıtlardaki tutardan fazlasını da yazabilirsiniz; fark, programdan önce yatırdığınız ve değerlenen kısım sayılır. Eve eklediğiniz parayı da yazın.</p>';
     h+='<div class="field-group"><label class="field-label" for="bk-dn-tarih">Tarih</label>';
     h+='<input type="date" id="bk-dn-tarih" class="field-input" value="'+bugun()+'"/></div>';
     h+='<div class="field-group"><label class="field-label" for="bk-dn-hedef">Neye d\u00f6n\u00fc\u015fs\u00fcn</label>';
@@ -885,6 +940,7 @@ var BirikimModule = (function() {
     h+='<div class="bk-dn-blok-baslik">Bozulan birikimler</div>';
     h+='<button type="button" class="bk-dn-tumunu" id="bk-dn-tumunu">T\u00fcm birikimi boz</button>';
     h+='</div>';
+    h+='<p class="bk-dn-yardim">T\u00fcm\u00fc, kay\u0131tlardaki bakiyeyi yazar. Ger\u00e7ek tutar daha y\u00fcksekse onu yaz\u0131n. Fazlas\u0131 de\u011fer art\u0131\u015f\u0131 say\u0131l\u0131r, kart eksiye d\u00fc\u015fmez.</p>';
     h+='<div id="bk-dn-kaynaklar"></div>';
     h+='</div>';
     h+='<div class="bk-dn-blok">';
@@ -1157,15 +1213,35 @@ var BirikimModule = (function() {
   function donusumOzetGuncelle(){
     donusumKaynaklariKilitle();
     var o=donusumFormOku();
-    var boz=0,ek=0;
-    o.bozulan.forEach(function(b){boz+=b.tutar;});
+    var boz=0,ek=0,kayitDisi=0;
+    o.bozulan.forEach(function(b){
+      boz+=b.tutar;
+      var fark=kurus(b.tutar-Math.max(0,b.bakiye));
+      if(fark>0.009) kayitDisi+=fark;
+    });
     o.eklenen.forEach(function(e){ek+=e.tutar;});
-    boz=kurus(boz); ek=kurus(ek);
+    boz=kurus(boz); ek=kurus(ek); kayitDisi=kurus(kayitDisi);
+    document.querySelectorAll("#bk-donusum-modal .bk-dn-kaynak").forEach(function(row){
+      var not=row.querySelector(".bk-dn-fazla");
+      var inp=row.querySelector(".bk-dn-tutar");
+      if(!not) return;
+      var tutar=inp&&!inp.disabled?tutarMetinOku(inp.value):0;
+      var bakiye=kurus(row.getAttribute("data-bakiye"));
+      var fark=kurus(tutar-Math.max(0,bakiye));
+      if(fark>0.009){
+        not.textContent="Kayıtlarda "+para(bakiye)+" TL var. "+para(fark)+" TL program öncesi yatırım ve değer artışı sayılır.";
+        not.classList.remove("hidden");
+      }else{
+        not.textContent="";
+        not.classList.add("hidden");
+      }
+    });
     var el=$("bk-dn-ozet");
     if(!el) return;
     var ad=o.hedef||"Yeni birikim";
     el.innerHTML=
       '<div class="bk-dn-ozet-satir"><span>Bozulan</span><strong>'+para(boz)+' TL</strong></div>'+
+      (kayitDisi>0.009?'<div class="bk-dn-ozet-satir bk-dn-ozet-alt"><span>Kayıtlarda olmayan</span><strong>'+para(kayitDisi)+' TL</strong></div>':'')+
       '<div class="bk-dn-ozet-satir"><span>Eklenen</span><strong>'+para(ek)+' TL</strong></div>'+
       '<div class="bk-dn-ozet-satir bk-dn-ozet-son"><span>'+esc(ad)+'</span><strong>'+para(kurus(boz+ek))+' TL</strong></div>';
   }
@@ -1185,12 +1261,13 @@ var BirikimModule = (function() {
       h+='<div class="bk-dn-kaynak" data-kalem="'+encodeURIComponent(ad)+'" data-bakiye="'+bakiye+'">';
       h+='<div class="bk-dn-kaynak-ust">';
       h+='<span class="bk-dn-kaynak-ad">'+esc(ad)+'</span>';
-      h+='<span class="bk-dn-kaynak-bak">Bakiye '+para(bakiye)+' TL</span>';
+      h+='<span class="bk-dn-kaynak-bak">Kayıtlarda '+para(bakiye)+' TL</span>';
       h+='</div>';
       h+='<div class="bk-dn-kaynak-alt">';
-      h+='<input type="text" class="field-input bk-dn-tutar" inputmode="decimal" placeholder="Bozulacak tutar" aria-label="'+esc(ad)+' bozulacak tutar" autocomplete="off"/>';
+      h+='<input type="text" class="field-input bk-dn-tutar" inputmode="decimal" placeholder="Gerçek bozulan tutar" aria-label="'+esc(ad)+' bozulacak tutar" autocomplete="off"/>';
       h+='<button type="button" class="bk-dn-tumu">T\u00fcm\u00fc</button>';
-      h+='</div></div>';
+      h+='</div>';
+      h+='<div class="bk-dn-fazla hidden"></div></div>';
     });
     if(!say) h='<p class="bk-dn-yok">Bozulacak bakiyesi olan birikim yok.</p>';
     if(kutu) kutu.innerHTML=h;
@@ -1254,10 +1331,6 @@ var BirikimModule = (function() {
     for(var i=0;i<o.bozulan.length;i++){
       var b=o.bozulan[i];
       if(kalemEsit(b.kalem,o.hedef)){ donusumHata(b.kalem+" kendisine d\u00f6n\u00fc\u015femez."); return; }
-      if(b.tutar-b.bakiye>0.009){
-        donusumHata(b.kalem+" bakiyesinden fazla bozulamaz. Bakiye "+para(b.bakiye)+" TL.");
-        return;
-      }
     }
     for(var j=0;j<o.eklenen.length;j++){
       if(!o.eklenen[j].aciklama){
@@ -1271,7 +1344,10 @@ var BirikimModule = (function() {
       tarih:o.tarih,
       hedef:o.hedef,
       not:o.not.slice(0,120),
-      bozulan:o.bozulan.map(function(b){return {kalem:b.kalem,tutar:b.tutar};}),
+      bozulan:o.bozulan.map(function(b){
+        var kayitli=kurus(Math.min(b.tutar, Math.max(0, b.bakiye)));
+        return {kalem:b.kalem,tutar:b.tutar,kayitli:kayitli};
+      }),
       eklenen:o.eklenen.map(function(e){return {aciklama:e.aciklama.slice(0,80),tutar:e.tutar};})
     });
     _donusumler=donusumNormalize(_donusumler);
