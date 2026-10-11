@@ -19,7 +19,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="dns-prefetch" href="https://hesap-kitap-234d1.firebaseapp.com" />
-  <link rel="stylesheet" href="css/style.css?v=20261011sade" />
+  <link rel="stylesheet" href="css/style.css?v=20261011vefa" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800&display=swap" media="print" onload="this.media='all'" />
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800&display=swap" /></noscript>
   <style>
@@ -164,6 +164,10 @@
             <button type="button" class="hk-ayar-item" id="hk-ayar-tanitim" role="menuitem">
               <span class="hk-ayar-item-ikon" aria-hidden="true">?</span>
               <span>Uygulama tanitimi</span>
+            </button>
+            <button type="button" class="hk-ayar-item hidden" id="hk-ayar-vefa" role="menuitem">
+              <span class="hk-ayar-item-ikon" aria-hidden="true">&#128332;</span>
+              <span>Vefa paylasimi</span>
             </button>
             <a class="hk-ayar-item" id="hk-ayar-oneri" href="mailto:salimoglu61@gmail.com?subject=Hesap%20Kitap%20-%20Oneri%20ve%20Sikayet" role="menuitem">
               <span class="hk-ayar-item-ikon" aria-hidden="true">&#9993;</span>
@@ -508,25 +512,43 @@
     </div>
   </div>
 
+  <div class="bk-modal-overlay hidden" id="hk-vefa-paylasim-modal">
+    <div class="modal-box modal-sm hk-vefa-paylas-kutu">
+      <div class="modal-header">
+        <h2 class="modal-title">Vefa paylaşımı</h2>
+        <button class="modal-close" id="hk-vefa-paylas-kapat" type="button">&#10005;</button>
+      </div>
+      <div class="modal-body">
+        <p class="hk-vefa-paylas-acik">Bu e-posta ile giren hesap sizin Vefa kaydınızı yalnızca görür. Ödeme ekleyemez ve silemez. Diğer modüller ona açılmaz. Girişte kullandığı adresi yazın. Gmail’de noktayla yazarsanız noktasız giriş de çalışır.</p>
+        <div class="hk-vefa-paylas-satir">
+          <input type="email" id="hk-vefa-paylas-eposta" class="field-input" placeholder="ornek@gmail.com" maxlength="120" autocomplete="off" />
+          <button type="button" class="btn-primary" id="hk-vefa-paylas-ekle">Ekle</button>
+        </div>
+        <p class="hk-vefa-paylas-hata" id="hk-vefa-paylas-hata"></p>
+        <div id="hk-vefa-paylas-liste"></div>
+      </div>
+    </div>
+  </div>
+
   <script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-  <script defer src="js/hk-version.js?v=1.76"></script>
+  <script defer src="js/hk-version.js?v=1.77"></script>
   <script defer src="js/hk-xlsx.js?v=20261001rapor"></script>
-  <script defer src="js/hk-erisim.js?v=20260823cocugum"></script>
+  <script defer src="js/hk-erisim.js?v=20261011vefa"></script>
   <script defer src="js/hk-tanitim.js?v=20261008ekle"></script>
-  <script defer src="js/hk-ayarlar.js?v=20260531temiz"></script>
-  <script defer src="js/firebase.js?v=20261008donusum"></script>
+  <script defer src="js/hk-ayarlar.js?v=20261011vefa"></script>
+  <script defer src="js/firebase.js?v=20261011vefa"></script>
   <script defer src="js/db.js?v=20260816perf"></script>
   <script defer src="js/modules/islemler.js?v=20260816perf"></script>
-  <script defer src="js/modules/yukle.js?v=20261001rapor"></script>
+  <script defer src="js/modules/yukle.js?v=20261011vefa"></script>
   <script defer src="js/modules/alacaklar.js?v=20260816perf"></script>
   <script defer src="js/modules/urun.js?v=20260816perf"></script>
   <script defer src="js/modules/cocugum.js?v=20260920cocuktoplam"></script>
   <script defer src="js/modules/arabam.js?v=20260816perf"></script>
   <script defer src="js/modules/birikim.js?v=20261011sade"></script>
   <script defer src="js/modules/verilen-altinlar.js?v=20260816perf"></script>
-  <script defer src="js/app.js?v=20260823cocugum"></script>
+  <script defer src="js/app.js?v=20261011vefa"></script>
 </body>
 </html>
 

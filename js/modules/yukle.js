@@ -2183,7 +2183,7 @@ function parcaYanOzet(oz){
 function borcPanelHtml(oz){
   var h='<div class="vf2-durum-panel'+(_gorunum==="durum"?"":" vf2-gizli")+'">';
   h+='<div class="vf2-durum-baslik"><span class="vf2-kolon-baslik">ALTINLARIN DURUMU</span>';
-  h+='<span class="vf2-durum-acik">Gruptan alınan altınlar küçükten büyüğe dizilir. Hepsi elimde başlar. Tıklayınca borç olur; sağından kime verildiği seçilir. Listenin sonunda Grup dışı vardır, seçince isim elle yazılır.</span></div>';
+  h+='<span class="vf2-durum-acik">'+(vefaSalt()?"Bu liste salt okunur.":"Gruptan alınan altınlar küçükten büyüğe dizilir. Hepsi elimde başlar. Tıklayınca borç olur; sağından kime verildiği seçilir. Listenin sonunda Grup dışı vardır, seçince isim elle yazılır.")+'</span></div>';
   h+='<div class="vf2-parca-yerlesim">';
   h+='<div class="vf2-parca-liste-wrap">';
   if(!oz.parcalar.length){
@@ -2196,9 +2196,10 @@ function borcPanelHtml(oz){
       var borc=st.durum==="borc";
       h+='<div class="vf2-parca-satir'+(borc?" vf2-parca-satir-borc":"")+'">';
       h+='<div class="vf2-parca-altin"><b>'+TIP_AD[pc.tip]+'</b><span>'+p(pc.gram)+' gr'+(pc.ay&&String(pc.ay).indexOf("-")>0?" · "+ayLbl(pc.ay):"")+'</span></div>';
-      h+='<button type="button" class="alt-durum-btn '+(borc?"vf2-parca-borc":"alt-elimde-btn")+'" data-parca="'+hkEsc(pc.id)+'" title="'+(borc?"Tıkla, elime al":"Tıkla, borç yap")+'">'+(borc?"BORÇ":"ELİMDE")+'</button>';
+      if(vefaSalt()) h+='<span class="alt-durum-btn '+(borc?"vf2-parca-borc":"alt-elimde-btn")+'">'+(borc?"BORÇ":"ELİMDE")+'</span>';
+      else h+='<button type="button" class="alt-durum-btn '+(borc?"vf2-parca-borc":"alt-elimde-btn")+'" data-parca="'+hkEsc(pc.id)+'" title="'+(borc?"Tıkla, elime al":"Tıkla, borç yap")+'">'+(borc?"BORÇ":"ELİMDE")+'</button>';
       h+='<div class="vf2-kime">';
-      h+='<select class="vf2-kisi-sec" data-parca="'+hkEsc(pc.id)+'"'+(borc?"":" disabled")+' aria-label="Kime verildi">';
+      h+='<select class="vf2-kisi-sec" data-parca="'+hkEsc(pc.id)+'"'+(vefaSalt()||!borc?" disabled":"")+' aria-label="Kime verildi">';
       h+='<option value="">'+(borc?"Seçin":"—")+'</option>';
       _uyeler.forEach(function(u){
         h+='<option value="'+hkEsc(u.id)+'"'+(!st.dis&&st.uyeId===u.id?" selected":"")+'>'+hkEsc(u.ad)+'</option>';
@@ -2209,7 +2210,7 @@ function borcPanelHtml(oz){
       h+='<option value="__dis"'+(st.dis?" selected":"")+'>Grup dışı</option>';
       h+='</select>';
       if(borc&&st.dis){
-        h+='<input class="vf2-dis-ad" data-parca="'+hkEsc(pc.id)+'" type="text" maxlength="80" autocomplete="off" placeholder="İsim yazın" value="'+hkEsc(st.disAd)+'" aria-label="Grup dışı isim">';
+        h+='<input class="vf2-dis-ad" data-parca="'+hkEsc(pc.id)+'" type="text" maxlength="80" autocomplete="off" placeholder="İsim yazın" value="'+hkEsc(st.disAd)+'" aria-label="Grup dışı isim"'+(vefaSalt()?" readonly":"")+'>';
       }
       h+='</div></div>';
     });
@@ -2230,19 +2231,26 @@ function tTahsilat(){
 }
 function tDeger(){return tumY().reduce(function(s,y){return s+yDeger(y);},0);}
 
+function vefaSalt(){return !!(window._hkVefaSahipUid);}
+async function vefaOku(path){
+  if(vefaSalt()&&typeof fbVefaPaylasilanOku==="function") return fbVefaPaylasilanOku(path);
+  return fbRtdbOku(path);
+}
 async function fbYukle(){
   if(!window._fbDb)return;
+  var salt=vefaSalt();
   try{
     var d={};
-    var v=await fbRtdbOku("vefa2");
+    var v=await vefaOku("vefa2");
     if(v!=null&&typeof v==="object"&&Object.keys(v).length>0){d=v;}
     if(Object.keys(d).length===0){
       try{
-        var v2=await fbRtdbOku("vefa");
+        var v2=await vefaOku("vefa");
         if(v2!=null&&typeof v2==="object"){d=v2;}
       }catch(e2){}
     }
-    _uyeler=d.uyeler||[{id:"u1",ad:"Zafer EROĞLU",rol:"Başkan"},{id:"u2",ad:"Fatma İNCE",rol:"Üye"},{id:"u3",ad:"Güler UÇAR",rol:"Üye"},{id:"u4",ad:"Salim EROĞLU",rol:"Üye"}];
+    var varsayilan=[{id:"u1",ad:"Zafer EROĞLU",rol:"Başkan"},{id:"u2",ad:"Fatma İNCE",rol:"Üye"},{id:"u3",ad:"Güler UÇAR",rol:"Üye"},{id:"u4",ad:"Salim EROĞLU",rol:"Üye"}];
+    _uyeler=d.uyeler||(salt?[]:varsayilan);
     _aylar=d.aylar||[];
     _borclar=borcDizi(d.borclar).map(borcNorm).filter(Boolean);
     _altinDurum={};
@@ -2253,11 +2261,13 @@ async function fbYukle(){
       });
     }
     borclariParcalaraYedir();
-    if(typeof fbAltinFiyatOku==="function")_gramFiyat=await fbAltinFiyatOku()||0;
+    if(salt) _gramFiyat=parseFloat(await vefaOku("altin_guncel_fiyat"))||0;
+    else if(typeof fbAltinFiyatOku==="function")_gramFiyat=await fbAltinFiyatOku()||0;
     else _gramFiyat=(await fbRtdbOku("altin_guncel_fiyat"))||0;
   }catch(e){}
 }
 async function fbKaydet(){
+  if(vefaSalt())return;
   if(!window._fbDb)return;
   try{await fbRtdbRef("vefa2").set({uyeler:_uyeler,aylar:_aylar,borclar:_borclar,altinDurum:_altinDurum});}catch(e){}
 }
@@ -2276,7 +2286,8 @@ function render(){
   var kr=kz>=0?"var(--green)":"var(--red)";
   var buAy=new Date().getFullYear()+"-"+String(new Date().getMonth()+1).padStart(2,"0");
 
-  var h='<div class="vf2-wrap">';
+  var salt=vefaSalt();
+  var h='<div class="vf2-wrap'+(salt?" vf2-salt-ekran":"")+'">';
 
   /* ── ÖZET BAR ── */
   h+='<div class="vf2-ozet-bar">';
@@ -2324,7 +2335,11 @@ function render(){
   h+='</div></div>';
 
   if(_gramFiyat>0)h+='<span class="vf2-fiyat-badge">🥇 '+p(_gramFiyat)+' TL/gr</span>';
-  h+='<div class="vf2-oz-btns"><button class="vf2-btn-sec" id="vf2-uye-btn">+ Üye</button><button class="vf2-btn-gold" id="vf2-yatirim-btn">+ Yatırım Ekle</button></div>';
+  if(salt){
+    h+='<div class="vf2-salt">Salt okunur. Bu Vefa kaydını yalnızca görüyorsunuz.</div>';
+  }else{
+    h+='<div class="vf2-oz-btns"><button class="vf2-btn-sec" id="vf2-uye-btn">+ Üye</button><button class="vf2-btn-gold" id="vf2-yatirim-btn">+ Yatırım Ekle</button></div>';
+  }
   h+='</div>';
 
   h+='<div class="vf2-sekme">';
@@ -2355,7 +2370,7 @@ function render(){
 
   if(!sirali.length){
     var cc=2+_uyeler.length+ALTIN_TIPLER.length+3;
-    h+='<tr><td colspan="'+cc+'" class="vf2-bos">Henüz kayıt yok. "+ Yatırım Ekle" butonuna tıklayın.</td></tr>';
+    h+='<tr><td colspan="'+cc+'" class="vf2-bos">'+(salt?"Henüz kayıt yok.":'Henüz kayıt yok. "+ Yatırım Ekle" butonuna tıklayın.')+'</td></tr>';
   } else {
     sirali.forEach(function(ay){
       var tg={};TUM_TIPLER.forEach(function(t){tg[t]=[];});
@@ -2381,7 +2396,8 @@ function render(){
           h+='<td class="vf2-td-ay" rowspan="'+maxR+'">'+ayLbl(ay.key)+'</td>';
           _uyeler.forEach(function(u){
             var odedi=(ay.odemeler&&ay.odemeler[u.id])||false;
-            h+='<td rowspan="'+maxR+'"><button class="vf2-ode-btn '+(odedi?"vf2-odedi":"vf2-bek")+'" data-ay="'+ay.key+'" data-uid="'+u.id+'">'+(odedi?p(kp):'—')+'</button></td>';
+            if(salt) h+='<td rowspan="'+maxR+'"><span class="vf2-ode-btn '+(odedi?"vf2-odedi":"vf2-bek")+'">'+(odedi?p(kp):'—')+'</span></td>';
+            else h+='<td rowspan="'+maxR+'"><button class="vf2-ode-btn '+(odedi?"vf2-odedi":"vf2-bek")+'" data-ay="'+ay.key+'" data-uid="'+u.id+'">'+(odedi?p(kp):'—')+'</button></td>';
           });
           h+='<td rowspan="'+maxR+'" class="vf2-td-top">'+p(ayOdeme)+'</td>';
           h+='<td rowspan="'+maxR+'" class="vf2-th-sep"></td>';
@@ -2396,7 +2412,7 @@ function render(){
         if(ri===0){
           h+='<td rowspan="'+maxR+'" class="vf2-td-yat '+(ayNakit>0?"vf2-td-nakit":"vf2-td-bos")+'">'+(ayNakit>0?p(ayNakit)+' TL':'—')+'</td>';
           h+='<td rowspan="'+maxR+'" class="vf2-td-gun">'+(_gramFiyat>0||ayNakit>0?p(ayDeger):' — ')+'</td>';
-          h+='<td rowspan="'+maxR+'" class="vf2-td-aks"><button class="vf2-duz-btn row-action-btn duzenle" data-ay="'+ay.key+'">&#9998;</button> <button class="vf2-sil-btn row-action-btn sil" data-ay="'+ay.key+'">&#10005;</button></td>';
+          h+='<td rowspan="'+maxR+'" class="vf2-td-aks">'+(salt?"":'<button class="vf2-duz-btn row-action-btn duzenle" data-ay="'+ay.key+'">&#9998;</button> <button class="vf2-sil-btn row-action-btn sil" data-ay="'+ay.key+'">&#10005;</button>')+'</td>';
         }
         h+='</tr>';
       }
@@ -2431,7 +2447,7 @@ function render(){
   /* Mobil: tablo gizli; kart listesi (vf2-cards) — ay bazlı yatırımlar */
   h+='<div class="vf2-cards'+(durumGor?" vf2-gizli":"")+'">';
   if(!sirali.length){
-    h+='<div class="vf2-card vf2-card-bos">Henüz kayıt yok. &quot;+ Yatırım Ekle&quot; butonuna tıklayın.</div>';
+    h+='<div class="vf2-card vf2-card-bos">'+(salt?"Henüz kayıt yok.":"Henüz kayıt yok. &quot;+ Yatırım Ekle&quot; butonuna tıklayın.")+'</div>';
   } else {
     sirali.forEach(function(ay){
       var tgM={};TUM_TIPLER.forEach(function(t){tgM[t]=[];});
@@ -2443,14 +2459,20 @@ function render(){
       h+='<div class="vf2-card">';
       h+='<div class="vf2-card-header">';
       h+='<div class="vf2-card-ay">'+ayLbl(ay.key)+'</div>';
-      h+='<div class="vf2-card-aks"><button type="button" class="vf2-duz-btn row-action-btn duzenle" data-ay="'+ay.key+'">&#9998;</button><button type="button" class="vf2-sil-btn row-action-btn sil" data-ay="'+ay.key+'">&#10005;</button></div>';
+      h+='<div class="vf2-card-aks">'+(salt?"":'<button type="button" class="vf2-duz-btn row-action-btn duzenle" data-ay="'+ay.key+'">&#9998;</button><button type="button" class="vf2-sil-btn row-action-btn sil" data-ay="'+ay.key+'">&#10005;</button>')+'</div>';
       h+='</div><div class="vf2-card-uyeler">';
       _uyeler.forEach(function(u){
         var odedi=(ay.odemeler&&ay.odemeler[u.id])||false;
         var km=(u.ad||"").split(" ");
-        h+='<button type="button" class="vf2-card-uye-btn vf2-ode-btn '+(odedi?"vf2-odedi":"vf2-bek")+'" data-ay="'+ay.key+'" data-uid="'+u.id+'">';
-        h+='<span class="vf2-card-uye-ad">'+hkEsc(km[0]||u.ad||'')+'</span>';
-        h+='<span class="vf2-card-uye-deg">'+(odedi?p(kpM):'—')+'</span></button>';
+        if(salt){
+          h+='<div class="vf2-card-uye-btn vf2-ode-btn '+(odedi?"vf2-odedi":"vf2-bek")+'">';
+          h+='<span class="vf2-card-uye-ad">'+hkEsc(km[0]||u.ad||'')+'</span>';
+          h+='<span class="vf2-card-uye-deg">'+(odedi?p(kpM):'—')+'</span></div>';
+        }else{
+          h+='<button type="button" class="vf2-card-uye-btn vf2-ode-btn '+(odedi?"vf2-odedi":"vf2-bek")+'" data-ay="'+ay.key+'" data-uid="'+u.id+'">';
+          h+='<span class="vf2-card-uye-ad">'+hkEsc(km[0]||u.ad||'')+'</span>';
+          h+='<span class="vf2-card-uye-deg">'+(odedi?p(kpM):'—')+'</span></button>';
+        }
       });
       h+='</div><div class="vf2-card-info">';
       h+='<div class="vf2-card-row"><span>Ay toplamı</span><b>'+p(ayOdemeM)+' TL</b></div>';
@@ -2619,6 +2641,15 @@ function ozetYenile(){
 }
 
 function bagla(){
+  if(vefaSalt()){
+    document.querySelectorAll("[data-gor]").forEach(function(btn){
+      btn.addEventListener("click",function(e){
+        e.preventDefault();
+        gorunumAc(btn.dataset.gor);
+      });
+    });
+    return;
+  }
   document.querySelectorAll(".vf2-ode-btn").forEach(function(btn){
     btn.addEventListener("click",async function(){
       var ay=_aylar.find(function(a){return a.key===btn.dataset.ay;});

@@ -44,6 +44,40 @@ var HK_ERISIM = (function () {
     cocugum: ["salimoglu61@gmail.com"]
   };
 
+  /**
+   * Vefa paylaşım anahtarı. Veritabanı kuralındaki ifadeyle aynı olmalı:
+   * auth.token.email.toLowerCase().replace('googlemail.com','gmail.com').replace('.', ',')
+   */
+  function kuralAnahtari(email) {
+    return String(email || "")
+      .trim()
+      .toLowerCase()
+      .replace("googlemail.com", "gmail.com")
+      .replace(/\./g, ",");
+  }
+
+  /** Giriş adresinin noktalı ve Gmail'de noktası silinmiş halleri. */
+  function paylasimAnahtarlari(email) {
+    var keys = [];
+    function ekle(k) {
+      if (k && keys.indexOf(k) < 0) keys.push(k);
+    }
+    var raw = String(email || "").trim().toLowerCase().replace(/@googlemail\.com$/, "@gmail.com");
+    var at = raw.indexOf("@");
+    if (at < 1 || at === raw.length - 1) return keys;
+    if (/[#$\[\]\/\s]/.test(raw)) return keys;
+    ekle(raw.replace(/\./g, ","));
+    if (raw.slice(at + 1) === "gmail.com") {
+      ekle((raw.slice(0, at).replace(/\./g, "") + "@gmail.com").replace(/\./g, ","));
+    }
+    return keys;
+  }
+
+  function vefaPaylasildiMi() {
+    var id = typeof window !== "undefined" ? window._hkVefaSahipUid : "";
+    return typeof id === "string" && id.length > 0;
+  }
+
   function epostaNorm(em) {
     var s = String(em || "").trim().toLowerCase();
     var at = s.indexOf("@");
@@ -130,8 +164,14 @@ var HK_ERISIM = (function () {
       : MISAFIR_SEKMELER.filter(function (id) {
           return TUM_SEKMELER.indexOf(id) >= 0;
         });
-    return base.filter(function (id) {
+    if (!yoneticiMi(user) && vefaPaylasildiMi() && base.indexOf("vefa") < 0) {
+      base.push("vefa");
+    }
+    base = base.filter(function (id) {
       return ozelModulIzinli(id, user);
+    });
+    return TUM_SEKMELER.filter(function (id) {
+      return base.indexOf(id) >= 0;
     });
   }
 
@@ -207,6 +247,9 @@ var HK_ERISIM = (function () {
     modulErisilebilir: modulErisilebilir,
     sekmeleriUygula: sekmeleriUygula,
     misafirBilgiGoster: misafirBilgiGoster,
-    tumSekmeler: TUM_SEKMELER
+    tumSekmeler: TUM_SEKMELER,
+    kuralAnahtari: kuralAnahtari,
+    paylasimAnahtarlari: paylasimAnahtarlari,
+    vefaPaylasildiMi: vefaPaylasildiMi
   };
 })();
