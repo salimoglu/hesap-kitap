@@ -713,44 +713,48 @@ var BirikimModule = (function() {
     var gelen=donusumlerHedef(ad);
     if(!gelen.length) return "";
     var h='<div class="bk-hikaye">';
+    h+='<div class="bk-hikaye-ust">';
     h+='<div class="bk-hikaye-baslik">Bu birikim nasıl oluştu</div>';
-    gelen.forEach(function(d){
-      var bozT=donusumBozulanToplam(d);
-      var ekT=donusumEklenenToplam(d);
-      h+='<div class="bk-hikaye-kart">';
-      h+='<div class="bk-hikaye-tarih">'+esc(tarihGunEtiket(d.tarih))+'</div>';
-      if(d.not) h+='<div class="bk-hikaye-not">'+esc(d.not)+'</div>';
-      h+='<div class="bk-hikaye-icerik">';
-      h+='<div class="bk-hikaye-grup">';
-      h+='<div class="bk-hikaye-eti">Bozulan birikimler</div>';
-      d.bozulan.forEach(function(b){
-        var fark=bozulanFark(b);
-        h+='<div class="bk-hikaye-satir"><span>'+esc(b.kalem)+'</span><span>'+para(b.tutar)+' TL</span></div>';
-        if(fark>0.009){
-          h+='<div class="bk-hikaye-satir bk-hikaye-alt"><span>Kayıtlarda vardı</span><span>'+para(bozulanKayitli(b))+' TL</span></div>';
-          h+='<div class="bk-hikaye-satir bk-hikaye-alt"><span>Program öncesi ve değer artışı</span><span>'+para(fark)+' TL</span></div>';
-        }
-      });
-      h+='<div class="bk-hikaye-satir bk-hikaye-ara"><span>Bozulan toplam</span><span>'+para(bozT)+' TL</span></div>';
-      h+='</div>';
-      h+='<div class="bk-hikaye-grup">';
-      h+='<div class="bk-hikaye-eti">Eklenen</div>';
-      if(d.eklenen.length){
-        d.eklenen.forEach(function(e){
-          h+='<div class="bk-hikaye-satir"><span>'+esc(e.aciklama)+'</span><span>'+para(e.tutar)+' TL</span></div>';
-        });
-        h+='<div class="bk-hikaye-satir bk-hikaye-ara"><span>Eklenen toplam</span><span>'+para(ekT)+' TL</span></div>';
-      }else{
-        h+='<div class="bk-hikaye-bos">Bu dönüşümde birikim dışında eklenen tutar yok.</div>';
-      }
-      h+='</div>';
-      h+='</div>';
-      h+='<div class="bk-hikaye-satir bk-hikaye-son"><span>'+esc(d.hedef)+'</span><span>'+para(donusumToplam(d))+' TL</span></div>';
-      h+='<button type="button" class="bk-hikaye-geri" data-id="'+esc(d.id)+'">Bu dönüşümü geri al</button>';
-      h+='</div>';
-    });
     h+='<button type="button" class="bk-hikaye-ekle" data-hedef="'+esc(ad)+'">Başka birikimden ekle</button>';
     h+='</div>';
+    h+='<div class="bk-hikaye-izgara">';
+    gelen.forEach(function(d){
+      var ekT=donusumEklenenToplam(d);
+      var ekVar=d.eklenen.length>0;
+      h+='<div class="bk-hikaye-kart">';
+      h+='<div class="bk-hikaye-kart-ust">';
+      h+='<div class="bk-hikaye-tarih">'+esc(tarihGunEtiket(d.tarih))+'</div>';
+      h+='<button type="button" class="bk-hikaye-geri" data-id="'+esc(d.id)+'" title="Bu dönüşümü geri al">Geri al</button>';
+      h+='</div>';
+      if(d.not) h+='<div class="bk-hikaye-not">'+esc(d.not)+'</div>';
+      h+='<div class="bk-hikaye-kaynaklar">';
+      d.bozulan.forEach(function(b){
+        var fark=bozulanFark(b);
+        h+='<div class="bk-hikaye-kaynak">';
+        h+='<div class="bk-hikaye-satir"><span>'+esc(b.kalem)+'</span><span>'+para(b.tutar)+' TL</span></div>';
+        if(fark>0.009){
+          h+='<div class="bk-hikaye-kirilim"><span>Kayıtta '+para(bozulanKayitli(b))+'</span><span>Öncesi ve artış '+para(fark)+'</span></div>';
+        }
+        h+='</div>';
+      });
+      if(ekVar && d.bozulan.length>1){
+        h+='<div class="bk-hikaye-satir bk-hikaye-ara"><span>Bozulan</span><span>'+para(donusumBozulanToplam(d))+' TL</span></div>';
+      }
+      h+='</div>';
+      if(ekVar){
+        h+='<div class="bk-hikaye-ekler">';
+        d.eklenen.forEach(function(e, i){
+          h+='<div class="bk-hikaye-satir bk-hikaye-ek"><span>'+(i===0?'<em>Eklenen</em>':'')+esc(e.aciklama)+'</span><span>'+para(e.tutar)+' TL</span></div>';
+        });
+        if(d.eklenen.length>1){
+          h+='<div class="bk-hikaye-satir bk-hikaye-ara"><span>Eklenen</span><span>'+para(ekT)+' TL</span></div>';
+        }
+        h+='</div>';
+      }
+      h+='<div class="bk-hikaye-satir bk-hikaye-son"><span>'+esc(d.hedef)+'</span><span>'+para(donusumToplam(d))+' TL</span></div>';
+      h+='</div>';
+    });
+    h+='</div></div>';
     return h;
   }
 
