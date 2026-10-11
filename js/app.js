@@ -217,6 +217,12 @@
     document.documentElement.classList.add("hk-hizli-ac");
 
     u = typeof fbMevcutKullanici === "function" ? fbMevcutKullanici() : u;
+    if (typeof fbRtdbOturumHazir === "function") {
+      try { await fbRtdbOturumHazir(); } catch (eOt) {}
+    }
+    if (typeof fbVefaPaylasimYukle === "function") {
+      try { await fbVefaPaylasimYukle(); } catch (eVf) {}
+    }
     if (typeof HK_ERISIM !== "undefined") {
       HK_ERISIM.sekmeleriUygula(u);
     }
@@ -247,6 +253,13 @@
     /* Bulut senkronu arka planda; bitince islemler + diger moduller guncellenir */
     hkBulutSenkron(u).then(async function () {
       u = typeof fbMevcutKullanici === "function" ? fbMevcutKullanici() : u;
+      if (typeof fbVefaPaylasimYukle === "function") {
+        try { await fbVefaPaylasimYukle(); } catch (eVf) {}
+      }
+      if (typeof HK_ERISIM !== "undefined") {
+        HK_ERISIM.sekmeleriUygula(u);
+        HK_ERISIM.misafirBilgiGoster(u);
+      }
       if (window._hkIslemlerBulutDegisti && modulIzinli("islemler") && typeof IslemlerModule !== "undefined" && typeof IslemlerModule.yukle === "function") {
         await IslemlerModule.yukle({ zorla: true });
         window._hkIslemlerBulutDegisti = false;
@@ -271,6 +284,9 @@
     if (!u || u.isAnonymous) return;
     await hkBulutSenkron(u);
     u = typeof fbMevcutKullanici === "function" ? fbMevcutKullanici() : u;
+    if (typeof fbVefaPaylasimYukle === "function") {
+      try { await fbVefaPaylasimYukle(); } catch (eVf) {}
+    }
     if (typeof HK_ERISIM !== "undefined") {
       HK_ERISIM.sekmeleriUygula(u);
       HK_ERISIM.misafirBilgiGoster(u);

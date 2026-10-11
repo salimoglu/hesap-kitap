@@ -752,7 +752,107 @@ async function fbGirisGoogle() {
   }
 }
 
+function fbVefaSahipUid() {
+  var id = window._hkVefaSahipUid;
+  var u = fbMevcutKullanici();
+  if (!id || typeof id !== "string" || (u && u.uid === id)) return "";
+  return id;
+}
+
+/** Paylaşılan Vefa: yalnızca vefa kaydı ve gram fiyatı, sahibin hesabından. */
+async function fbVefaPaylasilanOku(path) {
+  var sahip = fbVefaSahipUid();
+  if (!_fbDb || !sahip) return null;
+  var p = String(path || "").replace(/^\/+/, "");
+  if (p !== "vefa2" && p !== "vefa" && p !== "altin_guncel_fiyat") return null;
+  try {
+    var snap = await _fbDb.ref("users/" + sahip + "/" + p).once("value");
+    return snap.val();
+  } catch (e) {
+    console.warn("[HK] vefa paylasim oku", p, e && (e.code || e.message));
+    return null;
+  }
+}
+
+async function fbVefaPaylasimYukle() {
+  window._hkVefaSahipUid = "";
+  if (!_fbDb || typeof HK_ERISIM === "undefined") return "";
+  var u = fbMevcutKullanici();
+  if (!u || u.isAnonymous) return "";
+  if (await fbYoneticiMi(u)) return "";
+  var emails = HK_ERISIM.kullaniciEpostalari(u);
+  if (typeof fbAuthEpostalariTopla === "function") {
+    try { emails = await fbAuthEpostalariTopla(u); } catch (e) {}
+  }
+  var keys = [];
+  (emails || []).forEach(function (em) {
+    var kural = HK_ERISIM.kuralAnahtari(em);
+    if (kural && keys.indexOf(kural) < 0) keys.push(kural);
+  });
+  for (var i = 0; i < keys.length; i++) {
+    try {
+      var snap = await _fbDb.ref("paylasim/vefa/" + keys[i]).once("value");
+      var sahip = snap.val();
+      if (typeof sahip === "string" && sahip && sahip !== u.uid) {
+        window._hkVefaSahipUid = sahip;
+        return sahip;
+      }
+    } catch (e) {
+      console.warn("[HK] vefa paylasim bak", e && (e.code || e.message));
+    }
+  }
+  return "";
+}
+
+async function fbVefaPaylasimListe() {
+  var u = fbMevcutKullanici();
+  if (!_fbDb || !u) return [];
+  var snap = await _fbDb.ref("users/" + u.uid + "/vefaPaylasim").once("value");
+  var val = snap.val() || {};
+  return Object.keys(val).map(function (id) {
+    var rec = val[id] || {};
+    return {
+      id: id,
+      email: String(rec.email || ""),
+      anahtarlar: Array.isArray(rec.anahtarlar) ? rec.anahtarlar : [id]
+    };
+  }).filter(function (r) { return r.email; });
+}
+
+async function fbVefaPaylasimEkle(email) {
+  var u = fbMevcutKullanici();
+  if (!_fbDb || !u) throw new Error("Oturum yok");
+  if (typeof HK_ERISIM === "undefined") throw new Error("Erisim yok");
+  var gorunen = String(email || "").trim();
+  var anahtarlar = HK_ERISIM.paylasimAnahtarlari(gorunen);
+  if (!anahtarlar.length) throw new Error("E-posta gecersiz");
+  var benim = HK_ERISIM.kullaniciEpostalari(u);
+  var ayni = anahtarlar.some(function (k) {
+    return benim.some(function (em) { return HK_ERISIM.paylasimAnahtarlari(em).indexOf(k) >= 0; });
+  });
+  if (ayni) throw new Error("Kendi e-postanizi eklemeyin");
+  var id = anahtarlar[anahtarlar.length - 1];
+  var updates = {};
+  updates["users/" + u.uid + "/vefaPaylasim/" + id] = { email: gorunen, anahtarlar: anahtarlar };
+  anahtarlar.forEach(function (k) { updates["paylasim/vefa/" + k] = u.uid; });
+  await _fbDb.ref().update(updates);
+  return { id: id, email: gorunen, anahtarlar: anahtarlar };
+}
+
+async function fbVefaPaylasimSil(id) {
+  var u = fbMevcutKullanici();
+  if (!_fbDb || !u || !id) return;
+  var recSnap = await _fbDb.ref("users/" + u.uid + "/vefaPaylasim/" + id).once("value");
+  var rec = recSnap.val() || {};
+  var anahtarlar = Array.isArray(rec.anahtarlar) && rec.anahtarlar.length ? rec.anahtarlar : [id];
+  var updates = {};
+  updates["users/" + u.uid + "/vefaPaylasim/" + id] = null;
+  anahtarlar.forEach(function (k) { updates["paylasim/vefa/" + k] = null; });
+  await _fbDb.ref().update(updates);
+}
+
 async function fbCikisBulut() {
+  window._hkVefaSahipUid = "";
   try { localStorage.removeItem("hk-oturum-uid"); } catch (e) {}
   try { localStorage.removeItem("hk-rtdb-use-user-prefix"); } catch (e) {}
   try {

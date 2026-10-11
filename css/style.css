@@ -5222,6 +5222,71 @@ html.theme-light textarea { color-scheme: light; }
 .hk-ayar-item-ikon svg { width: 18px; height: 18px; display: block; }
 .hk-ayar-cikis { color: var(--red); }
 .hk-ayar-cikis .hk-ayar-item-ikon { color: var(--red); }
+.hk-vefa-paylas-kutu { max-width: 440px; }
+.hk-vefa-paylas-acik {
+  margin: 0 0 12px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+.hk-vefa-paylas-satir {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.hk-vefa-paylas-satir .field-input { flex: 1; min-width: 0; }
+.hk-vefa-paylas-satir .btn-primary { flex-shrink: 0; }
+.hk-vefa-paylas-hata {
+  min-height: 1.2em;
+  margin: 8px 0 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--red);
+}
+.hk-vefa-paylas-bos {
+  margin: 10px 0 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.hk-vefa-paylas-kisi {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.hk-vefa-paylas-posta {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 800;
+}
+.hk-vefa-paylas-sil {
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.hk-vefa-paylas-sil:hover { color: var(--red); }
+.vf2-salt {
+  margin-left: auto;
+  align-self: center;
+  max-width: 280px;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.35;
+  color: var(--text-secondary);
+}
+.vf2-salt-ekran .vf2-ode-btn { cursor: default; }
 
 /* === Mobil: asagi cekerek yenile === */
 .hk-ptr {

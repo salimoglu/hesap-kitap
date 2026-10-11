@@ -3,10 +3,26 @@
     "users": {
       "$uid": {
         ".read": "auth != null && auth.uid === $uid",
-        ".write": "auth != null && auth.uid === $uid"
+        ".write": "auth != null && auth.uid === $uid",
+        "vefa2": {
+          ".read": "auth != null && (auth.uid === $uid || (auth.token.email_verified === true && root.child('paylasim').child('vefa').child(auth.token.email.toLowerCase().replace('googlemail.com', 'gmail.com').replace('.', ',')).val() === $uid))"
+        },
+        "vefa": {
+          ".read": "auth != null && (auth.uid === $uid || (auth.token.email_verified === true && root.child('paylasim').child('vefa').child(auth.token.email.toLowerCase().replace('googlemail.com', 'gmail.com').replace('.', ',')).val() === $uid))"
+        },
+        "altin_guncel_fiyat": {
+          ".read": "auth != null && (auth.uid === $uid || (auth.token.email_verified === true && root.child('paylasim').child('vefa').child(auth.token.email.toLowerCase().replace('googlemail.com', 'gmail.com').replace('.', ',')).val() === $uid))"
+        }
       }
     },
-    ".read": "auth != null",
+    "paylasim": {
+      "vefa": {
+        "$emailKey": {
+          ".read": "auth != null && auth.token.email_verified === true && ($emailKey === auth.token.email.toLowerCase().replace('googlemail.com', 'gmail.com').replace('.', ',') || auth.token.email.toLowerCase().replace('googlemail.com', 'gmail.com').replace('.', ',') === 'salimoglu61@gmail,com')",
+          ".write": "auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase().replace('googlemail.com', 'gmail.com').replace('.', ',') === 'salimoglu61@gmail,com' && ((newData.isString() && newData.val() === auth.uid) || (!newData.exists() && (data.val() === auth.uid || !data.exists())))"
+        }
+      }
+    },
     ".write": false
   }
 }
