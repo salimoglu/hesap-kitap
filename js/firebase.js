@@ -774,6 +774,38 @@ async function fbVefaPaylasilanOku(path) {
   }
 }
 
+function fbVefaIzleyiciAnahtarlari(emails) {
+  var keys = [];
+  (emails || []).forEach(function (em) {
+    HK_ERISIM.paylasimAnahtarlari(em).forEach(function (k) {
+      if (k && keys.indexOf(k) < 0) keys.push(k);
+    });
+  });
+  return keys;
+}
+
+function fbVefaKayitEslesir(rec, keys) {
+  if (!rec || typeof rec !== "object") return false;
+  var aday = Array.isArray(rec.anahtarlar) ? rec.anahtarlar.slice() : [];
+  if (rec.email) aday = aday.concat(HK_ERISIM.paylasimAnahtarlari(rec.email));
+  for (var i = 0; i < aday.length; i++) {
+    if (keys.indexOf(aday[i]) >= 0) return true;
+  }
+  return false;
+}
+
+/** İndeks yazısı mevcut kurallarda reddedilebilir; asıl kayıt kullanıcı yolundadır. */
+async function fbVefaPaylasimIndeksYaz(anahtarlar, deger) {
+  if (!_fbDb || !anahtarlar || !anahtarlar.length) return;
+  var updates = {};
+  anahtarlar.forEach(function (k) { updates[k] = deger; });
+  try {
+    await _fbDb.ref("paylasim/vefa").update(updates);
+  } catch (e) {
+    console.warn("[HK] vefa indeks", e && (e.code || e.message));
+  }
+}
+
 async function fbVefaPaylasimYukle() {
   window._hkVefaSahipUid = "";
   if (!_fbDb || typeof HK_ERISIM === "undefined") return "";
@@ -784,11 +816,8 @@ async function fbVefaPaylasimYukle() {
   if (typeof fbAuthEpostalariTopla === "function") {
     try { emails = await fbAuthEpostalariTopla(u); } catch (e) {}
   }
-  var keys = [];
-  (emails || []).forEach(function (em) {
-    var kural = HK_ERISIM.kuralAnahtari(em);
-    if (kural && keys.indexOf(kural) < 0) keys.push(kural);
-  });
+  var keys = fbVefaIzleyiciAnahtarlari(emails);
+  if (!keys.length) return "";
   for (var i = 0; i < keys.length; i++) {
     try {
       var snap = await _fbDb.ref("paylasim/vefa/" + keys[i]).once("value");
@@ -797,9 +826,32 @@ async function fbVefaPaylasimYukle() {
         window._hkVefaSahipUid = sahip;
         return sahip;
       }
-    } catch (e) {
-      console.warn("[HK] vefa paylasim bak", e && (e.code || e.message));
+    } catch (e) {}
+  }
+  var uidler = [];
+  try {
+    var token = await u.getIdToken();
+    var url = "https://hesap-kitap-234d1-default-rtdb.firebaseio.com/users.json?shallow=true&auth=" + encodeURIComponent(token);
+    var res = await fetch(url);
+    if (res.ok) {
+      var data = await res.json();
+      if (data && typeof data === "object") uidler = Object.keys(data);
     }
+  } catch (eSh) {}
+  for (var j = 0; j < uidler.length; j++) {
+    if (uidler[j] === u.uid) continue;
+    try {
+      var paySnap = await _fbDb.ref("users/" + uidler[j] + "/vefaPaylasim").once("value");
+      var pay = paySnap.val();
+      if (!pay || typeof pay !== "object") continue;
+      var recIds = Object.keys(pay);
+      for (var r = 0; r < recIds.length; r++) {
+        if (fbVefaKayitEslesir(pay[recIds[r]], keys)) {
+          window._hkVefaSahipUid = uidler[j];
+          return uidler[j];
+        }
+      }
+    } catch (eU) {}
   }
   return "";
 }
@@ -832,10 +884,8 @@ async function fbVefaPaylasimEkle(email) {
   });
   if (ayni) throw new Error("Kendi e-postanizi eklemeyin");
   var id = anahtarlar[anahtarlar.length - 1];
-  var updates = {};
-  updates["users/" + u.uid + "/vefaPaylasim/" + id] = { email: gorunen, anahtarlar: anahtarlar };
-  anahtarlar.forEach(function (k) { updates["paylasim/vefa/" + k] = u.uid; });
-  await _fbDb.ref().update(updates);
+  await _fbDb.ref("users/" + u.uid + "/vefaPaylasim/" + id).set({ email: gorunen, anahtarlar: anahtarlar });
+  await fbVefaPaylasimIndeksYaz(anahtarlar, u.uid);
   return { id: id, email: gorunen, anahtarlar: anahtarlar };
 }
 
@@ -845,10 +895,8 @@ async function fbVefaPaylasimSil(id) {
   var recSnap = await _fbDb.ref("users/" + u.uid + "/vefaPaylasim/" + id).once("value");
   var rec = recSnap.val() || {};
   var anahtarlar = Array.isArray(rec.anahtarlar) && rec.anahtarlar.length ? rec.anahtarlar : [id];
-  var updates = {};
-  updates["users/" + u.uid + "/vefaPaylasim/" + id] = null;
-  anahtarlar.forEach(function (k) { updates["paylasim/vefa/" + k] = null; });
-  await _fbDb.ref().update(updates);
+  await _fbDb.ref("users/" + u.uid + "/vefaPaylasim/" + id).remove();
+  await fbVefaPaylasimIndeksYaz(anahtarlar, null);
 }
 
 async function fbCikisBulut() {
