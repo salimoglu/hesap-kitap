@@ -2272,6 +2272,539 @@ async function fbKaydet(){
   try{await fbRtdbRef("vefa2").set({uyeler:_uyeler,aylar:_aylar,borclar:_borclar,altinDurum:_altinDurum});}catch(e){}
 }
 
+/* ── VEFA EXCEL ── */
+var _vfExcelBusy=false;
+function tipYazi(tip){
+  var parts=[];
+  ALTIN_TIPLER.forEach(function(t){
+    var n=tip&&tip[t]||0;
+    if(n>0)parts.push(n+" × "+TIP_KISA[t]);
+  });
+  return parts.length?parts.join(" / "):"—";
+}
+function vefaExcelModel(){
+  var sirali=_aylar.slice().sort(function(a,b){return String(a.key||"").localeCompare(String(b.key||""));});
+  var tah=tTahsilat();
+  var deg=tDeger();
+  var altin=altinOzet();
+  var nakit=nakitOzet();
+  var oz=parcaOzet();
+  var degerBilinmiyor=_gramFiyat<=0&&altin.toplam_adet>0;
+  var uyeler=_uyeler.map(function(u){
+    var odenen=0, aySay=0;
+    sirali.forEach(function(ay){
+      if(ay.odemeler&&ay.odemeler[u.id]){
+        odenen+=kisiBasiOdeme(ay);
+        aySay+=1;
+      }
+    });
+    return {ad:u.ad||"Üye", rol:u.rol||"Üye", odenen:odenen, ay:aySay, pay:tah>0?odenen/tah:0};
+  });
+  var aySatir=sirali.map(function(ay){
+    var kp=kisiBasiOdeme(ay);
+    var tahsil=0;
+    var uyeTutar=_uyeler.map(function(u){
+      var od=!!(ay.odemeler&&ay.odemeler[u.id]);
+      if(od)tahsil+=kp;
+      return od?kp:0;
+    });
+    return {ay:ayLbl(ay.key), ayTutari:ay.toplamOdeme||0, kisiBasi:kp, tahsil:tahsil, uyeTutar:uyeTutar};
+  });
+  var yatirimlar=[];
+  var nakitKalem=[];
+  sirali.forEach(function(ay){
+    (ay.yatirimlar||[]).forEach(function(y){
+      if(!y)return;
+      if(y.tip==="nakit"){
+        var tutar=y.nakitTL||0;
+        nakitKalem.push({ay:ayLbl(ay.key), tutar:tutar, aciklama:y.aciklama||""});
+        yatirimlar.push({ay:ayLbl(ay.key), ad:"Nakit", adet:0, gram:0, deger:tutar, aciklama:y.aciklama||"", nakit:true});
+      } else if(TIP_GR[y.tip]){
+        yatirimlar.push({ay:ayLbl(ay.key), ad:TIP_AD[y.tip]||y.tip, adet:y.adet||0, gram:yGram(y), deger:yDeger(y), aciklama:"", nakit:false});
+      }
+    });
+  });
+  var parcalar=oz.parcalar.map(function(pc,i){
+    var st=parcaDurum(pc.id);
+    var durum="Elimde", kim="—";
+    if(st.durum==="borc"){
+      durum="Borç";
+      if(st.dis){
+        var ad=String(st.disAd||"").trim();
+        kim=ad?(ad+" (grup dışı)"):"Grup dışı (isim yok)";
+      } else if(st.uyeId) kim=uyeAd(st.uyeId)||"Eski üye";
+      else kim="Kişi seçilmedi";
+    }
+    return {
+      sira:i+1, cins:TIP_AD[pc.tip]||pc.tip, gram:pc.gram,
+      ay:pc.ay&&String(pc.ay).indexOf("-")>0?ayLbl(pc.ay):"—",
+      durum:durum, kim:kim, deger:_gramFiyat>0?pc.gram*_gramFiyat:0
+    };
+  });
+  return {
+    gramFiyat:_gramFiyat, degerBilinmiyor:degerBilinmiyor,
+    tahsilat:tah, maliyet:altin.maliyet, nakitToplam:nakit.toplam,
+    altinDeger:altin.guncel_deger, deger:deg, kz:deg-tah,
+    altin:altin, nakitKalem:nakitKalem, uyeler:uyeler, uyeAdlari:_uyeler.map(function(u){return u.ad||"Üye";}),
+    aylar:aySatir, yatirimlar:yatirimlar, konum:oz, parcalar:parcalar
+  };
+}
+function vefaExcelStilleri(){
+  return {
+    numFmts:[
+      {id:164,code:'#,##0.00" ₺"'},
+      {id:165,code:"0.0%"},
+      {id:166,code:'#,##0.00" gr"'}
+    ],
+    fonts:[
+      {sz:11,name:"Calibri",color:"FF1F2933"},
+      {sz:18,name:"Calibri",color:"FF1B365D",bold:1},
+      {sz:12,name:"Calibri",color:"FF6B5420",bold:1},
+      {sz:9,name:"Calibri",color:"FF5B6B7A"},
+      {sz:10,name:"Calibri",color:"FFFFFFFF",bold:1},
+      {sz:9,name:"Calibri",color:"FF1B365D",bold:1},
+      {sz:10,name:"Calibri",color:"FF1F2933"},
+      {sz:10,name:"Calibri",color:"FF1F2933",bold:1},
+      {sz:9,name:"Calibri",color:"FF5B6B7A",italic:1},
+      {sz:10,name:"Calibri",color:"FF067647",bold:1},
+      {sz:10,name:"Calibri",color:"FFB42318",bold:1},
+      {sz:10,name:"Calibri",color:"FF1B365D",bold:1},
+      {sz:10,name:"Calibri",color:"FF6B5420",bold:1}
+    ],
+    fills:[
+      {none:true},{gray125:true},
+      {fg:"FFFBF8F2"},{fg:"FF1B365D"},{fg:"FFF3E6C4"},
+      {fg:"FFFFFFFF"},{fg:"FFF7F4EC"},{fg:"FFE7F6EE"},
+      {fg:"FFFDECEC"},{fg:"FFE8E0C8"}
+    ],
+    borders:[
+      {},
+      {style:"thin",color:"FFE4D7B8"},
+      {style:"thin",color:"FFC4A35A"}
+    ],
+    xfs:[
+      {font:0,fill:0,border:0},
+      {font:1,fill:2,border:0,align:{h:"left",v:"center"}},
+      {font:2,fill:2,border:0,align:{h:"left",v:"center"}},
+      {font:3,fill:2,border:0,align:{h:"left",v:"center"}},
+      {font:4,fill:3,border:0,align:{h:"left",v:"center"}},
+      {font:5,fill:4,border:2,align:{h:"center",v:"center",wrap:1}},
+      {font:5,fill:4,border:2,align:{h:"left",v:"center",wrap:1}},
+      {font:7,fill:5,border:1,align:{h:"left",v:"center"}},
+      {font:7,fill:6,border:1,align:{h:"left",v:"center"}},
+      {font:6,fill:5,border:1,align:{h:"left",v:"center"}},
+      {font:6,fill:6,border:1,align:{h:"left",v:"center"}},
+      {font:6,fill:5,border:1,numFmt:164,align:{h:"right",v:"center"}},
+      {font:6,fill:6,border:1,numFmt:164,align:{h:"right",v:"center"}},
+      {font:6,fill:5,border:1,numFmt:166,align:{h:"right",v:"center"}},
+      {font:6,fill:6,border:1,numFmt:166,align:{h:"right",v:"center"}},
+      {font:6,fill:5,border:1,numFmt:3,align:{h:"right",v:"center"}},
+      {font:6,fill:6,border:1,numFmt:3,align:{h:"right",v:"center"}},
+      {font:6,fill:5,border:1,numFmt:165,align:{h:"right",v:"center"}},
+      {font:6,fill:6,border:1,numFmt:165,align:{h:"right",v:"center"}},
+      {font:9,fill:7,border:1,numFmt:164,align:{h:"right",v:"center"}},
+      {font:10,fill:8,border:1,numFmt:164,align:{h:"right",v:"center"}},
+      {font:9,fill:7,border:1,numFmt:165,align:{h:"right",v:"center"}},
+      {font:10,fill:8,border:1,numFmt:165,align:{h:"right",v:"center"}},
+      {font:11,fill:9,border:2,align:{h:"left",v:"center"}},
+      {font:11,fill:9,border:2,numFmt:164,align:{h:"right",v:"center"}},
+      {font:11,fill:9,border:2,numFmt:166,align:{h:"right",v:"center"}},
+      {font:11,fill:9,border:2,numFmt:3,align:{h:"right",v:"center"}},
+      {font:11,fill:9,border:2,numFmt:165,align:{h:"right",v:"center"}},
+      {font:8,fill:2,border:0,align:{h:"left",v:"center",wrap:1}},
+      {font:8,fill:5,border:1,align:{h:"center",v:"center"}},
+      {font:8,fill:6,border:1,align:{h:"center",v:"center"}},
+      {font:9,fill:7,border:1,align:{h:"center",v:"center"}},
+      {font:12,fill:4,border:1,align:{h:"center",v:"center"}}
+    ]
+  };
+}
+function vefaDosyaAd(d){
+  return "HesapKitap_Vefa_"+d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")+".xlsx";
+}
+function vefaExcelDosyasi(model, simdi){
+  if(typeof HK_XLSX==="undefined")return Promise.resolve(null);
+  var S={
+    title:1, sub:2, meta:3, bolum:4, head:5, headL:6,
+    lbl:7, lblA:8, txt:9, txtA:10, num:11, numA:12, gr:13, grA:14, ad:15, adA:16, pct:17, pctA:18,
+    pos:19, neg:20, posP:21, negP:22,
+    topL:23, topN:24, topG:25, topA:26, topP:27,
+    note:28, bos:29, bosA:30, el:31, borc:32
+  };
+  function metaYazi(){
+    var fiyat=model.gramFiyat>0?("Gram fiyatı "+p(model.gramFiyat)+" TL"):"Gram fiyatı girilmedi";
+    var tarih=simdi.toLocaleString("tr-TR",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"});
+    return tarih+"   ·   "+fiyat+"   ·   Tutarlar Türk Lirası";
+  }
+  function sayfaKur(){
+    var rows=[], merges=[], r=1;
+    function satir(ht, cells){ rows.push({r:r, ht:ht, cells:cells||[]}); r+=1; return r-1; }
+    function birlestir(row, c1, c2){ if(c2>c1) merges.push(HK_XLSX.cellRef(c1,row)+":"+HK_XLSX.cellRef(c2,row)); }
+    function hucre(c, t, s, v, d){
+      var cell={c:c, t:t, s:s, v:v};
+      if(t==="n") cell.digits=d==null?2:d;
+      return cell;
+    }
+    return {rows:rows, merges:merges, satir:satir, birlestir:birlestir, hucre:hucre};
+  }
+  function baslikBlogu(k, baslik, alt, son){
+    var n=k.satir(28,[k.hucre(0,"s",S.title,baslik)]);
+    k.birlestir(n,0,son);
+    n=k.satir(18,[k.hucre(0,"s",S.sub,alt)]);
+    k.birlestir(n,0,son);
+    n=k.satir(16,[k.hucre(0,"s",S.meta,metaYazi())]);
+    k.birlestir(n,0,son);
+  }
+  function bolum(k, ad, son){
+    var n=k.satir(20,[k.hucre(0,"s",S.bolum,ad)]);
+    k.birlestir(n,0,son);
+    return n;
+  }
+  function notSatiri(k, yazi, son, ht){
+    var n=k.satir(ht||18,[k.hucre(0,"s",S.note,yazi)]);
+    k.birlestir(n,0,son);
+    return n;
+  }
+  function ara(k){ k.satir(8,[]); }
+  function kafalar(k, liste, ht){
+    return k.satir(ht||18, liste.map(function(v,i){ return k.hucre(i,"s",i===0?S.headL:S.head,v); }));
+  }
+  function paraH(k, c, v, alt, yok, toplam){
+    if(yok) return k.hucre(c,"s",toplam?S.topL:(alt?S.bosA:S.bos),"—");
+    if(toplam) return k.hucre(c,"n",S.topN,v||0,2);
+    return k.hucre(c,"n",alt?S.numA:S.num,v||0,2);
+  }
+  function sayfa(ad, k, opt){
+    opt=opt||{};
+    return {
+      name:ad, tabSelected:!!opt.secili, hideGrid:true, freezeRow:opt.freeze||0,
+      orientation:opt.yon||"portrait", fitToWidth:1, fitToHeight:0,
+      footer:opt.footer, margins:{left:0.45,right:0.45,top:0.42,bottom:0.4,header:0.18,footer:0.2},
+      cols:opt.cols, rows:k.rows, merges:k.merges
+    };
+  }
+
+  var ozet=sayfaKur();
+  baslikBlogu(ozet,"HESAP KİTAP  —  VEFA YATIRIM VE BİRİKİM","Grubun birikimi, altına ve nakde nasıl dağıldığı",4);
+  notSatiri(ozet,"Bu sayfa sonucu gösterir. Ay ay döküm Aylar sayfasında, her bir altın Altınlar sayfasındadır.",4,20);
+  ara(ozet);
+  bolum(ozet,"GENEL DURUM",4);
+  var gh=kafalar(ozet,["KALEM","TUTAR","AÇIKLAMA"]);
+  ozet.birlestir(gh,2,4);
+  var gi=0;
+  function genel(ad, tutar, aciklama, tur){
+    var alt=gi%2===1; gi+=1;
+    var tutarH;
+    if(tur==="yok") tutarH=ozet.hucre(1,"s",alt?S.bosA:S.bos,"—");
+    else if(tur==="pos") tutarH=ozet.hucre(1,"n",S.pos,tutar,2);
+    else if(tur==="neg") tutarH=ozet.hucre(1,"n",S.neg,tutar,2);
+    else if(tur==="pct") tutarH=ozet.hucre(1,"n",tutar>0?S.posP:(tutar<0?S.negP:S.pct),tutar,6);
+    else tutarH=ozet.hucre(1,"n",alt?S.numA:S.num,tutar,2);
+    var n=ozet.satir(18,[ozet.hucre(0,"s",alt?S.lblA:S.lbl,ad),tutarH,ozet.hucre(2,"s",alt?S.txtA:S.txt,aciklama)]);
+    ozet.birlestir(n,2,4);
+  }
+  var kzTur=model.degerBilinmiyor?"yok":(model.kz>0?"pos":(model.kz<0?"neg":"tl"));
+  var getiriTur=(model.degerBilinmiyor||model.tahsilat<=0)?"yok":"pct";
+  genel("Toplam birikim",model.tahsilat,"Üyelerin işaretlenen ödemeleri","tl");
+  genel("Altının maliyeti",model.maliyet,model.maliyet<0?"Nakit, tahsil edilenden fazla":"Tahsilattan nakit ayrıldıktan sonra kalan","tl");
+  genel("Nakit birikim",model.nakitToplam,"Nakitte duran tutar, değeri değişmez","tl");
+  genel("Altının bugünkü değeri",model.degerBilinmiyor?0:model.altinDeger,model.degerBilinmiyor?"Gram fiyatı girilmedi":"Toplam gram × gram fiyatı",model.degerBilinmiyor?"yok":"tl");
+  genel("Bugünkü toplam değer",model.degerBilinmiyor?0:model.deger,model.degerBilinmiyor?"Altın değeri bilinmeden toplam çıkmaz":"Altın + nakit",model.degerBilinmiyor?"yok":"tl");
+  genel("Kar / zarar",model.degerBilinmiyor?0:model.kz,model.degerBilinmiyor?"Gram fiyatı girilince hesaplanır":"Bugünkü değer − birikim",kzTur);
+  genel("Getiri",model.tahsilat>0?model.kz/model.tahsilat:0,model.degerBilinmiyor?"Gram fiyatı girilince hesaplanır":(model.tahsilat>0?"Karın birikime oranı":"Birikim olmadığı için oran yok"),getiriTur);
+
+  ara(ozet);
+  bolum(ozet,"ÜYE BİRİKİMLERİ",4);
+  if(!model.uyeler.length){
+    notSatiri(ozet,"Üye yok.",4);
+  } else {
+    kafalar(ozet,["ÜYE","ROL","ÖDEDİĞİ","PAY","ÖDEDİĞİ AY"]);
+    var topOde=0, topAy=0;
+    model.uyeler.forEach(function(u,idx){
+      var alt=idx%2===1;
+      topOde+=u.odenen; topAy+=u.ay;
+      ozet.satir(18,[
+        ozet.hucre(0,"s",alt?S.lblA:S.lbl,u.ad),
+        ozet.hucre(1,"s",alt?S.txtA:S.txt,u.rol),
+        ozet.hucre(2,"n",alt?S.numA:S.num,u.odenen,2),
+        ozet.hucre(3,"n",alt?S.pctA:S.pct,u.pay,6),
+        ozet.hucre(4,"n",alt?S.adA:S.ad,u.ay,0)
+      ]);
+    });
+    ozet.satir(18,[
+      ozet.hucre(0,"s",S.topL,"Toplam"),
+      ozet.hucre(1,"s",S.topL,model.uyeler.length+" üye"),
+      ozet.hucre(2,"n",S.topN,topOde,2),
+      ozet.hucre(3,"n",S.topP,model.tahsilat>0?1:0,6),
+      ozet.hucre(4,"n",S.topA,topAy,0)
+    ]);
+  }
+
+  ara(ozet);
+  bolum(ozet,"ALTIN YATIRIMI",4);
+  var gorunenTip=ALTIN_TIPLER.filter(function(t){return ((model.altin.tipDetay[t]||{}).adet||0)>0;});
+  if(!gorunenTip.length){
+    notSatiri(ozet,"Henüz altın yok.",4);
+  } else {
+    kafalar(ozet,["CİNS","ADET","GRAM","GÜNCEL DEĞER","BİR ADET"]);
+    gorunenTip.forEach(function(t,idx){
+      var o=model.altin.tipDetay[t];
+      var alt=idx%2===1;
+      ozet.satir(18,[
+        ozet.hucre(0,"s",alt?S.lblA:S.lbl,TIP_AD[t]),
+        ozet.hucre(1,"n",alt?S.adA:S.ad,o.adet,0),
+        ozet.hucre(2,"n",alt?S.grA:S.gr,o.gram,2),
+        paraH(ozet,3,o.deger,alt,model.degerBilinmiyor,false),
+        ozet.hucre(4,"s",alt?S.txtA:S.txt,p(TIP_GR[t])+" gr")
+      ]);
+    });
+    ozet.satir(18,[
+      ozet.hucre(0,"s",S.topL,"Toplam"),
+      ozet.hucre(1,"n",S.topA,model.altin.toplam_adet,0),
+      ozet.hucre(2,"n",S.topG,model.altin.toplam_gram,2),
+      paraH(ozet,3,model.altin.guncel_deger,false,model.degerBilinmiyor,true),
+      ozet.hucre(4,"s",S.topL,"")
+    ]);
+  }
+
+  ara(ozet);
+  bolum(ozet,"ALTIN NEREDE",4);
+  kafalar(ozet,["DURUM","ADET","GRAM","GÜNCEL DEĞER","DAĞILIM"]);
+  function konumSatir(ad, o, stil){
+    ozet.satir(18,[
+      ozet.hucre(0,"s",stil,ad),
+      ozet.hucre(1,"n",S.ad,o.adet||0,0),
+      ozet.hucre(2,"n",S.gr,o.gram||0,2),
+      paraH(ozet,3,o.deger,false,model.degerBilinmiyor,false),
+      ozet.hucre(4,"s",S.txt,tipYazi(o.tip))
+    ]);
+  }
+  konumSatir("Elimizde",model.konum.elimde,S.el);
+  konumSatir("Borçta",model.konum.borc,S.borc);
+  ozet.satir(18,[
+    ozet.hucre(0,"s",S.topL,"Toplam"),
+    ozet.hucre(1,"n",S.topA,(model.konum.elimde.adet||0)+(model.konum.borc.adet||0),0),
+    ozet.hucre(2,"n",S.topG,(model.konum.elimde.gram||0)+(model.konum.borc.gram||0),2),
+    paraH(ozet,3,(model.konum.elimde.deger||0)+(model.konum.borc.deger||0),false,model.degerBilinmiyor,true),
+    ozet.hucre(4,"s",S.topL,"")
+  ]);
+
+  ara(ozet);
+  bolum(ozet,"BORÇTAKİ ALTIN",4);
+  var kimler=(model.konum.kisiler||[]).slice();
+  if(model.konum.secilmedi&&model.konum.secilmedi.adet){
+    kimler.push({ad:"Kişi seçilmedi",adet:model.konum.secilmedi.adet,gram:model.konum.secilmedi.gram,deger:model.konum.secilmedi.deger,tip:model.konum.secilmedi.tip});
+  }
+  if(model.konum.disIsimsiz&&model.konum.disIsimsiz.adet) kimler.push(Object.assign({},model.konum.disIsimsiz,{ad:"Grup dışı (isim yok)"}));
+  if(!model.konum.borc.adet){
+    notSatiri(ozet,"Borç verilen altın yok. Tamamı elimizde.",4);
+  } else {
+    kafalar(ozet,["KİŞİ","ADET","GRAM","GÜNCEL DEĞER","NE VAR"]);
+    kimler.forEach(function(kisi,idx){
+      var alt=idx%2===1;
+      ozet.satir(18,[
+        ozet.hucre(0,"s",alt?S.lblA:S.lbl,kisi.ad),
+        ozet.hucre(1,"n",alt?S.adA:S.ad,kisi.adet,0),
+        ozet.hucre(2,"n",alt?S.grA:S.gr,kisi.gram,2),
+        paraH(ozet,3,kisi.deger,alt,model.degerBilinmiyor,false),
+        ozet.hucre(4,"s",alt?S.txtA:S.txt,tipYazi(kisi.tip))
+      ]);
+    });
+  }
+
+  ara(ozet);
+  bolum(ozet,"NAKİT",4);
+  if(!model.nakitKalem.length){
+    notSatiri(ozet,"Nakit birikim yok.",4);
+  } else {
+    var nh=kafalar(ozet,["AY","TUTAR","AÇIKLAMA"]);
+    ozet.birlestir(nh,2,4);
+    var nakitTop=0;
+    model.nakitKalem.forEach(function(n,idx){
+      var alt=idx%2===1;
+      nakitTop+=n.tutar;
+      var row=ozet.satir(18,[
+        ozet.hucre(0,"s",alt?S.txtA:S.txt,n.ay),
+        ozet.hucre(1,"n",alt?S.numA:S.num,n.tutar,2),
+        ozet.hucre(2,"s",alt?S.txtA:S.txt,n.aciklama||"—")
+      ]);
+      ozet.birlestir(row,2,4);
+    });
+    var nt=ozet.satir(18,[
+      ozet.hucre(0,"s",S.topL,"Toplam"),
+      ozet.hucre(1,"n",S.topN,nakitTop,2),
+      ozet.hucre(2,"s",S.topL,model.nakitKalem.length+" kayıt")
+    ]);
+    ozet.birlestir(nt,2,4);
+  }
+
+  var aylar=sayfaKur();
+  var uyeN=model.uyeAdlari.length;
+  var aySon=Math.max(5,3+uyeN);
+  baslikBlogu(aylar,"AYLIK BİRİKİM VE YATIRIM","Hangi ay ne toplandı, ne alındı",aySon);
+  ara(aylar);
+  if(!model.aylar.length){
+    bolum(aylar,"AYLIK BİRİKİM",aySon);
+    notSatiri(aylar,"Henüz aylık kayıt yok.",aySon);
+  } else {
+    bolum(aylar,"AYLIK BİRİKİM",aySon);
+    notSatiri(aylar,"Ay tutarı o ay girilen toplamdır. Kişi başı, bu tutarın üye sayısına bölümüdür. Tahsil edilen, ödemesi işaretlenen kişilerin toplamıdır.",aySon,32);
+    var birikBas=["AY","AY TUTARI","KİŞİ BAŞI","TAHSİL EDİLEN"].concat(model.uyeAdlari);
+    var birikHead=kafalar(aylar,birikBas,32);
+    var sumAy=0, sumTah=0, sumUye=model.uyeAdlari.map(function(){return 0;});
+    model.aylar.forEach(function(ay,idx){
+      var alt=idx%2===1;
+      sumAy+=ay.ayTutari; sumTah+=ay.tahsil;
+      var cells=[
+        aylar.hucre(0,"s",alt?S.txtA:S.txt,ay.ay),
+        aylar.hucre(1,"n",alt?S.numA:S.num,ay.ayTutari,2),
+        aylar.hucre(2,"n",alt?S.numA:S.num,ay.kisiBasi,2),
+        aylar.hucre(3,"n",alt?S.numA:S.num,ay.tahsil,2)
+      ];
+      ay.uyeTutar.forEach(function(t,ui){
+        sumUye[ui]+=t;
+        cells.push(aylar.hucre(4+ui,"n",alt?S.numA:S.num,t,2));
+      });
+      aylar.satir(18,cells);
+    });
+    var topCells=[
+      aylar.hucre(0,"s",S.topL,"Toplam"),
+      aylar.hucre(1,"n",S.topN,sumAy,2),
+      aylar.hucre(2,"s",S.topL,"—"),
+      aylar.hucre(3,"n",S.topN,sumTah,2)
+    ];
+    sumUye.forEach(function(t,ui){ topCells.push(aylar.hucre(4+ui,"n",S.topN,t,2)); });
+    aylar.satir(18,topCells);
+    ara(aylar);
+    bolum(aylar,"AYLIK YATIRIMLAR",aySon);
+    notSatiri(aylar,"Altının alış tutarı ayrı yazılmaz. Güncel değer bugünkü gram fiyatına göredir. Nakit kendi tutarıdır.",aySon,30);
+    if(!model.yatirimlar.length){
+      notSatiri(aylar,"Bu aylarda yatırım kalemi yok.",aySon);
+    } else {
+      kafalar(aylar,["AY","YATIRIM","ADET","GRAM","GÜNCEL DEĞER","AÇIKLAMA"]);
+      var yAdet=0, yGramT=0, yDeger=0, yAltin=false;
+      model.yatirimlar.forEach(function(y,idx){
+        var alt=idx%2===1;
+        if(!y.nakit){ yAdet+=y.adet; yGramT+=y.gram; yAltin=true; }
+        yDeger+=y.deger;
+        var degerYok=!y.nakit&&model.degerBilinmiyor;
+        aylar.satir(18,[
+          aylar.hucre(0,"s",alt?S.txtA:S.txt,y.ay),
+          aylar.hucre(1,"s",alt?S.lblA:S.lbl,y.ad),
+          y.nakit?aylar.hucre(2,"s",alt?S.bosA:S.bos,"—"):aylar.hucre(2,"n",alt?S.adA:S.ad,y.adet,0),
+          y.nakit?aylar.hucre(3,"s",alt?S.bosA:S.bos,"—"):aylar.hucre(3,"n",alt?S.grA:S.gr,y.gram,2),
+          paraH(aylar,4,y.deger,alt,degerYok,false),
+          aylar.hucre(5,"s",alt?S.txtA:S.txt,y.aciklama||"—")
+        ]);
+      });
+      aylar.satir(18,[
+        aylar.hucre(0,"s",S.topL,"Toplam"),
+        aylar.hucre(1,"s",S.topL,""),
+        aylar.hucre(2,"n",S.topA,yAdet,0),
+        aylar.hucre(3,"n",S.topG,yGramT,2),
+        paraH(aylar,4,yDeger,false,model.degerBilinmiyor&&yAltin,true),
+        aylar.hucre(5,"s",S.topL,"")
+      ]);
+    }
+  }
+  var ayCols=[{min:1,max:1,width:20},{min:2,max:2,width:18},{min:3,max:3,width:14},{min:4,max:4,width:18},{min:5,max:5,width:20}];
+  var ayMax=Math.max(6,4+uyeN);
+  var ayi;
+  for(ayi=6;ayi<=ayMax;ayi++) ayCols.push({min:ayi,max:ayi,width:ayi===6?32:18});
+
+  var altinSayfa=sayfaKur();
+  baslikBlogu(altinSayfa,"ALTINLARIN DURUMU","Her satır gruptan alınan bir altındır. Sıra küçük gramdan büyüğe gider.",6);
+  ara(altinSayfa);
+  if(!model.parcalar.length){
+    bolum(altinSayfa,"ALTINLAR",6);
+    notSatiri(altinSayfa,"Henüz vefa altını yok.",6);
+  } else {
+    bolum(altinSayfa,"KISA ÖZET",6);
+    kafalar(altinSayfa,["DURUM","ADET","GRAM","GÜNCEL DEĞER"]);
+    function kisa(ad,o,stil){
+      altinSayfa.satir(18,[
+        altinSayfa.hucre(0,"s",stil,ad),
+        altinSayfa.hucre(1,"n",S.ad,o.adet||0,0),
+        altinSayfa.hucre(2,"n",S.gr,o.gram||0,2),
+        paraH(altinSayfa,3,o.deger,false,model.degerBilinmiyor,false)
+      ]);
+    }
+    kisa("Elimizde",model.konum.elimde,S.el);
+    kisa("Borçta",model.konum.borc,S.borc);
+    ara(altinSayfa);
+    bolum(altinSayfa,"LİSTE",6);
+    var listeHead=kafalar(altinSayfa,["SIRA","CİNS","GRAM","AY","DURUM","KİMDE","GÜNCEL DEĞER"]);
+    model.parcalar.forEach(function(pc,idx){
+      var alt=idx%2===1;
+      altinSayfa.satir(18,[
+        altinSayfa.hucre(0,"n",alt?S.adA:S.ad,pc.sira,0),
+        altinSayfa.hucre(1,"s",alt?S.lblA:S.lbl,pc.cins),
+        altinSayfa.hucre(2,"n",alt?S.grA:S.gr,pc.gram,2),
+        altinSayfa.hucre(3,"s",alt?S.txtA:S.txt,pc.ay),
+        altinSayfa.hucre(4,"s",pc.durum==="Borç"?S.borc:S.el,pc.durum),
+        altinSayfa.hucre(5,"s",alt?S.txtA:S.txt,pc.kim),
+        paraH(altinSayfa,6,pc.deger,alt,model.degerBilinmiyor,false)
+      ]);
+    });
+    var pAdet=model.parcalar.length, pGram=0, pDeg=0;
+    model.parcalar.forEach(function(pc){ pGram+=pc.gram; pDeg+=pc.deger; });
+    altinSayfa.satir(18,[
+      altinSayfa.hucre(0,"s",S.topL,"Toplam"),
+      altinSayfa.hucre(1,"n",S.topA,pAdet,0),
+      altinSayfa.hucre(2,"n",S.topG,pGram,2),
+      altinSayfa.hucre(3,"s",S.topL,""),
+      altinSayfa.hucre(4,"s",S.topL,""),
+      altinSayfa.hucre(5,"s",S.topL,""),
+      paraH(altinSayfa,6,pDeg,false,model.degerBilinmiyor,true)
+    ]);
+  }
+
+  var sheets=[
+    sayfa("Özet",ozet,{secili:true,footer:"&LHesap Kitap&CVefa ozet&RSayfa &P / &N",cols:[
+      {min:1,max:1,width:34},{min:2,max:2,width:22},{min:3,max:3,width:16},{min:4,max:4,width:22},{min:5,max:5,width:36}
+    ]}),
+    sayfa("Aylar",aylar,{yon:"landscape",freeze:birikHead||0,footer:"&LHesap Kitap&CVefa aylar&RSayfa &P / &N",cols:ayCols}),
+    sayfa("Altınlar",altinSayfa,{freeze:listeHead||0,footer:"&LHesap Kitap&CVefa altinlar&RSayfa &P / &N",cols:[
+      {min:1,max:1,width:16},{min:2,max:2,width:16},{min:3,max:3,width:14},{min:4,max:4,width:18},{min:5,max:5,width:14},{min:6,max:6,width:28},{min:7,max:7,width:20}
+    ]})
+  ];
+  return HK_XLSX.build({
+    title:"Vefa yatırım ve birikim",
+    creator:"Hesap Kitap",
+    now:simdi,
+    styles:vefaExcelStilleri(),
+    sheets:sheets
+  }).then(function(bytes){ return {bytes:bytes, dosya:vefaDosyaAd(simdi)}; });
+}
+function vefaExcelOlustur(veri, simdi){
+  var geri=null;
+  if(veri){
+    geri={uyeler:_uyeler,aylar:_aylar,borclar:_borclar,altinDurum:_altinDurum,gram:_gramFiyat};
+    _uyeler=veri.uyeler||[];
+    _aylar=veri.aylar||[];
+    _borclar=[];
+    _altinDurum=veri.altinDurum||{};
+    _gramFiyat=parseFloat(veri.gramFiyat)||0;
+  }
+  var model;
+  try{ model=vefaExcelModel(); }
+  finally{
+    if(geri){
+      _uyeler=geri.uyeler; _aylar=geri.aylar; _borclar=geri.borclar; _altinDurum=geri.altinDurum; _gramFiyat=geri.gram;
+    }
+  }
+  return vefaExcelDosyasi(model, simdi||new Date());
+}
+function vefaExcelIndir(){
+  if(typeof HK_XLSX==="undefined"||_vfExcelBusy)return Promise.resolve();
+  _vfExcelBusy=true;
+  return vefaExcelOlustur(null,new Date()).then(function(pack){
+    if(pack&&pack.bytes)HK_XLSX.download(pack.bytes,pack.dosya);
+  }).catch(function(e){
+    if(typeof console!=="undefined"&&console.error)console.error("[Vefa] excel",e);
+  }).then(function(){ _vfExcelBusy=false; });
+}
+
 function render(){
   var c=$("vefa-container");if(!c)return;
   var sirali=_aylar.slice().sort(function(a,b){return a.key.localeCompare(b.key);});
@@ -2337,9 +2870,14 @@ function render(){
   if(_gramFiyat>0)h+='<span class="vf2-fiyat-badge">🥇 '+p(_gramFiyat)+' TL/gr</span>';
   if(salt){
     h+='<div class="vf2-salt">Salt okunur. Bu Vefa kaydını yalnızca görüyorsunuz.</div>';
-  }else{
-    h+='<div class="vf2-oz-btns"><button class="vf2-btn-sec" id="vf2-uye-btn">+ Üye</button><button class="vf2-btn-gold" id="vf2-yatirim-btn">+ Yatırım Ekle</button></div>';
   }
+  h+='<div class="vf2-oz-btns">';
+  if(!salt){
+    h+='<button type="button" class="vf2-btn-sec" id="vf2-uye-btn">+ Üye</button>';
+    h+='<button type="button" class="vf2-btn-gold" id="vf2-yatirim-btn">+ Yatırım Ekle</button>';
+  }
+  h+='<button type="button" class="vf2-btn-excel" id="vf2-excel" title="Yatırım ve birikim özetini Excel olarak indir">&#8595; Excel</button>';
+  h+='</div>';
   h+='</div>';
 
   h+='<div class="vf2-sekme">';
@@ -2641,6 +3179,8 @@ function ozetYenile(){
 }
 
 function bagla(){
+  var excelBtn=$("vf2-excel");
+  if(excelBtn)excelBtn.addEventListener("click",function(e){e.preventDefault();vefaExcelIndir();});
   if(vefaSalt()){
     document.querySelectorAll("[data-gor]").forEach(function(btn){
       btn.addEventListener("click",function(e){
@@ -2804,7 +3344,7 @@ function bagla(){
 }
 
 async function vinit(){await fbYukle();render();}
-return{init:vinit};
+return{init:vinit,excelIndir:vefaExcelIndir,excelOlustur:vefaExcelOlustur};
 })();
 
 
