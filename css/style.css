@@ -2099,6 +2099,8 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .vf2-btn-gold:hover{opacity:0.85;}
 .vf2-btn-sec{background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-family:var(--font-body);font-size:12px;font-weight:700;padding:6px 14px;cursor:pointer;}
 .vf2-btn-sec:hover{border-color:var(--gold);color:var(--gold);}
+.vf2-btn-excel{background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--green);font-family:var(--font-body);font-size:12px;font-weight:700;padding:6px 14px;cursor:pointer;white-space:nowrap;}
+.vf2-btn-excel:hover{border-color:var(--green);background:rgba(52,201,122,0.08);}
 .vf2-ozet-grup{display:flex;flex-direction:column;gap:8px;min-width:0;flex:1 1 200px;}
 .vf2-ozet-grup-baslik{font-family:var(--font-brand);font-size:12px;font-weight:800;color:var(--gold);}
 .vf2-ozet-grup-ic{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;}
@@ -4918,6 +4920,8 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .vf2-btn-gold:hover{opacity:0.85;}
 .vf2-btn-sec{background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-family:var(--font-body);font-size:12px;font-weight:700;padding:6px 14px;cursor:pointer;}
 .vf2-btn-sec:hover{border-color:var(--gold);color:var(--gold);}
+.vf2-btn-excel{background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--green);font-family:var(--font-body);font-size:12px;font-weight:700;padding:6px 14px;cursor:pointer;white-space:nowrap;}
+.vf2-btn-excel:hover{border-color:var(--green);background:rgba(52,201,122,0.08);}
 .vf2-ozet-grup{display:flex;flex-direction:column;gap:8px;min-width:0;flex:1 1 200px;}
 .vf2-ozet-grup-baslik{font-family:var(--font-brand);font-size:12px;font-weight:800;color:var(--gold);}
 .vf2-ozet-grup-ic{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;}

@@ -349,7 +349,10 @@
     var mg = sheet.margins || {};
     function mgv(k, d) { return mg[k] == null ? d : mg[k]; }
     parts.push('<pageMargins left="' + mgv("left", 0.5) + '" right="' + mgv("right", 0.5) + '" top="' + mgv("top", 0.6) + '" bottom="' + mgv("bottom", 0.55) + '" header="' + mgv("header", 0.3) + '" footer="' + mgv("footer", 0.3) + '"/>');
-    parts.push('<pageSetup paperSize="9" orientation="portrait" fitToWidth="1" fitToHeight="1"/>');
+    var yon = sheet.orientation === "landscape" ? "landscape" : "portrait";
+    var fitW = sheet.fitToWidth == null ? 1 : sheet.fitToWidth;
+    var fitH = sheet.fitToHeight == null ? 1 : sheet.fitToHeight;
+    parts.push('<pageSetup paperSize="9" orientation="' + yon + '" fitToWidth="' + fitW + '" fitToHeight="' + fitH + '"/>');
     if (sheet.footer) {
       parts.push("<headerFooter><oddFooter>" + xmlEsc(sheet.footer) + "</oddFooter></headerFooter>");
     }
