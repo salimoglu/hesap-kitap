@@ -1944,6 +1944,22 @@ function p(n){return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigits:
 function uid(){return "vf"+Date.now()+"_"+Math.random().toString(36).substr(2,5);}
 function ayLbl(k){var s=k.split("-");return AY_TR[parseInt(s[1])-1]+" "+s[0];}
 function kisiBasiOdeme(ay){return _uyeler.length>0?((ay.toplamOdeme||0)/_uyeler.length):0;}
+/* Üyenin aylık ortalaması: ödediği tutarların ay sayısına bölümü. Hiç ödemediyse tutar yok. */
+function vefaUyeOrtalamalari(uyeler, aylar){
+  var liste=aylar||[];
+  var kisiler=uyeler||[];
+  var n=liste.length;
+  var payda=kisiler.length;
+  return kisiler.map(function(u){
+    if(!n||payda<=0||!u) return null;
+    var top=0;
+    liste.forEach(function(ay){
+      if(ay&&ay.odemeler&&ay.odemeler[u.id]) top+=(Number(ay.toplamOdeme)||0)/payda;
+    });
+    if(!(top>0)) return null;
+    return top/n;
+  });
+}
 
 /* Gram hesapla — sadece altın tipleri için */
 function yGram(y){
@@ -2956,11 +2972,12 @@ function render(){
       }
     });
 
-    /* Ortalama */
+    /* Ortalama: her üye yalnız kendi ödemesinden. Hiç ödemeyen üyenin hücresi boş. */
     var n=sirali.length;
     var ortOdeme=sirali.reduce(function(s,a){return s+(a.toplamOdeme||0);},0)/n;
+    var uyeOrt=vefaUyeOrtalamalari(_uyeler, sirali);
     h+='<tr class="vf2-ort-row"><td>Ortalama</td>';
-    _uyeler.forEach(function(){h+='<td>'+p(ortOdeme/_uyeler.length)+'</td>';});
+    uyeOrt.forEach(function(ort){h+='<td>'+(ort==null?"—":p(ort))+'</td>';});
     h+='<td>'+p(ortOdeme)+'</td><td class="vf2-th-sep"></td>';
     ALTIN_TIPLER.forEach(function(){h+='<td>—</td>';});
     h+='<td>—</td><td></td><td></td></tr>';
@@ -3343,8 +3360,24 @@ function bagla(){
   }
 }
 
+function vefaOnizleme(veri){
+  var geri={uyeler:_uyeler,aylar:_aylar,borclar:_borclar,altinDurum:_altinDurum,gram:_gramFiyat,gor:_gorunum};
+  _uyeler=(veri&&veri.uyeler)||[];
+  _aylar=(veri&&veri.aylar)||[];
+  _borclar=[];
+  _altinDurum=(veri&&veri.altinDurum)||{};
+  _gramFiyat=parseFloat(veri&&veri.gramFiyat)||0;
+  _gorunum="odeme";
+  var html="";
+  try{ render(); html=($("vefa-container")||{}).innerHTML||""; }
+  finally{
+    _uyeler=geri.uyeler; _aylar=geri.aylar; _borclar=geri.borclar;
+    _altinDurum=geri.altinDurum; _gramFiyat=geri.gram; _gorunum=geri.gor;
+  }
+  return html;
+}
 async function vinit(){await fbYukle();render();}
-return{init:vinit,excelIndir:vefaExcelIndir,excelOlustur:vefaExcelOlustur};
+return{init:vinit,excelIndir:vefaExcelIndir,excelOlustur:vefaExcelOlustur,uyeOrtalamalari:vefaUyeOrtalamalari,onizleme:vefaOnizleme};
 })();
 
 
