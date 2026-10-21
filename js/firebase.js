@@ -907,7 +907,9 @@ async function fbCikisBulut() {
     if (typeof document !== "undefined" && document.documentElement) {
       document.documentElement.classList.remove("hk-hizli-ac");
       document.documentElement.classList.remove("hk-auth-bekleniyor");
+      document.documentElement.classList.remove("hk-erisim-hazir");
     }
+    if (typeof HK_ERISIM !== "undefined" && HK_ERISIM.ozelSekmeleriGizle) HK_ERISIM.ozelSekmeleriGizle();
   } catch (eDom) {}
   window._fbAuthStateHazir = false;
   if (typeof fbAltinFiyatCacheTemizle === "function") fbAltinFiyatCacheTemizle();

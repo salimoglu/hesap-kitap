@@ -97,6 +97,8 @@
     try { localStorage.removeItem("hk-oturum-uid"); } catch (e) {}
     document.documentElement.classList.remove("hk-auth-bekleniyor");
     document.documentElement.classList.remove("hk-hizli-ac");
+    document.documentElement.classList.remove("hk-erisim-hazir");
+    if (typeof HK_ERISIM !== "undefined" && HK_ERISIM.ozelSekmeleriGizle) HK_ERISIM.ozelSekmeleriGizle();
   }
 
   function hkOturumBeklemeGoster() {
@@ -211,21 +213,23 @@
     const fbErrOk = document.getElementById("fb-auth-error");
     if (fbErrOk) fbErrOk.textContent = "";
 
+    u = typeof fbMevcutKullanici === "function" ? fbMevcutKullanici() : u;
+    /* Ozel sekmeler, kabuk gorunmeden once kapanir. Vefa paylasimi agdan gelene kadar beklenmez. */
+    if (typeof HK_ERISIM !== "undefined") HK_ERISIM.sekmeleriUygula(u);
+
     lockScreen.classList.add("hidden");
     appEl.classList.remove("hidden");
     hkOturumBeklemeBitir();
     document.documentElement.classList.add("hk-hizli-ac");
 
-    u = typeof fbMevcutKullanici === "function" ? fbMevcutKullanici() : u;
     if (typeof fbRtdbOturumHazir === "function") {
       try { await fbRtdbOturumHazir(); } catch (eOt) {}
     }
     if (typeof fbVefaPaylasimYukle === "function") {
       try { await fbVefaPaylasimYukle(); } catch (eVf) {}
     }
-    if (typeof HK_ERISIM !== "undefined") {
-      HK_ERISIM.sekmeleriUygula(u);
-    }
+    u = typeof fbMevcutKullanici === "function" ? fbMevcutKullanici() : u;
+    if (typeof HK_ERISIM !== "undefined") HK_ERISIM.sekmeleriUygula(u);
     if (typeof HK_AYARLAR !== "undefined") HK_AYARLAR.guncelle(u);
 
     /* Hizli acilis: butce onbellekten aninda; islemler yerelden; bulut arka planda */
@@ -467,19 +471,19 @@
   }
 
   // Sekme yonetimi
-  const TAB_SIRA_TUM = ["islemler", "birikim", "arabam", "kredi", "alacaklar", "urun", "cocugum", "altin", "verilen-altin", "vefa", "muhtac"];
+  var TAB_SIRA_MISAFIR = ["islemler", "birikim", "arabam", "kredi", "alacaklar", "altin"];
 
   function getTabSira() {
     let u = null;
     try { u = typeof fbMevcutKullanici === "function" ? fbMevcutKullanici() : null; } catch (e) { u = null; }
-    if (typeof HK_ERISIM !== "undefined" && u) return HK_ERISIM.izinliSekmeler(u);
-    return TAB_SIRA_TUM.slice();
+    if (typeof HK_ERISIM !== "undefined") return HK_ERISIM.izinliSekmeler(u);
+    return TAB_SIRA_MISAFIR.slice();
   }
 
   function modulIzinli(tabId) {
     let u = null;
     try { u = typeof fbMevcutKullanici === "function" ? fbMevcutKullanici() : null; } catch (e) { u = null; }
-    if (typeof HK_ERISIM === "undefined" || !u) return true;
+    if (typeof HK_ERISIM === "undefined") return TAB_SIRA_MISAFIR.indexOf(tabId) >= 0;
     return HK_ERISIM.modulErisilebilir(tabId, u);
   }
 

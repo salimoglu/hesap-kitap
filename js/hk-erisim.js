@@ -179,6 +179,27 @@ var HK_ERISIM = (function () {
     return izinliSekmeler(user).indexOf(tabId) >= 0;
   }
 
+  function ozelPaneliTemizle(id) {
+    if (typeof document === "undefined") return;
+    var panel = document.getElementById("tab-" + id);
+    if (!panel) return;
+    panel.classList.remove("active");
+    var host = panel.querySelector(".module-host");
+    if (host) host.textContent = "";
+  }
+
+  /** Cikis ve erisim oncesi: ozel sekmeler ve icerikleri ekranda kalmasin. */
+  function ozelSekmeleriGizle() {
+    if (typeof document === "undefined") return;
+    document.documentElement.classList.remove("hk-erisim-hazir");
+    document.querySelectorAll(".tab-btn[data-hk-ozel]").forEach(function (btn) {
+      btn.classList.add("hidden");
+      btn.style.display = "none";
+      btn.setAttribute("aria-hidden", "true");
+      if (btn.dataset.tab) ozelPaneliTemizle(btn.dataset.tab);
+    });
+  }
+
   function sekmeleriUygula(user) {
     user = user || (typeof fbMevcutKullanici === "function" ? fbMevcutKullanici() : null);
     var izinli = izinliSekmeler(user);
@@ -189,6 +210,7 @@ var HK_ERISIM = (function () {
       btn.classList.toggle("hidden", !ok);
       btn.style.display = ok ? "" : "none";
       btn.setAttribute("aria-hidden", ok ? "false" : "true");
+      if (!ok && btn.hasAttribute("data-hk-ozel")) ozelPaneliTemizle(id);
     });
     var aktifBtn = document.querySelector(".tab-btn.active:not(.hidden)");
     var aktifId = aktifBtn && aktifBtn.dataset.tab;
@@ -202,6 +224,8 @@ var HK_ERISIM = (function () {
         panel.classList.toggle("active", panel.id === "tab-" + ilkId);
       });
     }
+    if (user && !user.isAnonymous) document.documentElement.classList.add("hk-erisim-hazir");
+    else document.documentElement.classList.remove("hk-erisim-hazir");
     var syncEl = document.getElementById("sync-durum");
     if (syncEl) {
       syncEl.title = yonetici
@@ -246,6 +270,7 @@ var HK_ERISIM = (function () {
     izinliSekmeler: izinliSekmeler,
     modulErisilebilir: modulErisilebilir,
     sekmeleriUygula: sekmeleriUygula,
+    ozelSekmeleriGizle: ozelSekmeleriGizle,
     misafirBilgiGoster: misafirBilgiGoster,
     tumSekmeler: TUM_SEKMELER,
     kuralAnahtari: kuralAnahtari,

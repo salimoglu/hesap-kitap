@@ -192,9 +192,9 @@ var HK_TANITIM = (function () {
 
   function izinliModulSira(user) {
     var izinli =
-      typeof HK_ERISIM !== "undefined" && user
+      typeof HK_ERISIM !== "undefined"
         ? HK_ERISIM.izinliSekmeler(user)
-        : SIRA.slice();
+        : ["islemler", "birikim", "arabam", "kredi", "alacaklar", "altin"];
     var out = [];
     SIRA.forEach(function (id) {
       if (izinli.indexOf(id) >= 0 && MODULLER[id]) out.push(id);
