@@ -19,7 +19,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="dns-prefetch" href="https://hesap-kitap-234d1.firebaseapp.com" />
-  <link rel="stylesheet" href="css/style.css?v=20261020vefaexcel" />
+  <link rel="stylesheet" href="css/style.css?v=20261021erisim" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800&display=swap" media="print" onload="this.media='all'" />
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800&display=swap" /></noscript>
   <style>
@@ -29,6 +29,10 @@
     /* Kayitli oturum: kilit ekrani yerine uygulama kabugunu hemen goster */
     html.hk-hizli-ac #lock-screen { display: none !important; }
     html.hk-hizli-ac #app { display: flex !important; flex-direction: column; height: 100dvh; overflow: hidden; }
+    /* Ozel moduller erisim cozulene kadar hic boyanmasin */
+    .tab-btn[data-hk-ozel="1"] { display: none !important; pointer-events: none; }
+    html.hk-erisim-hazir .tab-btn[data-hk-ozel="1"]:not(.hidden) { display: flex !important; pointer-events: auto; }
+    html:not(.hk-erisim-hazir) .tab-panel[data-hk-ozel="1"] { display: none !important; }
     .lock-auth-bekliyor { display: none; flex-direction: column; align-items: center; gap: 14px; margin-top: 4px; }
     .lock-auth-bekliyor-spin { width: 28px; height: 28px; border: 3px solid var(--border, rgba(255,255,255,.12)); border-top-color: var(--gold, #c9a84c); border-radius: 50%; animation: hk-lock-spin .75s linear infinite; }
     .lock-auth-bekliyor-metin { font-size: 13px; font-weight: 600; color: var(--text-secondary, #9aa8b8); margin: 0; }
@@ -201,12 +205,12 @@
       <button class="tab-btn" data-tab="arabam"><span class="tab-icon">&#128663;</span><span class="tab-label">Arabam</span></button>
       <button class="tab-btn" data-tab="kredi"><span class="tab-icon">&#128179;</span><span class="tab-label">Kredi K.</span></button>
       <button class="tab-btn" data-tab="alacaklar"><span class="tab-icon">&#129309;</span><span class="tab-label">Alac/Borc</span></button>
-      <button class="tab-btn" data-tab="urun"><span class="tab-icon">&#128230;</span><span class="tab-label">&#220;r&#252;n</span></button>
-      <button class="tab-btn" data-tab="cocugum"><span class="tab-icon">&#128118;</span><span class="tab-label">&#199;ocu&#287;um</span></button>
+      <button class="tab-btn hidden" data-tab="urun" data-hk-ozel="1" aria-hidden="true"><span class="tab-icon">&#128230;</span><span class="tab-label">&#220;r&#252;n</span></button>
+      <button class="tab-btn hidden" data-tab="cocugum" data-hk-ozel="1" aria-hidden="true"><span class="tab-icon">&#128118;</span><span class="tab-label">&#199;ocu&#287;um</span></button>
       <button class="tab-btn" data-tab="altin"><span class="tab-icon">&#129351;</span><span class="tab-label">Alt&#305;n</span></button>
-      <button class="tab-btn" data-tab="verilen-altin"><span class="tab-icon">&#127873;</span><span class="tab-label">V. Alt&#305;n</span></button>
-      <button class="tab-btn" data-tab="vefa"><span class="tab-icon">&#128332;</span><span class="tab-label">Vefa</span></button>
-      <button class="tab-btn" data-tab="muhtac"><span class="tab-icon">&#129330;</span><span class="tab-label">Muhta&#231;</span></button>
+      <button class="tab-btn hidden" data-tab="verilen-altin" data-hk-ozel="1" aria-hidden="true"><span class="tab-icon">&#127873;</span><span class="tab-label">V. Alt&#305;n</span></button>
+      <button class="tab-btn hidden" data-tab="vefa" data-hk-ozel="1" aria-hidden="true"><span class="tab-icon">&#128332;</span><span class="tab-label">Vefa</span></button>
+      <button class="tab-btn hidden" data-tab="muhtac" data-hk-ozel="1" aria-hidden="true"><span class="tab-icon">&#129330;</span><span class="tab-label">Muhta&#231;</span></button>
     </nav>
 
     <main class="content">
@@ -298,12 +302,12 @@
       <section id="tab-arabam" class="tab-panel"><div id="arabam-container" class="module-host"></div></section>
       <section id="tab-kredi" class="tab-panel"><div id="kredi-container" class="module-host"></div></section>
       <section id="tab-alacaklar" class="tab-panel"><div id="alacaklar-container" class="module-host"></div></section>
-      <section id="tab-urun" class="tab-panel"><div id="urun-container" class="module-host"></div></section>
-      <section id="tab-cocugum" class="tab-panel"><div id="cocugum-container" class="module-host"></div></section>
+      <section id="tab-urun" class="tab-panel" data-hk-ozel="1"><div id="urun-container" class="module-host"></div></section>
+      <section id="tab-cocugum" class="tab-panel" data-hk-ozel="1"><div id="cocugum-container" class="module-host"></div></section>
       <section id="tab-altin" class="tab-panel"><div id="altin-container" class="module-host"></div></section>
-      <section id="tab-verilen-altin" class="tab-panel"><div id="verilen-altin-container" class="module-host"></div></section>
-      <section id="tab-vefa" class="tab-panel"><div id="vefa-container" class="module-host"></div></section>
-      <section id="tab-muhtac" class="tab-panel"><div id="muhtac-container" class="module-host"></div></section>
+      <section id="tab-verilen-altin" class="tab-panel" data-hk-ozel="1"><div id="verilen-altin-container" class="module-host"></div></section>
+      <section id="tab-vefa" class="tab-panel" data-hk-ozel="1"><div id="vefa-container" class="module-host"></div></section>
+      <section id="tab-muhtac" class="tab-panel" data-hk-ozel="1"><div id="muhtac-container" class="module-host"></div></section>
     </main>
   </div>
 
@@ -533,12 +537,12 @@
   <script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-  <script defer src="js/hk-version.js?v=1.79"></script>
+  <script defer src="js/hk-version.js?v=1.80"></script>
   <script defer src="js/hk-xlsx.js?v=20261020vefaexcel"></script>
-  <script defer src="js/hk-erisim.js?v=20261011vefa"></script>
-  <script defer src="js/hk-tanitim.js?v=20261008ekle"></script>
+  <script defer src="js/hk-erisim.js?v=20261021erisim"></script>
+  <script defer src="js/hk-tanitim.js?v=20261021erisim"></script>
   <script defer src="js/hk-ayarlar.js?v=20261011vefa"></script>
-  <script defer src="js/firebase.js?v=20261011vefa2"></script>
+  <script defer src="js/firebase.js?v=20261021erisim"></script>
   <script defer src="js/db.js?v=20260816perf"></script>
   <script defer src="js/modules/islemler.js?v=20260816perf"></script>
   <script defer src="js/modules/yukle.js?v=20261020vefaexcel"></script>
@@ -548,7 +552,7 @@
   <script defer src="js/modules/arabam.js?v=20260816perf"></script>
   <script defer src="js/modules/birikim.js?v=20261011sade"></script>
   <script defer src="js/modules/verilen-altinlar.js?v=20260816perf"></script>
-  <script defer src="js/app.js?v=20261011vefa"></script>
+  <script defer src="js/app.js?v=20261021erisim"></script>
 </body>
 </html>
 

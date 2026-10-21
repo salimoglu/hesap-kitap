@@ -31,4 +31,52 @@ esit(
 esit("bos", er.paylasimAnahtarlari("not-an-email"), []);
 esit("yasak", er.paylasimAnahtarlari("a/b@gmail.com"), []);
 
+var MISAFIR = ["islemler", "birikim", "arabam", "kredi", "alacaklar", "altin"];
+var OZEL = ["urun", "cocugum", "verilen-altin", "vefa", "muhtac"];
+var izleyici = { uid: "izleyici-1", email: "paylasilan.hesap@gmail.com", isAnonymous: false };
+var yonetici = { uid: "yonetici-1", email: "salimoglu61@gmail.com", isAnonymous: false };
+
+context.window._hkVefaSahipUid = "";
+esit("izleyici ozel yok", er.izinliSekmeler(izleyici), MISAFIR);
+esit("oturumsuz ozel yok", er.izinliSekmeler(null), MISAFIR);
+OZEL.forEach(function (id) {
+  esit("izleyici " + id, er.modulErisilebilir(id, izleyici), false);
+  esit("oturumsuz " + id, er.modulErisilebilir(id, null), false);
+});
+
+context.window._hkVefaSahipUid = "yonetici-1";
+esit("izleyici yalniz vefa", er.izinliSekmeler(izleyici), MISAFIR.concat(["vefa"]));
+esit("izleyici cocugum kapali", er.modulErisilebilir("cocugum", izleyici), false);
+esit("izleyici urun kapali", er.modulErisilebilir("urun", izleyici), false);
+
+context.window._hkVefaSahipUid = "";
+var yoneticiListe = er.izinliSekmeler(yonetici);
+OZEL.forEach(function (id) {
+  esit("yonetici " + id, yoneticiListe.indexOf(id) >= 0, true);
+});
+
+var html = fs.readFileSync(require("path").join(__dirname, "../index.html"), "utf8");
+OZEL.forEach(function (id) {
+  var btn = new RegExp('class="tab-btn hidden"[^>]*data-tab="' + id + '"[^>]*data-hk-ozel="1"');
+  var panel = new RegExp('id="tab-' + id + '" class="tab-panel" data-hk-ozel="1"');
+  if (!btn.test(html)) {
+    console.error("FAIL ozel sekme isareti", id);
+    process.exitCode = 1;
+  }
+  if (!panel.test(html)) {
+    console.error("FAIL ozel panel isareti", id);
+    process.exitCode = 1;
+  }
+});
+if (html.indexOf('html:not(.hk-erisim-hazir) .tab-panel[data-hk-ozel="1"]') < 0) {
+  console.error("FAIL erisim oncesi panel kilidi yok");
+  process.exitCode = 1;
+}
+MISAFIR.forEach(function (id) {
+  if (html.indexOf('data-tab="' + id + '" data-hk-ozel="1"') >= 0) {
+    console.error("FAIL misafir sekme ozel isaretli", id);
+    process.exitCode = 1;
+  }
+});
+
 if (!process.exitCode) console.log("vefa paylasim anahtarlari tamam");
