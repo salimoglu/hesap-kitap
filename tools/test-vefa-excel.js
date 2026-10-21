@@ -88,6 +88,46 @@ vm.createContext(context);
 vm.runInContext(fs.readFileSync(path.join(__dirname, "../js/hk-xlsx.js"), "utf8"), context);
 vm.runInContext(fs.readFileSync(path.join(__dirname, "../js/modules/yukle.js"), "utf8"), context);
 
+function yaklasik(ad, gercek, beklenen) {
+  if (typeof gercek !== "number" || Math.abs(gercek - beklenen) > 0.001) fail(ad, gercek);
+}
+var ortUyeler = [
+  { id: "u1", ad: "Ayşe Yılmaz", rol: "Üye" },
+  { id: "u2", ad: "Fatma İNCE", rol: "Üye" },
+  { id: "u3", ad: "Yeni Üye", rol: "Üye" }
+];
+var ortAylar = [
+  { key: "2026-01", toplamOdeme: 9000, odemeler: { u1: true, u2: true }, yatirimlar: [] },
+  { key: "2026-02", toplamOdeme: 3000, odemeler: { u1: true, u2: false, u3: false }, yatirimlar: [] }
+];
+var ort = context.VefaModule.uyeOrtalamalari(ortUyeler, ortAylar);
+yaklasik("sürekli ödeyen ortalama", ort[0], 2000);
+yaklasik("eksik ay ortalama", ort[1], 1500);
+if (ort[2] != null) fail("ödemeyen üye ortalaması", ort[2]);
+var tam = context.VefaModule.uyeOrtalamalari(
+  [{ id: "a", ad: "A", rol: "Üye" }, { id: "b", ad: "B", rol: "Üye" }],
+  [
+    { toplamOdeme: 10000, odemeler: { a: true, b: true } },
+    { toplamOdeme: 4000, odemeler: { a: true, b: true } }
+  ]
+);
+yaklasik("her ay ödeyen", tam[0], 3500);
+yaklasik("her ay ödeyen eşiti", tam[1], 3500);
+
+context.window._hkVefaSahipUid = "sahip";
+var ortalamaHtml = context.VefaModule.onizleme({
+  uyeler: ortUyeler,
+  aylar: ortAylar,
+  gramFiyat: 0
+});
+var ortalamaSatir = (ortalamaHtml.match(/<tr class="vf2-ort-row">([\s\S]*?)<\/tr>/) || [])[1] || "";
+var ortalamaHucre = [];
+ortalamaSatir.replace(/<td>([\s\S]*?)<\/td>/g, function (_, ic) { ortalamaHucre.push(ic); return _; });
+if (ortalamaHucre[0] !== "Ortalama") fail("ortalama satırı yok", ortalamaHucre[0]);
+if (ortalamaHucre[1] === "—" || ortalamaHucre[1] === ortalamaHucre[3]) fail("ödeyen ortalama", ortalamaHucre.join("|"));
+if (ortalamaHucre[3] !== "—") fail("yeni üye ortalaması tutar göstermemeli", ortalamaHucre.join("|"));
+if (ortalamaHucre[2] === ortalamaHucre[1]) fail("eksik ay tam ayla aynı", ortalamaHucre.join("|"));
+
 var ornek = {
   gramFiyat: 3000,
   uyeler: [
