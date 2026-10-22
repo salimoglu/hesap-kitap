@@ -1943,18 +1943,32 @@ var TUM_TIPLER=["gram","ceyrek","yarim","tam","nakit"];
 function p(n){return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2});}
 function uid(){return "vf"+Date.now()+"_"+Math.random().toString(36).substr(2,5);}
 function ayLbl(k){var s=k.split("-");return AY_TR[parseInt(s[1])-1]+" "+s[0];}
-function kisiBasiOdeme(ay){return _uyeler.length>0?((ay.toplamOdeme||0)/_uyeler.length):0;}
+/* Kişi başı: o ayki toplam, ödemesi seçilen üye sayısına bölünür. Sonradan eklenen ve seçilmeyen üye payı düşürmez. */
+function odeyenSayisi(ay, uyeler){
+  var kisiler=uyeler||[];
+  if(!ay||!ay.odemeler) return 0;
+  var n=0;
+  kisiler.forEach(function(u){
+    if(u&&ay.odemeler[u.id]) n++;
+  });
+  return n;
+}
+function kisiBasiTutar(ay, uyeler){
+  var n=odeyenSayisi(ay, uyeler);
+  if(n<=0) return 0;
+  return (Number(ay.toplamOdeme)||0)/n;
+}
+function kisiBasiOdeme(ay){return kisiBasiTutar(ay, _uyeler);}
 /* Üyenin aylık ortalaması: ödediği tutarların ay sayısına bölümü. Hiç ödemediyse tutar yok. */
 function vefaUyeOrtalamalari(uyeler, aylar){
   var liste=aylar||[];
   var kisiler=uyeler||[];
   var n=liste.length;
-  var payda=kisiler.length;
   return kisiler.map(function(u){
-    if(!n||payda<=0||!u) return null;
+    if(!n||!u) return null;
     var top=0;
     liste.forEach(function(ay){
-      if(ay&&ay.odemeler&&ay.odemeler[u.id]) top+=(Number(ay.toplamOdeme)||0)/payda;
+      if(ay&&ay.odemeler&&ay.odemeler[u.id]) top+=kisiBasiTutar(ay, kisiler);
     });
     if(!(top>0)) return null;
     return top/n;
@@ -2664,7 +2678,7 @@ function vefaExcelDosyasi(model, simdi){
     notSatiri(aylar,"Henüz aylık kayıt yok.",aySon);
   } else {
     bolum(aylar,"AYLIK BİRİKİM",aySon);
-    notSatiri(aylar,"Ay tutarı o ay girilen toplamdır. Kişi başı, bu tutarın üye sayısına bölümüdür. Tahsil edilen, ödemesi işaretlenen kişilerin toplamıdır.",aySon,32);
+    notSatiri(aylar,"Ay tutarı o ay girilen toplamdır. Kişi başı, bu tutarın o ay ödemesi seçilen kişi sayısına bölümüdür. Tahsil edilen, seçilen kişilerin paylarının toplamıdır.",aySon,32);
     var birikBas=["AY","AY TUTARI","KİŞİ BAŞI","TAHSİL EDİLEN"].concat(model.uyeAdlari);
     var birikHead=kafalar(aylar,birikBas,32);
     var sumAy=0, sumTah=0, sumUye=model.uyeAdlari.map(function(){return 0;});
@@ -3072,7 +3086,7 @@ function render(){
   h+='<div class="modal-body">';
   h+='<div style="display:flex;gap:12px;flex-wrap:wrap">';
   h+='<div class="field-group" style="flex:1"><label class="field-label">Ay</label><input type="month" id="vf2-ay-key" class="field-input" value="'+buAy+'"/></div>';
-  h+='<div class="field-group" style="flex:1.2"><label class="field-label">Toplam Ödeme (TL) <span style="color:var(--text-muted);font-weight:400;font-size:10px">÷ '+_uyeler.length+' kişi</span></label>';
+  h+='<div class="field-group" style="flex:1.2"><label class="field-label">Toplam Ödeme (TL) <span id="vf2-pay-not" style="color:var(--text-muted);font-weight:400;font-size:10px;text-transform:none;letter-spacing:0"></span></label>';
   h+='<input type="number" id="vf2-ay-top" class="field-input" placeholder="0" min="0" step="0.01" inputmode="decimal"/></div></div>';
   h+='<div class="field-group"><label class="field-label">Kim Ödedi?</label><div class="vf2-ode-checks">';
   _uyeler.forEach(function(u){h+='<label class="vf2-ck-lbl"><input type="checkbox" class="vf2-ode-cb" value="'+u.id+'" checked>'+u.ad+'</label>';});
@@ -3152,6 +3166,20 @@ function yeniKalem(y){
   div.querySelector(".vf2-k-sil").addEventListener("click",function(){div.remove();});
 }
 
+function payBolumGuncelle(){
+  var el=$("vf2-pay-not");
+  if(!el) return;
+  var n=0;
+  document.querySelectorAll(".vf2-ode-cb").forEach(function(cb){ if(cb.checked) n++; });
+  var topEl=$("vf2-ay-top");
+  var top=topEl?parseFloat(topEl.value):0;
+  if(!(top>0)) top=0;
+  if(n<=0){
+    el.textContent="· kişi seçilmedi";
+    return;
+  }
+  el.textContent="· ÷ "+n+" kişi"+(top>0?" · kişi başı "+p(top/n)+" TL":"");
+}
 function modalAc(ayKey){
   var mevcut=_aylar.find(function(a){return a.key===ayKey;});
   $("vf2-modal-baslik").textContent=mevcut?"Yatırımı Düzenle":"Yatırım Ekle";
@@ -3159,8 +3187,9 @@ function modalAc(ayKey){
   $("vf2-ay-top").value=mevcut?(mevcut.toplamOdeme||""):"";
   $("vf2-kalemler").innerHTML="";_kc=0;
   document.querySelectorAll(".vf2-ode-cb").forEach(function(cb){
-    cb.checked=mevcut?(mevcut.odemeler&&mevcut.odemeler[cb.value]!==false):true;
+    cb.checked=mevcut?!!(mevcut.odemeler&&mevcut.odemeler[cb.value]):true;
   });
+  payBolumGuncelle();
   if(mevcut&&mevcut.yatirimlar&&mevcut.yatirimlar.length){
     mevcut.yatirimlar.forEach(function(y){yeniKalem(y);});
   }
@@ -3239,11 +3268,19 @@ function bagla(){
   var vfBox=$("vf2-modal")&&$("vf2-modal").querySelector(".modal-box");
   if(vfBox)vfBox.addEventListener("click",function(e){e.stopPropagation();});
   $("vf2-kalem-btn").addEventListener("click",function(){yeniKalem(null);});
+  document.querySelectorAll(".vf2-ode-cb").forEach(function(cb){
+    cb.addEventListener("change", payBolumGuncelle);
+  });
+  var vfTop=$("vf2-ay-top");
+  if(vfTop) vfTop.addEventListener("input", payBolumGuncelle);
   $("vf2-kaydet").addEventListener("click",async function(){
     var key=$("vf2-ay-key").value,top=parseFloat($("vf2-ay-top").value)||0;
     if(!key){alert("Ay seçiniz.");return;}
     if(!top||top<=0){$("vf2-ay-top").focus();return;}
     var odemeler={};document.querySelectorAll(".vf2-ode-cb").forEach(function(cb){odemeler[cb.value]=cb.checked;});
+    var secili=0;
+    Object.keys(odemeler).forEach(function(id){ if(odemeler[id]) secili++; });
+    if(secili<1){alert("Tutarı bölmek için en az bir kişi seçin.");return;}
     var yatirimlar=[];
     document.querySelectorAll(".vf2-kalem-satir").forEach(function(satir){
       var i=satir.id.replace("vf2-k-","");
