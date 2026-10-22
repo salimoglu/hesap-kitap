@@ -101,9 +101,17 @@ var ortAylar = [
   { key: "2026-02", toplamOdeme: 3000, odemeler: { u1: true, u2: false, u3: false }, yatirimlar: [] }
 ];
 var ort = context.VefaModule.uyeOrtalamalari(ortUyeler, ortAylar);
-yaklasik("sürekli ödeyen ortalama", ort[0], 2000);
-yaklasik("eksik ay ortalama", ort[1], 1500);
+/* Ocak 9000 / 2 seçilen = 4500. Şubat 3000 / 1 seçilen = 3000. Ortalama ay sayısına bölünür. */
+yaklasik("sürekli ödeyen ortalama", ort[0], 3750);
+yaklasik("eksik ay ortalama", ort[1], 2250);
 if (ort[2] != null) fail("ödemeyen üye ortalaması", ort[2]);
+var selmaOrt = context.VefaModule.uyeOrtalamalari(
+  [{ id: "u1" }, { id: "u2" }, { id: "u3" }, { id: "u4" }, { id: "u5" }],
+  [{ toplamOdeme: 11540, odemeler: { u1: true, u2: true, u3: true, u4: true } }]
+);
+yaklasik("secilmeyen yeni uye payi dusurmez", selmaOrt[0], 2885);
+yaklasik("secilen esit pay", selmaOrt[3], 2885);
+if (selmaOrt[4] != null) fail("secilmeyen uye ortalamasi", selmaOrt[4]);
 var tam = context.VefaModule.uyeOrtalamalari(
   [{ id: "a", ad: "A", rol: "Üye" }, { id: "b", ad: "B", rol: "Üye" }],
   [
@@ -127,6 +135,29 @@ if (ortalamaHucre[0] !== "Ortalama") fail("ortalama satırı yok", ortalamaHucre
 if (ortalamaHucre[1] === "—" || ortalamaHucre[1] === ortalamaHucre[3]) fail("ödeyen ortalama", ortalamaHucre.join("|"));
 if (ortalamaHucre[3] !== "—") fail("yeni üye ortalaması tutar göstermemeli", ortalamaHucre.join("|"));
 if (ortalamaHucre[2] === ortalamaHucre[1]) fail("eksik ay tam ayla aynı", ortalamaHucre.join("|"));
+
+var payHtml = context.VefaModule.onizleme({
+  uyeler: [
+    { id: "u1", ad: "Zafer EROĞLU", rol: "Başkan" },
+    { id: "u2", ad: "Fatma İNCE", rol: "Üye" },
+    { id: "u3", ad: "Güler UÇAR", rol: "Üye" },
+    { id: "u4", ad: "Salim EROĞLU", rol: "Üye" },
+    { id: "u5", ad: "Selma BEKTAŞ", rol: "Üye" }
+  ],
+  aylar: [
+    { key: "2025-08", toplamOdeme: 11540, odemeler: { u1: true, u2: true, u3: true, u4: true }, yatirimlar: [] }
+  ],
+  gramFiyat: 0
+});
+var tabloHtml = payHtml.split("vf2-cards")[0] || "";
+var payHucre = [];
+tabloHtml.replace(/vf2-ode-btn[^>]*>([^<]*)</g, function (_, ic) { payHucre.push(ic); return _; });
+if (payHucre.length !== 5) fail("uye hucre sayisi", payHucre.join("|"));
+[0, 1, 2, 3].forEach(function (i) {
+  if (payHucre[i] !== "2.885,00") fail("secilen dorte bolunmeli", payHucre.join("|"));
+});
+if (payHucre[4] !== "—") fail("secilmeyen yeni uye pay almamali", payHucre.join("|"));
+if (tabloHtml.indexOf("2.308,00") >= 0) fail("tum uye sayisina bolunmus");
 
 var ornek = {
   gramFiyat: 3000,
@@ -196,7 +227,7 @@ context.VefaModule.excelOlustur(ornek, simdi).then(function (pack) {
   var ozet = satirlar(dosyalar["xl/worksheets/sheet1.xml"], sst);
   var aylar = satirlar(dosyalar["xl/worksheets/sheet2.xml"], sst);
   var altin = satirlar(dosyalar["xl/worksheets/sheet3.xml"], sst);
-  [12000, 14000, 10500, 34500, 36000, 24000, 7000, 5000, 1500, 11.5, 8.75, 2.75, 8250, 26250].forEach(function (n) {
+  [14000, 12500, 10500, 34500, 36000, 22000, 9000, 5000, 4000, 1500, 11.5, 8.75, 2.75, 8250, 26250].forEach(function (n) {
     var varMi = sayiVar(ozet, n) || sayiVar(aylar, n) || sayiVar(altin, n);
     if (!varMi) fail("sayi yok", n);
   });
