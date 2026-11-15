@@ -1984,6 +1984,14 @@ function pKisa(n){
 }
 function uid(){return "vf"+Date.now()+"_"+Math.random().toString(36).substr(2,5);}
 function ayLbl(k){var s=k.split("-");return AY_TR[parseInt(s[1])-1]+" "+s[0];}
+/* Ekranda en son ödeme üstte, ilk ödeme altta. Aynı ayda son eklenen üstte. */
+function ayEkranSirasi(liste){
+  return (liste||[]).map(function(a,i){return {a:a,i:i};}).sort(function(x,y){
+    var k=String(y.a&&y.a.key||"").localeCompare(String(x.a&&x.a.key||""));
+    if(k)return k;
+    return y.i-x.i;
+  }).map(function(x){return x.a;});
+}
 function kisaAdMap(uyeler){
   var liste=uyeler||[];
   var ilk=liste.map(function(u){
@@ -3006,7 +3014,7 @@ function render(){
   var c=$("vefa-container");if(!c)return;
   var kay=kaydirmaSakla();
   _aylar=ayListe(_aylar);
-  var sirali=_aylar.slice().sort(function(a,b){return String(a.key||"").localeCompare(String(b.key||""));});
+  var sirali=ayEkranSirasi(_aylar);
   var tah=tTahsilat();
   var deg=tDeger();
   var altin=altinOzet();

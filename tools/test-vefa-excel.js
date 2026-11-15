@@ -180,6 +180,29 @@ var ciftHtml = context.VefaModule.onizleme({
 if (ciftHtml.indexOf('data-pfiltre="borc"') < 0) fail("altin suzgeci yok");
 if (ciftHtml.indexOf('<button type="button" class="alt-durum-btn') >= 0) fail("salt okurda durum butonu");
 var ciftTablo = ciftHtml.split("vf2-cards")[0] || "";
+var siraHtml = context.VefaModule.onizleme({
+  uyeler: [{ id: "u1", ad: "Zafer EROĞLU", rol: "Başkan" }],
+  aylar: [
+    { id: "eski", key: "2025-06", toplamOdeme: 1000, odemeler: { u1: true }, yatirimlar: [] },
+    { id: "yeni", key: "2025-07", toplamOdeme: 2000, odemeler: { u1: true }, yatirimlar: [] }
+  ],
+  gramFiyat: 0
+});
+var siraTablo = siraHtml.split("vf2-cards")[0] || "";
+var siraAylar = [];
+siraTablo.replace(/vf2-td-ay[^>]*>([^<]+)/g, function (_, ic) { siraAylar.push(ic); return _; });
+if (siraAylar[0] !== "Temmuz 2025") fail("yeni odeme ustte", siraAylar.join("|"));
+if (siraAylar[siraAylar.length - 1] !== "Haziran 2025") fail("ilk odeme altta", siraAylar.join("|"));
+var ayniAyHtml = context.VefaModule.onizleme({
+  uyeler: [{ id: "u1", ad: "Zafer EROĞLU", rol: "Başkan" }],
+  aylar: [
+    { id: "ilk", key: "2026-11", toplamOdeme: 1000, odemeler: { u1: true }, yatirimlar: [] },
+    { id: "son", key: "2026-11", toplamOdeme: 3000, odemeler: { u1: true }, yatirimlar: [] }
+  ],
+  gramFiyat: 0
+});
+var ayniUst = ((ayniAyHtml.split("vf2-cards")[0] || "").match(/vf2-td-top[^>]*>([^<]+)/) || [])[1];
+if (ayniUst !== "3.000,00") fail("ayni ayda son eklenen ustte", ayniUst);
 var kasimSay = (ciftTablo.match(/Kasım 2026/g) || []).length;
 if (kasimSay !== 2) fail("ayni ay iki satir", kasimSay);
 if (ciftTablo.indexOf("8.000,00") < 0 || ciftTablo.indexOf("3.000,00") < 0) fail("iki tutar yok");
