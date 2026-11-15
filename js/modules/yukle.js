@@ -1977,6 +1977,62 @@ var TUM_TIPLER=["gram","ceyrek","yarim","tam","nakit"];
 function p(n){return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2});}
 function uid(){return "vf"+Date.now()+"_"+Math.random().toString(36).substr(2,5);}
 function ayLbl(k){var s=k.split("-");return AY_TR[parseInt(s[1])-1]+" "+s[0];}
+/* Aynı ayda birden fazla kayıt olabilir. Ay anahtarı kimlik değildir. */
+function ayListe(v){
+  var ham;
+  if(Array.isArray(v))ham=v;
+  else if(v&&typeof v==="object"){
+    ham=Object.keys(v).sort(function(a,b){
+      var na=parseInt(a,10),nb=parseInt(b,10);
+      if(String(na)===a&&String(nb)===b)return na-nb;
+      return String(a).localeCompare(String(b));
+    }).map(function(k){return v[k];});
+  }else ham=[];
+  var kullanilan={};
+  var liste=[];
+  ham.forEach(function(a,i){
+    if(!a||typeof a!=="object")return;
+    var id=a.id?String(a.id):"";
+    if(!id||kullanilan[id]){
+      var temel="ay_"+(a.key||String(i));
+      id=temel;
+      var n=2;
+      while(kullanilan[id]){id=temel+"_"+n;n++;}
+    }
+    kullanilan[id]=1;
+    a.id=id;
+    liste.push(a);
+  });
+  return liste;
+}
+function ayniAySayisi(key, haricId){
+  var n=0;
+  _aylar.forEach(function(a){
+    if(a&&a.key===key&&a.id!==haricId)n++;
+  });
+  return n;
+}
+function ayBul(id){
+  if(!id)return null;
+  for(var i=0;i<_aylar.length;i++){
+    if(_aylar[i]&&_aylar[i].id===id)return _aylar[i];
+  }
+  return null;
+}
+function ayKaydet(liste, kayit){
+  var id=kayit&&kayit.id?String(kayit.id):"";
+  var obj={
+    id:id||uid(),
+    key:kayit.key,
+    toplamOdeme:Number(kayit.toplamOdeme)||0,
+    odemeler:kayit.odemeler||{},
+    yatirimlar:kayit.yatirimlar||[]
+  };
+  var idx=id?liste.findIndex(function(a){return a&&a.id===id;}):-1;
+  if(idx>=0)liste[idx]=obj;
+  else liste.push(obj);
+  return obj;
+}
 /* Kişi başı: o ayki toplam, ödemesi seçilen üye sayısına bölünür. Sonradan eklenen ve seçilmeyen üye payı düşürmez. */
 function odeyenSayisi(ay, uyeler){
   var kisiler=uyeler||[];
@@ -2315,7 +2371,7 @@ async function fbYukle(){
     }
     var varsayilan=[{id:"u1",ad:"Zafer EROĞLU",rol:"Başkan"},{id:"u2",ad:"Fatma İNCE",rol:"Üye"},{id:"u3",ad:"Güler UÇAR",rol:"Üye"},{id:"u4",ad:"Salim EROĞLU",rol:"Üye"}];
     _uyeler=d.uyeler||(salt?[]:varsayilan);
-    _aylar=d.aylar||[];
+    _aylar=ayListe(d.aylar);
     _borclar=borcDizi(d.borclar).map(borcNorm).filter(Boolean);
     _altinDurum={};
     if(d.altinDurum&&typeof d.altinDurum==="object"){
@@ -2845,7 +2901,7 @@ function vefaExcelOlustur(veri, simdi){
   if(veri){
     geri={uyeler:_uyeler,aylar:_aylar,borclar:_borclar,altinDurum:_altinDurum,gram:_gramFiyat};
     _uyeler=veri.uyeler||[];
-    _aylar=veri.aylar||[];
+    _aylar=ayListe(veri.aylar);
     _borclar=[];
     _altinDurum=veri.altinDurum||{};
     _gramFiyat=parseFloat(veri.gramFiyat)||0;
@@ -2871,7 +2927,8 @@ function vefaExcelIndir(){
 
 function render(){
   var c=$("vefa-container");if(!c)return;
-  var sirali=_aylar.slice().sort(function(a,b){return a.key.localeCompare(b.key);});
+  _aylar=ayListe(_aylar);
+  var sirali=_aylar.slice().sort(function(a,b){return String(a.key||"").localeCompare(String(b.key||""));});
   var tah=tTahsilat();
   var deg=tDeger();
   var altin=altinOzet();
@@ -2999,7 +3056,7 @@ function render(){
           _uyeler.forEach(function(u){
             var odedi=(ay.odemeler&&ay.odemeler[u.id])||false;
             if(salt) h+='<td rowspan="'+maxR+'"><span class="vf2-ode-btn '+(odedi?"vf2-odedi":"vf2-bek")+'">'+(odedi?p(kp):'—')+'</span></td>';
-            else h+='<td rowspan="'+maxR+'"><button class="vf2-ode-btn '+(odedi?"vf2-odedi":"vf2-bek")+'" data-ay="'+ay.key+'" data-uid="'+u.id+'">'+(odedi?p(kp):'—')+'</button></td>';
+            else h+='<td rowspan="'+maxR+'"><button class="vf2-ode-btn '+(odedi?"vf2-odedi":"vf2-bek")+'" data-id="'+hkEsc(ay.id)+'" data-uid="'+u.id+'">'+(odedi?p(kp):'—')+'</button></td>';
           });
           h+='<td rowspan="'+maxR+'" class="vf2-td-top">'+p(ayOdeme)+'</td>';
           h+='<td rowspan="'+maxR+'" class="vf2-th-sep"></td>';
@@ -3014,7 +3071,7 @@ function render(){
         if(ri===0){
           h+='<td rowspan="'+maxR+'" class="vf2-td-yat '+(ayNakit>0?"vf2-td-nakit":"vf2-td-bos")+'">'+(ayNakit>0?p(ayNakit)+' TL':'—')+'</td>';
           h+='<td rowspan="'+maxR+'" class="vf2-td-gun">'+(_gramFiyat>0||ayNakit>0?p(ayDeger):' — ')+'</td>';
-          h+='<td rowspan="'+maxR+'" class="vf2-td-aks">'+(salt?"":'<button class="vf2-duz-btn row-action-btn duzenle" data-ay="'+ay.key+'">&#9998;</button> <button class="vf2-sil-btn row-action-btn sil" data-ay="'+ay.key+'">&#10005;</button>')+'</td>';
+          h+='<td rowspan="'+maxR+'" class="vf2-td-aks">'+(salt?"":'<button class="vf2-duz-btn row-action-btn duzenle" data-id="'+hkEsc(ay.id)+'">&#9998;</button> <button class="vf2-sil-btn row-action-btn sil" data-id="'+hkEsc(ay.id)+'">&#10005;</button>')+'</td>';
         }
         h+='</tr>';
       }
@@ -3062,7 +3119,7 @@ function render(){
       h+='<div class="vf2-card">';
       h+='<div class="vf2-card-header">';
       h+='<div class="vf2-card-ay">'+ayLbl(ay.key)+'</div>';
-      h+='<div class="vf2-card-aks">'+(salt?"":'<button type="button" class="vf2-duz-btn row-action-btn duzenle" data-ay="'+ay.key+'">&#9998;</button><button type="button" class="vf2-sil-btn row-action-btn sil" data-ay="'+ay.key+'">&#10005;</button>')+'</div>';
+      h+='<div class="vf2-card-aks">'+(salt?"":'<button type="button" class="vf2-duz-btn row-action-btn duzenle" data-id="'+hkEsc(ay.id)+'">&#9998;</button><button type="button" class="vf2-sil-btn row-action-btn sil" data-id="'+hkEsc(ay.id)+'">&#10005;</button>')+'</div>';
       h+='</div><div class="vf2-card-uyeler">';
       _uyeler.forEach(function(u){
         var odedi=(ay.odemeler&&ay.odemeler[u.id])||false;
@@ -3072,7 +3129,7 @@ function render(){
           h+='<span class="vf2-card-uye-ad">'+hkEsc(km[0]||u.ad||'')+'</span>';
           h+='<span class="vf2-card-uye-deg">'+(odedi?p(kpM):'—')+'</span></div>';
         }else{
-          h+='<button type="button" class="vf2-card-uye-btn vf2-ode-btn '+(odedi?"vf2-odedi":"vf2-bek")+'" data-ay="'+ay.key+'" data-uid="'+u.id+'">';
+          h+='<button type="button" class="vf2-card-uye-btn vf2-ode-btn '+(odedi?"vf2-odedi":"vf2-bek")+'" data-id="'+hkEsc(ay.id)+'" data-uid="'+u.id+'">';
           h+='<span class="vf2-card-uye-ad">'+hkEsc(km[0]||u.ad||'')+'</span>';
           h+='<span class="vf2-card-uye-deg">'+(odedi?p(kpM):'—')+'</span></button>';
         }
@@ -3119,7 +3176,7 @@ function render(){
   h+='<div class="modal-header"><h2 class="modal-title" id="vf2-modal-baslik">Yatırım Ekle</h2><button class="modal-close" id="vf2-modal-kapat">&#10005;</button></div>';
   h+='<div class="modal-body">';
   h+='<div style="display:flex;gap:12px;flex-wrap:wrap">';
-  h+='<div class="field-group" style="flex:1"><label class="field-label">Ay</label><input type="month" id="vf2-ay-key" class="field-input" value="'+buAy+'"/></div>';
+  h+='<div class="field-group" style="flex:1"><label class="field-label">Ay</label><input type="month" id="vf2-ay-key" class="field-input" value="'+buAy+'"/><p id="vf2-ay-not" style="display:none;margin-top:6px;font-size:11px;line-height:1.35;color:var(--gold);font-weight:700"></p></div>';
   h+='<div class="field-group" style="flex:1.2"><label class="field-label">Toplam Ödeme (TL) <span id="vf2-pay-not" style="color:var(--text-muted);font-weight:400;font-size:10px;text-transform:none;letter-spacing:0"></span></label>';
   h+='<input type="number" id="vf2-ay-top" class="field-input" placeholder="0" min="0" step="0.01" inputmode="decimal"/></div></div>';
   h+='<div class="field-group"><label class="field-label">Kim Ödedi?</label><div class="vf2-ode-checks">';
@@ -3214,8 +3271,30 @@ function payBolumGuncelle(){
   }
   el.textContent="· ÷ "+n+" kişi"+(top>0?" · kişi başı "+p(top/n)+" TL":"");
 }
-function modalAc(ayKey){
-  var mevcut=_aylar.find(function(a){return a.key===ayKey;});
+function ayNotGuncelle(){
+  var el=$("vf2-ay-not");
+  if(!el)return;
+  var keyEl=$("vf2-ay-key");
+  var key=keyEl?keyEl.value:"";
+  var modal=$("vf2-modal");
+  var kayitId=modal?(modal.getAttribute("data-id")||""):"";
+  var n=ayniAySayisi(key, kayitId);
+  if(!key||n<=0){
+    el.textContent="";
+    el.style.display="none";
+    return;
+  }
+  el.style.display="";
+  el.textContent=kayitId
+    ?("Bu ayda "+n+" kayıt daha var. Yalnızca bu kayıt güncellenir.")
+    :("Bu ayda zaten "+n+" kayıt var. Yenisi onların yanına eklenir.");
+}
+function modalAc(opts){
+  opts=opts||{};
+  var mevcut=opts.id?ayBul(opts.id):null;
+  var ayKey=mevcut?(mevcut.key||""):(opts.ayKey||"");
+  var modal=$("vf2-modal");
+  if(modal)modal.setAttribute("data-id", mevcut?mevcut.id:"");
   $("vf2-modal-baslik").textContent=mevcut?"Yatırımı Düzenle":"Yatırım Ekle";
   $("vf2-ay-key").value=ayKey;
   $("vf2-ay-top").value=mevcut?(mevcut.toplamOdeme||""):"";
@@ -3224,11 +3303,11 @@ function modalAc(ayKey){
     cb.checked=mevcut?!!(mevcut.odemeler&&mevcut.odemeler[cb.value]):true;
   });
   payBolumGuncelle();
+  ayNotGuncelle();
   if(mevcut&&mevcut.yatirimlar&&mevcut.yatirimlar.length){
     mevcut.yatirimlar.forEach(function(y){yeniKalem(y);});
   }
   _vfModalKoruma=Date.now()+450;
-  var modal=$("vf2-modal");
   if(modal){
     modal.classList.remove("hidden");
     modal.style.pointerEvents="none";
@@ -3272,26 +3351,27 @@ function bagla(){
   }
   document.querySelectorAll(".vf2-ode-btn").forEach(function(btn){
     btn.addEventListener("click",async function(){
-      var ay=_aylar.find(function(a){return a.key===btn.dataset.ay;});
+      var ay=ayBul(btn.dataset.id);
       if(!ay)return;if(!ay.odemeler)ay.odemeler={};
       ay.odemeler[btn.dataset.uid]=!ay.odemeler[btn.dataset.uid];
       await fbKaydet();render();
     });
   });
-  document.querySelectorAll(".vf2-duz-btn").forEach(function(btn){btn.addEventListener("click",function(e){e.preventDefault();e.stopPropagation();modalAc(btn.dataset.ay);});});
+  document.querySelectorAll(".vf2-duz-btn").forEach(function(btn){btn.addEventListener("click",function(e){e.preventDefault();e.stopPropagation();modalAc({id:btn.dataset.id});});});
   document.querySelectorAll(".vf2-sil-btn").forEach(function(btn){
     btn.addEventListener("click",async function(){
-      if(!confirm("Bu ayı silmek istiyor musunuz?"))return;
-      _aylar=_aylar.filter(function(a){return a.key!==btn.dataset.ay;});
+      if(!confirm("Bu yatırımı silmek istiyor musunuz?"))return;
+      _aylar=_aylar.filter(function(a){return a.id!==btn.dataset.id;});
       await fbKaydet();render();
     });
   });
   $("vf2-yatirim-btn").addEventListener("click",function(e){
     e.preventDefault();e.stopPropagation();
     var buAy=new Date().getFullYear()+"-"+String(new Date().getMonth()+1).padStart(2,"0");
-    modalAc(buAy);
-    $("vf2-ay-key").onchange=function(){modalAc(this.value);};
+    modalAc({ayKey:buAy});
   });
+  var ayInp=$("vf2-ay-key");
+  if(ayInp)ayInp.addEventListener("change", ayNotGuncelle);
   $("vf2-modal-kapat").addEventListener("click",function(){vfModalKapat("vf2-modal");});
   $("vf2-iptal").addEventListener("click",function(){vfModalKapat("vf2-modal");});
   $("vf2-modal").addEventListener("click",function(e){
@@ -3329,9 +3409,8 @@ function bagla(){
         if(adet>0)yatirimlar.push({id:eski||uid(),tip:tip,adet:adet});
       }
     });
-    var idx=_aylar.findIndex(function(a){return a.key===key;});
-    var obj={key:key,toplamOdeme:top,odemeler:odemeler,yatirimlar:yatirimlar};
-    if(idx>=0)_aylar[idx]=obj;else _aylar.push(obj);
+    var kayitId=$("vf2-modal").getAttribute("data-id")||"";
+    ayKaydet(_aylar,{id:kayitId,key:key,toplamOdeme:top,odemeler:odemeler,yatirimlar:yatirimlar});
     await fbKaydet();vfModalKapat("vf2-modal");render();
   });
   $("vf2-uye-btn").addEventListener("click",function(e){
@@ -3434,7 +3513,7 @@ function bagla(){
 function vefaOnizleme(veri){
   var geri={uyeler:_uyeler,aylar:_aylar,borclar:_borclar,altinDurum:_altinDurum,gram:_gramFiyat,gor:_gorunum};
   _uyeler=(veri&&veri.uyeler)||[];
-  _aylar=(veri&&veri.aylar)||[];
+  _aylar=ayListe(veri&&veri.aylar);
   _borclar=[];
   _altinDurum=(veri&&veri.altinDurum)||{};
   _gramFiyat=parseFloat(veri&&veri.gramFiyat)||0;
@@ -3448,7 +3527,7 @@ function vefaOnizleme(veri){
   return html;
 }
 async function vinit(){await fbYukle();render();}
-return{init:vinit,excelIndir:vefaExcelIndir,excelOlustur:vefaExcelOlustur,uyeOrtalamalari:vefaUyeOrtalamalari,onizleme:vefaOnizleme};
+return{init:vinit,excelIndir:vefaExcelIndir,excelOlustur:vefaExcelOlustur,uyeOrtalamalari:vefaUyeOrtalamalari,onizleme:vefaOnizleme,ayKaydet:ayKaydet};
 })();
 
 
