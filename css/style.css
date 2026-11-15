@@ -5101,6 +5101,8 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .vf2-kime{display:flex;flex-direction:column;gap:4px;min-width:0;}
 .vf2-kisi-sec,.vf2-dis-ad{width:100%;min-width:0;height:32px;padding:0 8px;border-radius:8px;border:1px solid var(--border);background:var(--bg-elevated);color:var(--text-primary);font-size:12px;font-weight:700;font-family:inherit;}
 .vf2-kisi-sec:disabled{opacity:0.45;}
+.vf2-salt-ekran .vf2-kisi-sec:disabled,
+.vf2-salt-ekran .vf2-dis-ad[readonly]{opacity:1;color:var(--text-primary);-webkit-text-fill-color:var(--text-primary);}
 .vf2-dis-ad{border-color:var(--gold);}
 .vf2-dis-ad::placeholder{color:var(--text-muted);font-weight:600;}
 .vf2-parca-ozet{width:280px;flex:0 0 280px;display:flex;flex-direction:column;gap:8px;position:sticky;top:0;}
@@ -5592,8 +5594,75 @@ html.theme-light html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 4
 }
 
 /* === VEFA: MOBIL KART LISTESI + DESKTOP TABLO === */
+/* Masaustunde uc ozet kutusu barin parcasi kalsin; telefon ozeti gizli. */
+.vf2-hero { display: contents; }
+.vf2-tel-ozet { display: none; }
+.vf2-durum-kisa { display: none; }
+.vf2-tel-ikili { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.vf2-tel-kutu {
+  display: flex; flex-direction: column; gap: 1px;
+  background: var(--bg-elevated); border-radius: 8px; padding: 7px 8px; min-width: 0;
+}
+.vf2-tel-kutu span {
+  font-size: 10px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted);
+}
+.vf2-tel-kutu b {
+  font-size: 16px; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.15; color: var(--text-primary);
+}
+.vf2-tel-kutu em {
+  font-style: normal; font-size: 11px; font-weight: 700; color: var(--text-secondary); font-variant-numeric: tabular-nums;
+}
+.vf2-tel-kutu-altin b { color: var(--gold); }
+.vf2-tel-kutu-nakit b { color: var(--green); }
+.vf2-tel-tipler { font-size: 12px; font-weight: 700; color: var(--text-secondary); line-height: 1.35; }
+
 /* Default: kart listesi gizli (desktop tabloyu kullanir) */
 .vf2-cards { display: none; }
+.vf2-ay {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.vf2-ay-bos { text-align: center; color: var(--text-muted); padding: 22px 12px; font-size: 13px; }
+.vf2-ay-ust { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.vf2-ay-ad { font-size: 14px; font-weight: 800; color: var(--text-primary); min-width: 0; }
+.vf2-ay-tutar {
+  margin-left: auto; font-size: 14px; font-weight: 800; color: var(--gold);
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.vf2-ay-paylar { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.vf2-pay {
+  display: flex; align-items: center; justify-content: space-between; gap: 6px;
+  min-height: 40px; margin: 0; padding: 6px 8px; width: 100%; box-sizing: border-box;
+  border-radius: 8px; border: 1px solid var(--border); background: var(--bg-card);
+  color: var(--text-primary); font-family: var(--font-body); font-size: 13px; font-weight: 700;
+  text-align: left; cursor: pointer;
+}
+.vf2-pay-ad { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vf2-pay-tutar { flex: 0 0 auto; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.vf2-pay.vf2-odedi { background: var(--bg-card); border-style: solid; }
+.vf2-pay.vf2-bek { background: transparent; border-style: dashed; color: var(--text-muted); }
+.vf2-pay.vf2-bek .vf2-pay-tutar { color: var(--text-muted); font-weight: 600; }
+.vf2-pay-sabit { cursor: default; }
+.vf2-salt-ekran .vf2-pay { cursor: default; }
+.vf2-ay-alt {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
+  border-top: 1px solid var(--border); padding-top: 6px; font-size: 12px; min-width: 0;
+}
+.vf2-ay-yat { min-width: 0; line-height: 1.35; }
+.vf2-ay-yok { color: var(--text-muted); font-weight: 600; }
+.vf2-ay-deger {
+  margin-left: auto; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--text-primary);
+}
+.vf2-ay-toplam { background: var(--bg-card); border-color: rgba(240, 184, 64, 0.55); }
+.vf2-ay-toplam .vf2-ay-ad,
+.vf2-ay-toplam .vf2-ay-tutar { color: var(--gold); }
+.vf2-ay-ort { font-size: 11px; font-weight: 700; color: var(--text-muted); }
+.vf2-pay:active { border-color: var(--gold); }
 
 /* Kart stilleri */
 .vf2-card {
@@ -6009,7 +6078,8 @@ html.theme-light html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 4
   .vf2-oz-btns {
     width: 100%;
     flex-basis: 100%;
-    gap: 4px !important;
+    flex-direction: row !important;
+    gap: 6px !important;
     flex-wrap: nowrap !important;
   }
   .vf2-oz-btns button {
@@ -6018,6 +6088,116 @@ html.theme-light html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 4
     padding: 6px 4px !important;
     font-size: 10px !important;
   }
+
+  .vf2-hero {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2px 8px;
+    width: 100%;
+    flex: 1 1 100%;
+  }
+  .vf2-hero .vf2-oz { min-width: 0; }
+  .vf2-hero .vf2-oz-l { font-size: 10px !important; letter-spacing: 0.04em; line-height: 1.2; }
+  .vf2-hero .vf2-oz-v {
+    font-size: 15px !important;
+    letter-spacing: 0 !important;
+    line-height: 1.15;
+  }
+  .vf2-hero .vf2-oz-v small { display: block; font-size: 11px !important; font-weight: 700; margin-top: 1px; }
+  .vf2-ozet-grup,
+  .vf2-ozet-bar > .vf2-oz-sep,
+  .vf2-fiyat-badge { display: none !important; }
+  .vf2-tel-ozet {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+    flex: 1 1 100%;
+  }
+  .vf2-tel-ozet .vf2-konum { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .vf2-tel-ozet .vf2-konum-btn {
+    flex: none;
+    width: 100%;
+    min-height: 44px;
+    padding: 6px 10px;
+    justify-content: center;
+  }
+  .vf2-tel-ozet .vf2-konum-l { font-size: 10px; }
+  .vf2-tel-ozet .vf2-konum-v { font-size: 15px; }
+  .vf2-wrap:has(.vf2-durum-panel:not(.vf2-gizli)) .vf2-tel-ozet { display: none; }
+  .vf2-salt {
+    flex-basis: auto;
+    max-width: none;
+    margin: 0 auto;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    background: var(--bg-elevated);
+    border-radius: 999px;
+    padding: 4px 10px;
+  }
+  .vf2-oz-btns button {
+    min-height: 40px;
+    font-size: 12px !important;
+    padding: 8px 6px !important;
+  }
+  .vf2-sekme-btn { font-size: 13px; padding: 10px 8px; min-height: 42px; }
+  .vf2-durum-uzun { display: none !important; }
+  .vf2-durum-kisa { display: block; }
+  .vf2-durum-acik { font-size: 12px; }
+  .vf2-filtre { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .vf2-filtre-btn { justify-content: center; min-height: 36px; font-size: 12px; padding: 6px 8px; }
+  .vf2-parca-ozet {
+    order: -1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    gap: 6px;
+  }
+  .vf2-parca-ozet .vf2-yan-kart:last-child { grid-column: 1 / -1; }
+  .vf2-yan-kart { padding: 8px 10px; }
+  .vf2-yan-gram { font-size: 16px; margin-top: 2px; }
+  .vf2-yan-kisi {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 2px 8px;
+    align-items: baseline;
+    margin-top: 8px;
+  }
+  .vf2-yan-chips { grid-column: 1 / -1; margin-top: 0; }
+  .vf2-yan-kisi-gr { margin-top: 0; text-align: right; }
+  .vf2-parca-baslik { display: none; }
+  .vf2-parca-satir {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "altin durum" "kime kime";
+    gap: 6px 8px;
+    padding: 10px 12px;
+  }
+  .vf2-parca-satir:not(.vf2-parca-satir-borc) { grid-template-areas: "altin durum"; }
+  .vf2-parca-satir:not(.vf2-parca-satir-borc) .vf2-kime { display: none; }
+  .vf2-parca-altin {
+    grid-area: altin;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 6px;
+  }
+  .vf2-parca-satir > .alt-durum-btn {
+    grid-area: durum;
+    justify-self: end;
+    align-self: center;
+    letter-spacing: 0.03em;
+    font-weight: 800;
+    font-size: 11px;
+    min-height: 32px;
+    padding: 6px 10px;
+  }
+  .vf2-kime { grid-area: kime; }
+  .vf2-kisi-sec,
+  .vf2-dis-ad { height: 42px; font-size: 16px; padding: 0 10px; }
 
   .ur-tablo .ur-th-desktop { display: none !important; }
   .ur-tablo .ur-th-mob { display: inline !important; }
