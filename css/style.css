@@ -5597,6 +5597,43 @@ html.theme-light html.theme-light .alt-fiyat-kutu { background: rgba(184, 134, 4
 /* Masaustunde uc ozet kutusu barin parcasi kalsin; telefon ozeti gizli. */
 .vf2-hero { display: contents; }
 .vf2-tel-ozet { display: none; }
+.vf2-masa { display: none; }
+.vf2-masa-cift { display: flex; flex-direction: column; gap: 0; min-width: 0; }
+.vf2-masa-cift b { font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.15; color: var(--text-primary); white-space: nowrap; }
+.vf2-masa-cift i { font-style: normal; font-size: 11px; font-weight: 700; color: var(--text-muted); white-space: nowrap; }
+.vf2-masa-altin i { color: var(--text-secondary); }
+@media (min-width: 601px) {
+  .vf2-wrap { gap: 8px; padding: 8px 10px 12px; }
+  .vf2-ozet-bar {
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    padding: 6px 10px;
+  }
+  .vf2-hero,
+  .vf2-ozet-bar > .vf2-oz-sep,
+  .vf2-ozet-grup,
+  .vf2-fiyat-badge { display: none !important; }
+  .vf2-masa {
+    display: flex;
+    align-items: center;
+    flex: 1 1 auto;
+    min-width: 0;
+    gap: 8px 16px;
+    flex-wrap: wrap;
+  }
+  .vf2-masa .vf2-konum-btn {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 5px;
+    padding: 3px 8px;
+  }
+  .vf2-masa .vf2-konum-l { font-size: 11px; letter-spacing: 0; text-transform: none; font-weight: 700; }
+  .vf2-masa .vf2-konum-v { font-size: 14px; }
+  .vf2-oz-btns { flex-direction: row; margin-left: auto; align-self: center; gap: 6px; }
+  .vf2-oz-btns button { padding: 6px 10px; }
+  .vf2-salt { margin-left: 0; align-self: center; }
+}
 .vf2-durum-kisa { display: none; }
 .vf2-tel-ikili { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 .vf2-tel-kutu {
