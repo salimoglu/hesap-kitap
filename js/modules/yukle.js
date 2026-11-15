@@ -3076,6 +3076,17 @@ function render(){
   h+='<div class="vf2-oz"><span class="vf2-oz-l">KAYIT</span><span class="vf2-oz-v">'+nakit.adet+' adet</span></div>';
   h+='</div></div>';
 
+  h+='<div class="vf2-masa">';
+  h+='<span class="vf2-masa-cift"><b>'+pKisa(tah)+' TL</b><i>Tahsilat</i></span>';
+  h+='<span class="vf2-masa-cift"><b style="color:var(--gold)">'+(_gramFiyat>0||nakit.toplam>0?pKisa(deg)+' TL':'—')+'</b><i>Değer</i></span>';
+  h+='<span class="vf2-masa-cift"><b style="color:'+kr+'">'+(kz>=0?"+":"")+pKisa(kz)+' TL</b><i>'+(kzp>=0?"+":"")+kzp.toFixed(1).replace(".",",")+'%</i></span>';
+  h+='<span class="vf2-masa-cift vf2-masa-altin"><b style="color:var(--gold)">'+p(altin.toplam_gram)+' gr</b><i>'+(tipParcalar.length?tipParcalar.join('<span class="vf2-tip-ayrac"> · </span>'):'Altın yok')+'</i></span>';
+  h+=konumBtn("el","Elimde",bo.elimde.gram,"");
+  h+=konumBtn("borc","Borç",bo.borc.gram,"");
+  h+='<span class="vf2-masa-cift"><b style="color:var(--green)">'+pKisa(nakit.toplam)+' TL</b><i>Nakit</i></span>';
+  if(_gramFiyat>0)h+='<span class="vf2-masa-cift"><b>'+pKisa(_gramFiyat)+'</b><i>TL/gr</i></span>';
+  h+='</div>';
+
   h+='<div class="vf2-tel-ozet">';
   h+='<div class="vf2-tel-ikili">';
   h+='<div class="vf2-tel-kutu vf2-tel-kutu-altin"><span>Altın</span><b>'+p(altin.toplam_gram)+' gr</b>';

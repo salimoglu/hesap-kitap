@@ -159,6 +159,7 @@ if (payHucre.length !== 5) fail("uye hucre sayisi", payHucre.join("|"));
 if (payHucre[4] !== "—") fail("secilmeyen yeni uye pay almamali", payHucre.join("|"));
 if (tabloHtml.indexOf("2.308,00") >= 0) fail("tum uye sayisina bolunmus");
 if (payHtml.indexOf("vf2-tel-ozet") < 0) fail("telefon ozeti yok");
+if (payHtml.indexOf("vf2-masa") < 0) fail("masaustu ozeti yok");
 if (payHtml.indexOf("vf2-ay-paylar") < 0) fail("telefon ay listesi yok");
 if (payHtml.indexOf('id="vf2-yatirim-btn"') >= 0) fail("salt okurda yatirim butonu");
 var saltKart = ((payHtml.split("vf2-cards")[1] || "").split("vf2-durum-panel")[0]);
