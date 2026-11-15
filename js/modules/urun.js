@@ -97,7 +97,7 @@ async function fbKaydet(){
 
 function render(){
   var c=$("urun-container");if(!c)return;
-  var toplamFiyat=_urunler.reduce(function(s,u){return s+u.fiyat;},0);
+  var toplamFiyat=_urunler.reduce(function(s,u){return s+(Number(u.fiyat)||0);},0);
 
   var h='<div class="ur-wrap">';
 

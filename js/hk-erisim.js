@@ -216,13 +216,17 @@ var HK_ERISIM = (function () {
     var aktifId = aktifBtn && aktifBtn.dataset.tab;
     if (!aktifId || izinli.indexOf(aktifId) < 0) {
       var ilkId = izinli[0] || "islemler";
-      document.querySelectorAll(".tab-btn").forEach(function (btn) {
-        var show = izinli.indexOf(btn.dataset.tab) >= 0;
-        btn.classList.toggle("active", show && btn.dataset.tab === ilkId);
-      });
-      document.querySelectorAll(".tab-panel").forEach(function (panel) {
-        panel.classList.toggle("active", panel.id === "tab-" + ilkId);
-      });
+      if (typeof window.hkSekmeAc === "function") {
+        window.hkSekmeAc(ilkId);
+      } else {
+        document.querySelectorAll(".tab-btn").forEach(function (btn) {
+          var show = izinli.indexOf(btn.dataset.tab) >= 0;
+          btn.classList.toggle("active", show && btn.dataset.tab === ilkId);
+        });
+        document.querySelectorAll(".tab-panel").forEach(function (panel) {
+          panel.classList.toggle("active", panel.id === "tab-" + ilkId);
+        });
+      }
     }
     if (user && !user.isAnonymous) document.documentElement.classList.add("hk-erisim-hazir");
     else document.documentElement.classList.remove("hk-erisim-hazir");

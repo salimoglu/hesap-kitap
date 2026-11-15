@@ -1,4 +1,18 @@
 /* alacaklar.js — Alacaklar + Borclarim (cift panel) */
+function hkAlacakDuzenleBirlestir(eski, kayit){
+  if(!eski||!kayit)return kayit;
+  kayit.id=eski.id;
+  if(kayit.tip==="pesin"||kayit.tip==="altin"){
+    kayit.odendi=!!eski.odendi;
+  }else if(kayit.tip==="taksit"){
+    var o={}, n=Math.max(1,parseInt(kayit.taksitSayisi,10)||1), eskiO=eski.odemeler||{};
+    for(var i=0;i<n;i++){
+      if(eskiO[i]||eskiO[String(i)])o[i]=true;
+    }
+    kayit.odemeler=o;
+  }
+  return kayit;
+}
 var AlacaklarModule=(function(){
 var $=function(id){return document.getElementById(id);};
 var _gramAltinFiyatTL=0;
@@ -116,7 +130,8 @@ function taksitPlan(k){
   if(k.tip==="pesin")return [{ay:k.tarih?k.tarih.substring(0,7):"",tutar:parseFloat(k.tutar)||0,no:1,odendi:k.odendi||false}];
   if(k.tip==="altin")return [{ay:k.tarih?k.tarih.substring(0,7):"",tutar:0,no:1,odendi:k.odendi||false}];
   var ts=Math.max(1,parseInt(k.taksitSayisi,10)||1),toplam=parseFloat(k.tutar)||0,plan=[],i;
-  for(i=0;i<ts;i++)plan.push({ay:ayEkle(k.basTarih,i),tutar:toplam/ts,no:i+1,odendi:(k.odemeler&&k.odemeler[i])||false});
+  var paylar=typeof hkTaksitPaylari==="function"?hkTaksitPaylari(toplam,ts):null;
+  for(i=0;i<ts;i++)plan.push({ay:ayEkle(k.basTarih,i),tutar:paylar?paylar[i]:toplam/ts,no:i+1,odendi:(k.odemeler&&(k.odemeler[i]||k.odemeler[String(i)]))||false});
   return plan;
 }
 function kalanTutar(k){
@@ -407,19 +422,19 @@ function baglaKartAksiyonlari(p,root){
     btn.onclick=function(e){e.stopPropagation();modalAc(p,btn.dataset.id,null);};
   });
   root.querySelectorAll(".al-sil-btn").forEach(function(btn){
-    btn.onclick=function(e){
+    btn.onclick=async function(e){
       e.stopPropagation();if(!confirm("Silmek istiyor musunuz?"))return;
       p.kayitlar=p.kayitlar.filter(function(x){return x.id!==btn.dataset.id;});
-      fbKaydet(p);guvenliRender();
+      await fbKaydet(p);guvenliRender();
     };
   });
   root.querySelectorAll(".al-odeme-btn").forEach(function(btn){
-    btn.onclick=function(e){
+    btn.onclick=async function(e){
       e.stopPropagation();
       var kid=btn.dataset.id,no=parseInt(btn.dataset.no,10),k=p.kayitlar.find(function(x){return x.id===kid;});if(!k)return;
       if(k.tip==="altin"||k.tip==="pesin")k.odendi=!k.odendi;
       else{if(!k.odemeler)k.odemeler={};k.odemeler[no]=!k.odemeler[no];}
-      fbKaydet(p);guvenliRender();
+      await fbKaydet(p);guvenliRender();
     };
   });
 }
@@ -549,7 +564,7 @@ async function kaydet(p){
     if(!bt){alert("Baslangic ayi giriniz.");return;}
     kayit={tip:"taksit",kisi:kisi,tutar:tutar2,doviz:doviz,aciklama:aciklama,taksitSayisi:ts,basTarih:bt,odemeler:{}};
   }
-  if(p.aktif){var idx=p.kayitlar.findIndex(function(x){return x.id===p.aktif;});if(idx>=0){kayit.id=p.aktif;if(p.kayitlar[idx].odemeler)kayit.odemeler=p.kayitlar[idx].odemeler;p.kayitlar[idx]=kayit;}}
+  if(p.aktif){var idx=p.kayitlar.findIndex(function(x){return x.id===p.aktif;});if(idx>=0){hkAlacakDuzenleBirlestir(p.kayitlar[idx],kayit);p.kayitlar[idx]=kayit;}}
   else{kayit.id=uid();p.kayitlar.push(kayit);}
   p.aktifKisiAd=kisi;
   await fbKaydet(p);modalKapat(p);render();

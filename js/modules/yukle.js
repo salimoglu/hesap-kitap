@@ -1,6 +1,40 @@
 /* yukle.js - ButceModule + KrediModule + Altin + Vefa + Muhtac */
 function hkEsc(v){return String(v==null?"":v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");}
 function hkBugun(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+/** RTDB dizi gibi duran nesneyi metin listesine cevirir. */
+function hkMetinDizisi(v){
+  var ham;
+  if(Array.isArray(v))ham=v;
+  else if(typeof v==="string")ham=v?[v]:[];
+  else if(v&&typeof v==="object"){
+    ham=Object.keys(v).sort(function(a,b){
+      var na=Number(a),nb=Number(b);
+      if(isFinite(na)&&isFinite(nb))return na-nb;
+      return String(a).localeCompare(String(b));
+    }).map(function(k){return v[k];});
+  }else ham=[];
+  var out=[];
+  for(var i=0;i<ham.length;i++){
+    if(typeof ham[i]==="string"&&ham[i])out.push(ham[i]);
+  }
+  return out;
+}
+/** Taksit tutarlarini kurus artigi son taksitte kalacak sekilde boler. */
+function hkTaksitPaylari(toplam,adet){
+  var n=Math.max(1,parseInt(adet,10)||1);
+  var kurus=Math.round((Number(toplam)||0)*100);
+  if(!isFinite(kurus))kurus=0;
+  var baz=Math.floor(kurus/n);
+  var kalan=kurus-baz*n;
+  var out=[];
+  for(var i=0;i<n;i++)out.push((baz+(i===n-1?kalan:0))/100);
+  return out;
+}
+function vfKonumFiltreId(filtre){
+  if(filtre==="el"||filtre==="elimde")return "elimde";
+  if(filtre==="borc")return "borc";
+  return "hepsi";
+}
 
 /* ===== BUTCE MODULE ===== */
 var ButceModule=(function(){
@@ -799,8 +833,8 @@ async function kfbYukle(){
   if(typeof window._fbDb==="undefined"||!window._fbDb)return false;
   try{
     var pk=await Promise.all([fbRtdbOku("kredi_harcamalar"),fbRtdbOku("kredi_kartlar")]);
-    _h=pk[0]?Object.values(pk[0]):[];
-    _k=pk[1]||[];
+    _h=pk[0]?Object.values(pk[0]).filter(function(h){return h&&typeof h==="object";}):[];
+    _k=hkMetinDizisi(pk[1]);
     _krYuklendi=true;
     return true;
   }catch(e){_h=[];_k=[];return false;}
@@ -812,8 +846,8 @@ function taksitler(h){
     while(ay<=bit&&i<120){r.push({ay:ay,tutar:aylik,no:no,toplamTaksit:h.devam?0:(parseInt(h.taksit,10)||1),duzenli:true});i++;no++;ay=ayEkle(bas,i);}
     return r;
   }
-  var r2=[],ts=Math.max(1,parseInt(h.taksit,10)||1),top=parseFloat(h.tutar)||0;
-  for(var j=0;j<ts;j++){r2.push({ay:ayEkle(h.basTarih,j),tutar:top/ts,no:j+1,toplamTaksit:ts,duzenli:false});}
+  var r2=[],ts=Math.max(1,parseInt(h.taksit,10)||1),top=parseFloat(h.tutar)||0,paylar=hkTaksitPaylari(top,ts);
+  for(var j=0;j<ts;j++){r2.push({ay:ayEkle(h.basTarih,j),tutar:paylar[j],no:j+1,toplamTaksit:ts,duzenli:false});}
   return r2;
 }
 function taksitEtiket(r,h){
@@ -1751,7 +1785,7 @@ function arender(){
   h+='<div class="alt-form-cift">';
   h+='<div class="field-group"><label class="field-label">Nasıl alındı</label><input type="text" id="alt-nasil" class="field-input" placeholder="Nakit, KK..." maxlength="100"/></div>';
   h+='<div class="field-group"><label class="field-label">Nerede kullanıldı</label><input type="text" id="alt-nerde" class="field-input" placeholder="Seç veya yaz..." list="alt-nerde-dl" autocomplete="off"/><datalist id="alt-nerde-dl">';
-  secenekler.forEach(function(s){h+='<option value="'+s+'"/>';});
+  secenekler.forEach(function(s){h+='<option value="'+hkEsc(s)+'"/>';});
   h+='</datalist></div>';
   h+='</div>';
   h+='</div>';
@@ -2295,8 +2329,10 @@ function parcaOzet(){
 }
 function borcDurumOzet(){return parcaOzet();}
 function konumBtn(filtre, etiket, gram, ekstra){
+  var id=vfKonumFiltreId(filtre);
   var uyari=gram<-0.001?" vf2-konum-uyari":"";
-  return '<button type="button" class="vf2-konum-btn'+uyari+'" data-gor="durum"><span class="vf2-konum-l">'+etiket+'</span><span class="vf2-konum-v">'+p(gram)+' gr</span>'+(ekstra||"")+'</button>';
+  var aktif=_parcaFiltre===id?" vf2-filtre-aktif":"";
+  return '<button type="button" class="vf2-konum-btn'+uyari+aktif+'" data-gor="durum" data-pfiltre="'+id+'"><span class="vf2-konum-l">'+hkEsc(etiket)+'</span><span class="vf2-konum-v">'+p(gram)+' gr</span>'+(ekstra||"")+'</button>';
 }
 function parcaYanOzet(oz){
   var h='<aside class="vf2-parca-ozet">';
@@ -3290,7 +3326,7 @@ function render(){
   h+='<div class="field-group" style="flex:1.2"><label class="field-label">Toplam Ödeme (TL) <span id="vf2-pay-not" style="color:var(--text-muted);font-weight:400;font-size:10px;text-transform:none;letter-spacing:0"></span></label>';
   h+='<input type="number" id="vf2-ay-top" class="field-input" placeholder="0" min="0" step="0.01" inputmode="decimal"/></div></div>';
   h+='<div class="field-group"><label class="field-label">Kim Ödedi?</label><div class="vf2-ode-checks">';
-  _uyeler.forEach(function(u){h+='<label class="vf2-ck-lbl"><input type="checkbox" class="vf2-ode-cb" value="'+u.id+'" checked>'+u.ad+'</label>';});
+  _uyeler.forEach(function(u){h+='<label class="vf2-ck-lbl"><input type="checkbox" class="vf2-ode-cb" value="'+hkEsc(u.id)+'" checked>'+hkEsc(u.ad)+'</label>';});
   h+='</div></div>';
   h+='<div class="field-group">';
   h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">';
@@ -3331,8 +3367,8 @@ function yeniKalem(y){
       '<select class="field-input vf2-k-tip" id="vf2-k-tip-'+i+'" style="flex:1.2">'+
       TUM_TIPLER.map(function(t){return'<option value="'+t+'"'+(tip===t?" selected":"")+'>'+TIP_AD[t]+'</option>';}).join('')+
       '</select>'+
-      '<input type="number" class="field-input vf2-k-nakit" id="vf2-k-nakit-'+i+'" value="'+(y&&y.nakitTL?y.nakitTL:"")+'" min="0" step="0.01" inputmode="decimal" style="flex:1" placeholder="TL Tutarı"/>'+
-      '<input type="text" class="field-input vf2-k-ac" id="vf2-k-ac-'+i+'" value="'+(y&&y.aciklama?y.aciklama:"")+'" style="flex:1.5" maxlength="80" placeholder="Açıklama (isteğe bağlı)"/>'+
+      '<input type="number" class="field-input vf2-k-nakit" id="vf2-k-nakit-'+i+'" value="'+hkEsc(y&&y.nakitTL?y.nakitTL:"")+'" min="0" step="0.01" inputmode="decimal" style="flex:1" placeholder="TL Tutarı"/>'+
+      '<input type="text" class="field-input vf2-k-ac" id="vf2-k-ac-'+i+'" value="'+hkEsc(y&&y.aciklama?y.aciklama:"")+'" style="flex:1.5" maxlength="80" placeholder="Açıklama (isteğe bağlı)"/>'+
       '<button class="vf2-k-sil" style="flex-shrink:0">&#10005;</button>';
   } else {
     /* ALTIN: adet + gram göstergesi */

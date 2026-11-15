@@ -50,7 +50,13 @@ var BirikimModule = (function() {
   }
   function bugun(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
   function buAy(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");}
-  function tarihFmt(t){if(!t)return"";var p=t.split("-");return p[2]+"."+p[1]+"."+p[0];}
+  function tarihFmt(t){
+    if(!t)return"";
+    var p=String(t).split("-");
+    if(p.length>=3&&p[2])return p[2]+"."+p[1]+"."+p[0];
+    if(p.length===2&&p[1])return p[1]+"."+p[0];
+    return String(t);
+  }
   function esc(v){return String(v==null?"":v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");}
 
   function birikimGrupMu(grup) {
@@ -1031,7 +1037,7 @@ var BirikimModule = (function() {
     $("bk-inp-tutar").addEventListener("keydown",function(e){if(e.key==="Enter")ekle();});
     /* Sil */
     document.querySelectorAll(".bk-sil-btn").forEach(function(btn){
-      btn.addEventListener("click",function(e){
+      btn.addEventListener("click",async function(e){
         e.stopPropagation();
         if(!confirm("Bu kayd\u0131 silmek istiyor musunuz?"))return;
         var kalemAd=decodeURIComponent(btn.dataset.kalem);
@@ -1040,7 +1046,7 @@ var BirikimModule = (function() {
           _manuelIslemler[kalemAd]=_manuelIslemler[kalemAd].filter(function(i){return i.id!==id;});
           if(_manuelIslemler[kalemAd].length===0) delete _manuelIslemler[kalemAd];
         }
-        fbKaydet();render();
+        await fbKaydet();render();
       });
     });
     baglaBes();
