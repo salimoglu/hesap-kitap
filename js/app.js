@@ -518,6 +518,12 @@
     tabPaneller.forEach(panel => panel.classList.toggle("active", panel.id === "tab-" + tabId));
   }
 
+  window.hkSekmeAc = function (tabId) {
+    if (!modulIzinli(tabId)) return;
+    tabSec(tabId);
+    modulAc(tabId);
+  };
+
   function modulAc(tabId) {
     if (!modulIzinli(tabId)) return;
     if (tabId === "islemler") {

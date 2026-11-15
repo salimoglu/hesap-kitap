@@ -8,9 +8,11 @@ var DB_VERSION = 2;
 var STORES = { ISLEMLER: "islemler", KATEGORILER: "kategoriler", AYARLAR: "ayarlar" };
 var _db = null;
 
+var _dbAcma = null;
 function openDB() {
   if (_db) return Promise.resolve(_db);
-  return new Promise(function(resolve, reject) {
+  if (_dbAcma) return _dbAcma;
+  _dbAcma = new Promise(function(resolve, reject) {
     var req = indexedDB.open(DB_NAME, DB_VERSION);
     req.onupgradeneeded = function(e) {
       var db = e.target.result;
@@ -29,11 +31,44 @@ function openDB() {
     };
     req.onsuccess = function(e) {
       _db = e.target.result;
-      _db.onversionchange = function() { _db.close(); _db = null; };
+      _db.onversionchange = function() { _db.close(); _db = null; _dbAcma = null; };
       resolve(_db);
     };
-    req.onerror = function() { reject(req.error); };
+    req.onerror = function() { _dbAcma = null; reject(req.error); };
   });
+  return _dbAcma;
+}
+
+function hkDedupeAnahtar() {
+  var uid = "";
+  try {
+    if (typeof fbMevcutKullanici === "function") {
+      var u = fbMevcutKullanici();
+      if (u && u.uid) uid = u.uid;
+    }
+  } catch (eUid) {}
+  if (!uid) {
+    try { uid = localStorage.getItem("hk-oturum-uid") || ""; } catch (eLs) {}
+  }
+  return "hk-dedupe-done:" + (uid || "yerel");
+}
+function hkDedupeBittiMi() {
+  var key = hkDedupeAnahtar();
+  if (window._hkDedupeAnahtar && window._hkDedupeAnahtar !== key) window._hkDedupeDone = false;
+  try {
+    if (localStorage.getItem(key) === "1") {
+      window._hkDedupeDone = true;
+      window._hkDedupeAnahtar = key;
+      return true;
+    }
+  } catch (e) {}
+  return !!window._hkDedupeDone && window._hkDedupeAnahtar === key;
+}
+function hkDedupeBittiIsaretle() {
+  var key = hkDedupeAnahtar();
+  window._hkDedupeDone = true;
+  window._hkDedupeAnahtar = key;
+  try { localStorage.setItem(key, "1"); } catch (e) {}
 }
 
 function tx(storeName, mode) { return _db.transaction([storeName], mode).objectStore(storeName); }
@@ -81,11 +116,6 @@ function hkNormGrupKaydet(g) {
 function hkNormGrupEslestir(g) {
   var u = hkNormGrupKaydet(g);
   return HK_GRUP_ALIAS[u] || u;
-}
-
-/** Geriye uyumluluk: gorunen / kaydedilen grup adi (alias uygulanmaz). */
-function hkNormGrup(g) {
-  return hkNormGrupKaydet(g);
 }
 
 /** BIRIKIM / BİRİKİM / birikim — birikim modulu eslesmesi (grup adi degisse de). */
@@ -231,35 +261,6 @@ var IslemlerDB = {
 
 var KategorilerDB = {
   getAll: async function() { await openDB(); return getAll(tx(STORES.KATEGORILER, "readonly")); },
-  /** Yereli silmeden RTDB kayitlarini id uzerinden yerel olarak yazar veya gunceller. */
-  mergeUpsertFromRemote: async function(liste) {
-    await openDB();
-    return new Promise(function(resolve, reject) {
-      try {
-        var t = _db.transaction([STORES.KATEGORILER], "readwrite");
-        var store = t.objectStore(STORES.KATEGORILER);
-        t.oncomplete = function() { resolve(); };
-        t.onerror = function() { reject(t.error); };
-        var idx = 0;
-        function next() {
-          while (idx < liste.length) {
-            var raw = liste[idx++];
-            if (!raw || raw.id == null) continue;
-            var item = Object.assign({}, raw);
-            if (typeof item.id === "string") item.id = parseInt(item.id, 10);
-            if (isNaN(item.id)) continue;
-            var req = store.put(item);
-            req.onerror = function() { reject(req.error); };
-            req.onsuccess = next;
-            return;
-          }
-        }
-        next();
-      } catch (ex) {
-        reject(ex);
-      }
-    });
-  },
   /** Yerel kayitlari temizleyip sunucudan gelen liste ile degistirir (id ile put). */
   replaceAll: async function(liste) {
     await openDB();
@@ -324,14 +325,9 @@ var KategorilerDB = {
   /** Ayni anlama gelen kategorileri birlestirir; islem etiketlerini tek canonical forma ceker. */
   dedupeNormalizeAll: async function() {
     await openDB();
-    try {
-      if (localStorage.getItem("hk-dedupe-done") === "1") {
-        window._hkDedupeDone = true;
-        return { merged: 0, islemGuncelle: 0, skipped: true };
-      }
-    } catch (eSkip) {}
+    if (hkDedupeBittiMi()) return { merged: 0, islemGuncelle: 0, skipped: true };
     var kats = await getAll(tx(STORES.KATEGORILER, "readonly"));
-    if (!kats.length) return { merged: 0, islemGuncelle: 0 };
+    if (!kats.length) return { merged: 0, islemGuncelle: 0, bos: true };
     var byKey = {};
     var i, k, key, list, winner, canon, deleteIds = [], normToCanon = {}, merged = 0, islemGuncelle = 0;
     for (i = 0; i < kats.length; i++) {
@@ -352,8 +348,7 @@ var KategorilerDB = {
       }
     }
     if (!normFixNeeded) {
-      window._hkDedupeDone = true;
-      try { localStorage.setItem("hk-dedupe-done", "1"); } catch (eDone) {}
+      hkDedupeBittiIsaretle();
       return { merged: 0, islemGuncelle: 0, skipped: true };
     }
     for (key in byKey) {
@@ -403,8 +398,7 @@ var KategorilerDB = {
       await promisify(tx(STORES.KATEGORILER, "readwrite").delete(deleteIds[i]));
     }
     if (merged > 0 || islemGuncelle > 0) await kategorileriBulutaYaz();
-    window._hkDedupeDone = true;
-    try { localStorage.setItem("hk-dedupe-done", "1"); } catch (eFin) {}
+    hkDedupeBittiIsaretle();
     return { merged: merged, islemGuncelle: islemGuncelle };
   },
   delete: async function(id) {
@@ -445,11 +439,6 @@ var KategorilerDB = {
   },
 };
 
-var AyarlarDB = {
-  get: async function(key) { await openDB(); var r = await promisify(tx(STORES.AYARLAR, "readonly").get(key)); return r ? r.value : null; },
-  set: async function(key, value) { await openDB(); return promisify(tx(STORES.AYARLAR, "readwrite").put({ key: key, value: value })); },
-};
-
 window.initApp = async function(opt) {
   opt = opt || {};
   await openDB();
@@ -467,18 +456,11 @@ window.initApp = async function(opt) {
 
 /** Kategori birlestirme acilista UI'yi bloklamasin; bir kez tamamlaninca tekrar calismaz. */
 function hkDedupeErtele() {
-  if (window._hkDedupeDone) return;
-  try {
-    if (localStorage.getItem("hk-dedupe-done") === "1") {
-      window._hkDedupeDone = true;
-      return;
-    }
-  } catch (e) {}
+  if (hkDedupeBittiMi()) return;
   var calistir = function() {
-    if (window._hkDedupeDone || typeof KategorilerDB.dedupeNormalizeAll !== "function") return;
+    if (hkDedupeBittiMi() || typeof KategorilerDB.dedupeNormalizeAll !== "function") return;
     KategorilerDB.dedupeNormalizeAll().then(function(r) {
-      window._hkDedupeDone = true;
-      try { localStorage.setItem("hk-dedupe-done", "1"); } catch (e2) {}
+      if (!(r && r.bos)) hkDedupeBittiIsaretle();
       if (r && r.islemGuncelle > 0 && typeof window.dispatchEvent === "function") {
         try { window.dispatchEvent(new CustomEvent("hk-islemler-degisti")); } catch (e3) {}
       }

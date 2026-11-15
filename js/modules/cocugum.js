@@ -1096,7 +1096,7 @@ var CocugumModule = (function () {
     document.querySelectorAll(".cg-filtre-btn").forEach(function (btn) {
       btn.addEventListener("click", function () {
         _filtre = btn.dataset.filtre || "tumu";
-        render();
+        guvenliRender();
       });
     });
 

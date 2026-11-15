@@ -10,23 +10,7 @@ const _fbConfig = {
 };
 
 let _fbDb = null;
-window._fbAuthOk = false;
 window._fbReady = Promise.resolve(false);
-
-function fbMobilMi() {
-  var ua = typeof navigator !== "undefined" ? navigator.userAgent || "" : "";
-  if (/Android/i.test(ua)) return true;
-  if (/iPhone|iPad|iPod/i.test(ua)) return true;
-  if (
-    typeof navigator !== "undefined" &&
-    navigator.platform === "MacIntel" &&
-    typeof navigator.maxTouchPoints === "number" &&
-    navigator.maxTouchPoints > 1
-  )
-    return true;
-  if (/webOS|BlackBerry|IEMobile|Opera Mini/i.test(ua)) return true;
-  return false;
-}
 
 function fbIosMi() {
   var ua = typeof navigator !== "undefined" ? navigator.userAgent || "" : "";
@@ -145,20 +129,14 @@ async function fbInit() {
 
     window._fbAuthStateHazir = !!(uInit && !uInit.isAnonymous);
     if (uInit && !uInit.isAnonymous) {
-      window._fbAuthOk = true;
       try {
         localStorage.setItem("hk-oturum-uid", uInit.uid);
         if (typeof document !== "undefined" && document.documentElement) {
           document.documentElement.classList.add("hk-hizli-ac");
         }
       } catch (eLs) {}
-    } else {
-      window._fbAuthOk = false;
     }
     window._fbReady = Promise.resolve(true);
-    firebase.auth().onAuthStateChanged(function(user) {
-      window._fbAuthOk = !!user;
-    });
     try {
       if (firebase.auth().currentUser) {
         sessionStorage.removeItem("hk-google-redirect-pending");
@@ -209,7 +187,6 @@ async function fbInit() {
     } catch (pendEx) {}
   } catch (e) {
     console.warn("Firebase init:", e);
-    window._fbAuthOk = false;
     window._fbReady = Promise.resolve(false);
   }
 }
@@ -632,11 +609,6 @@ async function fbEnsureUserDataScope() {
   }
 }
 
-/** @deprecated fbEnsureUserDataScope kullanin — geriye uyumluluk */
-async function fbDetectRtdbScope() {
-  return fbEnsureUserDataScope();
-}
-
 /** Ortak altın gram fiyatı okuma — init sırasında tekrarlı RTDB çağrılarını birleştirir */
 async function fbAltinFiyatOku(force) {
   if (!force && typeof window._hkAltinFiyatCache === "number" && window._hkAltinFiyatCache > 0) {
@@ -1006,10 +978,14 @@ async function fbKategorileriYukle() {
       }
       return;
     }
-    await KategorilerDB.mergeUpsertFromRemote(uzak);
-    if (typeof KategorilerDB.dedupeNormalizeAll === "function" && !window._hkDedupeDone) {
+    await KategorilerDB.replaceAll(uzak);
+    if (typeof hkKategorilerBildir === "function") hkKategorilerBildir();
+    window._hkDedupeDone = false;
+    if (typeof hkDedupeAnahtar === "function") {
+      try { localStorage.removeItem(hkDedupeAnahtar()); } catch (eKey) {}
+    }
+    if (typeof KategorilerDB.dedupeNormalizeAll === "function") {
       await KategorilerDB.dedupeNormalizeAll();
-      window._hkDedupeDone = true;
     }
   } catch (e) {
     console.warn("fbKategorileriYukle:", e);
@@ -1061,37 +1037,44 @@ async function fbVerileriYukle() {
       console.warn("fbVerileriYukle: islemler sunucuda bos veya gecersiz; IndexedDB korunuyor.");
       return;
     }
-    await new Promise(function(resolve) {
-      var req = indexedDB.open("hesap-kitap-db");
-      req.onsuccess = function(e) {
-        var db = e.target.result;
-        if (!db.objectStoreNames.contains("islemler")) {
-          db.close();
-          resolve();
-          return;
-        }
-        try {
-          var t = db.transaction("islemler", "readwrite");
-          var store = t.objectStore("islemler");
-          store.clear();
-          for (var i = 0; i < entries.length; i++) {
-            var item = entries[i][1];
-            if (!item) continue;
-            var numId = parseInt(entries[i][0]);
-            var kayit = Object.assign({}, item, { id: isNaN(numId) ? undefined : numId });
-            if (kayit.id === undefined) delete kayit.id;
-            try {
-              if (kayit.id !== undefined) store.put(kayit);
-              else store.add(kayit);
-            } catch (ex) {}
+    var db = await openDB();
+    if (!db.objectStoreNames.contains("islemler")) {
+      console.warn("fbVerileriYukle: islemler deposu yok");
+      return;
+    }
+    await new Promise(function(resolve, reject) {
+      var bitti = false;
+      function ok() { if (!bitti) { bitti = true; resolve(); } }
+      function no(err) { if (!bitti) { bitti = true; reject(err || new Error("islem aktarimi")); } }
+      try {
+        var t = db.transaction("islemler", "readwrite");
+        var store = t.objectStore("islemler");
+        var clr = store.clear();
+        clr.onerror = function() { no(clr.error || t.error); };
+        clr.onsuccess = function() {
+          var i = 0;
+          function next() {
+            while (i < entries.length) {
+              var item = entries[i][1];
+              var key = entries[i][0];
+              i++;
+              if (!item) continue;
+              var numId = parseInt(key, 10);
+              var kayit = Object.assign({}, item, { id: isNaN(numId) ? undefined : numId });
+              if (kayit.id === undefined) delete kayit.id;
+              var req = kayit.id !== undefined ? store.put(kayit) : store.add(kayit);
+              req.onerror = function() { no(req.error); };
+              req.onsuccess = next;
+              return;
+            }
           }
-          t.oncomplete = resolve;
-          t.onerror = function() { resolve(); };
-        } catch (ex) {
-          resolve();
-        }
-      };
-      req.onerror = resolve;
+          next();
+        };
+        t.oncomplete = ok;
+        t.onerror = function() { no(t.error); };
+      } catch (ex) {
+        no(ex);
+      }
     });
     if (typeof window !== "undefined") {
       window._hkIslemlerOnbellek = null;
