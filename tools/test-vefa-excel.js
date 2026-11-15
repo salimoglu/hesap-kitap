@@ -159,6 +159,59 @@ if (payHucre.length !== 5) fail("uye hucre sayisi", payHucre.join("|"));
 if (payHucre[4] !== "—") fail("secilmeyen yeni uye pay almamali", payHucre.join("|"));
 if (tabloHtml.indexOf("2.308,00") >= 0) fail("tum uye sayisina bolunmus");
 
+var ciftAylar = [
+  { id: "k1", key: "2026-11", toplamOdeme: 8000, odemeler: { u1: true, u2: false }, yatirimlar: [{ id: "a", tip: "ceyrek", adet: 1 }] },
+  { id: "k2", key: "2026-11", toplamOdeme: 3000, odemeler: { u1: false, u2: true }, yatirimlar: [{ id: "b", tip: "gram", adet: 2 }] }
+];
+var ciftHtml = context.VefaModule.onizleme({
+  uyeler: [
+    { id: "u1", ad: "Zafer EROĞLU", rol: "Başkan" },
+    { id: "u2", ad: "Fatma İNCE", rol: "Üye" }
+  ],
+  aylar: ciftAylar,
+  gramFiyat: 0
+});
+var ciftTablo = ciftHtml.split("vf2-cards")[0] || "";
+var kasimSay = (ciftTablo.match(/Kasım 2026/g) || []).length;
+if (kasimSay !== 2) fail("ayni ay iki satir", kasimSay);
+if (ciftTablo.indexOf("8.000,00") < 0 || ciftTablo.indexOf("3.000,00") < 0) fail("iki tutar yok");
+var totSatir = (ciftTablo.match(/<tr class="vf2-tot-row">([\s\S]*?)<\/tr>/) || [])[1] || "";
+if (totSatir.indexOf("8.000,00") < 0 || totSatir.indexOf("3.000,00") < 0) fail("uye toplamlari", totSatir);
+var eskiAylar = [
+  { key: "2026-11", toplamOdeme: 1000, odemeler: { u1: true }, yatirimlar: [] },
+  { key: "2026-11", toplamOdeme: 500, odemeler: { u1: true }, yatirimlar: [] }
+];
+context.VefaModule.onizleme({
+  uyeler: [{ id: "u1", ad: "Zafer EROĞLU", rol: "Başkan" }],
+  aylar: eskiAylar,
+  gramFiyat: 0
+});
+if (eskiAylar[0].id !== "ay_2026-11") fail("eski kayit kimligi", eskiAylar[0].id);
+if (eskiAylar[1].id !== "ay_2026-11_2") fail("ikinci eski kayit kimligi", eskiAylar[1].id);
+var liste = [
+  { id: "k1", key: "2026-11", toplamOdeme: 8000, odemeler: { u1: true }, yatirimlar: [{ id: "a", tip: "ceyrek", adet: 1 }] }
+];
+var yeniKayit = context.VefaModule.ayKaydet(liste, {
+  key: "2026-11",
+  toplamOdeme: 3000,
+  odemeler: { u2: true },
+  yatirimlar: [{ id: "b", tip: "gram", adet: 2 }]
+});
+if (liste.length !== 2) fail("ikinci kayit eklenmedi", liste.length);
+if (liste[0].toplamOdeme !== 8000 || liste[0].yatirimlar[0].id !== "a") fail("eski kasim degisti");
+if (!yeniKayit.id || yeniKayit.id === "k1") fail("yeni kimlik yok", yeniKayit && yeniKayit.id);
+if (liste[1].key !== "2026-11" || liste[1].toplamOdeme !== 3000) fail("yeni kasim yok");
+context.VefaModule.ayKaydet(liste, {
+  id: liste[1].id,
+  key: "2026-12",
+  toplamOdeme: 3500,
+  odemeler: { u2: true },
+  yatirimlar: liste[1].yatirimlar
+});
+if (liste.length !== 2) fail("duzenleme yeni kayit acti", liste.length);
+if (liste[0].key !== "2026-11" || liste[0].toplamOdeme !== 8000) fail("duzenleme diger kaydi bozdu");
+if (liste[1].key !== "2026-12" || liste[1].toplamOdeme !== 3500) fail("duzenlenen kayit guncellenmedi");
+
 var ornek = {
   gramFiyat: 3000,
   uyeler: [
