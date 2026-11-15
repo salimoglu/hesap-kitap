@@ -158,6 +158,12 @@ if (payHucre.length !== 5) fail("uye hucre sayisi", payHucre.join("|"));
 });
 if (payHucre[4] !== "—") fail("secilmeyen yeni uye pay almamali", payHucre.join("|"));
 if (tabloHtml.indexOf("2.308,00") >= 0) fail("tum uye sayisina bolunmus");
+if (payHtml.indexOf("vf2-tel-ozet") < 0) fail("telefon ozeti yok");
+if (payHtml.indexOf("vf2-ay-paylar") < 0) fail("telefon ay listesi yok");
+if (payHtml.indexOf('id="vf2-yatirim-btn"') >= 0) fail("salt okurda yatirim butonu");
+var saltKart = ((payHtml.split("vf2-cards")[1] || "").split("vf2-durum-panel")[0]);
+if (saltKart.indexOf("<button") >= 0) fail("salt okur kartinda buton var");
+if (saltKart.indexOf("Zafer") < 0 || saltKart.indexOf("Selma") < 0) fail("telefon adlari yok");
 
 var ciftAylar = [
   { id: "k1", key: "2026-11", toplamOdeme: 8000, odemeler: { u1: true, u2: false }, yatirimlar: [{ id: "a", tip: "ceyrek", adet: 1 }] },
@@ -171,6 +177,8 @@ var ciftHtml = context.VefaModule.onizleme({
   aylar: ciftAylar,
   gramFiyat: 0
 });
+if (ciftHtml.indexOf('data-pfiltre="borc"') < 0) fail("altin suzgeci yok");
+if (ciftHtml.indexOf('<button type="button" class="alt-durum-btn') >= 0) fail("salt okurda durum butonu");
 var ciftTablo = ciftHtml.split("vf2-cards")[0] || "";
 var kasimSay = (ciftTablo.match(/Kasım 2026/g) || []).length;
 if (kasimSay !== 2) fail("ayni ay iki satir", kasimSay);
