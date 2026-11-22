@@ -84,7 +84,7 @@ var HK_TANITIM = (function () {
         "Alacaklariniz ve borclariniz ayni sayfada. Telefonda ustte alacak, altta borc; genis ekranda yan yana. Pesin, taksitli ve altin kayitlari.",
       ipuclari: [
         "Alacaklarım: size borclu kisiler. Borçlarım: sizin borclu oldugunuz kisiler.",
-        "Kisi satirina dokunun. Taksit satırında daireye dokunun; tarih ve not isterseniz yazın, boş da bırakabilirsiniz.",
+        "Kisi satirina dokunun. Taksit dairesine dokunun, tik hemen olusur. Tarih ve not icin yesil tike tekrar dokunun.",
       ],
     },
     urun: {
