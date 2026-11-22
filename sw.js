@@ -1,14 +1,14 @@
 // sw.js — Network First: her zaman gunceli al, cache sadece fallback
-const CACHE = "hesap-kitap-v287";
+const CACHE = "hesap-kitap-v288";
 const BASE = self.location.pathname.replace(/\/?sw\.js$/i, "");
 const ASSETS = [
   BASE + "/",
   BASE + "/index.html",
-  BASE + "/css/style.css?v=20261115vefaozet",
-  BASE + "/js/hk-version.js?v=1.88",
+  BASE + "/css/style.css?v=20261122alacak",
+  BASE + "/js/hk-version.js?v=1.89",
   BASE + "/js/hk-xlsx.js?v=20261020vefaexcel",
   BASE + "/js/hk-erisim.js?v=20261115duzelt",
-  BASE + "/js/hk-tanitim.js?v=20261021erisim",
+  BASE + "/js/hk-tanitim.js?v=20261122alacak",
   BASE + "/js/hk-ayarlar.js?v=20261011vefa",
   BASE + "/js/app.js?v=20261115duzelt",
   BASE + "/js/firebase.js?v=20261115duzelt",
@@ -17,7 +17,7 @@ const ASSETS = [
   BASE + "/js/modules/birikim.js?v=20261115duzelt",
   BASE + "/js/modules/verilen-altinlar.js?v=20260816perf",
   BASE + "/js/modules/yukle.js?v=20261115duzelt",
-  BASE + "/js/modules/alacaklar.js?v=20261115duzelt",
+  BASE + "/js/modules/alacaklar.js?v=20261122alacak",
   BASE + "/js/modules/urun.js?v=20261115duzelt",
   BASE + "/js/modules/cocugum.js?v=20261115duzelt",
   BASE + "/js/modules/arabam.js?v=20261115duzelt",

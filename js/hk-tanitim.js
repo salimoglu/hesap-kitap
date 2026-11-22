@@ -81,10 +81,10 @@ var HK_TANITIM = (function () {
       ikon: "🤝",
       baslik: "Alacaklar / Borclar",
       ozet:
-        "Solda size olan alacaklari, sagda sizin borclarinizi takip edin. Pesin, taksitli ve altin kayitlari; doviz destegi.",
+        "Alacaklariniz ve borclariniz ayni sayfada. Telefonda ustte alacak, altta borc; genis ekranda yan yana. Pesin, taksitli ve altin kayitlari.",
       ipuclari: [
-        "Alacaklar: size borclu kisiler; Borclarim: sizin borclu oldugunuz kisiler.",
-        "Odeme aldiginizda veya odediginizde daire simgesine tiklayin.",
+        "Alacaklarım: size borclu kisiler. Borçlarım: sizin borclu oldugunuz kisiler.",
+        "Kisi satirina dokunun. Taksitleri kaydirin, bir taksite dokununca odendi isaretlenir.",
       ],
     },
     urun: {
