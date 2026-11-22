@@ -82,4 +82,11 @@ var metinAnahtar = context.hkAlacakDuzenleBirlestir(
 );
 assert("taksit metin anahtar", metinAnahtar.odemeler[0] === true && !metinAnahtar.odemeler[1]);
 
+var detay = context.hkAlacakDuzenleBirlestir(
+  { id: "t3", tip: "taksit", odemeler: { 0: { tarih: "2026-03-02", not: "elden  " }, 1: true } },
+  { tip: "taksit", taksitSayisi: 2, odemeler: {} }
+);
+assert("taksit tarih not korunur", detay.odemeler[0].tarih === "2026-03-02" && detay.odemeler[0].not === "elden" && detay.odemeler[1] === true, JSON.stringify(detay.odemeler));
+assert("bos odeme true kalir", context.hkAlacakOdemeSakla({ tarih: "", not: "  " }) === true);
+
 if (!process.exitCode) console.log("duzeltme testleri tamam");
