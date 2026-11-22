@@ -1531,7 +1531,8 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .al-bos-baslik { font-size:16px; font-weight:800; color:var(--text-secondary); margin-bottom:6px; }
 .al-bos-alt { font-size:13px; line-height:1.45; }
 .al-kisi-modal-box { max-width:520px; max-height:min(88dvh,calc(100dvh - 24px)); display:flex; flex-direction:column; min-height:0; overflow:hidden; }
-.al-kisi-modal-body { padding:10px 14px 16px; display:flex; flex-direction:column; gap:10px; flex:1 1 auto; min-height:0; max-height:min(68dvh, calc(100dvh - 148px)); overflow-x:hidden; overflow-y:auto; -webkit-overflow-scrolling:touch; touch-action:pan-y; overscroll-behavior:contain; }
+.al-kisi-modal-body { padding:10px 14px 16px; display:flex; flex-direction:column; gap:10px; flex:1 1 auto; min-height:0; max-height:none; overflow-x:hidden; overflow-y:auto; -webkit-overflow-scrolling:touch; touch-action:pan-y; overscroll-behavior:contain; }
+.al-kisi-modal-body > * { flex-shrink:0; }
 .al-kisi-modal-ozet { padding-bottom:4px; }
 .al-kisi-modal-ozet .al-kisi-chip-wrap { max-width:none; justify-content:flex-start; }
 .al-liste-baslik { font-size:10px; font-weight:800; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted); padding:2px 2px 4px; }
@@ -1572,10 +1573,7 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .al-plan-sonraki strong { color:var(--text-primary); font-size:12px; font-weight:800; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .al-plan-sonraki em { margin-left:auto; font-style:normal; font-weight:800; color:var(--green); font-variant-numeric:tabular-nums; white-space:nowrap; }
 .al-plan-bitti span { color:var(--green); font-weight:800; }
-.al-plan-liste {
-  max-height:min(46vh, 320px); overflow-x:hidden; overflow-y:auto; position:relative;
-  -webkit-overflow-scrolling:touch; touch-action:pan-y; overscroll-behavior:contain; scrollbar-width:thin;
-}
+.al-plan-liste { overflow:visible; }
 .al-plan-satir { display:flex; align-items:center; gap:8px; min-height:44px; padding:7px 8px; border-top:1px solid rgba(46,64,89,0.5); }
 .al-plan-satir.al-plan-siradaki { box-shadow:inset 3px 0 0 var(--gold); background:rgba(240,184,64,0.06); }
 .al-plan-satir.al-odendi .al-plan-ay { color:var(--text-secondary); }
@@ -1670,7 +1668,8 @@ body.hk-kat-alt-modal-acik #modal-kategori {
   .al-kart-tutar { min-width:56px; }
   .al-kart-actions { margin-left:auto; }
   #al-kisi-modal, #al-a-kisi-modal, #al-b-kisi-modal { align-items:flex-end; padding:0; }
-  .al-kisi-modal-box { max-width:100%; width:100%; border-radius:20px 20px 0 0; max-height:92dvh; animation:al-sheet-in 0.25s ease; margin:0; }
+  .al-kisi-modal-box { max-width:100%; width:100%; border-radius:20px 20px 0 0; max-height:92dvh; height:auto; animation:al-sheet-in 0.25s ease; margin:0; }
+  .al-kisi-modal-body { max-height:none; overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; }
 }
 
 
@@ -4405,7 +4404,8 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .al-bos-baslik { font-size:16px; font-weight:800; color:var(--text-secondary); margin-bottom:6px; }
 .al-bos-alt { font-size:13px; line-height:1.45; }
 .al-kisi-modal-box { max-width:520px; max-height:min(88dvh,calc(100dvh - 24px)); display:flex; flex-direction:column; min-height:0; overflow:hidden; }
-.al-kisi-modal-body { padding:10px 14px 16px; display:flex; flex-direction:column; gap:10px; flex:1 1 auto; min-height:0; max-height:min(68dvh, calc(100dvh - 148px)); overflow-x:hidden; overflow-y:auto; -webkit-overflow-scrolling:touch; touch-action:pan-y; overscroll-behavior:contain; }
+.al-kisi-modal-body { padding:10px 14px 16px; display:flex; flex-direction:column; gap:10px; flex:1 1 auto; min-height:0; max-height:none; overflow-x:hidden; overflow-y:auto; -webkit-overflow-scrolling:touch; touch-action:pan-y; overscroll-behavior:contain; }
+.al-kisi-modal-body > * { flex-shrink:0; }
 .al-kisi-modal-ozet { padding-bottom:4px; }
 .al-kisi-modal-ozet .al-kisi-chip-wrap { max-width:none; justify-content:flex-start; }
 .al-liste-baslik { font-size:10px; font-weight:800; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted); padding:2px 2px 4px; }
@@ -4446,10 +4446,7 @@ body.hk-kat-alt-modal-acik #modal-kategori {
 .al-plan-sonraki strong { color:var(--text-primary); font-size:12px; font-weight:800; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .al-plan-sonraki em { margin-left:auto; font-style:normal; font-weight:800; color:var(--green); font-variant-numeric:tabular-nums; white-space:nowrap; }
 .al-plan-bitti span { color:var(--green); font-weight:800; }
-.al-plan-liste {
-  max-height:min(46vh, 320px); overflow-x:hidden; overflow-y:auto; position:relative;
-  -webkit-overflow-scrolling:touch; touch-action:pan-y; overscroll-behavior:contain; scrollbar-width:thin;
-}
+.al-plan-liste { overflow:visible; }
 .al-plan-satir { display:flex; align-items:center; gap:8px; min-height:44px; padding:7px 8px; border-top:1px solid rgba(46,64,89,0.5); }
 .al-plan-satir.al-plan-siradaki { box-shadow:inset 3px 0 0 var(--gold); background:rgba(240,184,64,0.06); }
 .al-plan-satir.al-odendi .al-plan-ay { color:var(--text-secondary); }
@@ -4544,7 +4541,8 @@ body.hk-kat-alt-modal-acik #modal-kategori {
   .al-kart-tutar { min-width:56px; }
   .al-kart-actions { margin-left:auto; }
   #al-kisi-modal, #al-a-kisi-modal, #al-b-kisi-modal { align-items:flex-end; padding:0; }
-  .al-kisi-modal-box { max-width:100%; width:100%; border-radius:20px 20px 0 0; max-height:92dvh; animation:al-sheet-in 0.25s ease; margin:0; }
+  .al-kisi-modal-box { max-width:100%; width:100%; border-radius:20px 20px 0 0; max-height:92dvh; height:auto; animation:al-sheet-in 0.25s ease; margin:0; }
+  .al-kisi-modal-body { max-height:none; overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; }
 }
 
 
